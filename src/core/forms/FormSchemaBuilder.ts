@@ -33,6 +33,21 @@ export interface DecimalRule {
   readonly decimals: number;
 }
 
+export interface TextOptions {
+  /** Normalizes to lower case before checking, for example the username (API.md 2.1). */
+  readonly lowercase?: boolean;
+}
+
+export interface PasswordOptions {
+  /** Constraint to read when it is not the field name, for example "password" for a confirmation. */
+  readonly constraint?: string;
+  /**
+   * Skips the server minimum and only requires some text. Used for the current password, which
+   * may predate today's policy; the server still decides.
+   */
+  readonly anyLength?: boolean;
+}
+
 const LINE_BREAK = /\r\n|\r|\n/;
 const MINIMUM_REQUIRED_LENGTH = 1;
 
@@ -56,15 +71,44 @@ export class FormSchemaBuilder {
   ) {}
 
   /** Text limited by the min, max, pattern and max lines the server sent for `field`. */
-  text(field: string): this {
-    this.shape[field] = this.textSchema(field, this.require(field).min ?? 0);
+  text(field: string, options: TextOptions = {}): this {
+    this.shape[field] = this.textSchema(field, this.require(field).min ?? 0, options);
+    return this;
+  }
+
+  /**
+   * A password: required, never trimmed or changed (spaces are valid characters), with the
+   * length range of the server. Its value must not be echoed in any message.
+   */
+  password(field: string, options: PasswordOptions = {}): this {
+    const limits = this.require(options.constraint ?? field);
+    const minimum =
+      options.anyLength === true
+        ? MINIMUM_REQUIRED_LENGTH
+        : Math.max(limits.min ?? 0, MINIMUM_REQUIRED_LENGTH);
+    this.shape[field] = z.string().transform((value, context) => {
+      const fail = (key: Parameters<ValidationMessageFactory>[0], params = {}): typeof z.NEVER => {
+        context.addIssue({ code: 'custom', message: this.messages(key, params) });
+        return z.NEVER;
+      };
+      if (value.length === 0) {
+        return fail('required');
+      }
+      if (value.length < minimum) {
+        return fail('min', { min: minimum });
+      }
+      if (limits.max !== undefined && value.length > limits.max) {
+        return fail('max', { max: limits.max });
+      }
+      return value;
+    });
     return this;
   }
 
   /** Text that must not be empty, with the range the backend defines (for example a reason). */
   requiredReason(field: string): this {
     const minimum = Math.max(this.require(field).min ?? 0, MINIMUM_REQUIRED_LENGTH);
-    this.shape[field] = this.textSchema(field, minimum);
+    this.shape[field] = this.textSchema(field, minimum, {});
     return this;
   }
 
@@ -103,11 +147,12 @@ export class FormSchemaBuilder {
     return z.object({ ...this.shape });
   }
 
-  private textSchema(field: string, minimum: number): z.ZodType<string> {
+  private textSchema(field: string, minimum: number, options: TextOptions): z.ZodType<string> {
     const limits = this.require(field);
     const pattern = this.compilePattern(field, limits);
     return z.string().transform((raw, context) => {
-      const value = raw.trim();
+      const trimmed = raw.trim();
+      const value = options.lowercase === true ? trimmed.toLowerCase() : trimmed;
       const fail = (key: Parameters<ValidationMessageFactory>[0], params = {}): typeof z.NEVER => {
         context.addIssue({ code: 'custom', message: this.messages(key, params) });
         return z.NEVER;

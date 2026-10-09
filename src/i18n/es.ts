@@ -62,6 +62,18 @@ export const strings = {
     imports: 'Importar historial',
     summaries: 'Resúmenes autorizados',
   },
+  auth: {
+    tagline: 'El cuaderno del acueducto, pero digital',
+    username: 'Usuario',
+    password: 'Contraseña',
+    signIn: 'Entrar',
+    signingIn: 'Entrando...',
+    loadingForm: 'Cargando el formulario...',
+    sessionExpired: 'Tu sesión venció. Entra de nuevo para continuar.',
+    offlineLogin:
+      'Necesitas conexión para entrar. Si ya entraste en este celular, puedes registrar lecturas sin conexión.',
+    tooManyAttempts: 'Demasiados intentos. Intenta de nuevo en {minutes} min.',
+  },
   connection: {
     constraintsMissing:
       'No pudimos cargar los límites de los campos. Conéctate a internet para registrar datos.',

@@ -7,6 +7,8 @@ export const FIELD = {
   readingNote: 'reading.note',
   changeReason: 'change_reason',
   gaugeValue: 'gauge_value',
+  username: 'username',
+  password: 'password',
 } as const;
 
 /** Reading form: gauge value (range from the active rule set) and an optional note. */
@@ -24,4 +26,12 @@ export function readingFormSchema(
 /** Mandatory reason for a change (rule activation, proposal changes, corrections). */
 export function reasonSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
   return new FormSchemaBuilder(constraints, messages).requiredReason(FIELD.changeReason).build();
+}
+
+/** Sign-in form: username (lower case) and password, with the limits of /meta/constraints. */
+export function loginFormSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
+  return new FormSchemaBuilder(constraints, messages)
+    .text(FIELD.username, { lowercase: true })
+    .password(FIELD.password)
+    .build();
 }

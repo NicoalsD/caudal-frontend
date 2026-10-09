@@ -21,6 +21,8 @@ const THREE_DECIMALS = '2,123';
 const OVER_BY_ONE = 1;
 
 const constraints: ConstraintsMap = {
+  username: { min: 3, max: 32, pattern: '^[a-z0-9][a-z0-9._-]{1,30}[a-z0-9]$' },
+  password: { min: 12, max: 128 },
   'reading.note': { min: 0, max: NOTE_MAX, maxLines: NOTE_LINES },
   change_reason: { min: REASON_MIN, max: REASON_MAX },
   'sector.code': { min: 2, max: 20, pattern: '^[A-Z0-9-]+$' },
@@ -207,5 +209,59 @@ describe('configuration errors', () => {
 
   it('builds an empty schema when no field was added', () => {
     expect(new FormSchemaBuilder({}, keyMessages).build().parse({})).toEqual({});
+  });
+});
+
+describe('username text', () => {
+  const schema = new FormSchemaBuilder(constraints, keyMessages)
+    .text('username', { lowercase: true })
+    .build();
+
+  it('lowers the case before applying the server pattern', () => {
+    expect(schema.parse({ username: '  Junta.Presidencia ' })).toEqual({
+      username: 'junta.presidencia',
+    });
+  });
+
+  it('keeps rejecting what the pattern rejects', () => {
+    expect(messagesOf(schema.safeParse({ username: '.junta' }))).toEqual(['validation.pattern']);
+  });
+});
+
+describe('password fields', () => {
+  const MIN_LENGTH = 12;
+  const MAX_LENGTH = 128;
+  const schema = new FormSchemaBuilder(constraints, keyMessages).password('password').build();
+  const lenient = new FormSchemaBuilder(constraints, keyMessages)
+    .password('current', { constraint: 'password', anyLength: true })
+    .build();
+
+  it('never trims or alters the value', () => {
+    const typed = `  ${'a'.repeat(MIN_LENGTH)}  `;
+
+    expect(schema.parse({ password: typed })).toEqual({ password: typed });
+  });
+
+  it('requires the value, then the server minimum and maximum', () => {
+    expect(messagesOf(schema.safeParse({ password: '' }))).toEqual(['validation.required']);
+    expect(messagesOf(schema.safeParse({ password: 'a'.repeat(MIN_LENGTH - 1) }))).toEqual([
+      'validation.min',
+    ]);
+    expect(schema.safeParse({ password: 'a'.repeat(MAX_LENGTH) }).success).toBe(true);
+    expect(messagesOf(schema.safeParse({ password: 'a'.repeat(MAX_LENGTH + 1) }))).toEqual([
+      'validation.max',
+    ]);
+  });
+
+  it('can accept any length up to the maximum for an existing password', () => {
+    expect(lenient.safeParse({ current: 'x' }).success).toBe(true);
+    expect(messagesOf(lenient.safeParse({ current: '' }))).toEqual(['validation.required']);
+    expect(lenient.safeParse({ current: 'a'.repeat(MAX_LENGTH + 1) }).success).toBe(false);
+  });
+
+  it('throws when the constraint is missing', () => {
+    expect(() => new FormSchemaBuilder({}, keyMessages).password('password')).toThrow(
+      MissingConstraintError,
+    );
   });
 });
