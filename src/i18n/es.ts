@@ -66,6 +66,7 @@ export const strings = {
     required: 'Este dato es obligatorio',
     min: 'Escribe al menos {min} caracteres',
     max: 'Máximo {max}',
+    maxLines: 'Máximo {max} líneas',
     pattern: 'El formato no es válido',
     rangeMin: 'El número no puede ser menor que {min}',
     rangeMax: 'El número no puede ser mayor que {max}',

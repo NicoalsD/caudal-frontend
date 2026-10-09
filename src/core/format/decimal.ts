@@ -23,3 +23,9 @@ export function parseDecimalInput(raw: string): number | null {
   const value = Number(normalized);
   return Number.isFinite(value) ? value : null;
 }
+
+/** How many digits the person typed after the decimal separator ("2,10" has 2). */
+export function countFractionDigits(raw: string): number {
+  const [, fraction = ''] = raw.trim().replace(',', '.').split('.');
+  return fraction.length;
+}
