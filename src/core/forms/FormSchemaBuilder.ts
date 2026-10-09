@@ -48,6 +48,11 @@ export interface DecimalRule {
 export interface TextOptions {
   /** Normalizes to lower case before checking, for example the username (API.md 2.1). */
   readonly lowercase?: boolean;
+  /**
+   * Constraint to read when it is not the field name. A dotted constraint such as "reading.note"
+   * cannot be a form field name (React Hook Form would nest it), so the field gets a plain name.
+   */
+  readonly constraint?: string;
 }
 
 export interface PasswordOptions {
@@ -96,7 +101,20 @@ export class FormSchemaBuilder {
 
   /** Text limited by the min, max, pattern and max lines the server sent for `field`. */
   text(field: string, options: TextOptions = {}): this {
-    this.shape[field] = this.textSchema(field, this.require(field).min ?? 0, options);
+    const limits = this.require(options.constraint ?? field);
+    this.shape[field] = this.textSchema(field, limits.min ?? 0, options);
+    return this;
+  }
+
+  /** A choice that must be made (a select or radio group): any non-empty value. */
+  requiredChoice(field: string): this {
+    this.shape[field] = z.string().min(MINIMUM_REQUIRED_LENGTH, this.messages('required', {}));
+    return this;
+  }
+
+  /** A yes/no box. */
+  flag(field: string): this {
+    this.shape[field] = z.boolean();
     return this;
   }
 
@@ -364,7 +382,7 @@ export class FormSchemaBuilder {
   }
 
   private textSchema(field: string, minimum: number, options: TextOptions): z.ZodType<string> {
-    const limits = this.require(field);
+    const limits = this.require(options.constraint ?? field);
     const pattern = this.compilePattern(field, limits);
     return z.string().transform((raw, context) => {
       const trimmed = raw.trim();

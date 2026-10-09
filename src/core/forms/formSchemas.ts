@@ -8,6 +8,9 @@ import type { ValidationMessageFactory } from './validationMessages';
 /** Field names shared with the API (snake_case in the JSON, as the constraints endpoint names them). */
 export const FIELD = {
   readingNote: 'reading.note',
+  note: 'note',
+  waterAppearance: 'water_appearance_code',
+  damageNoticed: 'damage_noticed',
   changeReason: 'change_reason',
   gaugeValue: 'gauge_value',
   username: 'username',
@@ -26,6 +29,24 @@ export function readingFormSchema(
   return new FormSchemaBuilder(constraints, messages)
     .decimal(FIELD.gaugeValue, gauge)
     .text(FIELD.readingNote)
+    .build();
+}
+
+/**
+ * The reading entry form of the plumber: gauge value (range from the active rule set), water
+ * appearance (a catalog code), damage flag and an optional note. The note keeps the limits of the
+ * `reading.note` constraint but the field is called `note`.
+ */
+export function readingEntrySchema(
+  constraints: ConstraintsMap,
+  gauge: DecimalRule,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .decimal(FIELD.gaugeValue, gauge)
+    .requiredChoice(FIELD.waterAppearance)
+    .flag(FIELD.damageNoticed)
+    .text(FIELD.note, { constraint: FIELD.readingNote })
     .build();
 }
 

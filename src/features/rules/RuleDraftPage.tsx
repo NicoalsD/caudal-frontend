@@ -9,7 +9,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import { DraftEditor } from './DraftEditor';
-import { QueryError } from './QueryStates';
+import { QueryError } from '../../ui/feedback/QueryError';
 import { RuleSetOverview } from './RuleSetOverview';
 import styles from './Rules.module.css';
 import { statusLabel } from './ruleLabels';

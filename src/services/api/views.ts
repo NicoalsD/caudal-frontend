@@ -134,3 +134,35 @@ export interface ValveView {
   readonly failSafePosition: 'KEEP' | 'OPEN' | 'CLOSED';
   readonly isActive: boolean;
 }
+
+/** One option of a server catalog (GET /catalogs/{catalog}), already in Spanish. */
+export interface CatalogItemView {
+  readonly code: string;
+  readonly label: string;
+  readonly sortOrder: number;
+}
+
+/** What the plumber typed, ready to send (POST /readings). */
+export interface ReadingInput {
+  /** Client UUID: the server uses it to recognize a repeated send (API.md 1.6). */
+  readonly id: string;
+  readonly tankId: string;
+  readonly gaugeValue: number;
+  readonly waterAppearanceCode: string;
+  readonly damageNoticed: boolean;
+  /** Empty when there is no note. */
+  readonly note: string;
+  readonly observedAt: Date;
+}
+
+/** The server's answer to a reading: what it stored and what it noticed. */
+export interface ReadingResultView {
+  readonly id: string;
+  readonly gaugeValue: DecimalView;
+  readonly observedAt: TimestampView;
+  readonly validationStatus: string;
+  /** Codes of the issues the validation chain found (the reading is kept but flagged). */
+  readonly issueCodes: readonly string[];
+  /** True when the server already had this reading (same id and content). */
+  readonly isReplay: boolean;
+}

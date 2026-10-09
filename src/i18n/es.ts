@@ -10,6 +10,7 @@ export const strings = {
     comingSoon: 'Esta pantalla se construye en una fase posterior.',
   },
   common: {
+    retry: 'Reintentar',
     simulatedData: 'Datos simulados',
   },
   nav: {
@@ -481,6 +482,29 @@ export const strings = {
     draftSaved: 'Borrador guardado.',
     noChangesToSave: 'No hay cambios por guardar.',
     readOnlyNotice: 'Puedes ver este borrador, pero no editarlo con tu rol.',
+  },
+  readings: {
+    loading: 'Cargando el tanque...',
+    noTank: 'Todavía no hay un tanque activo. Avisa a la Junta.',
+    tankLabel: 'Tanque',
+    gaugeLabel: 'Nivel en la regla',
+    gaugeHint: 'Escribe lo que marca la regla pintada, de {min} a {max}. Puedes usar coma.',
+    appearanceLegend: 'Cómo se ve el agua',
+    appearanceLoadError: 'No pudimos cargar las opciones de cómo se ve el agua.',
+    damageLabel: 'Vi un daño en el tanque o en la tubería',
+    noteLabel: 'Nota (opcional)',
+    noteHint: 'Por ejemplo, si llovió o si hay algo raro en el tanque.',
+    noteCounter: '{length} de {max} caracteres',
+    submit: 'Guardar lectura',
+    submitting: 'Guardando...',
+    savedTitle: 'Lectura guardada',
+    saved: 'Nivel {value}, registrado el {date}.',
+    savedAgain: 'Esta lectura ya estaba guardada. No se repitió.',
+    flagged: 'Quedó marcada para que la Junta la revise.',
+    another: 'Registrar otra lectura',
+    tankLine: 'Tanque: {name}',
+    retry: 'Reintentar',
+    serverError: 'No se pudo guardar la lectura.',
   },
   connection: {
     constraintsMissing:
