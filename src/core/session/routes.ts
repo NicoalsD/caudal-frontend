@@ -1,4 +1,4 @@
-import type { Role } from '../core/session/roles';
+import type { Role } from './roles';
 
 /** Public path prefix (architecture.md section 4). Change here only. */
 const PUBLIC_PREFIX = '/a';

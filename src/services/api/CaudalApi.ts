@@ -1,5 +1,6 @@
 import type { HttpClient } from '../http/HttpClient';
 import type { ApiDtoAdapter } from './adapters/ApiDtoAdapter';
+import { AuthApi } from './endpoints/AuthApi';
 import { MetaApi } from './endpoints/MetaApi';
 import { SystemApi } from './endpoints/SystemApi';
 
@@ -11,10 +12,12 @@ import { SystemApi } from './endpoints/SystemApi';
  * @pattern P10 Facade
  */
 export class CaudalApi {
+  readonly auth: AuthApi;
   readonly meta: MetaApi;
   readonly system: SystemApi;
 
   constructor(http: HttpClient, adapter: ApiDtoAdapter) {
+    this.auth = new AuthApi(http, adapter);
     this.meta = new MetaApi(http, adapter);
     this.system = new SystemApi(http, adapter);
   }

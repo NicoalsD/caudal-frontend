@@ -1,3 +1,5 @@
+import type { Role } from '../../core/session/roles';
+
 /** View models returned by CaudalApi. Components never see the server DTOs. */
 
 export interface HealthView {
@@ -19,4 +21,21 @@ export interface DecimalView {
   readonly value: number;
   /** Text with decimal comma, for example "2,1". */
   readonly text: string;
+}
+
+/** The person who signed in. Everything here may be shown; none of it is a secret. */
+export interface AuthUserView {
+  readonly id: string;
+  readonly username: string;
+  readonly fullName: string;
+  readonly role: Role;
+  readonly aqueductId: string;
+  readonly mustChangePassword: boolean;
+}
+
+/** Answer of a sign in. The access token is for the in-memory TokenStore only. */
+export interface LoginView {
+  readonly accessToken: string;
+  readonly expiresInSeconds: number;
+  readonly user: AuthUserView;
 }

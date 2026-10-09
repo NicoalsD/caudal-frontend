@@ -13,18 +13,6 @@ import { buildConstraints } from '../../test/factories/constraints';
 import { LoginForm } from './LoginForm';
 import type { LoginCredentials } from './LoginForm';
 
-const toConstraints = (dto: ReturnType<typeof buildConstraints>) =>
-  Object.fromEntries(
-    Object.entries(dto).map(([field, limits]) => [
-      field,
-      {
-        min: limits.min,
-        max: limits.max,
-        ...(limits.max_lines ? { maxLines: limits.max_lines } : {}),
-      },
-    ]),
-  );
-
 const PASSWORD = 'contraseña larga de prueba';
 const STRICT_MIN = 20;
 const RETRY_SECONDS = 600;

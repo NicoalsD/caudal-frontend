@@ -5,6 +5,8 @@ import { SessionStore } from './SessionStore';
 
 const USER: SessionUser = {
   userId: '0190f3a2-7c1d-7b2e-9f11-3d4c5e6f7a81',
+  username: 'fontanero.prueba',
+  mustChangePassword: false,
   role: 'OPERATOR',
   aqueductId: '0190f3a2-7c1d-7b2e-9f11-3d4c5e6f7a82',
   displayName: 'Fontanero de prueba',

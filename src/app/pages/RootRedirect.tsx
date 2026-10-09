@@ -2,7 +2,7 @@ import type { JSX } from 'react';
 import { Navigate } from 'react-router';
 
 import { useSession } from '../../state/hooks/useSession';
-import { HOME_PATH_BY_ROLE, ROUTE_PATHS } from '../routes';
+import { HOME_PATH_BY_ROLE, ROUTE_PATHS } from '../../core/session/routes';
 
 /** "/" sends each visitor to the first screen of their role, or to /login. */
 export function RootRedirect(): JSX.Element {

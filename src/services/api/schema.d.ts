@@ -43,6 +43,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Inicia sesión
+         * @description Público. Respuesta con el token de acceso y la cookie caudal_rt (HttpOnly) con el refresh. API.md sección 2.1.
+         */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -83,6 +103,32 @@ export interface components {
         /** @description Mapa plano de nombre de campo a límites (API.md sección 4.1). */
         ConstraintsResponse: {
             [key: string]: components["schemas"]["FieldConstraint"];
+        };
+        LoginRequest: {
+            username: string;
+            password: string;
+        };
+        AuthUser: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            full_name: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: uuid */
+            aqueduct_id: string;
+            must_change_password: boolean;
+        };
+        LoginResponse: {
+            access_token: string;
+            /** @enum {string} */
+            token_type: "Bearer";
+            /**
+             * Format: int32
+             * @description Segundos de vida del token de acceso.
+             */
+            expires_in: number;
+            user: components["schemas"]["AuthUser"];
         };
     };
     responses: never;
@@ -151,6 +197,48 @@ export interface operations {
             };
             /** @description Error no controlado (INTERNAL_ERROR). */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Sesión iniciada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Usuario o contraseña incorrectos (INVALID_CREDENTIALS). Siempre el mismo mensaje. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiados intentos (RATE_LIMITED). */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

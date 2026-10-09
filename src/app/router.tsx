@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import type { RouteObject } from 'react-router';
 
+import { LoginPage } from '../features/auth';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequireRole } from './guards/RequireRole';
@@ -14,7 +15,7 @@ import { ErrorPage } from './pages/ErrorPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { RootRedirect } from './pages/RootRedirect';
-import { ROLES_BY_AREA, ROUTE_PATHS } from './routes';
+import { ROLES_BY_AREA, ROUTE_PATHS } from '../core/session/routes';
 
 /** Builds one leaf route that renders a placeholder until its feature exists. */
 function screen(path: string, title: string): RouteObject {
@@ -27,7 +28,7 @@ const publicRoutes: RouteObject = {
     screen(ROUTE_PATHS.public.schedule, t('screens.publicSchedule')),
     screen(ROUTE_PATHS.public.damageReport, t('screens.publicDamageReport')),
     screen(ROUTE_PATHS.public.tracking, t('screens.publicTracking')),
-    screen(ROUTE_PATHS.login, t('screens.login')),
+    { path: ROUTE_PATHS.login, element: <LoginPage /> },
   ],
 };
 

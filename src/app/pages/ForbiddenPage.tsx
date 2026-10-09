@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { t } from '../../i18n/t';
 import { useSession } from '../../state/hooks/useSession';
 import { ErrorState } from '../../ui/feedback/ErrorState';
-import { HOME_PATH_BY_ROLE, ROUTE_PATHS } from '../routes';
+import { HOME_PATH_BY_ROLE, ROUTE_PATHS } from '../../core/session/routes';
 
 export function ForbiddenPage(): JSX.Element {
   const session = useSession();

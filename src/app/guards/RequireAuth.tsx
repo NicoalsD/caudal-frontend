@@ -2,7 +2,7 @@ import type { JSX } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 
 import { useSession } from '../../state/hooks/useSession';
-import { ROUTE_PATHS } from '../routes';
+import { ROUTE_PATHS } from '../../core/session/routes';
 
 /** UX guard: sends anonymous visitors to /login keeping the internal route in ?next=. */
 export function RequireAuth(): JSX.Element {

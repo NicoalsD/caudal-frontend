@@ -5,7 +5,11 @@
     "description": "Representa solo lo que el backend ya publica y el frontend usa hoy: el error canónico, la salud y los límites de campos. Se reemplaza por la instantánea completa de caudal-backend/docs/openapi.json cuando exista. Ver docs/tipos-de-la-api.md.",
     "version": "1.0.0"
   },
-  "servers": [{ "url": "/" }],
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
   "paths": {
     "/actuator/health": {
       "get": {
@@ -16,13 +20,21 @@
           "200": {
             "description": "El servicio responde.",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/HealthResponse" } }
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
             }
           },
           "503": {
             "description": "El servicio no está disponible.",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/HealthResponse" } }
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
             }
           }
         }
@@ -38,20 +50,79 @@
             "description": "Mapa campo a límites.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ConstraintsResponse" }
+                "schema": {
+                  "$ref": "#/components/schemas/ConstraintsResponse"
+                }
               }
             }
           },
           "429": {
             "description": "Demasiadas solicitudes (RATE_LIMITED).",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } }
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
             }
           },
           "500": {
             "description": "Error no controlado (INTERNAL_ERROR).",
             "content": {
-              "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } }
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Inicia sesión",
+        "description": "Público. Respuesta con el token de acceso y la cookie caudal_rt (HttpOnly) con el refresh. API.md sección 2.1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sesión iniciada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario o contraseña incorrectos (INVALID_CREDENTIALS). Siempre el mismo mensaje.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiados intentos (RATE_LIMITED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
             }
           }
         }
@@ -62,7 +133,11 @@
     "schemas": {
       "ErrorBody": {
         "type": "object",
-        "required": ["code", "message", "request_id"],
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ],
         "properties": {
           "code": {
             "type": "string",
@@ -86,35 +161,144 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "required": ["error"],
+        "required": [
+          "error"
+        ],
         "properties": {
-          "error": { "$ref": "#/components/schemas/ErrorBody" }
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
         }
       },
       "HealthResponse": {
         "type": "object",
-        "required": ["status"],
+        "required": [
+          "status"
+        ],
         "properties": {
-          "status": { "type": "string", "enum": ["UP", "DOWN"] }
+          "status": {
+            "type": "string",
+            "enum": [
+              "UP",
+              "DOWN"
+            ]
+          }
         }
       },
       "FieldConstraint": {
         "type": "object",
         "description": "Límites de un campo. Todos son opcionales: solo llegan los que aplican.",
         "properties": {
-          "min": { "type": "integer", "format": "int32", "minimum": 0 },
-          "max": { "type": "integer", "format": "int32", "minimum": 0 },
+          "min": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "max": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
           "pattern": {
             "type": "string",
             "description": "Expresión regular compatible con JavaScript (bandera u)."
           },
-          "max_lines": { "type": "integer", "format": "int32", "minimum": 1 }
+          "max_lines": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
         }
       },
       "ConstraintsResponse": {
         "type": "object",
         "description": "Mapa plano de nombre de campo a límites (API.md sección 4.1).",
-        "additionalProperties": { "$ref": "#/components/schemas/FieldConstraint" }
+        "additionalProperties": {
+          "$ref": "#/components/schemas/FieldConstraint"
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthUser": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "full_name",
+          "role",
+          "aqueduct_id",
+          "must_change_password"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "BOARD_ADMIN",
+              "BOARD_MEMBER",
+              "OPERATOR",
+              "PROJECT_TEAM",
+              "SUPPORT_ENTITY"
+            ]
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "must_change_password": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in",
+          "user"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Segundos de vida del token de acceso."
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUser"
+          }
+        }
       }
     }
   }

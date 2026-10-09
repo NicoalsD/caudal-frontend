@@ -1,6 +1,6 @@
 import { t } from '../../i18n/t';
 import type { NavItem } from './RoleLayout';
-import { ROUTE_PATHS } from '../routes';
+import { ROUTE_PATHS } from '../../core/session/routes';
 
 export const OPERATOR_NAV: readonly NavItem[] = [
   { to: ROUTE_PATHS.operator.home, label: t('nav.operatorHome') },

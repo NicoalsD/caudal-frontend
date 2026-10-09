@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { buildLoginResponse, TEST_USERS } from '../../../test/factories/auth';
 import { plain } from '../../../test/text';
 
 import { ApiDtoAdapter } from './ApiDtoAdapter';
@@ -82,5 +83,34 @@ describe('ApiDtoAdapter.toDecimal', () => {
 
   it.each([Number.NaN, Number.POSITIVE_INFINITY])('rejects %s', (value) => {
     expect(() => adapter.toDecimal('gauge_value', value)).toThrow(InvalidDtoError);
+  });
+});
+
+describe('ApiDtoAdapter.toLogin', () => {
+  const dto = buildLoginResponse(TEST_USERS.admin);
+
+  it('turns the snake_case answer into a view', () => {
+    expect(adapter.toLogin(dto)).toEqual({
+      accessToken: dto.access_token,
+      expiresInSeconds: dto.expires_in,
+      user: {
+        id: TEST_USERS.admin.id,
+        username: TEST_USERS.admin.username,
+        fullName: TEST_USERS.admin.full_name,
+        role: 'BOARD_ADMIN',
+        aqueductId: TEST_USERS.admin.aqueduct_id,
+        mustChangePassword: false,
+      },
+    });
+  });
+
+  it('rejects a role the client does not know', () => {
+    const unknownRole = { ...dto, user: { ...dto.user, role: 'SUPERUSER' as 'OPERATOR' } };
+
+    expect(() => adapter.toLogin(unknownRole)).toThrow(InvalidDtoError);
+  });
+
+  it.each([0, Number.NEGATIVE_INFINITY, Number.NaN])('rejects expires_in %s', (seconds) => {
+    expect(() => adapter.toLogin({ ...dto, expires_in: seconds })).toThrow(InvalidDtoError);
   });
 });
