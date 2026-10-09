@@ -1,0 +1,30 @@
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Variables de entorno y secretos (nunca se suben)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+keys/
+
+# Logs
+*.log
+logs/
+
+# Node / Vite
+node_modules/
+dist/
+dist-ssr/
+coverage/
+*.local
+playwright-report/
+test-results/
+.vite/
