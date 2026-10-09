@@ -36,6 +36,15 @@ export const TEST_USERS = {
     aqueduct_id: TEST_AQUEDUCT_ID,
     must_change_password: false,
   },
+  /** Works in two aqueducts: administrator in the first, operator in the second. */
+  multi: {
+    id: '0190f3a2-0000-7000-8000-000000000005',
+    username: 'persona.dos.acueductos',
+    full_name: 'Persona Dos Acueductos',
+    role: 'BOARD_ADMIN',
+    aqueduct_id: TEST_AQUEDUCT_ID,
+    must_change_password: false,
+  },
   newcomer: {
     id: '0190f3a2-0000-7000-8000-000000000004',
     username: 'fontanero.nuevo',
@@ -79,13 +88,18 @@ export const PERMISSIONS_BY_ROLE: Record<AuthUserDto['role'], readonly string[]>
   SUPPORT_ENTITY: ['SUMMARY_VIEW'],
 };
 
-export function buildMeResponse(user: AuthUserDto): MeResponseDto {
+export type MembershipDto = components['schemas']['Membership'];
+
+export function buildMeResponse(
+  user: AuthUserDto,
+  memberships: MembershipDto[] = [{ aqueduct_id: user.aqueduct_id, role: user.role }],
+): MeResponseDto {
   return {
     id: user.id,
     username: user.username,
     full_name: user.full_name,
     must_change_password: user.must_change_password,
-    memberships: [{ aqueduct_id: user.aqueduct_id, role: user.role }],
+    memberships,
     permissions: [...PERMISSIONS_BY_ROLE[user.role]],
   };
 }

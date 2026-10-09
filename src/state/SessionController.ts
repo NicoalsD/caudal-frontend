@@ -2,9 +2,12 @@ import type { QueryClient } from '@tanstack/react-query';
 
 import { DomainError } from '../core/errors/DomainError';
 import { NetworkError } from '../core/errors/NetworkError';
+import { currentMembershipChoices } from '../core/session/memberships';
+import { toSessionHint } from '../core/session/SessionHint';
+import type { SessionHintRepository } from '../core/session/SessionHint';
 import { readAccessTokenClaims } from '../core/session/accessTokenClaims';
 import type { SessionUser } from '../core/session/SessionState';
-import { PROACTIVE_REFRESH_FRACTION } from '../core/policy/clientPolicy';
+import { OPERATOR_SESSION_HINT_MS, PROACTIVE_REFRESH_FRACTION } from '../core/policy/clientPolicy';
 import type { Clock } from '../core/time/Clock';
 import type { Scheduler } from '../core/time/Scheduler';
 import type { CaudalApi } from '../services/api/CaudalApi';
@@ -14,6 +17,8 @@ import type { TokenStore } from '../services/session/TokenStore';
 import type { SessionStore } from './SessionStore';
 
 const MS_PER_SECOND = 1000;
+/** The only role that keeps working screens without connection (architecture.md 5.5). */
+const LOCAL_MODE_ROLE = 'OPERATOR';
 const PASSWORD_CHANGE_REQUIRED_CODE = 'PASSWORD_CHANGE_REQUIRED';
 
 export interface SessionControllerDependencies {
@@ -24,11 +29,13 @@ export interface SessionControllerDependencies {
   readonly queryClient: QueryClient;
   readonly clock: Clock;
   readonly scheduler: Scheduler;
+  readonly hints: SessionHintRepository;
 }
 
 function toSessionUser(
   me: MeView,
   identity: Pick<SessionUser, 'role' | 'aqueductId'>,
+  nowMs: number,
 ): SessionUser {
   return {
     userId: me.id,
@@ -38,6 +45,7 @@ function toSessionUser(
     displayName: me.fullName,
     mustChangePassword: me.mustChangePassword,
     permissions: me.permissions,
+    memberships: currentMembershipChoices(me.memberships, nowMs),
   };
 }
 
@@ -48,6 +56,7 @@ function toSessionUser(
  */
 export class SessionController {
   private restoring: Promise<void> | null = null;
+  private cacheIdentity: string | null = null;
   private cancelRenewal: (() => void) | null = null;
 
   constructor(private readonly deps: SessionControllerDependencies) {
@@ -71,8 +80,8 @@ export class SessionController {
     this.deps.tokens.set(login.accessToken, expiresAtMs);
     try {
       const me = await this.deps.api.auth.me();
-      const user = toSessionUser(me, login.user);
-      this.deps.store.signIn(user);
+      const user = toSessionUser(me, login.user, this.deps.clock.nowMs());
+      this.admit(user);
       this.scheduleRenewal(expiresAtMs);
       return user;
     } catch (error) {
@@ -132,7 +141,50 @@ export class SessionController {
     this.deps.store.expire();
   }
 
-  private cleanUp(): void {
+  /**
+   * Changes the aqueduct the session works in. The old aqueduct's data must not stay in memory:
+   * running requests are cancelled and the cache is emptied before the new identity is published.
+   * If the server refuses (403), nothing changes.
+   */
+  async switchAqueduct(aqueductId: string): Promise<SessionUser> {
+    const switched = await this.deps.api.auth.switchAqueduct(aqueductId);
+    const expiresAtMs = this.deps.clock.nowMs() + switched.expiresInSeconds * MS_PER_SECOND;
+    await this.deps.queryClient.cancelQueries();
+    this.deps.queryClient.clear();
+    this.deps.tokens.set(switched.accessToken, expiresAtMs);
+    const claims = readAccessTokenClaims(switched.accessToken);
+    if (claims === null) {
+      throw new Error('The access token has no readable claims');
+    }
+    const me = await this.deps.api.auth.me();
+    const user = toSessionUser(me, claims, this.deps.clock.nowMs());
+    this.admit(user);
+    this.scheduleRenewal(expiresAtMs);
+    return user;
+  }
+
+  /**
+   * Publishes the signed-in person and remembers a hint for their aqueduct (no secrets). If the
+   * identity (person or aqueduct) is not the one the cache was filled for, the cache is emptied.
+   */
+  private admit(user: SessionUser): void {
+    const identity = `${user.userId}@${user.aqueductId}`;
+    if (this.cacheIdentity !== null && this.cacheIdentity !== identity) {
+      this.deps.queryClient.clear();
+    }
+    this.cacheIdentity = identity;
+    if (user.role === LOCAL_MODE_ROLE) {
+      this.deps.hints.put(toSessionHint(user, this.deps.clock.nowMs(), OPERATOR_SESSION_HINT_MS));
+    }
+    this.deps.store.signIn(user);
+  }
+
+  /** Forgets the token, the cache and (unless the server was just unreachable) the hints. */
+  private cleanUp(keepHints = false): void {
+    this.cacheIdentity = null;
+    if (!keepHints) {
+      this.deps.hints.clear();
+    }
     this.cancelRenewal?.();
     this.cancelRenewal = null;
     this.deps.tokens.clear();
@@ -148,10 +200,11 @@ export class SessionController {
         throw new Error('The access token has no readable claims');
       }
       const me = await this.deps.api.auth.me();
-      this.deps.store.signIn(toSessionUser(me, claims));
+      this.admit(toSessionUser(me, claims, this.deps.clock.nowMs()));
     } catch (error) {
-      this.cleanUp();
-      this.deps.store.clear(error instanceof NetworkError ? 'offline' : undefined);
+      const offline = error instanceof NetworkError;
+      this.cleanUp(offline);
+      this.deps.store.clear(offline ? 'offline' : undefined);
     }
   }
 

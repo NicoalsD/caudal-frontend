@@ -259,6 +259,45 @@
           }
         }
       }
+    },
+    "/api/v1/auth/switch-aqueduct": {
+      "post": {
+        "operationId": "switchAqueduct",
+        "summary": "Cambia el acueducto activo",
+        "description": "Autenticado. Un JWT lleva un solo acueducto. API.md sección 2.9.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchAqueductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token de acceso del acueducto indicado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La membresía no está vigente o no existe (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -545,6 +584,18 @@
           },
           "new_password": {
             "type": "string"
+          }
+        }
+      },
+      "SwitchAqueductRequest": {
+        "type": "object",
+        "required": [
+          "aqueduct_id"
+        ],
+        "properties": {
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       }

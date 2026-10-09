@@ -10,13 +10,14 @@ import {
   TEST_PASSWORD,
   ACCESS_TOKEN_SECONDS,
 } from '../factories/auth';
-import type { AuthUserDto } from '../factories/auth';
+import type { AuthUserDto, MembershipDto } from '../factories/auth';
 import { apiUrl } from './apiUrl';
 import { errorResponse } from './errorResponse';
 import { bearerOf, changePasswordOutcome } from './handlers/auth';
 import type { components } from '../../services/api/schema';
 
 type ChangePasswordDto = components['schemas']['ChangePasswordRequest'];
+type SwitchAqueductDto = components['schemas']['SwitchAqueductRequest'];
 
 /** The header the real API demands on /auth/refresh (API.md section 1.2). */
 const REQUIRED_REQUESTED_WITH = 'caudal-web';
@@ -29,6 +30,7 @@ export interface SessionBackend {
     logout: number;
     me: number;
     passwordChanges: number;
+    switches: number;
   };
   /** Every access token issued so far stops working (the 15 minutes passed). */
   expireAccessTokens(): void;
@@ -46,12 +48,15 @@ export interface SessionBackend {
  * access token only works until expireAccessTokens() is called. State lives in this closure, so
  * each test gets its own.
  */
-export function createSessionBackend(initialCookieUser: AuthUserDto | null = null): SessionBackend {
+export function createSessionBackend(
+  initialCookieUser: AuthUserDto | null = null,
+  memberships: MembershipDto[] = [],
+): SessionBackend {
   let cookieUser = initialCookieUser;
   let serial = 0;
   let networkFailure = false;
   const validTokens = new Set<string>();
-  const calls = { refresh: 0, login: 0, logout: 0, me: 0, passwordChanges: 0 };
+  const calls = { refresh: 0, login: 0, logout: 0, me: 0, passwordChanges: 0, switches: 0 };
 
   const issue = (user: AuthUserDto): string => {
     serial += 1;
@@ -96,7 +101,9 @@ export function createSessionBackend(initialCookieUser: AuthUserDto | null = nul
       if (token === null || !validTokens.has(token) || cookieUser === null) {
         return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
       }
-      return HttpResponse.json(buildMeResponse(cookieUser));
+      return HttpResponse.json(
+        buildMeResponse(cookieUser, memberships.length > 0 ? memberships : undefined),
+      );
     }),
     http.post(apiUrl('/auth/change-password'), async ({ request }) => {
       const token = bearerOf(request);
@@ -114,6 +121,24 @@ export function createSessionBackend(initialCookieUser: AuthUserDto | null = nul
       validTokens.clear();
       calls.passwordChanges += 1;
       return new HttpResponse(null, { status: STATUS.noContent });
+    }),
+    http.post(apiUrl('/auth/switch-aqueduct'), async ({ request }) => {
+      const token = bearerOf(request);
+      if (token === null || !validTokens.has(token) || cookieUser === null) {
+        return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
+      }
+      const body = (await request.json()) as SwitchAqueductDto;
+      const target = memberships.find((membership) => membership.aqueduct_id === body.aqueduct_id);
+      if (target === undefined) {
+        return errorResponse(STATUS.forbidden, 'FORBIDDEN');
+      }
+      cookieUser = { ...cookieUser, role: target.role, aqueduct_id: target.aqueduct_id };
+      calls.switches += 1;
+      return HttpResponse.json({
+        access_token: issue(cookieUser),
+        token_type: 'Bearer',
+        expires_in: ACCESS_TOKEN_SECONDS,
+      });
     }),
     http.post(apiUrl('/auth/logout'), () => {
       calls.logout += 1;

@@ -10,6 +10,7 @@ export function buildSessionUser(overrides: Partial<SessionUser> = {}): SessionU
     displayName: 'Persona de prueba',
     mustChangePassword: false,
     permissions: [],
+    memberships: [],
     ...overrides,
   };
 }

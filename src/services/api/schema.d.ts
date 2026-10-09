@@ -143,6 +143,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/switch-aqueduct": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cambia el acueducto activo
+         * @description Autenticado. Un JWT lleva un solo acueducto. API.md sección 2.9.
+         */
+        post: operations["switchAqueduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -243,6 +263,10 @@ export interface components {
         ChangePasswordRequest: {
             current_password: string;
             new_password: string;
+        };
+        SwitchAqueductRequest: {
+            /** Format: uuid */
+            aqueduct_id: string;
         };
     };
     responses: never;
@@ -487,6 +511,39 @@ export interface operations {
             };
             /** @description La contraseña no cumple la política (PASSWORD_POLICY_VIOLATION). */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    switchAqueduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwitchAqueductRequest"];
+            };
+        };
+        responses: {
+            /** @description Token de acceso del acueducto indicado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefreshResponse"];
+                };
+            };
+            /** @description La membresía no está vigente o no existe (FORBIDDEN). */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

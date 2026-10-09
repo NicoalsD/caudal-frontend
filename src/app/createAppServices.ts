@@ -1,5 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 
+import { InMemorySessionHintRepository } from '../core/session/SessionHint';
+import type { SessionHintRepository } from '../core/session/SessionHint';
 import type { Clock } from '../core/time/Clock';
 import { SystemClock } from '../core/time/SystemClock';
 import { ApiDtoAdapter } from '../services/api/adapters/ApiDtoAdapter';
@@ -29,6 +31,8 @@ export interface AppServices {
   readonly sessionStore: SessionStore;
   readonly session: SessionController;
   readonly queryClient: QueryClient;
+  /** Session hints per aqueduct (no secrets). Exposed for the local mode and for tests. */
+  readonly hints: SessionHintRepository;
 }
 
 /**
@@ -55,6 +59,7 @@ export function createAppServices(
     random: () => Math.random(),
   });
   const api = new CaudalApi(http, adapter);
+  const hints: SessionHintRepository = new InMemorySessionHintRepository();
   const sessionStore = new SessionStore((event, phase) => {
     logger.warn('session.event_ignored', { event, phase });
   });
@@ -71,9 +76,10 @@ export function createAppServices(
     queryClient,
     clock,
     scheduler,
+    hints,
   });
   errorSink.handle = (error) => {
     session.handleError(error);
   };
-  return { api, tokens, sessionStore, session, queryClient };
+  return { api, tokens, sessionStore, session, queryClient, hints };
 }

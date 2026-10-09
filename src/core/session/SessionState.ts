@@ -1,3 +1,4 @@
+import type { MembershipChoice } from './memberships';
 import type { Role } from './roles';
 
 /** Minimal user data kept in memory for UX decisions. The server always authorizes. */
@@ -11,6 +12,8 @@ export interface SessionUser {
   readonly mustChangePassword: boolean;
   /** Permission codes from GET /auth/me, used only to show or hide actions. */
   readonly permissions: readonly string[];
+  /** Where the person can work (current memberships), to offer a change of aqueduct. */
+  readonly memberships: readonly MembershipChoice[];
 }
 
 export type SessionState =

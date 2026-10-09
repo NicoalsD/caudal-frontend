@@ -3,6 +3,7 @@ import { formatDecimal } from '../../../core/format/decimal';
 import { formatDateTime, parseInstant, toBogotaDateKey } from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
 import type { components } from '../schema';
+import type { Membership } from '../../../core/session/memberships';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -22,6 +23,7 @@ type AuthUserDto = components['schemas']['AuthUser'];
 type LoginDto = components['schemas']['LoginResponse'];
 type RefreshDto = components['schemas']['RefreshResponse'];
 type MeDto = components['schemas']['MeResponse'];
+type MembershipDto = components['schemas']['Membership'];
 
 /**
  * Adapter between the server contract and the view models (api-integration.md section 5).
@@ -78,7 +80,27 @@ export class ApiDtoAdapter {
       fullName: dto.full_name,
       mustChangePassword: dto.must_change_password,
       permissions: [...dto.permissions],
+      memberships: dto.memberships.map((membership) => this.toMembership(membership)),
     };
+  }
+
+  private toMembership(dto: MembershipDto): Membership {
+    if (!isRole(dto.role)) {
+      throw new InvalidDtoError('memberships.role');
+    }
+    return {
+      aqueductId: dto.aqueduct_id,
+      role: dto.role,
+      validFromMs: this.toOptionalInstantMs('memberships.valid_from', dto.valid_from),
+      validToMs: this.toOptionalInstantMs('memberships.valid_to', dto.valid_to),
+    };
+  }
+
+  private toOptionalInstantMs(field: string, iso: string | null | undefined): number | null {
+    if (iso === undefined || iso === null) {
+      return null;
+    }
+    return this.toTimestamp(field, iso).date.getTime();
   }
 
   /** Converts an ISO-8601 instant from the API into a view with its Bogota text. */

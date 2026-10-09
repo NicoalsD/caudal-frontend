@@ -37,6 +37,14 @@ export const PUBLIC_PATH_PREFIX = '/public/';
 /** The access token is renewed in the background after this fraction of its life (architecture 5.3). */
 export const PROACTIVE_REFRESH_FRACTION = 0.8;
 
+/**
+ * How long the session hint of an OPERATOR opens the local mode without connection. It follows the
+ * refresh cookie of that role (30 days, API.md 1.2). Decision to validate with Drako (arch 5.5).
+ */
+export const OPERATOR_SESSION_HINT_DAYS = 30;
+const MS_PER_DAY = 86_400_000;
+export const OPERATOR_SESSION_HINT_MS = OPERATOR_SESSION_HINT_DAYS * MS_PER_DAY;
+
 /** Client policy: GET retries on network failure or 5xx (api-integration.md section 2.4). */
 export const HTTP_RETRY_MAX_ATTEMPTS = 3;
 export const HTTP_RETRY_BASE_DELAY_MS = 500;

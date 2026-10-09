@@ -18,6 +18,7 @@ const USER: SessionUser = {
   displayName: 'Persona Uno',
   mustChangePassword: false,
   permissions: ['RULESET_ACTIVATE'],
+  memberships: [],
 };
 const FORCED: SessionUser = { ...USER, mustChangePassword: true };
 
@@ -152,6 +153,7 @@ describe('a session snapshot holds no secrets', () => {
       [
         'aqueductId',
         'displayName',
+        'memberships',
         'mustChangePassword',
         'permissions',
         'role',

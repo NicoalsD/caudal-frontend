@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildLoginResponse, TEST_USERS } from '../../../test/factories/auth';
+import { buildLoginResponse, buildMeResponse, TEST_USERS } from '../../../test/factories/auth';
 import { plain } from '../../../test/text';
 
 import { ApiDtoAdapter } from './ApiDtoAdapter';
@@ -112,5 +112,42 @@ describe('ApiDtoAdapter.toLogin', () => {
 
   it.each([0, Number.NEGATIVE_INFINITY, Number.NaN])('rejects expires_in %s', (seconds) => {
     expect(() => adapter.toLogin({ ...dto, expires_in: seconds })).toThrow(InvalidDtoError);
+  });
+});
+
+describe('ApiDtoAdapter.toMe', () => {
+  const me = buildMeResponse(TEST_USERS.admin, [
+    {
+      aqueduct_id: TEST_USERS.admin.aqueduct_id,
+      role: 'BOARD_ADMIN',
+      valid_from: '2026-01-01T00:00:00-05:00',
+      valid_to: null,
+    },
+  ]);
+
+  it('maps the profile, the permissions and the membership dates', () => {
+    const view = adapter.toMe(me);
+
+    expect(view.fullName).toBe(TEST_USERS.admin.full_name);
+    expect(view.permissions).toContain('RULESET_ACTIVATE');
+    expect(view.memberships).toEqual([
+      {
+        aqueductId: TEST_USERS.admin.aqueduct_id,
+        role: 'BOARD_ADMIN',
+        validFromMs: Date.parse('2026-01-01T00:00:00-05:00'),
+        validToMs: null,
+      },
+    ]);
+  });
+
+  it('rejects a membership with an unknown role or a broken date', () => {
+    const base = { aqueduct_id: TEST_USERS.admin.aqueduct_id };
+
+    expect(() =>
+      adapter.toMe({ ...me, memberships: [{ ...base, role: 'ROOT' as 'OPERATOR' }] }),
+    ).toThrow(InvalidDtoError);
+    expect(() =>
+      adapter.toMe({ ...me, memberships: [{ ...base, role: 'OPERATOR', valid_to: 'ayer' }] }),
+    ).toThrow(InvalidDtoError);
   });
 });

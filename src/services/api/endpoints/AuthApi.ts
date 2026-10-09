@@ -8,6 +8,7 @@ type LoginDto = components['schemas']['LoginResponse'];
 type RefreshDto = components['schemas']['RefreshResponse'];
 type MeDto = components['schemas']['MeResponse'];
 
+type SwitchAqueductRequestDto = components['schemas']['SwitchAqueductRequest'];
 type ChangePasswordRequestDto = components['schemas']['ChangePasswordRequest'];
 
 export interface ChangePasswordInput {
@@ -66,6 +67,20 @@ export class AuthApi {
       new_password: input.newPassword,
     };
     await this.http.request<undefined>({ method: 'POST', path: '/auth/change-password', body });
+  }
+
+  /**
+   * POST /api/v1/auth/switch-aqueduct: a new access token for another aqueduct (a token carries a
+   * single one). The server answers 403 when the membership does not exist or is not current.
+   */
+  async switchAqueduct(aqueductId: string): Promise<RefreshView> {
+    const body: SwitchAqueductRequestDto = { aqueduct_id: aqueductId };
+    const response = await this.http.request<RefreshDto>({
+      method: 'POST',
+      path: '/auth/switch-aqueduct',
+      body,
+    });
+    return this.adapter.toRefresh(response.body);
   }
 
   /** POST /api/v1/auth/logout (204): the server revokes the refresh family and clears the cookie. */

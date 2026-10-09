@@ -1,3 +1,4 @@
+import type { Membership } from '../../core/session/memberships';
 import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
@@ -53,4 +54,5 @@ export interface MeView {
   readonly fullName: string;
   readonly mustChangePassword: boolean;
   readonly permissions: readonly string[];
+  readonly memberships: readonly Membership[];
 }
