@@ -40,5 +40,8 @@ jobs:
       - name: Tipos
         run: pnpm typecheck
 
+      - name: Pruebas con cobertura
+        run: pnpm test:coverage
+
       - name: Build
         run: pnpm build
