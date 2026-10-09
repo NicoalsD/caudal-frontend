@@ -10,6 +10,7 @@ export default mergeConfig(
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],
       restoreMocks: true,
+      env: { VITE_API_BASE_URL: 'http://api.caudal.test/api/v1' },
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],
