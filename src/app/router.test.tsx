@@ -35,7 +35,7 @@ const heading = (name: string) => screen.getByRole('heading', { level: 1, name }
 
 describe('role router', () => {
   it('shows the public schedule without a session', () => {
-    renderAt('/p/vereda-de-prueba');
+    renderAt('/a/vereda-de-prueba');
 
     expect(heading(t('screens.publicSchedule'))).toBeInTheDocument();
   });

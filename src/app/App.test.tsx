@@ -10,7 +10,7 @@ import { buildRoutes } from './router';
 
 describe('App', () => {
   it('composes the providers and renders the routed screen', async () => {
-    const router = createMemoryRouter(buildRoutes(), { initialEntries: ['/p/vereda-de-prueba'] });
+    const router = createMemoryRouter(buildRoutes(), { initialEntries: ['/a/vereda-de-prueba'] });
 
     render(
       <App

@@ -1,7 +1,7 @@
 import type { Role } from '../core/session/roles';
 
 /** Public path prefix (architecture.md section 4). Change here only. */
-const PUBLIC_PREFIX = '/p';
+const PUBLIC_PREFIX = '/a';
 
 /** Route paths by actor. Every route not listed here answers 404 (deny by default). */
 export const ROUTE_PATHS = {

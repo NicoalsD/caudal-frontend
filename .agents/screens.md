@@ -93,7 +93,7 @@ Nota sobre identificadores: `S01` a `S28` identifican pantallas; los patrones de
 
 ## 2. Público (sin login)
 
-Estas pantallas viven bajo `/p/:aqueductSlug`. Usan `PublicLayout`, sin barra de sesión.
+Estas pantallas viven bajo `/a/:aqueductSlug`. Usan `PublicLayout`, sin barra de sesión.
 
 ### S04 Horario público
 - **Actores:** cualquier persona, sin login.
