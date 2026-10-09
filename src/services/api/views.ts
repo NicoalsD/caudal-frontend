@@ -114,3 +114,23 @@ export interface SectorView {
   readonly householdsCount: number;
   readonly isActive: boolean;
 }
+
+export interface TankView {
+  readonly id: string;
+  readonly name: string;
+  readonly gaugeMin: number;
+  readonly gaugeMax: number;
+  readonly gaugeStep: number;
+  readonly capacityLiters: number | null;
+  readonly isActive: boolean;
+}
+
+export interface ValveView {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly locationHint: string | null;
+  readonly isMotorized: boolean;
+  readonly failSafePosition: 'KEEP' | 'OPEN' | 'CLOSED';
+  readonly isActive: boolean;
+}

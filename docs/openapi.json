@@ -642,6 +642,75 @@
           }
         }
       }
+    },
+    "/api/v1/tanks": {
+      "get": {
+        "operationId": "listTanks",
+        "summary": "Tanques del acueducto",
+        "description": "Autenticado. API.md sección 5.1.",
+        "responses": {
+          "200": {
+            "description": "Tanques.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TankList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sectors/{id}/valves": {
+      "get": {
+        "operationId": "listValves",
+        "summary": "Válvulas de un sector",
+        "description": "Autenticado. API.md sección 5.6.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Válvulas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValveList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El sector no existe (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1449,6 +1518,119 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Sector"
+            }
+          }
+        }
+      },
+      "Tank": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "gauge_min",
+          "gauge_max",
+          "gauge_step",
+          "is_active"
+        ],
+        "description": "Tanque (API.md sección 5.1).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "gauge_min": {
+            "type": "number",
+            "format": "double"
+          },
+          "gauge_max": {
+            "type": "number",
+            "format": "double"
+          },
+          "gauge_step": {
+            "type": "number",
+            "format": "double"
+          },
+          "capacity_liters": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TankList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Lista de tanques. La forma exacta (items) se confirma con el OpenAPI del backend.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tank"
+            }
+          }
+        }
+      },
+      "Valve": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "is_motorized",
+          "fail_safe_position",
+          "is_active"
+        ],
+        "description": "Válvula de un sector (API.md sección 5.6).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "location_hint": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_motorized": {
+            "type": "boolean"
+          },
+          "fail_safe_position": {
+            "type": "string",
+            "enum": [
+              "KEEP",
+              "OPEN",
+              "CLOSED"
+            ]
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ValveList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Valve"
             }
           }
         }

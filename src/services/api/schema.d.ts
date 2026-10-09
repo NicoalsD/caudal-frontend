@@ -271,6 +271,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tanks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tanques del acueducto
+         * @description Autenticado. API.md sección 5.1.
+         */
+        get: operations["listTanks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sectors/{id}/valves": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Válvulas de un sector
+         * @description Autenticado. API.md sección 5.6.
+         */
+        get: operations["listValves"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -544,6 +584,41 @@ export interface components {
         /** @description Lista de sectores. La forma exacta (items) se confirma con el OpenAPI del backend. */
         SectorList: {
             items: components["schemas"]["Sector"][];
+        };
+        /** @description Tanque (API.md sección 5.1). */
+        Tank: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: double */
+            gauge_min: number;
+            /** Format: double */
+            gauge_max: number;
+            /** Format: double */
+            gauge_step: number;
+            /** Format: int32 */
+            capacity_liters?: number | null;
+            is_active: boolean;
+        };
+        /** @description Lista de tanques. La forma exacta (items) se confirma con el OpenAPI del backend. */
+        TankList: {
+            items: components["schemas"]["Tank"][];
+        };
+        /** @description Válvula de un sector (API.md sección 5.6). */
+        Valve: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            location_hint?: string | null;
+            is_motorized: boolean;
+            /** @enum {string} */
+            fail_safe_position: "KEEP" | "OPEN" | "CLOSED";
+            is_active: boolean;
+        };
+        /** @description Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend. */
+        ValveList: {
+            items: components["schemas"]["Valve"][];
         };
     };
     responses: never;
@@ -1091,6 +1166,66 @@ export interface operations {
             };
             /** @description Sesión no válida (UNAUTHORIZED). */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listTanks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tanques. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TankList"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listValves: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Válvulas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValveList"];
+                };
+            };
+            /** @description El sector no existe (NOT_FOUND). */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

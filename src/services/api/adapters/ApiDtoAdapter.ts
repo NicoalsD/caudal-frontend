@@ -23,6 +23,8 @@ import type {
   RuleSetSummaryView,
   RuleSetView,
   SectorView,
+  TankView,
+  ValveView,
   TimestampView,
 } from '../views';
 import { InvalidDtoError } from './InvalidDtoError';
@@ -43,6 +45,8 @@ type RuleValveOrderDto = components['schemas']['RuleValveOrder'];
 type RuleOperatingWindowDto = components['schemas']['RuleOperatingWindow'];
 type RuleGaugeDto = components['schemas']['RuleGauge'];
 type SectorDto = components['schemas']['Sector'];
+type TankDto = components['schemas']['Tank'];
+type ValveDto = components['schemas']['Valve'];
 
 const TIME_OF_DAY = /^(?<hours>\d{2}):(?<minutes>\d{2})(?::\d{2})?$/;
 
@@ -144,6 +148,36 @@ export class ApiDtoAdapter {
       name: dto.name,
       parentSectorId: dto.parent_sector_id ?? null,
       householdsCount: dto.households_count,
+      isActive: dto.is_active,
+    };
+  }
+
+  toTank(dto: TankDto): TankView {
+    if (
+      ![dto.gauge_min, dto.gauge_max, dto.gauge_step].every(Number.isFinite) ||
+      dto.gauge_max <= dto.gauge_min
+    ) {
+      throw new InvalidDtoError('tank.gauge');
+    }
+    return {
+      id: dto.id,
+      name: dto.name,
+      gaugeMin: dto.gauge_min,
+      gaugeMax: dto.gauge_max,
+      gaugeStep: dto.gauge_step,
+      capacityLiters: dto.capacity_liters ?? null,
+      isActive: dto.is_active,
+    };
+  }
+
+  toValve(dto: ValveDto): ValveView {
+    return {
+      id: dto.id,
+      code: dto.code,
+      name: dto.name,
+      locationHint: dto.location_hint ?? null,
+      isMotorized: dto.is_motorized,
+      failSafePosition: dto.fail_safe_position,
       isActive: dto.is_active,
     };
   }
