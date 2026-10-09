@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { DomainError } from '../../core/errors/DomainError';
 import { ROUTE_PATHS } from '../../core/session/routes';
@@ -17,6 +17,15 @@ import { cn } from '../../ui/styles/cn';
 
 const NOT_FOUND_CODE = 'NOT_FOUND';
 
+/** The activation dialog sends the person back here saying which version it activated. */
+function readActivatedVersion(state: unknown): number | null {
+  if (typeof state !== 'object' || state === null || !('activatedVersion' in state)) {
+    return null;
+  }
+  const version = state.activatedVersion;
+  return typeof version === 'number' ? version : null;
+}
+
 function draftPath(id: string): string {
   return ROUTE_PATHS.board.ruleDetail.replace(':id', encodeURIComponent(id));
 }
@@ -28,6 +37,8 @@ export function RulesPage(): JSX.Element {
   const createDraft = useCreateDraft();
   const canDraft = usePermission('RULESET_DRAFT');
   const navigate = useNavigate();
+  const location = useLocation();
+  const activatedVersion = readActivatedVersion(location.state);
 
   const create = (): void => {
     createDraft.mutate(undefined, {
@@ -70,6 +81,9 @@ export function RulesPage(): JSX.Element {
   return (
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.rules')}</ScreenTitle>
+      {activatedVersion === null ? null : (
+        <p role="status">{t('rules.activated', { version: String(activatedVersion) })}</p>
+      )}
       {body}
       <section className={cn(styles.section)} aria-labelledby="rules-draft-title">
         <h2 id="rules-draft-title">{t('rules.draftTitle')}</h2>

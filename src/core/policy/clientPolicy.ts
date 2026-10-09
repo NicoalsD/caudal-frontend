@@ -23,6 +23,9 @@ export const AUTH_PATH_PREFIX = '/auth/';
 /** Hours in a day: the ceiling of any "hours per day" the person types (a fact, not a rule). */
 export const HOURS_PER_DAY = 24;
 
+/** A character counter warns when this fraction of the maximum is used (ux-guidelines section 9). */
+export const COUNTER_WARNING_FRACTION = 0.9;
+
 /** Header and scheme that carry the access token (API.md section 1.2). */
 export const AUTHORIZATION_HEADER = 'Authorization';
 export const BEARER_SCHEME = 'Bearer';

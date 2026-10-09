@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { JSX } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router';
 
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { draftRulesFormSchema } from '../../core/forms/formSchemas';
 import {
   rowsToBands,
@@ -23,6 +25,8 @@ import { Button } from '../../ui/primitives/Button';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { cn } from '../../ui/styles/cn';
 import { useConstraints } from '../../state/hooks/useConstraints';
+import { usePermission } from '../../state/hooks/usePermission';
+import { ActivateRuleDialog } from './ActivateRuleDialog';
 import { BandsEditor } from './BandsEditor';
 import { SectorsEditor } from './SectorsEditor';
 import { WindowsEditor } from './WindowsEditor';
@@ -41,6 +45,9 @@ interface DraftEditorProps {
  */
 export function DraftEditor({ rules, sectors }: DraftEditorProps): JSX.Element {
   const save = useSaveDraft(rules.id);
+  const canActivate = usePermission('RULESET_ACTIVATE');
+  const [activating, setActivating] = useState(false);
+  const navigate = useNavigate();
   const [failure, setFailure] = useState<ReturnType<typeof errorText> | null>(null);
   const [saved, setSaved] = useState(false);
   const constraints = useConstraints().data;
@@ -110,6 +117,31 @@ export function DraftEditor({ rules, sectors }: DraftEditorProps): JSX.Element {
           {saved && !isDirty ? <p role="status">{t('rules.draftSaved')}</p> : null}
         </div>
       </form>
+      {canActivate ? (
+        <div className={cn(styles.actions)}>
+          <ActivateRuleDialog
+            ruleSetId={rules.id}
+            version={rules.version}
+            open={activating}
+            onOpenChange={setActivating}
+            trigger={
+              <Button
+                variant="primary"
+                disabled={isDirty || isSubmitting}
+                aria-describedby="rules-activate-hint"
+              >
+                {t('rules.activate')}
+              </Button>
+            }
+            onActivated={(version) => {
+              void navigate(ROUTE_PATHS.board.rules, { state: { activatedVersion: version } });
+            }}
+          />
+          <p id="rules-activate-hint" className={cn(styles.note)}>
+            {isDirty ? t('rules.saveBeforeActivating') : ''}
+          </p>
+        </div>
+      ) : null}
     </FormProvider>
   );
 }
