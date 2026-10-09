@@ -1,4 +1,5 @@
 import type { HttpClient } from '../http/HttpClient';
+import type { ApiDtoAdapter } from './adapters/ApiDtoAdapter';
 import { SystemApi } from './endpoints/SystemApi';
 
 /**
@@ -11,7 +12,7 @@ import { SystemApi } from './endpoints/SystemApi';
 export class CaudalApi {
   readonly system: SystemApi;
 
-  constructor(http: HttpClient) {
-    this.system = new SystemApi(http);
+  constructor(http: HttpClient, adapter: ApiDtoAdapter) {
+    this.system = new SystemApi(http, adapter);
   }
 }

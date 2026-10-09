@@ -1,6 +1,7 @@
 import { SystemClock } from '../../core/time/SystemClock';
 import { createHttpClient } from '../http/createHttpClient';
 import { ConsoleLogger, NoopLogger } from '../http/Logger';
+import { ApiDtoAdapter } from './adapters/ApiDtoAdapter';
 import { CaudalApi } from './CaudalApi';
 import { readApiBaseUrl } from './config';
 
@@ -18,5 +19,5 @@ export function createCaudalApi(env: ApiEnvironment): CaudalApi {
     clock: new SystemClock(),
     random: () => Math.random(),
   });
-  return new CaudalApi(http);
+  return new CaudalApi(http, new ApiDtoAdapter());
 }
