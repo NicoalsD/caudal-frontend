@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { Outlet } from 'react-router';
 
-import { strings } from '../../i18n/es';
+import { t } from '../../i18n/t';
 import { cn } from '../../ui/styles/cn';
 import styles from './Layout.module.css';
 import { MAIN_CONTENT_ID } from './RoleLayout';
@@ -11,10 +11,10 @@ export function PublicLayout(): JSX.Element {
   return (
     <>
       <a className={cn(styles.skipLink)} href={`#${MAIN_CONTENT_ID}`}>
-        {strings.app.skipToContent}
+        {t('app.skipToContent')}
       </a>
       <header className={cn(styles.header)}>
-        <p className={cn(styles.brand)}>{strings.app.name}</p>
+        <p className={cn(styles.brand)}>{t('app.name')}</p>
       </header>
       <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
         <Outlet />

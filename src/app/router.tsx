@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import type { RouteObject } from 'react-router';
 
-import { strings } from '../i18n/es';
+import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequireRole } from './guards/RequireRole';
 import { BoardLayout } from './layouts/BoardLayout';
@@ -16,8 +16,6 @@ import { PlaceholderPage } from './pages/PlaceholderPage';
 import { RootRedirect } from './pages/RootRedirect';
 import { ROLES_BY_AREA, ROUTE_PATHS } from './routes';
 
-const screens = strings.screens;
-
 /** Builds one leaf route that renders a placeholder until its feature exists. */
 function screen(path: string, title: string): RouteObject {
   return { path, element: <PlaceholderPage title={title} /> };
@@ -26,18 +24,18 @@ function screen(path: string, title: string): RouteObject {
 const publicRoutes: RouteObject = {
   element: <PublicLayout />,
   children: [
-    screen(ROUTE_PATHS.public.schedule, screens.publicSchedule),
-    screen(ROUTE_PATHS.public.damageReport, screens.publicDamageReport),
-    screen(ROUTE_PATHS.public.tracking, screens.publicTracking),
-    screen(ROUTE_PATHS.login, screens.login),
+    screen(ROUTE_PATHS.public.schedule, t('screens.publicSchedule')),
+    screen(ROUTE_PATHS.public.damageReport, t('screens.publicDamageReport')),
+    screen(ROUTE_PATHS.public.tracking, t('screens.publicTracking')),
+    screen(ROUTE_PATHS.login, t('screens.login')),
   ],
 };
 
 const sessionRoutes: RouteObject = {
   element: <PublicLayout />,
   children: [
-    screen(ROUTE_PATHS.changePassword, screens.changePassword),
-    screen(ROUTE_PATHS.privacyNotice, screens.privacyNotice),
+    screen(ROUTE_PATHS.changePassword, t('screens.changePassword')),
+    screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice')),
   ],
 };
 
@@ -47,11 +45,11 @@ const operatorRoutes: RouteObject = {
     {
       element: <OperatorLayout />,
       children: [
-        screen(ROUTE_PATHS.operator.home, screens.operatorHome),
-        screen(ROUTE_PATHS.operator.newReading, screens.newReading),
-        screen(ROUTE_PATHS.operator.pending, screens.pendingReadings),
-        screen(ROUTE_PATHS.operator.dayClosure, screens.dayClosure),
-        screen(ROUTE_PATHS.operator.damage, screens.operatorDamage),
+        screen(ROUTE_PATHS.operator.home, t('screens.operatorHome')),
+        screen(ROUTE_PATHS.operator.newReading, t('screens.newReading')),
+        screen(ROUTE_PATHS.operator.pending, t('screens.pendingReadings')),
+        screen(ROUTE_PATHS.operator.dayClosure, t('screens.dayClosure')),
+        screen(ROUTE_PATHS.operator.damage, t('screens.operatorDamage')),
       ],
     },
   ],
@@ -63,20 +61,20 @@ const boardRoutes: RouteObject = {
     {
       element: <BoardLayout />,
       children: [
-        screen(ROUTE_PATHS.board.tank, screens.tankStatus),
-        screen(ROUTE_PATHS.board.proposals, screens.proposals),
-        screen(ROUTE_PATHS.board.proposalDetail, screens.proposalDetail),
-        screen(ROUTE_PATHS.board.publication, screens.publication),
-        screen(ROUTE_PATHS.board.rules, screens.rules),
-        screen(ROUTE_PATHS.board.ruleDetail, screens.ruleDetail),
-        screen(ROUTE_PATHS.board.ruleHistory, screens.ruleHistory),
-        screen(ROUTE_PATHS.board.network, screens.network),
-        screen(ROUTE_PATHS.board.minutes, screens.minutes),
-        screen(ROUTE_PATHS.board.incidents, screens.incidents),
-        screen(ROUTE_PATHS.board.entities, screens.entities),
+        screen(ROUTE_PATHS.board.tank, t('screens.tankStatus')),
+        screen(ROUTE_PATHS.board.proposals, t('screens.proposals')),
+        screen(ROUTE_PATHS.board.proposalDetail, t('screens.proposalDetail')),
+        screen(ROUTE_PATHS.board.publication, t('screens.publication')),
+        screen(ROUTE_PATHS.board.rules, t('screens.rules')),
+        screen(ROUTE_PATHS.board.ruleDetail, t('screens.ruleDetail')),
+        screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
+        screen(ROUTE_PATHS.board.network, t('screens.network')),
+        screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
+        screen(ROUTE_PATHS.board.incidents, t('screens.incidents')),
+        screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,
-          children: [screen(ROUTE_PATHS.board.users, screens.users)],
+          children: [screen(ROUTE_PATHS.board.users, t('screens.users'))],
         },
       ],
     },
@@ -89,11 +87,11 @@ const teamRoutes: RouteObject = {
     {
       element: <TeamLayout />,
       children: [
-        screen(ROUTE_PATHS.team.evaluation, screens.evaluation),
-        screen(ROUTE_PATHS.team.health, screens.health),
-        screen(ROUTE_PATHS.team.devices, screens.devices),
-        screen(ROUTE_PATHS.team.audit, screens.audit),
-        screen(ROUTE_PATHS.team.imports, screens.imports),
+        screen(ROUTE_PATHS.team.evaluation, t('screens.evaluation')),
+        screen(ROUTE_PATHS.team.health, t('screens.health')),
+        screen(ROUTE_PATHS.team.devices, t('screens.devices')),
+        screen(ROUTE_PATHS.team.audit, t('screens.audit')),
+        screen(ROUTE_PATHS.team.imports, t('screens.imports')),
       ],
     },
   ],
@@ -104,7 +102,7 @@ const entityRoutes: RouteObject = {
   children: [
     {
       element: <EntityLayout />,
-      children: [screen(ROUTE_PATHS.entity.summaries, screens.summaries)],
+      children: [screen(ROUTE_PATHS.entity.summaries, t('screens.summaries'))],
     },
   ],
 };
@@ -114,7 +112,7 @@ const sharedRoutes: RouteObject = {
   children: [
     {
       element: <SharedLayout />,
-      children: [screen(ROUTE_PATHS.tank, screens.tankStatus)],
+      children: [screen(ROUTE_PATHS.tank, t('screens.tankStatus'))],
     },
   ],
 };

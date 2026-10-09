@@ -3,7 +3,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import type { Role } from '../core/session/roles';
-import { strings } from '../i18n/es';
+import { t } from '../i18n/t';
 import { SessionStore } from '../state/SessionStore';
 import { SessionProvider } from './providers/SessionProvider';
 import { buildRoutes } from './router';
@@ -37,7 +37,7 @@ describe('role router', () => {
   it('shows the public schedule without a session', () => {
     renderAt('/p/vereda-de-prueba');
 
-    expect(heading(strings.screens.publicSchedule)).toBeInTheDocument();
+    expect(heading(t('screens.publicSchedule'))).toBeInTheDocument();
   });
 
   it('sends anonymous visitors of a private route to login keeping the next path', () => {
@@ -47,7 +47,7 @@ describe('role router', () => {
     expect(router.state.location.search).toBe(
       `?next=${encodeURIComponent(ROUTE_PATHS.operator.pending)}`,
     );
-    expect(heading(strings.screens.login)).toBeInTheDocument();
+    expect(heading(t('screens.login'))).toBeInTheDocument();
   });
 
   it.each<[Role, string, string]>([
@@ -65,19 +65,17 @@ describe('role router', () => {
   it('renders the operator layout with its navigation', () => {
     renderAt(ROUTE_PATHS.operator.home, 'OPERATOR');
 
-    expect(
-      screen.getByRole('navigation', { name: strings.app.mainNavigation }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: strings.nav.newReading })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: t('app.mainNavigation') })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: t('nav.newReading') })).toBeInTheDocument();
     expect(screen.getByRole('main')).toBeInTheDocument();
-    expect(heading(strings.screens.operatorHome)).toBeInTheDocument();
+    expect(heading(t('screens.operatorHome'))).toBeInTheDocument();
   });
 
   it('shows the 403 page when a role opens another role area', () => {
     renderAt(ROUTE_PATHS.board.proposals, 'OPERATOR');
 
-    expect(heading(strings.errors.forbiddenTitle)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: strings.errors.goHome })).toHaveAttribute(
+    expect(heading(t('errors.forbiddenTitle'))).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: t('errors.goHome') })).toHaveAttribute(
       'href',
       ROUTE_PATHS.operator.home,
     );
@@ -85,28 +83,28 @@ describe('role router', () => {
 
   it('lets only BOARD_ADMIN open user administration', () => {
     renderAt(ROUTE_PATHS.board.users, 'BOARD_ADMIN');
-    expect(heading(strings.screens.users)).toBeInTheDocument();
+    expect(heading(t('screens.users'))).toBeInTheDocument();
   });
 
   it('blocks BOARD_MEMBER from user administration and hides the menu item', () => {
     renderAt(ROUTE_PATHS.board.users, 'BOARD_MEMBER');
 
-    expect(heading(strings.errors.forbiddenTitle)).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: strings.nav.users })).not.toBeInTheDocument();
+    expect(heading(t('errors.forbiddenTitle'))).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: t('nav.users') })).not.toBeInTheDocument();
   });
 
   it('shares /tanque between operator, board and team but not with the entity role', () => {
     renderAt(ROUTE_PATHS.tank, 'PROJECT_TEAM');
-    expect(heading(strings.screens.tankStatus)).toBeInTheDocument();
+    expect(heading(t('screens.tankStatus'))).toBeInTheDocument();
   });
 
   it('forbids /tanque to SUPPORT_ENTITY', () => {
     renderAt(ROUTE_PATHS.tank, 'SUPPORT_ENTITY');
-    expect(heading(strings.errors.forbiddenTitle)).toBeInTheDocument();
+    expect(heading(t('errors.forbiddenTitle'))).toBeInTheDocument();
   });
 
   it('answers 404 for undeclared routes', () => {
     renderAt('/ruta-que-no-existe', 'OPERATOR');
-    expect(heading(strings.errors.notFoundTitle)).toBeInTheDocument();
+    expect(heading(t('errors.notFoundTitle'))).toBeInTheDocument();
   });
 });

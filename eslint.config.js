@@ -156,6 +156,11 @@ export default tseslint.config(
           message: 'document.write is forbidden (security.md section 5).',
         },
         {
+          selector:
+            'JSXAttribute[name.name=/^(aria-label|aria-description|title|alt|placeholder)$/] > Literal',
+          message: 'Accessible names and hints must come from src/i18n/es.ts.',
+        },
+        {
           selector: 'JSXText[value=/\\S/]',
           message: 'Visible text must come from src/i18n/es.ts, not from JSX literals.',
         },

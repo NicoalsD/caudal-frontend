@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
 
-import { strings } from '../../i18n/es';
+import { t } from '../../i18n/t';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 
 interface PlaceholderPageProps {
@@ -12,7 +12,7 @@ export function PlaceholderPage({ title }: PlaceholderPageProps): JSX.Element {
   return (
     <>
       <ScreenTitle>{title}</ScreenTitle>
-      <p>{strings.app.comingSoon}</p>
+      <p>{t('app.comingSoon')}</p>
     </>
   );
 }

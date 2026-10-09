@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { NavLink, Outlet } from 'react-router';
 
-import { strings } from '../../i18n/es';
+import { t } from '../../i18n/t';
 import { cn } from '../../ui/styles/cn';
 import styles from './Layout.module.css';
 
@@ -21,11 +21,11 @@ export function RoleLayout({ navItems }: RoleLayoutProps): JSX.Element {
   return (
     <>
       <a className={cn(styles.skipLink)} href={`#${MAIN_CONTENT_ID}`}>
-        {strings.app.skipToContent}
+        {t('app.skipToContent')}
       </a>
       <header className={cn(styles.header)}>
-        <p className={cn(styles.brand)}>{strings.app.name}</p>
-        <nav aria-label={strings.app.mainNavigation}>
+        <p className={cn(styles.brand)}>{t('app.name')}</p>
+        <nav aria-label={t('app.mainNavigation')}>
           <ul className={cn(styles.navList)}>
             {navItems.map((item) => (
               <li key={item.to}>

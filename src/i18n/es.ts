@@ -62,6 +62,16 @@ export const strings = {
     imports: 'Importar historial',
     summaries: 'Resúmenes autorizados',
   },
+  validation: {
+    required: 'Este dato es obligatorio',
+    min: 'Escribe al menos {min} caracteres',
+    max: 'Máximo {max}',
+    pattern: 'El formato no es válido',
+    rangeMin: 'El número no puede ser menor que {min}',
+    rangeMax: 'El número no puede ser mayor que {max}',
+    decimalPlaces: 'Usa como máximo {max} decimales',
+    number: 'Escribe un número válido, por ejemplo 2,1',
+  },
   errors: {
     notFoundTitle: 'No encontramos esta página',
     notFoundBody: 'Revisa la dirección o vuelve al inicio.',
