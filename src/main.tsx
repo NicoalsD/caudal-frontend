@@ -2,6 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './app/App';
+import { createAppRouter } from './app/router';
+import { SessionStore } from './state/SessionStore';
 
 const container = document.getElementById('root');
 if (container === null) {
@@ -10,6 +12,6 @@ if (container === null) {
 
 createRoot(container).render(
   <StrictMode>
-    <App />
+    <App sessionStore={new SessionStore()} router={createAppRouter()} />
   </StrictMode>,
 );
