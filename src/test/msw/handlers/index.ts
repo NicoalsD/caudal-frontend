@@ -1,5 +1,6 @@
 import { authHandlers } from './auth';
 import { metaHandlers } from './meta';
+import { rulesHandlers } from './rules';
 
 /** Default handlers: one file per API area, written from caudal-backend/docs/API.md. */
-export const handlers = [...authHandlers, ...metaHandlers];
+export const handlers = [...authHandlers, ...metaHandlers, ...rulesHandlers];

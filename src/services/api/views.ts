@@ -1,3 +1,11 @@
+import type {
+  Gauge,
+  OperatingWindow,
+  RuleBand,
+  RuleSetStatus,
+  SectorSetting,
+  ValveOrder,
+} from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
 import type { Role } from '../../core/session/roles';
 
@@ -55,4 +63,44 @@ export interface MeView {
   readonly mustChangePassword: boolean;
   readonly permissions: readonly string[];
   readonly memberships: readonly Membership[];
+}
+
+/** A version of the Junta's rules, complete (GET /rule-sets/current and /rule-sets/{id}). */
+export interface RuleSetView {
+  readonly id: string;
+  readonly version: number;
+  readonly status: RuleSetStatus;
+  readonly validFrom: TimestampView | null;
+  readonly validTo: TimestampView | null;
+  readonly basedOnRuleSetId: string | null;
+  readonly changeReason: string | null;
+  readonly lockVersion: number | null;
+  readonly reserveLevel: number;
+  readonly reservePolicy: 'NONE' | 'REDUCE_TO_CRITICAL_BAND' | 'PRIORITY_ONLY';
+  readonly maxDailyServiceHours: number;
+  readonly minShiftHours: number;
+  readonly maxShiftHours: number;
+  readonly allocationStrategy: 'PRIORITY_THEN_LONGEST_WAIT' | 'EQUAL_SPLIT';
+  readonly duplicateWindowMinutes: number;
+  readonly maxLevelChangePerHour: number;
+  readonly staleReadingHours: number;
+  readonly maxBackdateDays: number;
+  readonly forecastHorizonDays: number;
+  readonly forecastContextDays: number;
+  readonly trendThresholdPerDay: number;
+  readonly bands: readonly RuleBand[];
+  readonly sectors: readonly SectorSetting[];
+  readonly valveOrder: readonly ValveOrder[];
+  readonly operatingWindows: readonly OperatingWindow[];
+  readonly gauge: Gauge;
+}
+
+/** A row of the versions list (GET /rule-sets). */
+export interface RuleSetSummaryView {
+  readonly id: string;
+  readonly version: number;
+  readonly status: RuleSetStatus;
+  readonly validFrom: TimestampView | null;
+  readonly validTo: TimestampView | null;
+  readonly activatedAt: TimestampView | null;
 }

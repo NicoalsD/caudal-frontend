@@ -298,6 +298,321 @@
           }
         }
       }
+    },
+    "/api/v1/rule-sets/current": {
+      "get": {
+        "operationId": "getCurrentRuleSet",
+        "summary": "Reglas vigentes",
+        "description": "Versión ACTIVE completa. API.md sección 6.1.",
+        "responses": {
+          "200": {
+            "description": "Versión vigente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No hay versión activa (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rule-sets": {
+      "get": {
+        "operationId": "listRuleSets",
+        "summary": "Versiones de reglas",
+        "description": "Requiere RULESET_VIEW. API.md sección 6.2.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "SUPERSEDED",
+                "DISCARDED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de versiones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSetPage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permiso (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createRuleSet",
+        "summary": "Crea un borrador",
+        "description": "Copia la versión ACTIVE. Requiere RULESET_DRAFT. API.md sección 6.4.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRuleSetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Borrador creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSet"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permiso (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe un borrador abierto (CONFLICT).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rule-sets/{id}": {
+      "get": {
+        "operationId": "getRuleSet",
+        "summary": "Una versión de reglas",
+        "description": "API.md sección 6.3.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La versión completa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateRuleSet",
+        "summary": "Edita un borrador",
+        "description": "Solo DRAFT. Requiere RULESET_DRAFT. API.md sección 6.5.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRuleSetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Borrador actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (VALIDATION_ERROR).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permiso (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La versión no es un borrador (RULE_SET_IMMUTABLE).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rule-sets/{id}/activate": {
+      "post": {
+        "operationId": "activateRuleSet",
+        "summary": "Activa un borrador",
+        "description": "Solo BOARD_ADMIN (RULESET_ACTIVATE). Motivo de 10 a 500 caracteres. API.md sección 6.6.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivateRuleSetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Versión activada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleSet"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permiso (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "No es un borrador (INVALID_STATE_TRANSITION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Reglas inválidas o motivo ausente (RULE_SET_INVALID, REASON_REQUIRED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -596,6 +911,465 @@
           "aqueduct_id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "RuleBand": {
+        "type": "object",
+        "required": [
+          "band",
+          "min_level",
+          "max_level",
+          "daily_service_hours",
+          "priority_only"
+        ],
+        "description": "Banda de nivel [min_level, max_level). La banda superior incluye gauge_max.",
+        "properties": {
+          "band": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "LOW",
+              "CRITICAL"
+            ]
+          },
+          "min_level": {
+            "type": "number",
+            "format": "double"
+          },
+          "max_level": {
+            "type": "number",
+            "format": "double"
+          },
+          "daily_service_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "priority_only": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RuleSectorSetting": {
+        "type": "object",
+        "required": [
+          "sector_id",
+          "is_included",
+          "is_priority"
+        ],
+        "properties": {
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_included": {
+            "type": "boolean"
+          },
+          "is_priority": {
+            "type": "boolean"
+          },
+          "priority_rank": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "nullable": true
+          }
+        }
+      },
+      "RuleValveOrder": {
+        "type": "object",
+        "required": [
+          "valve_id",
+          "sequence_order"
+        ],
+        "properties": {
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence_order": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        }
+      },
+      "RuleOperatingWindow": {
+        "type": "object",
+        "required": [
+          "start_time",
+          "end_time"
+        ],
+        "description": "Ventana de operación. day_of_week 1 a 7 (lunes a domingo); nulo = todos los días. Horas locales HH:MM, fin mayor que inicio.",
+        "properties": {
+          "day_of_week": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 7,
+            "nullable": true
+          },
+          "start_time": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          },
+          "end_time": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}$"
+          }
+        }
+      },
+      "RuleGauge": {
+        "type": "object",
+        "required": [
+          "min",
+          "max",
+          "step"
+        ],
+        "properties": {
+          "min": {
+            "type": "number",
+            "format": "double"
+          },
+          "max": {
+            "type": "number",
+            "format": "double"
+          },
+          "step": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "RuleSet": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "status",
+          "bands",
+          "sectors",
+          "valve_order",
+          "operating_windows",
+          "gauge",
+          "reserve_level",
+          "reserve_policy",
+          "max_daily_service_hours",
+          "min_shift_hours",
+          "max_shift_hours",
+          "allocation_strategy",
+          "duplicate_window_minutes",
+          "max_level_change_per_hour",
+          "stale_reading_hours",
+          "max_backdate_days",
+          "forecast_horizon_days",
+          "forecast_context_days",
+          "trend_threshold_per_day"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUPERSEDED",
+              "DISCARDED"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "based_on_rule_set_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "change_reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "lock_version": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Propuesta de API.md 6.5."
+          },
+          "reserve_level": {
+            "type": "number",
+            "format": "double"
+          },
+          "reserve_policy": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REDUCE_TO_CRITICAL_BAND",
+              "PRIORITY_ONLY"
+            ]
+          },
+          "max_daily_service_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "min_shift_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "max_shift_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "allocation_strategy": {
+            "type": "string",
+            "enum": [
+              "PRIORITY_THEN_LONGEST_WAIT",
+              "EQUAL_SPLIT"
+            ]
+          },
+          "duplicate_window_minutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max_level_change_per_hour": {
+            "type": "number",
+            "format": "double"
+          },
+          "stale_reading_hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max_backdate_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "forecast_horizon_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "forecast_context_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trend_threshold_per_day": {
+            "type": "number",
+            "format": "double"
+          },
+          "bands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleBand"
+            }
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSectorSetting"
+            }
+          },
+          "valve_order": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleValveOrder"
+            }
+          },
+          "operating_windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleOperatingWindow"
+            }
+          },
+          "gauge": {
+            "$ref": "#/components/schemas/RuleGauge"
+          },
+          "server_time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RuleSetSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "SUPERSEDED",
+              "DISCARDED"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "activated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "based_on_rule_set_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "RuleSetPage": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSetSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateRuleSetRequest": {
+        "type": "object",
+        "properties": {
+          "change_reason": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateRuleSetRequest": {
+        "type": "object",
+        "description": "Todos los campos son opcionales y solo valen en DRAFT. Las listas reemplazan a las actuales.",
+        "properties": {
+          "reserve_level": {
+            "type": "number",
+            "format": "double"
+          },
+          "reserve_policy": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "REDUCE_TO_CRITICAL_BAND",
+              "PRIORITY_ONLY"
+            ]
+          },
+          "max_daily_service_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "min_shift_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "max_shift_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "allocation_strategy": {
+            "type": "string",
+            "enum": [
+              "PRIORITY_THEN_LONGEST_WAIT",
+              "EQUAL_SPLIT"
+            ]
+          },
+          "duplicate_window_minutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max_level_change_per_hour": {
+            "type": "number",
+            "format": "double"
+          },
+          "stale_reading_hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max_backdate_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "forecast_horizon_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "forecast_context_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trend_threshold_per_day": {
+            "type": "number",
+            "format": "double"
+          },
+          "bands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleBand"
+            }
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSectorSetting"
+            }
+          },
+          "valve_order": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleValveOrder"
+            }
+          },
+          "operating_windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleOperatingWindow"
+            }
+          }
+        }
+      },
+      "ActivateRuleSetRequest": {
+        "type": "object",
+        "required": [
+          "change_reason"
+        ],
+        "properties": {
+          "change_reason": {
+            "type": "string"
           }
         }
       }
