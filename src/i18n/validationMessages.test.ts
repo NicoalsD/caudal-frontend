@@ -17,6 +17,9 @@ const KEYS: readonly ValidationMessageKey[] = [
   'mismatch',
   'containsUsername',
   'sameAsCurrent',
+  'bandOrder',
+  'bandOverlap',
+  'bandGap',
 ];
 
 const MAX_HOURS = 24;
@@ -28,7 +31,7 @@ describe('validationMessages', () => {
   it('has a Spanish text for every key the builder can ask for', () => {
     for (const key of KEYS) {
       expect(strings.validation[key], key).toBeTruthy();
-      expect(validationMessages(key, { min: 1, max: 1 }), key).not.toContain('{');
+      expect(validationMessages(key, { min: 1, max: 1, from: 1, to: 1 }), key).not.toContain('{');
     }
   });
 

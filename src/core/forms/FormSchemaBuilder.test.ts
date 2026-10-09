@@ -321,3 +321,92 @@ describe('cross-field checks', () => {
     expect(schema.safeParse({ next: NEW_PASSWORD }).success).toBe(true);
   });
 });
+
+const BAND_DECIMALS = 2;
+const HOURS_IN_DAY = 24;
+describe('bandList', () => {
+  const GAUGE_RULE = {
+    gauge: { min: 0, max: 5, step: 0.01 },
+    decimals: BAND_DECIMALS,
+    maxHoursPerDay: HOURS_IN_DAY,
+  };
+  const schema = new FormSchemaBuilder({}, keyMessages).bandList('bands', GAUGE_RULE).build();
+  const row = (band: string, from: string, to: string, hours: string, only = false) => ({
+    band,
+    min_level: from,
+    max_level: to,
+    daily_service_hours: hours,
+    priority_only: only,
+  });
+  const highRow = row('HIGH', '3,5', '5', '16');
+  const criticalRow = row('CRITICAL', '0', '1,5', '3', true);
+  const seed = [highRow, row('LOW', '1,5', '3,5', '8'), criticalRow];
+
+  function issues(bands: ReturnType<typeof row>[]): [string, string][] {
+    const result = schema.safeParse({ bands });
+    return result.success
+      ? []
+      : result.error.issues.map((issue) => [issue.path.join('.'), issue.message]);
+  }
+
+  it('parses the seed into numbers and keeps the band codes', () => {
+    expect(schema.parse({ bands: seed }).bands).toEqual([
+      { band: 'HIGH', min_level: 3.5, max_level: 5, daily_service_hours: 16, priority_only: false },
+      { band: 'LOW', min_level: 1.5, max_level: 3.5, daily_service_hours: 8, priority_only: false },
+      {
+        band: 'CRITICAL',
+        min_level: 0,
+        max_level: 1.5,
+        daily_service_hours: 3,
+        priority_only: true,
+      },
+    ]);
+  });
+
+  it('reports the gap with its limits', () => {
+    const withGap = [highRow, row('LOW', '1,5', '3', '8'), criticalRow];
+
+    expect(issues(withGap)).toEqual([['bands', 'validation.bandGap']]);
+  });
+
+  it('reports the overlap', () => {
+    const overlapping = [highRow, row('LOW', '1,5', '3,6', '8'), criticalRow];
+
+    expect(issues(overlapping)).toEqual([['bands', 'validation.bandOverlap']]);
+  });
+
+  it('puts "top must be above bottom" on the top field of that row', () => {
+    const inverted = [highRow, row('LOW', '3,5', '1,5', '8'), criticalRow];
+
+    expect(issues(inverted).map(([path]) => path)).toContain('bands.1.max_level');
+  });
+
+  it('checks each number against the tank range and the hours of a day', () => {
+    const outside = [row('HIGH', '3,5', '6', '25')];
+
+    expect(issues(outside)).toEqual([
+      ['bands.0.max_level', 'validation.rangeMax'],
+      ['bands.0.daily_service_hours', 'validation.rangeMax'],
+    ]);
+  });
+
+  it('refuses more decimals than the gauge step and text that is not a number', () => {
+    expect(issues([row('HIGH', '3,555', '5', 'abc')]).map(([, message]) => message)).toEqual([
+      'validation.decimalPlaces',
+      'validation.number',
+    ]);
+  });
+
+  it('follows the gauge of the rule set (a bigger tank accepts bigger levels)', () => {
+    const bigger = new FormSchemaBuilder({}, keyMessages)
+      .bandList('bands', { ...GAUGE_RULE, gauge: { min: 0, max: 8, step: 0.01 } })
+      .build();
+
+    expect(bigger.safeParse({ bands: [row('HIGH', '0', '8', '10')] }).success).toBe(true);
+    expect(schema.safeParse({ bands: [row('HIGH', '0', '8', '10')] }).success).toBe(false);
+  });
+
+  it('asks for coverage when there are no rows at all', () => {
+    expect(issues([])).toEqual([['bands', 'validation.bandGap']]);
+  });
+});

@@ -20,6 +20,9 @@ export const REQUEST_ID_HEADER = 'X-Request-Id';
 /** Only paths under this prefix send the refresh cookie (credentials: include). */
 export const AUTH_PATH_PREFIX = '/auth/';
 
+/** Hours in a day: the ceiling of any "hours per day" the person types (a fact, not a rule). */
+export const HOURS_PER_DAY = 24;
+
 /** Header and scheme that carry the access token (API.md section 1.2). */
 export const AUTHORIZATION_HEADER = 'Authorization';
 export const BEARER_SCHEME = 'Bearer';

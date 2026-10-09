@@ -150,6 +150,18 @@ export const strings = {
     backToRules: 'Volver a las reglas',
     notEditable: 'Esta versión ya no se puede editar. Crea un borrador nuevo.',
     retry: 'Reintentar',
+    editBandsTitle: 'Bandas de nivel',
+    editBandsIntro:
+      'Cada banda va desde un nivel (incluido) hasta otro (excluido). Juntas deben cubrir todo el rango del tanque, sin huecos ni solapes.',
+    bandFromField: 'Desde',
+    bandToField: 'Hasta',
+    bandHoursField: 'Horas al día',
+    bandProblemsTitle: 'Revisa las bandas',
+    saveDraft: 'Guardar borrador',
+    savingDraft: 'Guardando...',
+    draftSaved: 'Borrador guardado.',
+    noChangesToSave: 'No hay cambios por guardar.',
+    readOnlyNotice: 'Puedes ver este borrador, pero no editarlo con tu rol.',
   },
   connection: {
     constraintsMissing:
@@ -167,6 +179,9 @@ export const strings = {
     number: 'Escribe un número válido, por ejemplo 2,1',
     mismatch: 'Las dos contraseñas no coinciden',
     containsUsername: 'La contraseña no puede contener tu usuario',
+    bandOrder: 'El nivel de arriba debe ser mayor que el de abajo',
+    bandOverlap: 'Entre {from} y {to} hay dos bandas',
+    bandGap: 'Entre {from} y {to} no hay banda',
     sameAsCurrent: 'La contraseña nueva debe ser distinta de la actual',
   },
   errors: {

@@ -3,9 +3,11 @@ import { Link, useParams } from 'react-router';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
+import { usePermission } from '../../state/hooks/usePermission';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
+import { DraftEditor } from './DraftEditor';
 import { QueryError } from './QueryStates';
 import { RuleSetOverview } from './RuleSetOverview';
 import styles from './Rules.module.css';
@@ -16,6 +18,7 @@ import { useRuleSet } from './ruleQueries';
 export function RuleDraftPage(): JSX.Element {
   const { id = '' } = useParams();
   const query = useRuleSet(id);
+  const canEdit = usePermission('RULESET_DRAFT');
 
   if (query.isPending) {
     return <LoadingState message={t('rules.loading')} />;
@@ -43,7 +46,14 @@ export function RuleDraftPage(): JSX.Element {
         <span className={cn(styles.status)}>{statusLabel(rules.status)}</span>
       </p>
       {isDraft ? null : <p>{t('rules.notEditable')}</p>}
-      <RuleSetOverview rules={rules} />
+      {isDraft && canEdit ? (
+        <DraftEditor key={rules.id} rules={rules} />
+      ) : (
+        <>
+          {isDraft ? <p>{t('rules.readOnlyNotice')}</p> : null}
+          <RuleSetOverview rules={rules} />
+        </>
+      )}
       <Link to={ROUTE_PATHS.board.rules}>{t('rules.backToRules')}</Link>
     </div>
   );

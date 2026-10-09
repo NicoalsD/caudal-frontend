@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { analyzeBands } from '../rules/bandCoverage';
+import type { Gauge } from '../rules/ruleSetParts';
 import { countFractionDigits, parseDecimalInput } from '../format/decimal';
 import type { ConstraintsMap, FieldConstraint } from './FieldConstraint';
 import type { ValidationMessageFactory } from './validationMessages';
@@ -24,6 +26,15 @@ export class InvalidConstraintError extends Error {
     this.name = 'InvalidConstraintError';
     this.field = field;
   }
+}
+
+export interface BandListRule {
+  /** Range of the tank, from the rule set. */
+  readonly gauge: Gauge;
+  /** Decimals the levels and hours have (those of the gauge step). */
+  readonly decimals: number;
+  /** Most hours a band can give in a day (the hours of a day). */
+  readonly maxHoursPerDay: number;
 }
 
 export interface DecimalRule {
@@ -125,28 +136,58 @@ export class FormSchemaBuilder {
    * The range comes from the active rule set, not from constants.
    */
   decimal(field: string, rule: DecimalRule): this {
-    this.shape[field] = z.string().transform((raw, context) => {
-      const value = parseDecimalInput(raw);
-      if (value === null) {
-        context.addIssue({ code: 'custom', message: this.messages('number', {}) });
-        return z.NEVER;
-      }
-      if (countFractionDigits(raw) > rule.decimals) {
-        context.addIssue({
+    this.shape[field] = this.decimalSchema(rule);
+    return this;
+  }
+
+  /**
+   * The level bands of a rule set as typed in the editor: one row per band with its range and
+   * hours (decimals with comma accepted), and the whole list checked against the tank range: every
+   * band needs a top above its bottom, bands cannot overlap and together they must cover the gauge
+   * without gaps (Reglas-de-negocio.md section 2). The range comes from the rule set, not from code.
+   */
+  bandList(field: string, rule: BandListRule): this {
+    const levels: DecimalRule = {
+      min: rule.gauge.min,
+      max: rule.gauge.max,
+      decimals: rule.decimals,
+    };
+    const hours: DecimalRule = { min: 0, max: rule.maxHoursPerDay, decimals: rule.decimals };
+    const row = z.object({
+      band: z.string(),
+      min_level: this.decimalSchema(levels),
+      max_level: this.decimalSchema(levels),
+      daily_service_hours: this.decimalSchema(hours),
+      priority_only: z.boolean(),
+    });
+    this.shape[field] = z.array(row).check((context) => {
+      const rows = context.value;
+      const analysis = analyzeBands(
+        rows.map((value) => ({ minLevel: value.min_level, maxLevel: value.max_level })),
+        rule.gauge,
+        rule.decimals,
+      );
+      const report = (
+        key: Parameters<ValidationMessageFactory>[0],
+        params: Parameters<ValidationMessageFactory>[1],
+        path: (string | number)[],
+      ): void => {
+        context.issues.push({
           code: 'custom',
-          message: this.messages('decimalPlaces', { max: rule.decimals }),
+          message: this.messages(key, params),
+          path,
+          input: rows,
         });
-        return z.NEVER;
-      }
-      if (value < rule.min) {
-        context.addIssue({ code: 'custom', message: this.messages('rangeMin', { min: rule.min }) });
-        return z.NEVER;
-      }
-      if (value > rule.max) {
-        context.addIssue({ code: 'custom', message: this.messages('rangeMax', { max: rule.max }) });
-        return z.NEVER;
-      }
-      return value;
+      };
+      analysis.inverted.forEach((index) => {
+        report('bandOrder', {}, [index, 'max_level']);
+      });
+      analysis.overlaps.forEach((span) => {
+        report('bandOverlap', { from: span.from, to: span.to }, []);
+      });
+      analysis.gaps.forEach((span) => {
+        report('bandGap', { from: span.from, to: span.to }, []);
+      });
     });
     return this;
   }
@@ -197,6 +238,32 @@ export class FormSchemaBuilder {
           });
         }
       }
+    });
+  }
+
+  private decimalSchema(rule: DecimalRule): z.ZodType<number> {
+    return z.string().transform((raw, context) => {
+      const value = parseDecimalInput(raw);
+      if (value === null) {
+        context.addIssue({ code: 'custom', message: this.messages('number', {}) });
+        return z.NEVER;
+      }
+      if (countFractionDigits(raw) > rule.decimals) {
+        context.addIssue({
+          code: 'custom',
+          message: this.messages('decimalPlaces', { max: rule.decimals }),
+        });
+        return z.NEVER;
+      }
+      if (value < rule.min) {
+        context.addIssue({ code: 'custom', message: this.messages('rangeMin', { min: rule.min }) });
+        return z.NEVER;
+      }
+      if (value > rule.max) {
+        context.addIssue({ code: 'custom', message: this.messages('rangeMax', { max: rule.max }) });
+        return z.NEVER;
+      }
+      return value;
     });
   }
 

@@ -190,6 +190,8 @@ const schema = new FormSchemaBuilder(constraints)
 
 **Prueba.** Casos: `"2,1"` y `"2.1"` producen el mismo número; `"8"` con máximo 5 produce `validation.rangeMax`; `"2,123"` con dos decimales produce `validation.decimalPlaces`; campo ausente en el mapa lanza error; cadena vacía produce `validation.number`.
 
+**Extensiones de la fase de reglas.** `FormSchemaBuilder` también arma `bandList` (bandas de nivel: rango del tanque y decimales salen de la versión de reglas; revisa que cada banda tenga arriba mayor que abajo, que no se solapen y que cubran todo el rango, con la lógica pura de `core/rules/bandCoverage.ts`), `password`, `confirmation`, `notContaining` y `differentFrom`. Prueba: `FormSchemaBuilder.test.ts` y `bandCoverage.test.ts` (incluye pruebas de propiedades).
+
 ---
 
 ## P06 Adapter: `ApiDtoAdapter`

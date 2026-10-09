@@ -83,3 +83,24 @@
 .definitionRow {
   display: contents;
 }
+
+.cellInput {
+  min-width: 5.5rem;
+}
+
+.problems {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-ochre-100);
+  border: 2px solid var(--color-ochre-800);
+  border-radius: var(--radius-control);
+}
+
+.problems ul {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  list-style: disc;
+}
+
+.problemsTitle {
+  font-weight: var(--font-weight-bold);
+}

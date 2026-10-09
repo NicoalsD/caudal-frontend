@@ -6,8 +6,22 @@ import { createAppServices } from '../app/createAppServices';
 import type { AppServices } from '../app/createAppServices';
 import { buildRoutes } from '../app/router';
 import type { SessionUser } from '../core/session/SessionState';
+import { makeAccessToken } from './factories/auth';
 import type { Scheduler } from '../core/time/Scheduler';
 import type { Clock } from '../core/time/Clock';
+
+const FAR_FUTURE_MS = 9_999_999_999_999;
+
+function accessTokenFor(user: SessionUser): string {
+  return makeAccessToken({
+    id: user.userId,
+    username: user.username,
+    full_name: user.displayName,
+    role: user.role,
+    aqueduct_id: user.aqueductId,
+    must_change_password: user.mustChangePassword,
+  });
+}
 
 export interface RenderedApp {
   readonly services: AppServices;
@@ -29,6 +43,8 @@ export function renderApp(
     options.scheduler,
   );
   if (options.user !== undefined) {
+    // A real session has a token in memory; the fake servers read the role from its claims.
+    services.tokens.set(accessTokenFor(options.user), FAR_FUTURE_MS);
     services.sessionStore.signIn(options.user);
   }
   services.queryClient.setDefaultOptions({
