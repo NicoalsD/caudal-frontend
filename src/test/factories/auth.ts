@@ -1,6 +1,7 @@
 import type { components } from '../../services/api/schema';
 
 export type AuthUserDto = components['schemas']['AuthUser'];
+export type MeResponseDto = components['schemas']['MeResponse'];
 export type LoginResponseDto = components['schemas']['LoginResponse'];
 
 export const TEST_AQUEDUCT_ID = '0190f3a2-0000-7000-8000-0000000000aa';
@@ -65,4 +66,30 @@ export function buildLoginResponse(user: AuthUserDto, serial = 1): LoginResponse
     expires_in: ACCESS_TOKEN_SECONDS,
     user,
   };
+}
+
+const BOARD_PERMISSIONS = ['NETWORK_VIEW', 'RULESET_VIEW', 'RULESET_DRAFT', 'STATUS_VIEW'] as const;
+
+/** Permission codes by role, as in Actores-y-permisos.md section 3.3 (the ones the screens use). */
+export const PERMISSIONS_BY_ROLE: Record<AuthUserDto['role'], readonly string[]> = {
+  BOARD_ADMIN: [...BOARD_PERMISSIONS, 'RULESET_ACTIVATE', 'NETWORK_MANAGE', 'USER_MANAGE'],
+  BOARD_MEMBER: BOARD_PERMISSIONS,
+  OPERATOR: ['NETWORK_VIEW', 'RULESET_VIEW', 'READING_CREATE', 'DAY_CLOSE', 'STATUS_VIEW'],
+  PROJECT_TEAM: ['NETWORK_VIEW', 'RULESET_VIEW', 'EVALUATION_VIEW'],
+  SUPPORT_ENTITY: ['SUMMARY_VIEW'],
+};
+
+export function buildMeResponse(user: AuthUserDto): MeResponseDto {
+  return {
+    id: user.id,
+    username: user.username,
+    full_name: user.full_name,
+    must_change_password: user.must_change_password,
+    memberships: [{ aqueduct_id: user.aqueduct_id, role: user.role }],
+    permissions: [...PERMISSIONS_BY_ROLE[user.role]],
+  };
+}
+
+export function findTestUser(predicate: (user: AuthUserDto) => boolean): AuthUserDto | undefined {
+  return Object.values<AuthUserDto>(TEST_USERS).find(predicate);
 }

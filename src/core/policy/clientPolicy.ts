@@ -34,6 +34,9 @@ export const SESSIONLESS_AUTH_PATHS: readonly string[] = [
 /** The public API (page and damage reports) is called without Bearer or cookies (security.md 7). */
 export const PUBLIC_PATH_PREFIX = '/public/';
 
+/** The access token is renewed in the background after this fraction of its life (architecture 5.3). */
+export const PROACTIVE_REFRESH_FRACTION = 0.8;
+
 /** Client policy: GET retries on network failure or 5xx (api-integration.md section 2.4). */
 export const HTTP_RETRY_MAX_ATTEMPTS = 3;
 export const HTTP_RETRY_BASE_DELAY_MS = 500;

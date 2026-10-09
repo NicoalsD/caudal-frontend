@@ -127,6 +127,96 @@
           }
         }
       }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "refreshSession",
+        "summary": "Renueva la sesión",
+        "description": "Cookie caudal_rt válida, cabecera X-Requested-With: caudal-web y Origin permitido. Sin cuerpo. Rota la cookie. API.md sección 2.2.",
+        "responses": {
+          "200": {
+            "description": "Token de acceso nuevo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin cookie, vencida o reutilizada (UNAUTHORIZED, SESSION_REVOKED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta X-Requested-With u Origin no permitido (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "summary": "Cierra la sesión",
+        "description": "Autenticado. Revoca la familia del refresh y borra la cookie. API.md sección 2.3.",
+        "responses": {
+          "204": {
+            "description": "Sesión cerrada."
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "getMe",
+        "summary": "Datos de la persona autenticada",
+        "description": "Permitido aunque must_change_password sea true. API.md sección 2.7.",
+        "responses": {
+          "200": {
+            "description": "Persona, membresías y permisos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -297,6 +387,107 @@
           },
           "user": {
             "$ref": "#/components/schemas/AuthUser"
+          }
+        }
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in"
+        ],
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Membership": {
+        "type": "object",
+        "required": [
+          "aqueduct_id",
+          "role"
+        ],
+        "properties": {
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "BOARD_ADMIN",
+              "BOARD_MEMBER",
+              "OPERATOR",
+              "PROJECT_TEAM",
+              "SUPPORT_ENTITY"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "full_name",
+          "must_change_password",
+          "memberships",
+          "permissions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "must_change_password": {
+            "type": "boolean"
+          },
+          "privacy_accepted_version": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Membership"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Códigos de permiso (por ejemplo RULESET_ACTIVATE). El cliente los usa solo para mostrar u ocultar acciones."
           }
         }
       }

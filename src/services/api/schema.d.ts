@@ -63,6 +63,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renueva la sesión
+         * @description Cookie caudal_rt válida, cabecera X-Requested-With: caudal-web y Origin permitido. Sin cuerpo. Rota la cookie. API.md sección 2.2.
+         */
+        post: operations["refreshSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cierra la sesión
+         * @description Autenticado. Revoca la familia del refresh y borra la cookie. API.md sección 2.3.
+         */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Datos de la persona autenticada
+         * @description Permitido aunque must_change_password sea true. API.md sección 2.7.
+         */
+        get: operations["getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -129,6 +189,36 @@ export interface components {
              */
             expires_in: number;
             user: components["schemas"]["AuthUser"];
+        };
+        RefreshResponse: {
+            access_token: string;
+            /** @enum {string} */
+            token_type?: "Bearer";
+            /** Format: int32 */
+            expires_in: number;
+        };
+        Membership: {
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: date-time */
+            valid_from?: string;
+            /** Format: date-time */
+            valid_to?: string | null;
+        };
+        MeResponse: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            full_name: string;
+            status?: string;
+            must_change_password: boolean;
+            /** Format: int32 */
+            privacy_accepted_version?: number | null;
+            memberships: components["schemas"]["Membership"][];
+            /** @description Códigos de permiso (por ejemplo RULESET_ACTIVATE). El cliente los usa solo para mostrar u ocultar acciones. */
+            permissions: string[];
         };
     };
     responses: never;
@@ -239,6 +329,100 @@ export interface operations {
             };
             /** @description Demasiados intentos (RATE_LIMITED). */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    refreshSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token de acceso nuevo. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefreshResponse"];
+                };
+            };
+            /** @description Sin cookie, vencida o reutilizada (UNAUTHORIZED, SESSION_REVOKED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta X-Requested-With u Origin no permitido (FORBIDDEN). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sesión cerrada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Persona, membresías y permisos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

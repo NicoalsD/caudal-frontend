@@ -1,6 +1,8 @@
 import type { JSX } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 
+import { t } from '../../i18n/t';
+import { LoadingState } from '../../ui/feedback/LoadingState';
 import { useSession } from '../../state/hooks/useSession';
 import { ROUTE_PATHS } from '../../core/session/routes';
 
@@ -9,6 +11,9 @@ export function RequireAuth(): JSX.Element {
   const session = useSession();
   const location = useLocation();
 
+  if (session.status === 'restoring') {
+    return <LoadingState message={t('auth.restoring')} />;
+  }
   if (session.status !== 'authenticated') {
     const next = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
     return <Navigate to={`${ROUTE_PATHS.login}?next=${next}`} replace />;

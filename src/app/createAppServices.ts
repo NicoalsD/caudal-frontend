@@ -5,9 +5,14 @@ import { SystemClock } from '../core/time/SystemClock';
 import { ApiDtoAdapter } from '../services/api/adapters/ApiDtoAdapter';
 import { CaudalApi } from '../services/api/CaudalApi';
 import { readApiBaseUrl } from '../services/api/config';
+import { BaseFetchHttpClient } from '../services/http/BaseFetchHttpClient';
 import { createHttpClient } from '../services/http/createHttpClient';
 import { ConsoleLogger, NoopLogger } from '../services/http/Logger';
+import { AuthApi } from '../services/api/endpoints/AuthApi';
+import { SessionRefreshProxy } from '../services/session/SessionRefreshProxy';
 import { TokenStore } from '../services/session/TokenStore';
+import type { Scheduler } from '../core/time/Scheduler';
+import { TimeoutScheduler } from '../core/time/Scheduler';
 import { SessionController } from '../state/SessionController';
 import { SessionStore } from '../state/SessionStore';
 import { createQueryClient } from './providers/queryClient';
@@ -33,17 +38,32 @@ export interface AppServices {
 export function createAppServices(
   env: AppEnvironment,
   clock: Clock = new SystemClock(),
+  scheduler: Scheduler = new TimeoutScheduler(),
 ): AppServices {
+  const baseUrl = readApiBaseUrl(env);
+  const adapter = new ApiDtoAdapter();
   const tokens = new TokenStore();
+  // The refresh call goes straight to the transport: it must not pass through AuthHttpClient.
+  const refreshApi = new AuthApi(new BaseFetchHttpClient({ baseUrl }), adapter);
+  const refresher = new SessionRefreshProxy(() => refreshApi.refresh(), tokens, clock);
   const http = createHttpClient({
-    baseUrl: readApiBaseUrl(env),
+    baseUrl,
+    auth: { tokens, refresher },
     logger: env.DEV === true ? new ConsoleLogger() : new NoopLogger(),
     clock,
     random: () => Math.random(),
   });
-  const api = new CaudalApi(http, new ApiDtoAdapter());
+  const api = new CaudalApi(http, adapter);
   const sessionStore = new SessionStore();
   const queryClient = createQueryClient();
-  const session = new SessionController({ api, tokens, store: sessionStore, clock });
+  const session = new SessionController({
+    api,
+    tokens,
+    store: sessionStore,
+    refresher,
+    queryClient,
+    clock,
+    scheduler,
+  });
   return { api, tokens, sessionStore, session, queryClient };
 }

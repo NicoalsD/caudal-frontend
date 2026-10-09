@@ -39,3 +39,18 @@ export interface LoginView {
   readonly expiresInSeconds: number;
   readonly user: AuthUserView;
 }
+
+/** A new access token after POST /auth/refresh. */
+export interface RefreshView {
+  readonly accessToken: string;
+  readonly expiresInSeconds: number;
+}
+
+/** Who the server says is signed in (GET /auth/me). Permissions are for showing actions only. */
+export interface MeView {
+  readonly id: string;
+  readonly username: string;
+  readonly fullName: string;
+  readonly mustChangePassword: boolean;
+  readonly permissions: readonly string[];
+}

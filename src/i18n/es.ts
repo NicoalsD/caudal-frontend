@@ -68,6 +68,7 @@ export const strings = {
     password: 'Contraseña',
     signIn: 'Entrar',
     signingIn: 'Entrando...',
+    restoring: 'Revisando tu sesión...',
     loadingForm: 'Cargando el formulario...',
     sessionExpired: 'Tu sesión venció. Entra de nuevo para continuar.',
     offlineLogin:

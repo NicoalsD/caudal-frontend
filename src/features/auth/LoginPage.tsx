@@ -23,6 +23,9 @@ export function LoginPage(): JSX.Element {
   const [params] = useSearchParams();
   const schema = useFormSchema(loginFormSchema);
 
+  if (session.status === 'restoring') {
+    return <LoadingState message={t('auth.restoring')} />;
+  }
   if (session.status === 'authenticated') {
     return (
       <Navigate to={afterLoginPath(session.user, safeNextPath(params.get(NEXT_PARAM)))} replace />
@@ -38,6 +41,9 @@ export function LoginPage(): JSX.Element {
       <ScreenTitle>{t('screens.login')}</ScreenTitle>
       <p>{t('auth.tagline')}</p>
       {session.status === 'expired' ? <p role="status">{t('auth.sessionExpired')}</p> : null}
+      {session.status === 'anonymous' && session.reason === 'offline' ? (
+        <p role="status">{t('auth.offlineLogin')}</p>
+      ) : null}
       {schema.status === 'loading' ? <LoadingState message={t('auth.loadingForm')} /> : null}
       {schema.status === 'unavailable' ? (
         <ErrorState title={t('screens.login')} message={t('connection.constraintsMissing')} />

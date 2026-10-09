@@ -4,11 +4,12 @@ type Listener = () => void;
 
 const ANONYMOUS: SessionState = { status: 'anonymous' };
 const EXPIRED: SessionState = { status: 'expired' };
+const RESTORING: SessionState = { status: 'restoring' };
+const OFFLINE: SessionState = { status: 'anonymous', reason: 'offline' };
 
 /**
  * In-memory observable session state (architecture.md 5.2).
- * It holds no tokens: the access token belongs to the future TokenStore.
- * Real sign-in arrives in phase 3; here it only exposes the state guards read.
+ * It holds no tokens: the access token belongs to the TokenStore (services/session).
  */
 export class SessionStore {
   private state: SessionState = ANONYMOUS;
@@ -27,12 +28,18 @@ export class SessionStore {
     this.update({ status: 'authenticated', user });
   }
 
+  /** Boot: the refresh cookie is being checked, so guards must wait instead of redirecting. */
+  beginRestore(): void {
+    this.update(RESTORING);
+  }
+
   expire(): void {
     this.update(EXPIRED);
   }
 
-  clear(): void {
-    this.update(ANONYMOUS);
+  /** Back to anonymous. `offline` tells the login screen the server could not be reached. */
+  clear(reason?: 'offline'): void {
+    this.update(reason === 'offline' ? OFFLINE : ANONYMOUS);
   }
 
   private update(next: SessionState): void {

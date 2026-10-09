@@ -4,7 +4,15 @@ import { formatDateTime, parseInstant, toBogotaDateKey } from '../../../core/for
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
 import type { components } from '../schema';
 import { isRole } from '../../../core/session/roles';
-import type { AuthUserView, DecimalView, HealthView, LoginView, TimestampView } from '../views';
+import type {
+  AuthUserView,
+  DecimalView,
+  HealthView,
+  LoginView,
+  MeView,
+  RefreshView,
+  TimestampView,
+} from '../views';
 import { InvalidDtoError } from './InvalidDtoError';
 
 type HealthDto = components['schemas']['HealthResponse'];
@@ -12,6 +20,8 @@ type ConstraintsDto = components['schemas']['ConstraintsResponse'];
 type FieldConstraintDto = components['schemas']['FieldConstraint'];
 type AuthUserDto = components['schemas']['AuthUser'];
 type LoginDto = components['schemas']['LoginResponse'];
+type RefreshDto = components['schemas']['RefreshResponse'];
+type MeDto = components['schemas']['MeResponse'];
 
 /**
  * Adapter between the server contract and the view models (api-integration.md section 5).
@@ -50,13 +60,24 @@ export class ApiDtoAdapter {
   }
 
   toLogin(dto: LoginDto): LoginView {
-    if (!Number.isFinite(dto.expires_in) || dto.expires_in <= 0) {
+    const refresh = this.toRefresh(dto);
+    return { ...refresh, user: this.toAuthUser(dto.user) };
+  }
+
+  toRefresh(dto: RefreshDto): RefreshView {
+    if (!Number.isFinite(dto.expires_in) || dto.expires_in <= 0 || dto.access_token === '') {
       throw new InvalidDtoError('expires_in');
     }
+    return { accessToken: dto.access_token, expiresInSeconds: dto.expires_in };
+  }
+
+  toMe(dto: MeDto): MeView {
     return {
-      accessToken: dto.access_token,
-      expiresInSeconds: dto.expires_in,
-      user: this.toAuthUser(dto.user),
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      mustChangePassword: dto.must_change_password,
+      permissions: [...dto.permissions],
     };
   }
 
