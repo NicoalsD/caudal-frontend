@@ -1,0 +1,29 @@
+{
+  "name": "caudal-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PWA de CAUDAL para el fontanero, la Junta y la página pública",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "6.0.3",
+    "vite": "8.3.4"
+  }
+}
