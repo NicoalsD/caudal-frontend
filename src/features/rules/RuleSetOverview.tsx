@@ -4,6 +4,8 @@ import { formatDecimal } from '../../core/format/decimal';
 import { t } from '../../i18n/t';
 import type { RuleSetView } from '../../services/api/views';
 import { cn } from '../../ui/styles/cn';
+import { useSectors } from '../../state/hooks/useSectors';
+import { buildSectorRows } from '../../core/rules/sectorOrder';
 import { bandLabel, dayLabel, windowRangeLabel } from './ruleLabels';
 import styles from './Rules.module.css';
 
@@ -82,6 +84,8 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
         </dl>
       </section>
 
+      <SectorsOverview rules={rules} />
+
       <section className={cn(styles.section)} aria-labelledby="rules-windows-title">
         <h2 id="rules-windows-title">{t('rules.windowsTitle')}</h2>
         {windows.length === 0 ? (
@@ -101,5 +105,41 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
         )}
       </section>
     </div>
+  );
+}
+
+/** Which sectors get shifts and which are priority, in the order they are attended. */
+function SectorsOverview({ rules }: RuleSetOverviewProps): JSX.Element {
+  const sectors = useSectors();
+  const names = new Map((sectors.data ?? []).map((sector) => [sector.id, sector.name]));
+  const rows = buildSectorRows(rules.sectors, []);
+  const ranks = new Map(rules.sectors.map((setting) => [setting.sectorId, setting.priorityRank]));
+
+  return (
+    <section className={cn(styles.section)} aria-labelledby="rules-sectors-title">
+      <h2 id="rules-sectors-title">{t('rules.sectorsOverviewTitle')}</h2>
+      {rows.length === 0 ? (
+        <p>{t('rules.noSectors')}</p>
+      ) : (
+        <ol className={cn(styles.sectorList)}>
+          {rows.map((row) => {
+            const rank = ranks.get(row.sectorId) ?? null;
+            let state = t('rules.sectorNotPriority');
+            if (!row.isIncluded) {
+              state = t('rules.sectorExcluded');
+            } else if (row.isPriority && rank !== null) {
+              state = t('rules.sectorPriorityRank', { rank: String(rank) });
+            }
+            return (
+              <li key={row.sectorId}>
+                {names.get(row.sectorId) ?? t('rules.sectorUnknown')}
+                {': '}
+                {state}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
   );
 }

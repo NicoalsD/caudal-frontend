@@ -104,3 +104,13 @@ export interface RuleSetSummaryView {
   readonly validTo: TimestampView | null;
   readonly activatedAt: TimestampView | null;
 }
+
+/** A sector of the network. It never carries names or phones of families. */
+export interface SectorView {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly parentSectorId: string | null;
+  readonly householdsCount: number;
+  readonly isActive: boolean;
+}

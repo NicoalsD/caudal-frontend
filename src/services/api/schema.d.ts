@@ -251,6 +251,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sectors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sectores del acueducto
+         * @description Autenticado. API.md sección 5.3.
+         */
+        get: operations["listSectors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -508,6 +528,22 @@ export interface components {
         };
         ActivateRuleSetRequest: {
             change_reason: string;
+        };
+        /** @description Sector de la red. Sin datos personales (API.md sección 5.3). */
+        Sector: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** Format: uuid */
+            parent_sector_id?: string | null;
+            /** Format: int32 */
+            households_count: number;
+            is_active: boolean;
+        };
+        /** @description Lista de sectores. La forma exacta (items) se confirma con el OpenAPI del backend. */
+        SectorList: {
+            items: components["schemas"]["Sector"][];
         };
     };
     responses: never;
@@ -1026,6 +1062,35 @@ export interface operations {
             };
             /** @description Reglas inválidas o motivo ausente (RULE_SET_INVALID, REASON_REQUIRED). */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSectors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sectores. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectorList"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

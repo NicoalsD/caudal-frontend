@@ -14,7 +14,8 @@ export type ValidationMessageKey =
   | 'sameAsCurrent'
   | 'bandOrder'
   | 'bandOverlap'
-  | 'bandGap';
+  | 'bandGap'
+  | 'duplicateSector';
 
 export type ValidationParams = Readonly<Record<string, number>>;
 

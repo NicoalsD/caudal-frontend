@@ -22,6 +22,7 @@ import type {
   RefreshView,
   RuleSetSummaryView,
   RuleSetView,
+  SectorView,
   TimestampView,
 } from '../views';
 import { InvalidDtoError } from './InvalidDtoError';
@@ -41,6 +42,7 @@ type RuleSectorSettingDto = components['schemas']['RuleSectorSetting'];
 type RuleValveOrderDto = components['schemas']['RuleValveOrder'];
 type RuleOperatingWindowDto = components['schemas']['RuleOperatingWindow'];
 type RuleGaugeDto = components['schemas']['RuleGauge'];
+type SectorDto = components['schemas']['Sector'];
 
 const TIME_OF_DAY = /^(?<hours>\d{2}):(?<minutes>\d{2})(?::\d{2})?$/;
 
@@ -61,6 +63,7 @@ export class ApiDtoAdapter {
 
   /** `max_lines` becomes `maxLines`; only the limits that arrived are present. */
   toConstraints(dto: ConstraintsDto): ConstraintsMap {
+    // fromEntries defines own properties, so a field named "__proto__" cannot change the prototype.
     return Object.fromEntries(
       Object.entries(dto).map(([field, limits]) => [field, this.toFieldConstraint(limits)]),
     );
@@ -131,6 +134,17 @@ export class ApiDtoAdapter {
       valveOrder: dto.valve_order.map((valve) => this.toValveOrder(valve)),
       operatingWindows: dto.operating_windows.map((window) => this.toOperatingWindow(window)),
       gauge: this.toGauge(dto.gauge),
+    };
+  }
+
+  toSector(dto: SectorDto): SectorView {
+    return {
+      id: dto.id,
+      code: dto.code,
+      name: dto.name,
+      parentSectorId: dto.parent_sector_id ?? null,
+      householdsCount: dto.households_count,
+      isActive: dto.is_active,
     };
   }
 

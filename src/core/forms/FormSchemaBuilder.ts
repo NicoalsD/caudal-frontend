@@ -223,6 +223,34 @@ export class FormSchemaBuilder {
     return this;
   }
 
+  /**
+   * The sector settings of a rule set: one row per sector with its two flags. The position in the
+   * list is the order of attention; the ranks are computed when the list is sent. A sector can
+   * appear only once.
+   */
+  sectorList(field: string): this {
+    const row = z.object({
+      sector_id: z.string().min(1),
+      is_included: z.boolean(),
+      is_priority: z.boolean(),
+    });
+    this.shape[field] = z.array(row).check((context) => {
+      const seen = new Set<string>();
+      context.value.forEach((value, index) => {
+        if (seen.has(value.sector_id)) {
+          context.issues.push({
+            code: 'custom',
+            message: this.messages('duplicateSector', {}),
+            path: [index, 'sector_id'],
+            input: value,
+          });
+        }
+        seen.add(value.sector_id);
+      });
+    });
+    return this;
+  }
+
   build(): z.ZodObject<FormShape> {
     const checks = [...this.crossChecks];
     const messages = this.messages;

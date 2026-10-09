@@ -43,7 +43,7 @@ export function loginFormSchema(constraints: ConstraintsMap, messages: Validatio
 }
 
 /** Names of the fields of the draft rules form. */
-export const DRAFT_FIELD = { bands: 'bands' } as const;
+export const DRAFT_FIELD = { bands: 'bands', sectors: 'sectors' } as const;
 
 /** What the draft form needs to know about the active tank (all from the rule set). */
 export interface DraftFormContext {
@@ -64,6 +64,7 @@ export function draftRulesFormSchema(
       decimals: gaugeDecimals(context.gauge),
       maxHoursPerDay: HOURS_PER_DAY,
     })
+    .sectorList(DRAFT_FIELD.sectors)
     .build();
 }
 

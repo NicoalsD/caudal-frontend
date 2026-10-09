@@ -613,6 +613,35 @@
           }
         }
       }
+    },
+    "/api/v1/sectors": {
+      "get": {
+        "operationId": "listSectors",
+        "summary": "Sectores del acueducto",
+        "description": "Autenticado. API.md sección 5.3.",
+        "responses": {
+          "200": {
+            "description": "Sectores.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1370,6 +1399,57 @@
         "properties": {
           "change_reason": {
             "type": "string"
+          }
+        }
+      },
+      "Sector": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "households_count",
+          "is_active"
+        ],
+        "description": "Sector de la red. Sin datos personales (API.md sección 5.3).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parent_sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "households_count": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SectorList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Lista de sectores. La forma exacta (items) se confirma con el OpenAPI del backend.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sector"
+            }
           }
         }
       }

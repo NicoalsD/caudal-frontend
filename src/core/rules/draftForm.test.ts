@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { bandsToRows, rowsToBands, toDraftFormValues } from './draftForm';
+import {
+  bandsToRows,
+  rowsToBands,
+  rowsToSectors,
+  sectorsToRows,
+  toDraftFormValues,
+} from './draftForm';
 import type { RuleBand } from './ruleSetParts';
 
 const HIGH: RuleBand = {
@@ -44,7 +50,7 @@ describe('bandsToRows', () => {
     bandsToRows(bands);
 
     expect(bands).toEqual([CRITICAL, HIGH]);
-    expect(toDraftFormValues(bands).bands).toHaveLength(bands.length);
+    expect(toDraftFormValues({ bands, sectors: [] }, []).bands).toHaveLength(bands.length);
   });
 });
 
@@ -75,5 +81,31 @@ describe('rowsToBands', () => {
         },
       ]),
     ).toThrow('Unknown band code "MEDIUM"');
+  });
+});
+
+describe('sector rows', () => {
+  it('lists priority sectors first and adds the sectors the version does not mention', () => {
+    const rows = sectorsToRows(
+      [
+        { sectorId: 'b', isIncluded: true, isPriority: false, priorityRank: null },
+        { sectorId: 'a', isIncluded: true, isPriority: true, priorityRank: 1 },
+      ],
+      ['a', 'b', 'c'],
+    );
+
+    expect(rows.map((row) => row.sector_id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('computes the ranks from the order of the rows when sending', () => {
+    expect(
+      rowsToSectors([
+        { sector_id: 'x', is_included: true, is_priority: false },
+        { sector_id: 'y', is_included: false, is_priority: true },
+      ]),
+    ).toEqual([
+      { sectorId: 'x', isIncluded: true, isPriority: false, priorityRank: null },
+      { sectorId: 'y', isIncluded: false, isPriority: true, priorityRank: 1 },
+    ]);
   });
 });
