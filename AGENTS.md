@@ -28,8 +28,8 @@ La documentación canónica del proyecto (requisitos, API, modelo de datos, segu
 | Integrante | Cuenta | Rol en este repo |
 |---|---|---|
 | Nicolas Diaz | `NicoalsD` | Dueño del frontend, UX y publicación |
-| Drako Salazar | `Drako2305` | Integración del login y seguridad del cliente |
-| Nicolas Mora | `nicomora70` | Se une más adelante: gráfica de pronóstico y tablero de evaluación |
+| Drako Salazar | `Drako2305` | Contrato de seguridad con el backend (revisión) |
+| Nicolas Mora | `nicomora70` | Cola offline de lecturas, estado y pronóstico, cierre y actas, evaluación y dispositivos |
 
 Solo esas tres cuentas. Cambio de cuenta, ramas, commits y PR: [`.agents/workflow.md`](.agents/workflow.md).
 

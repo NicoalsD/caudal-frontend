@@ -12,7 +12,7 @@ React 19 · Vite · TypeScript · PWA sin conexión.
 
 ## Estado
 
-**Fase 0: planeación y arquitectura.** Por ahora hay reglas, guías y diagramas. El código empieza en la Fase 1.
+**Fase 1 y 2: fundaciones.** Ya están la aplicación con Vite, las capas con ESLint, las pruebas con Vitest y MSW, el router por rol, los tokens de diseño, los textos en español, el cliente HTTP decorado y los formularios armados desde la API. Las pantallas se construyen por fases.
 
 ## Documentación
 
@@ -21,13 +21,24 @@ React 19 · Vite · TypeScript · PWA sin conexión.
 - Documentación canónica del proyecto: [`caudal-backend/docs`](https://github.com/NicoalsD/caudal-backend/tree/develop/docs).
 - [Política de seguridad](SECURITY.md) y [cómo contribuir](CONTRIBUTING.md).
 
-## Cómo correrlo (desde la Fase 1)
+## Cómo correrlo
 
 ```bash
 cp .env.example .env.local
 pnpm install
-pnpm dev
+pnpm dev          # http://localhost:5173
 ```
+
+Verificación antes de cada commit:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test --run
+pnpm build
+```
+
+Otros comandos: `pnpm format:check`, `pnpm test:coverage` y `pnpm gen:api` (tipos desde `docs/openapi.json`).
 
 ## Equipo
 
