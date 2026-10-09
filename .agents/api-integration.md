@@ -22,7 +22,7 @@ componente -> hook (TanStack Query) -> CaudalApi (fachada)
 | `ApiDtoAdapter` | `src/services/adapters/ApiDtoAdapter.ts` | Convierte DTO del servidor en modelo de vista (P06). |
 | `OfflineDatabase` | `src/services/OfflineDatabase.ts` | IndexedDB con Dexie (P01) para la cola offline. |
 | Textos de error | `src/i18n/es.ts` | Mapa de `code` a texto en español. |
-| Tipos del contrato | `src/services/api-schema.d.ts` (ruta por definir) | Generados con openapi-typescript. No se editan a mano. |
+| Tipos del contrato | `src/services/api/schema.d.ts` | Generados con openapi-typescript (`pnpm gen:api`, ver `docs/tipos-de-la-api.md`). No se editan a mano. |
 
 Orden de composición (de fuera hacia dentro). Es una decisión de este documento:
 
@@ -206,14 +206,14 @@ Los tipos se generan desde el OpenAPI del backend (`/v3/api-docs`, activo en tod
 pnpm gen:api
 ```
 
-El script `gen:api` lee la URL del backend, genera el archivo y lo deja en la ruta de salida acordada (por definir). Reglas:
+El script `gen:api` lee una instantánea del backend, o su `/v3/api-docs` si `VITE_API_BASE_URL` está definida, y deja el archivo en `src/services/api/schema.d.ts`. El orden de fuentes está en `docs/tipos-de-la-api.md`. Reglas:
 
 - Si el backend tiene `API_DOCS_ENABLED=false`, el comando falla. Generar contra una instancia de desarrollo o contra un JSON guardado.
 - El archivo generado no se edita a mano.
 - Propuesta de CI: ejecutar `pnpm gen:api` y comprobar que no hay diferencias (`git diff --exit-code`). Así se detecta la desalineación con el backend.
 
 ```ts
-import type { components } from './api-schema';
+import type { components } from './schema';
 
 export type ReadingRequest = components['schemas']['CreateReadingRequest']; // nombre verificar
 ```

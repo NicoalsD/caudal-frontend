@@ -1,0 +1,143 @@
+/*
+ * Design tokens (design-theme.md). Light mode first; dark mode redefines the same names.
+ * Components never write colors, sizes or fonts directly: they read these variables.
+ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces and text */
+  --color-page: #f4f0e6;
+  --color-raised: #fbf9f3;
+  --color-sand-200: #e6dcc6;
+  --color-text-primary: #1e2b2f;
+  --color-text-secondary: #4a5b60;
+
+  /* Water: action and focus */
+  --color-water-700: #1d5a6e;
+  --color-water-800: #164857;
+  --color-water-300: #a9cdd6;
+  --color-water-100: #d7e8ee;
+
+  /* Paramo: correct, online */
+  --color-paramo-800: #2f5e3e;
+  --color-paramo-100: #dde9dc;
+
+  /* Andean sun: attention, offline */
+  --color-ochre-800: #7a4e0e;
+  --color-ochre-700: #a8691a;
+  --color-ochre-100: #f5e6c8;
+
+  /* Earth: error, damage, risk */
+  --color-clay-700: #8e3424;
+  --color-clay-100: #f3ddd6;
+
+  /* Borders and focus */
+  --color-border-strong: #6b7c81;
+  --color-border-subtle: #d9d0bc;
+  --color-focus: #1d5a6e;
+
+  /* Typography */
+  --font-family-base:
+    'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', 'Segoe UI', system-ui, Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --font-size-display: 3rem;
+  --font-size-h1: 1.75rem;
+  --font-size-h2: 1.375rem;
+  --font-size-h3: 1.25rem;
+  --font-size-body: 1.125rem;
+  --font-size-small: 1rem;
+  --font-size-label: 1.125rem;
+  --line-height-display: 1.1;
+  --line-height-h1: 1.2;
+  --line-height-h2: 1.25;
+  --line-height-h3: 1.3;
+  --line-height-body: 1.5;
+  --line-height-small: 1.45;
+  --line-height-label: 1.3;
+
+  /* Spacing, radii and measures */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --radius-control: 0.5rem;
+  --radius-surface: 0.75rem;
+  --radius-chip: 999px;
+  --target-min: 3rem;
+  --field-height: 3.25rem;
+  --content-max: 45rem;
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --level-line-height: 2px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Dark mode: follows the system unless the page forces a theme with data-theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --color-page: #0f1a1d;
+    --color-raised: #16252a;
+    --color-sand-200: #22343a;
+    --color-text-primary: #e8eef0;
+    --color-text-secondary: #a9bcc1;
+
+    --color-water-700: #7fc0d3;
+    --color-water-800: #a9d5e3;
+    --color-water-300: #2b5a68;
+    --color-water-100: #1f3e49;
+
+    --color-paramo-800: #8fcb9f;
+    --color-paramo-100: #1f3b2a;
+
+    --color-ochre-800: #e3b15f;
+    --color-ochre-700: #d39a3a;
+    --color-ochre-100: #43330f;
+
+    --color-clay-700: #f0907d;
+    --color-clay-100: #4a211a;
+
+    --color-border-strong: #8fa3a8;
+    --color-border-subtle: #2f4249;
+    --color-focus: #7fc0d3;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-page: #0f1a1d;
+  --color-raised: #16252a;
+  --color-sand-200: #22343a;
+  --color-text-primary: #e8eef0;
+  --color-text-secondary: #a9bcc1;
+
+  --color-water-700: #7fc0d3;
+  --color-water-800: #a9d5e3;
+  --color-water-300: #2b5a68;
+  --color-water-100: #1f3e49;
+
+  --color-paramo-800: #8fcb9f;
+  --color-paramo-100: #1f3b2a;
+
+  --color-ochre-800: #e3b15f;
+  --color-ochre-700: #d39a3a;
+  --color-ochre-100: #43330f;
+
+  --color-clay-700: #f0907d;
+  --color-clay-100: #4a211a;
+
+  --color-border-strong: #8fa3a8;
+  --color-border-subtle: #2f4249;
+  --color-focus: #7fc0d3;
+}

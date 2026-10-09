@@ -1,0 +1,121 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API de CAUDAL (instantánea mínima para el frontend)",
+    "description": "Representa solo lo que el backend ya publica y el frontend usa hoy: el error canónico, la salud y los límites de campos. Se reemplaza por la instantánea completa de caudal-backend/docs/openapi.json cuando exista. Ver docs/tipos-de-la-api.md.",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "/" }],
+  "paths": {
+    "/actuator/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Salud mínima del servicio",
+        "description": "Público. No revela detalles internos.",
+        "responses": {
+          "200": {
+            "description": "El servicio responde.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HealthResponse" } }
+            }
+          },
+          "503": {
+            "description": "El servicio no está disponible.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/HealthResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meta/constraints": {
+      "get": {
+        "operationId": "getConstraints",
+        "summary": "Límites de campos para armar los formularios",
+        "description": "Público. Cada clave es un campo (por ejemplo reading.note) con sus límites tomados de FieldLimits en el backend.",
+        "responses": {
+          "200": {
+            "description": "Mapa campo a límites.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ConstraintsResponse" }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiadas solicitudes (RATE_LIMITED).",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } }
+            }
+          },
+          "500": {
+            "description": "Error no controlado (INTERNAL_ERROR).",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorBody": {
+        "type": "object",
+        "required": ["code", "message", "request_id"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código en SCREAMING_SNAKE_CASE del catálogo de API.md sección 1.4.",
+            "example": "GAUGE_OUT_OF_RANGE"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensaje en español. Sirve de respaldo; la UI usa el texto de es.ts."
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Objeto opcional con datos del error. Sin trazas ni secretos."
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Correlaciona la respuesta con los registros. También viene en X-Request-Id."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": { "$ref": "#/components/schemas/ErrorBody" }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "type": "string", "enum": ["UP", "DOWN"] }
+        }
+      },
+      "FieldConstraint": {
+        "type": "object",
+        "description": "Límites de un campo. Todos son opcionales: solo llegan los que aplican.",
+        "properties": {
+          "min": { "type": "integer", "format": "int32", "minimum": 0 },
+          "max": { "type": "integer", "format": "int32", "minimum": 0 },
+          "pattern": {
+            "type": "string",
+            "description": "Expresión regular compatible con JavaScript (bandera u)."
+          },
+          "max_lines": { "type": "integer", "format": "int32", "minimum": 1 }
+        }
+      },
+      "ConstraintsResponse": {
+        "type": "object",
+        "description": "Mapa plano de nombre de campo a límites (API.md sección 4.1).",
+        "additionalProperties": { "$ref": "#/components/schemas/FieldConstraint" }
+      }
+    }
+  }
+}
