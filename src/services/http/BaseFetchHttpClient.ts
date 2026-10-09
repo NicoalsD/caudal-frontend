@@ -60,6 +60,9 @@ export interface BaseFetchHttpClientOptions {
 /**
  * The only class that calls `fetch`. It builds the URL, sends the mandatory headers, parses
  * JSON and turns every failure into a typed error: ApiError or NetworkError.
+ * It is the innermost component of the decorator chain.
+ *
+ * @pattern P09 Decorator
  */
 export class BaseFetchHttpClient implements HttpClient {
   private readonly baseUrl: string;
@@ -115,7 +118,8 @@ export class BaseFetchHttpClient implements HttpClient {
     if (!request.path.startsWith('/')) {
       throw new Error(`Request path must start with "/": ${request.path}`);
     }
-    const url = new URL(`${this.baseUrl}${request.path}`);
+    const root = request.scope === 'root' ? new URL(this.baseUrl).origin : this.baseUrl;
+    const url = new URL(`${root}${request.path}`);
     for (const [name, value] of Object.entries(request.query ?? {})) {
       url.searchParams.set(name, String(value));
     }

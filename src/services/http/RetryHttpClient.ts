@@ -25,6 +25,8 @@ export const sleep: Sleep = (ms, signal) =>
 /**
  * Decorator (P09): repeats transient failures of repeatable requests. It sits outside the
  * authentication decorator, so each attempt goes through it and uses the current token.
+ *
+ * @pattern P09 Decorator
  */
 export class RetryHttpClient implements HttpClient {
   constructor(

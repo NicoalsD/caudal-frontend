@@ -9,6 +9,8 @@ export const HTTP_REQUEST_EVENT = 'http.request';
 /**
  * Decorator (P09): records method, path, status, duration and request id of each logical call.
  * It never logs bodies, query strings, headers (Authorization, Cookie) or personal data.
+ *
+ * @pattern P09 Decorator
  */
 export class LoggingHttpClient implements HttpClient {
   constructor(

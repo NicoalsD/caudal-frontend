@@ -4,6 +4,11 @@ export interface HttpRequest {
   readonly method: HttpMethod;
   /** Relative to the API base, for example "/readings". Always starts with "/". */
   readonly path: string;
+  /**
+   * "api" (default) resolves against the API base (/api/v1). "root" resolves against the origin
+   * of the API, for the few routes outside the prefix such as /actuator/health (API.md 1.1).
+   */
+  readonly scope?: 'api' | 'root';
   readonly query?: Readonly<Record<string, string | number>>;
   /** Plain data, sent as JSON. Build it field by field: the API rejects unknown fields. */
   readonly body?: unknown;
@@ -22,7 +27,11 @@ export interface HttpResponse<T> {
   readonly requestId: string | null;
 }
 
-/** Component interface of the Decorator pattern (P09): every layer implements and wraps it. */
+/**
+ * Component interface of the Decorator pattern: every layer implements and wraps it.
+ *
+ * @pattern P09 Decorator
+ */
 export interface HttpClient {
   request<T>(request: HttpRequest): Promise<HttpResponse<T>>;
 }
