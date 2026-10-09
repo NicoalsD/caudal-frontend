@@ -30,8 +30,9 @@ export function bearerOf(request: Request): string | null {
 export function changePasswordOutcome(
   user: { readonly username: string },
   body: ChangePasswordDto,
+  currentPassword: string = TEST_PASSWORD,
 ): Response | null {
-  if (body.current_password !== TEST_PASSWORD) {
+  if (body.current_password !== currentPassword) {
     return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
   }
   const next = body.new_password;

@@ -56,6 +56,9 @@ export function createSessionBackend(
   let serial = 0;
   let networkFailure = false;
   const validTokens = new Set<string>();
+  // What changed on the server: new passwords and cleared must_change_password flags.
+  const passwords = new Map<string, string>();
+  const changed = new Set<string>();
   const calls = { refresh: 0, login: 0, logout: 0, me: 0, passwordChanges: 0, switches: 0 };
 
   const issue = (user: AuthUserDto): string => {
@@ -69,8 +72,15 @@ export function createSessionBackend(
     http.post(apiUrl('/auth/login'), async ({ request }) => {
       calls.login += 1;
       const body = (await request.json()) as { username: string; password: string };
-      const user = findTestUser((candidate) => candidate.username === body.username);
-      if (user === undefined || body.password !== TEST_PASSWORD) {
+      const known = findTestUser((candidate) => candidate.username === body.username);
+      const user =
+        known === undefined
+          ? undefined
+          : {
+              ...known,
+              must_change_password: !changed.has(known.id) && known.must_change_password,
+            };
+      if (user === undefined || body.password !== (passwords.get(user.username) ?? TEST_PASSWORD)) {
         return errorResponse(STATUS.unauthorized, 'INVALID_CREDENTIALS');
       }
       cookieUser = user; // Set-Cookie: caudal_rt
@@ -110,13 +120,14 @@ export function createSessionBackend(
       if (token === null || !validTokens.has(token) || cookieUser === null) {
         return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
       }
-      const failure = changePasswordOutcome(
-        cookieUser,
-        (await request.json()) as ChangePasswordDto,
-      );
+      const change = (await request.json()) as ChangePasswordDto;
+      const expected = passwords.get(cookieUser.username) ?? TEST_PASSWORD;
+      const failure = changePasswordOutcome(cookieUser, change, expected);
       if (failure !== null) {
         return failure;
       }
+      passwords.set(cookieUser.username, change.new_password);
+      changed.add(cookieUser.id);
       cookieUser = null; // token_version bumped: refresh tokens revoked, access tokens dead
       validTokens.clear();
       calls.passwordChanges += 1;
