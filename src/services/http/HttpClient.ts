@@ -10,6 +10,11 @@ export interface HttpRequest {
    */
   readonly scope?: 'api' | 'root';
   readonly query?: Readonly<Record<string, string | number>>;
+  /**
+   * Extra headers for this call, such as Authorization (added only by AuthHttpClient).
+   * They cannot replace Accept, Content-Type or X-Requested-With, which the transport owns.
+   */
+  readonly headers?: Readonly<Record<string, string>>;
   /** Plain data, sent as JSON. Build it field by field: the API rejects unknown fields. */
   readonly body?: unknown;
   /**

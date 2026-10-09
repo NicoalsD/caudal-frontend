@@ -64,6 +64,22 @@ describe('BaseFetchHttpClient success', () => {
     expect(fake.calls[0]?.init.credentials).toBe('omit');
   });
 
+  it('sends the caller headers but never lets them replace the mandatory ones', async () => {
+    const fake = recordingFetch();
+    const withFake = new BaseFetchHttpClient({ baseUrl: BASE_URL, fetchFn: fake.fetchFn });
+
+    await withFake.request({
+      method: 'GET',
+      path: '/things',
+      headers: { Authorization: 'Bearer abc', 'X-Requested-With': 'otro', Accept: 'text/html' },
+    });
+
+    const headers = new Headers(fake.calls[0]?.init.headers);
+    expect(headers.get('Authorization')).toBe('Bearer abc');
+    expect(headers.get('X-Requested-With')).toBe('caudal-web');
+    expect(headers.get('Accept')).toBe('application/json');
+  });
+
   it('includes credentials only for /auth/ paths', async () => {
     const fake = recordingFetch();
     const withFake = new BaseFetchHttpClient({ baseUrl: BASE_URL, fetchFn: fake.fetchFn });

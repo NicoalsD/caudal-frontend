@@ -20,6 +20,20 @@ export const REQUEST_ID_HEADER = 'X-Request-Id';
 /** Only paths under this prefix send the refresh cookie (credentials: include). */
 export const AUTH_PATH_PREFIX = '/auth/';
 
+/** Header and scheme that carry the access token (API.md section 1.2). */
+export const AUTHORIZATION_HEADER = 'Authorization';
+export const BEARER_SCHEME = 'Bearer';
+
+/** Paths that never carry the access token and never trigger a refresh on 401 (no session yet). */
+export const SESSIONLESS_AUTH_PATHS: readonly string[] = [
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/reset-password',
+];
+
+/** The public API (page and damage reports) is called without Bearer or cookies (security.md 7). */
+export const PUBLIC_PATH_PREFIX = '/public/';
+
 /** Client policy: GET retries on network failure or 5xx (api-integration.md section 2.4). */
 export const HTTP_RETRY_MAX_ATTEMPTS = 3;
 export const HTTP_RETRY_BASE_DELAY_MS = 500;
