@@ -1,20 +1,25 @@
+import { AnonymousPhase } from '../core/session/SessionPhase';
+import type { SessionEvent, SessionPhase } from '../core/session/SessionPhase';
 import type { SessionState, SessionUser } from '../core/session/SessionState';
 
 type Listener = () => void;
 
-const ANONYMOUS: SessionState = { status: 'anonymous' };
-const EXPIRED: SessionState = { status: 'expired' };
-const RESTORING: SessionState = { status: 'restoring' };
-const OFFLINE: SessionState = { status: 'anonymous', reason: 'offline' };
-const PASSWORD_CHANGED: SessionState = { status: 'anonymous', reason: 'password-changed' };
+/** Called when the current state ignores an event, so the gap is noticed in development. */
+export type IgnoredEventHandler = (
+  event: SessionEvent['type'],
+  phase: SessionPhase['name'],
+) => void;
 
 /**
- * In-memory observable session state (architecture.md 5.2).
+ * In-memory observable session (architecture.md 5.2). It holds the current state object of the
+ * State pattern (core/session/SessionPhase) and tells subscribers when it changes.
  * It holds no tokens: the access token belongs to the TokenStore (services/session).
  */
 export class SessionStore {
-  private state: SessionState = ANONYMOUS;
+  private phase: SessionPhase = new AnonymousPhase();
   private readonly listeners = new Set<Listener>();
+
+  constructor(private readonly onIgnored: IgnoredEventHandler = () => undefined) {}
 
   readonly subscribe = (listener: Listener): (() => void) => {
     this.listeners.add(listener);
@@ -23,42 +28,51 @@ export class SessionStore {
     };
   };
 
-  readonly getSnapshot = (): SessionState => this.state;
+  /** The same object until the state changes, as useSyncExternalStore requires. */
+  readonly getSnapshot = (): SessionState => this.phase.snapshot;
 
   signIn(user: SessionUser): void {
-    this.update({ status: 'authenticated', user });
+    this.dispatch({ type: 'SIGNED_IN', user });
   }
 
   /** Boot: the refresh cookie is being checked, so guards must wait instead of redirecting. */
   beginRestore(): void {
-    this.update(RESTORING);
+    this.dispatch({ type: 'RESTORE_STARTED' });
   }
 
   /** The server answered PASSWORD_CHANGE_REQUIRED: from now on only the change screen is open. */
   requirePasswordChange(): void {
-    if (this.state.status === 'authenticated' && !this.state.user.mustChangePassword) {
-      this.signIn({ ...this.state.user, mustChangePassword: true });
-    }
+    this.dispatch({ type: 'PASSWORD_CHANGE_REQUIRED' });
   }
 
   expire(): void {
-    this.update(EXPIRED);
+    this.dispatch({ type: 'EXPIRED' });
   }
 
   /**
-   * Back to anonymous. The reason tells the login screen what to say: `offline` (the server could
-   * not be reached) or `password-changed` (the change ended the session, as the server requires).
+   * Leaves the session. The reason tells the login screen what to say: `offline` (the restore could
+   * not reach the server) or `password-changed` (the change ended the session, as the server
+   * requires). Without a reason it is a plain sign out.
    */
   clear(reason?: 'offline' | 'password-changed'): void {
     if (reason === 'offline') {
-      this.update(OFFLINE);
+      this.dispatch({ type: 'RESTORE_FAILED', offline: true });
+    } else if (reason === 'password-changed') {
+      this.dispatch({ type: 'PASSWORD_CHANGED' });
+    } else if (this.phase.name === 'RESTORING') {
+      this.dispatch({ type: 'RESTORE_FAILED', offline: false });
     } else {
-      this.update(reason === 'password-changed' ? PASSWORD_CHANGED : ANONYMOUS);
+      this.dispatch({ type: 'SIGNED_OUT' });
     }
   }
 
-  private update(next: SessionState): void {
-    this.state = next;
+  private dispatch(event: SessionEvent): void {
+    const next = this.phase.next(event);
+    if (next === this.phase) {
+      this.onIgnored(event.type, this.phase.name);
+      return;
+    }
+    this.phase = next;
     this.listeners.forEach((listener) => {
       listener();
     });

@@ -42,6 +42,7 @@ export function createAppServices(
 ): AppServices {
   const baseUrl = readApiBaseUrl(env);
   const adapter = new ApiDtoAdapter();
+  const logger = env.DEV === true ? new ConsoleLogger() : new NoopLogger();
   const tokens = new TokenStore();
   // The refresh call goes straight to the transport: it must not pass through AuthHttpClient.
   const refreshApi = new AuthApi(new BaseFetchHttpClient({ baseUrl }), adapter);
@@ -49,12 +50,14 @@ export function createAppServices(
   const http = createHttpClient({
     baseUrl,
     auth: { tokens, refresher },
-    logger: env.DEV === true ? new ConsoleLogger() : new NoopLogger(),
+    logger,
     clock,
     random: () => Math.random(),
   });
   const api = new CaudalApi(http, adapter);
-  const sessionStore = new SessionStore();
+  const sessionStore = new SessionStore((event, phase) => {
+    logger.warn('session.event_ignored', { event, phase });
+  });
   // The query client is needed to build the controller, and the controller reads its errors.
   const errorSink = { handle: (_error: unknown): void => undefined };
   const queryClient = createQueryClient((error) => {

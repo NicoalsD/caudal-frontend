@@ -24,7 +24,7 @@ Este documento describe los patrones que `caudal-frontend` implementa de forma e
 | P13 | Command | `Command`, `SubmitReadingCommand`, `CloseDayCommand`, `CommandQueue` | `core/commands` | NicoalsD |
 | P15 | Mediator | `ProposalEditorMediator` | `core/proposal` | NicoalsD |
 | P17 | Observer | `SyncQueueStore`, `ConnectivityMonitor` | `state` | NicoalsD |
-| P18 | State | `ConnectionState` | `core/connection` | NicoalsD |
+| P18 | State | `ConnectionState`, `SessionPhase` | `core/connection`, `core/session` | NicoalsD |
 
 ---
 
@@ -754,6 +754,12 @@ refresh(): Promise<void> {
 ```
 
 **Prueba.** `SessionController.test.tsx`: llamadas en paralelo con `401` hacen una sola renovación; `restore()` dos veces (StrictMode) hace una; un rechazo del servidor cierra la sesión y limpia la caché; un fallo de red la conserva.
+
+---
+
+## P18 State: `SessionPhase`
+
+La sesión también es una máquina de estados: `RESTORING` (el arranque pregunta al servidor), `ANONYMOUS` (con motivo opcional: `offline` o `password-changed`), `AUTHENTICATED`, `PASSWORD_CHANGE_PENDING` y `EXPIRED`. Cada clase en `src/core/session/SessionPhase.ts` acepta los eventos que le corresponden (`SIGNED_IN`, `PASSWORD_CHANGE_REQUIRED`, `EXPIRED`, ...) y devuelve el estado siguiente; el resto se ignora y `SessionStore` lo registra. El `snapshot` de cada estado solo tiene datos que se pueden mostrar (usuario, rol, acueducto, permisos): ningún token, cookie ni contraseña. La prueba es una tabla de transiciones y una revisión de que el `snapshot` serializado no contiene esas palabras.
 
 ---
 
