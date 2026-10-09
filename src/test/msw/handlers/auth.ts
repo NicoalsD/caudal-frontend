@@ -13,12 +13,36 @@ import { apiUrl } from '../apiUrl';
 import { errorResponse } from '../errorResponse';
 
 type LoginRequestDto = components['schemas']['LoginRequest'];
+type ChangePasswordDto = components['schemas']['ChangePasswordRequest'];
+
+/** A password the fake server treats as "too common" (API.md 2.5). */
+export const COMMON_PASSWORD = 'contrasena-comun-12345';
 
 const BEARER_PREFIX = 'Bearer ';
+const MIN_NEW_PASSWORD = 12;
 
 export function bearerOf(request: Request): string | null {
   const header = request.headers.get('Authorization');
   return header?.startsWith(BEARER_PREFIX) === true ? header.slice(BEARER_PREFIX.length) : null;
+}
+
+/** Change-password rules of API.md 2.5 that the fake server can check. */
+export function changePasswordOutcome(
+  user: { readonly username: string },
+  body: ChangePasswordDto,
+): Response | null {
+  if (body.current_password !== TEST_PASSWORD) {
+    return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
+  }
+  const next = body.new_password;
+  if (
+    next.length < MIN_NEW_PASSWORD ||
+    next === COMMON_PASSWORD ||
+    next.toLowerCase().includes(user.username)
+  ) {
+    return errorResponse(STATUS.unprocessable, 'PASSWORD_POLICY_VIOLATION');
+  }
+  return null;
 }
 
 /**
@@ -45,6 +69,17 @@ export const authHandlers = [
     return user === undefined
       ? errorResponse(STATUS.unauthorized, 'UNAUTHORIZED')
       : HttpResponse.json(buildMeResponse(user));
+  }),
+  http.post(apiUrl('/auth/change-password'), async ({ request }) => {
+    const token = bearerOf(request);
+    const claims = token === null ? null : readAccessTokenClaims(token);
+    const user =
+      claims === null ? undefined : findTestUser((candidate) => candidate.id === claims.subject);
+    if (user === undefined) {
+      return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
+    }
+    const failure = changePasswordOutcome(user, (await request.json()) as ChangePasswordDto);
+    return failure ?? new HttpResponse(null, { status: STATUS.noContent });
   }),
   http.post(apiUrl('/auth/refresh'), () => errorResponse(STATUS.unauthorized, 'UNAUTHORIZED')),
   http.post(apiUrl('/auth/logout'), () => new HttpResponse(null, { status: STATUS.noContent })),

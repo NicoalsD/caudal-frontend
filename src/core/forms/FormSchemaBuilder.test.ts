@@ -265,3 +265,59 @@ describe('password fields', () => {
     );
   });
 });
+
+describe('cross-field checks', () => {
+  const NEW_PASSWORD = 'una-clave-larga-y-distinta';
+  const build = () =>
+    new FormSchemaBuilder(constraints, keyMessages)
+      .password('current', { constraint: 'password', anyLength: true })
+      .password('next', { constraint: 'password' })
+      .password('again', { constraint: 'password' })
+      .differentFrom('next', 'current')
+      .notContaining('next', 'Junta.Uno')
+      .confirmation('again', 'next')
+      .build();
+  const valid = { current: 'clave-actual', next: NEW_PASSWORD, again: NEW_PASSWORD };
+
+  function issuesOf(values: Record<string, string>): [string, string][] {
+    const result = build().safeParse(values);
+    return result.success
+      ? []
+      : result.error.issues.map((issue) => [String(issue.path[0]), issue.message]);
+  }
+
+  it('passes when every rule holds', () => {
+    expect(build().safeParse(valid).success).toBe(true);
+  });
+
+  it('reports a confirmation that does not match on the confirmation field', () => {
+    expect(issuesOf({ ...valid, again: `${NEW_PASSWORD}x` })).toEqual([
+      ['again', 'validation.mismatch'],
+    ]);
+  });
+
+  it('rejects a new password equal to the current one', () => {
+    const same = 'la-misma-clave-larga';
+
+    expect(issuesOf({ current: same, next: same, again: same })).toEqual([
+      ['next', 'validation.sameAsCurrent'],
+    ]);
+  });
+
+  it('rejects a password that contains the username, ignoring case', () => {
+    const withUser = 'xxjunta.UNOxxxxxx';
+
+    expect(issuesOf({ current: 'clave-actual', next: withUser, again: withUser })).toEqual([
+      ['next', 'validation.containsUsername'],
+    ]);
+  });
+
+  it('never fails the username rule when the term is empty', () => {
+    const schema = new FormSchemaBuilder(constraints, keyMessages)
+      .password('next', { constraint: 'password' })
+      .notContaining('next', '  ')
+      .build();
+
+    expect(schema.safeParse({ next: NEW_PASSWORD }).success).toBe(true);
+  });
+});

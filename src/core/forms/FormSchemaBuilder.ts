@@ -53,6 +53,13 @@ const MINIMUM_REQUIRED_LENGTH = 1;
 
 export type FormShape = Record<string, z.ZodType>;
 
+/** A rule that compares fields of the same form, checked once every field is valid. */
+interface CrossCheck {
+  readonly field: string;
+  readonly key: Parameters<ValidationMessageFactory>[0];
+  readonly fails: (values: Readonly<Record<string, unknown>>) => boolean;
+}
+
 /**
  * Builds Zod schemas at run time from the limits of GET /meta/constraints and the rule set,
  * so forms never hold a hardcoded limit (configuration.md section 3). The rest of the app does
@@ -64,6 +71,7 @@ export type FormShape = Record<string, z.ZodType>;
  */
 export class FormSchemaBuilder {
   private readonly shape: FormShape = {};
+  private readonly crossChecks: CrossCheck[] = [];
 
   constructor(
     private readonly constraints: ConstraintsMap,
@@ -143,8 +151,53 @@ export class FormSchemaBuilder {
     return this;
   }
 
+  /** `field` must equal `of` (a password typed twice). The error is reported on `field`. */
+  confirmation(field: string, of: string): this {
+    this.crossChecks.push({
+      field,
+      key: 'mismatch',
+      fails: (values) => values[field] !== values[of],
+    });
+    return this;
+  }
+
+  /** `field` must not contain `term` (the username), ignoring case. An empty term never fails. */
+  notContaining(field: string, term: string): this {
+    const needle = term.trim().toLowerCase();
+    this.crossChecks.push({
+      field,
+      key: 'containsUsername',
+      fails: (values) => needle !== '' && String(values[field]).toLowerCase().includes(needle),
+    });
+    return this;
+  }
+
+  /** `field` must differ from `from` (the new password against the current one). */
+  differentFrom(field: string, from: string): this {
+    this.crossChecks.push({
+      field,
+      key: 'sameAsCurrent',
+      fails: (values) => values[field] === values[from],
+    });
+    return this;
+  }
+
   build(): z.ZodObject<FormShape> {
-    return z.object({ ...this.shape });
+    const checks = [...this.crossChecks];
+    const messages = this.messages;
+    return z.object({ ...this.shape }).check((context) => {
+      const values = context.value as Record<string, unknown>;
+      for (const check of checks) {
+        if (check.fails(values)) {
+          context.issues.push({
+            code: 'custom',
+            message: messages(check.key, {}),
+            path: [check.field],
+            input: values,
+          });
+        }
+      }
+    });
   }
 
   private textSchema(field: string, minimum: number, options: TextOptions): z.ZodType<string> {

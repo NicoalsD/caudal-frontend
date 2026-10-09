@@ -15,6 +15,8 @@ interface TextFieldProps extends InputProps {
   readonly hint?: string | undefined;
   /** Error text. When present the field is marked invalid and the text is announced. */
   readonly error?: string | undefined;
+  /** Id of other content that describes the field, for example a checklist of requirements. */
+  readonly describedBy?: string | undefined;
 }
 
 /**
@@ -25,13 +27,18 @@ export function TextField({
   label,
   hint,
   error,
+  describedBy: extraDescription,
   className,
   ...input
 }: TextFieldProps): JSX.Element {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
-  const describedBy = [hint === undefined ? null : hintId, error === undefined ? null : errorId]
+  const describedBy = [
+    hint === undefined ? null : hintId,
+    extraDescription ?? null,
+    error === undefined ? null : errorId,
+  ]
     .filter((value): value is string => value !== null)
     .join(' ');
 

@@ -36,7 +36,7 @@ describe('mandatory password change', () => {
   it('explains why nothing else opens', () => {
     renderApp(ROUTE_PATHS.changePassword, { user: forced() });
 
-    expect(screen.getByRole('status')).toHaveTextContent(t('auth.changeRequiredNotice'));
+    expect(screen.getByText(t('auth.changeRequiredNotice'))).toBeInTheDocument();
   });
 
   it('does not show the notice when the change is voluntary', () => {

@@ -8,6 +8,13 @@ type LoginDto = components['schemas']['LoginResponse'];
 type RefreshDto = components['schemas']['RefreshResponse'];
 type MeDto = components['schemas']['MeResponse'];
 
+type ChangePasswordRequestDto = components['schemas']['ChangePasswordRequest'];
+
+export interface ChangePasswordInput {
+  readonly currentPassword: string;
+  readonly newPassword: string;
+}
+
 export interface LoginInput {
   readonly username: string;
   readonly password: string;
@@ -47,6 +54,18 @@ export class AuthApi {
   async me(): Promise<MeView> {
     const response = await this.http.request<MeDto>({ method: 'GET', path: '/auth/me' });
     return this.adapter.toMe(response.body);
+  }
+
+  /**
+   * POST /api/v1/auth/change-password (204). The server revokes every refresh token of the
+   * account, so the session ends: the caller must sign in again with the new password.
+   */
+  async changePassword(input: ChangePasswordInput): Promise<void> {
+    const body: ChangePasswordRequestDto = {
+      current_password: input.currentPassword,
+      new_password: input.newPassword,
+    };
+    await this.http.request<undefined>({ method: 'POST', path: '/auth/change-password', body });
   }
 
   /** POST /api/v1/auth/logout (204): the server revokes the refresh family and clears the cookie. */

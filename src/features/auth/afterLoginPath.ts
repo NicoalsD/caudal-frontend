@@ -9,5 +9,7 @@ export function afterLoginPath(user: SessionUser, next: string | null): string {
   if (user.mustChangePassword) {
     return ROUTE_PATHS.changePassword;
   }
-  return next ?? HOME_PATH_BY_ROLE[user.role];
+  // After a password change the guard sent the person to login from this very screen.
+  const target = next === ROUTE_PATHS.changePassword ? null : next;
+  return target ?? HOME_PATH_BY_ROLE[user.role];
 }

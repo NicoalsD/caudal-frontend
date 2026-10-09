@@ -14,6 +14,9 @@ const KEYS: readonly ValidationMessageKey[] = [
   'rangeMax',
   'decimalPlaces',
   'number',
+  'mismatch',
+  'containsUsername',
+  'sameAsCurrent',
 ];
 
 const MAX_HOURS = 24;

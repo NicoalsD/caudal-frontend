@@ -91,6 +91,19 @@ export class SessionController {
     return this.restoring;
   }
 
+  /**
+   * Changes the password. The server revokes every refresh token (API.md 2.5), so on success the
+   * local session closes too and the person signs in again with the new password.
+   */
+  async changePassword(input: {
+    readonly currentPassword: string;
+    readonly newPassword: string;
+  }): Promise<void> {
+    await this.deps.api.auth.changePassword(input);
+    this.cleanUp();
+    this.deps.store.clear('password-changed');
+  }
+
   /** Signs out. The local session closes even when the server cannot be reached. */
   async logout(): Promise<void> {
     try {

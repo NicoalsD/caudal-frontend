@@ -16,6 +16,6 @@ export interface SessionUser {
 export type SessionState =
   /** The app just started and is asking the server whether the refresh cookie is still good. */
   | { readonly status: 'restoring' }
-  | { readonly status: 'anonymous'; readonly reason?: 'offline' }
+  | { readonly status: 'anonymous'; readonly reason?: 'offline' | 'password-changed' }
   | { readonly status: 'authenticated'; readonly user: SessionUser }
   | { readonly status: 'expired' };

@@ -41,6 +41,9 @@ export function LoginPage(): JSX.Element {
       <ScreenTitle>{t('screens.login')}</ScreenTitle>
       <p>{t('auth.tagline')}</p>
       {session.status === 'expired' ? <p role="status">{t('auth.sessionExpired')}</p> : null}
+      {session.status === 'anonymous' && session.reason === 'password-changed' ? (
+        <p role="status">{t('auth.passwordChanged')}</p>
+      ) : null}
       {session.status === 'anonymous' && session.reason === 'offline' ? (
         <p role="status">{t('auth.offlineLogin')}</p>
       ) : null}

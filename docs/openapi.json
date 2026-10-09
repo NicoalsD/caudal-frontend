@@ -217,6 +217,48 @@
           }
         }
       }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "operationId": "changePassword",
+        "summary": "Cambia la contraseña",
+        "description": "Autenticado. Permitido aunque must_change_password sea true. Revoca los refresh tokens (la sesión termina). API.md sección 2.5.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Contraseña cambiada."
+          },
+          "401": {
+            "description": "Contraseña actual incorrecta (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "La contraseña no cumple la política (PASSWORD_POLICY_VIOLATION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -488,6 +530,21 @@
               "type": "string"
             },
             "description": "Códigos de permiso (por ejemplo RULESET_ACTIVATE). El cliente los usa solo para mostrar u ocultar acciones."
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "properties": {
+          "current_password": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string"
           }
         }
       }

@@ -123,6 +123,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cambia la contraseña
+         * @description Autenticado. Permitido aunque must_change_password sea true. Revoca los refresh tokens (la sesión termina). API.md sección 2.5.
+         */
+        post: operations["changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -219,6 +239,10 @@ export interface components {
             memberships: components["schemas"]["Membership"][];
             /** @description Códigos de permiso (por ejemplo RULESET_ACTIVATE). El cliente los usa solo para mostrar u ocultar acciones. */
             permissions: string[];
+        };
+        ChangePasswordRequest: {
+            current_password: string;
+            new_password: string;
         };
     };
     responses: never;
@@ -423,6 +447,46 @@ export interface operations {
             };
             /** @description Sesión no válida (UNAUTHORIZED). */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Contraseña cambiada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contraseña actual incorrecta (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La contraseña no cumple la política (PASSWORD_POLICY_VIOLATION). */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

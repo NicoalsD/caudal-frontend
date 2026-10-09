@@ -6,6 +6,7 @@ const ANONYMOUS: SessionState = { status: 'anonymous' };
 const EXPIRED: SessionState = { status: 'expired' };
 const RESTORING: SessionState = { status: 'restoring' };
 const OFFLINE: SessionState = { status: 'anonymous', reason: 'offline' };
+const PASSWORD_CHANGED: SessionState = { status: 'anonymous', reason: 'password-changed' };
 
 /**
  * In-memory observable session state (architecture.md 5.2).
@@ -44,9 +45,16 @@ export class SessionStore {
     this.update(EXPIRED);
   }
 
-  /** Back to anonymous. `offline` tells the login screen the server could not be reached. */
-  clear(reason?: 'offline'): void {
-    this.update(reason === 'offline' ? OFFLINE : ANONYMOUS);
+  /**
+   * Back to anonymous. The reason tells the login screen what to say: `offline` (the server could
+   * not be reached) or `password-changed` (the change ended the session, as the server requires).
+   */
+  clear(reason?: 'offline' | 'password-changed'): void {
+    if (reason === 'offline') {
+      this.update(OFFLINE);
+    } else {
+      this.update(reason === 'password-changed' ? PASSWORD_CHANGED : ANONYMOUS);
+    }
   }
 
   private update(next: SessionState): void {

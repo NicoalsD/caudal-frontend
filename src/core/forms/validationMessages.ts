@@ -8,7 +8,10 @@ export type ValidationMessageKey =
   | 'rangeMin'
   | 'rangeMax'
   | 'decimalPlaces'
-  | 'number';
+  | 'number'
+  | 'mismatch'
+  | 'containsUsername'
+  | 'sameAsCurrent';
 
 export type ValidationParams = Readonly<Record<string, number>>;
 

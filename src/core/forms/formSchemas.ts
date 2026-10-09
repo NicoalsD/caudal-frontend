@@ -9,6 +9,9 @@ export const FIELD = {
   gaugeValue: 'gauge_value',
   username: 'username',
   password: 'password',
+  currentPassword: 'current_password',
+  newPassword: 'new_password',
+  confirmPassword: 'confirm_password',
 } as const;
 
 /** Reading form: gauge value (range from the active rule set) and an optional note. */
@@ -33,5 +36,28 @@ export function loginFormSchema(constraints: ConstraintsMap, messages: Validatio
   return new FormSchemaBuilder(constraints, messages)
     .text(FIELD.username, { lowercase: true })
     .password(FIELD.password)
+    .build();
+}
+
+/** The constraint that holds the password range (API.md 2.1 and 2.5). */
+export const PASSWORD_CONSTRAINT = 'password';
+
+/**
+ * Change-password form. The current password only has to be present (it may predate today's
+ * policy); the new one follows the server range, differs from the current one, does not contain
+ * the username and is typed twice.
+ */
+export function changePasswordFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+  username: string,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .password(FIELD.currentPassword, { constraint: PASSWORD_CONSTRAINT, anyLength: true })
+    .password(FIELD.newPassword, { constraint: PASSWORD_CONSTRAINT })
+    .password(FIELD.confirmPassword, { constraint: PASSWORD_CONSTRAINT })
+    .differentFrom(FIELD.newPassword, FIELD.currentPassword)
+    .notContaining(FIELD.newPassword, username)
+    .confirmation(FIELD.confirmPassword, FIELD.newPassword)
     .build();
 }

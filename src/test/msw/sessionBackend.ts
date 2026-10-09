@@ -13,14 +13,23 @@ import {
 import type { AuthUserDto } from '../factories/auth';
 import { apiUrl } from './apiUrl';
 import { errorResponse } from './errorResponse';
-import { bearerOf } from './handlers/auth';
+import { bearerOf, changePasswordOutcome } from './handlers/auth';
+import type { components } from '../../services/api/schema';
+
+type ChangePasswordDto = components['schemas']['ChangePasswordRequest'];
 
 /** The header the real API demands on /auth/refresh (API.md section 1.2). */
 const REQUIRED_REQUESTED_WITH = 'caudal-web';
 
 export interface SessionBackend {
   readonly handlers: HttpHandler[];
-  readonly calls: { refresh: number; login: number; logout: number; me: number };
+  readonly calls: {
+    refresh: number;
+    login: number;
+    logout: number;
+    me: number;
+    passwordChanges: number;
+  };
   /** Every access token issued so far stops working (the 15 minutes passed). */
   expireAccessTokens(): void;
   /** The refresh cookie is gone or revoked: the next refresh answers 401. */
@@ -42,7 +51,7 @@ export function createSessionBackend(initialCookieUser: AuthUserDto | null = nul
   let serial = 0;
   let networkFailure = false;
   const validTokens = new Set<string>();
-  const calls = { refresh: 0, login: 0, logout: 0, me: 0 };
+  const calls = { refresh: 0, login: 0, logout: 0, me: 0, passwordChanges: 0 };
 
   const issue = (user: AuthUserDto): string => {
     serial += 1;
@@ -88,6 +97,23 @@ export function createSessionBackend(initialCookieUser: AuthUserDto | null = nul
         return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
       }
       return HttpResponse.json(buildMeResponse(cookieUser));
+    }),
+    http.post(apiUrl('/auth/change-password'), async ({ request }) => {
+      const token = bearerOf(request);
+      if (token === null || !validTokens.has(token) || cookieUser === null) {
+        return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
+      }
+      const failure = changePasswordOutcome(
+        cookieUser,
+        (await request.json()) as ChangePasswordDto,
+      );
+      if (failure !== null) {
+        return failure;
+      }
+      cookieUser = null; // token_version bumped: refresh tokens revoked, access tokens dead
+      validTokens.clear();
+      calls.passwordChanges += 1;
+      return new HttpResponse(null, { status: STATUS.noContent });
     }),
     http.post(apiUrl('/auth/logout'), () => {
       calls.logout += 1;
