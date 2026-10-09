@@ -1,0 +1,74 @@
+.skipLink {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: calc(-1 * var(--target-min) - var(--space-4));
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-water-700);
+  color: var(--color-raised);
+  border-radius: var(--radius-control);
+  z-index: 1;
+}
+
+.skipLink:focus {
+  inset-block-start: var(--space-2);
+}
+
+.header {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-raised);
+}
+
+/* The level line: the only decorative motif, hidden from assistive technology. */
+.header::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: var(--level-line-height);
+  background: var(--color-water-700);
+}
+
+.brand {
+  font-weight: var(--font-weight-bold);
+}
+
+.navList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.navLink:hover {
+  background: var(--color-sand-200);
+  color: var(--color-text-primary);
+}
+
+.navLink[aria-current='page'] {
+  color: var(--color-water-700);
+  font-weight: var(--font-weight-bold);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+.main {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
