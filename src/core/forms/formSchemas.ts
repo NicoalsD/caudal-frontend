@@ -43,7 +43,10 @@ export function loginFormSchema(constraints: ConstraintsMap, messages: Validatio
 }
 
 /** Names of the fields of the draft rules form. */
-export const DRAFT_FIELD = { bands: 'bands', sectors: 'sectors' } as const;
+export const DRAFT_FIELD = { bands: 'bands', sectors: 'sectors', windows: 'windows' } as const;
+
+/** Optional constraint whose `max` caps the operating windows of a version (API.md 6.5). */
+export const WINDOWS_LIMIT_CONSTRAINT = 'rule_set.operating_windows';
 
 /** What the draft form needs to know about the active tank (all from the rule set). */
 export interface DraftFormContext {
@@ -57,14 +60,16 @@ export interface DraftFormContext {
 export function draftRulesFormSchema(
   context: DraftFormContext,
   messages: ValidationMessageFactory,
+  constraints: ConstraintsMap = {},
 ) {
-  return new FormSchemaBuilder({}, messages)
+  return new FormSchemaBuilder(constraints, messages)
     .bandList(DRAFT_FIELD.bands, {
       gauge: context.gauge,
       decimals: gaugeDecimals(context.gauge),
       maxHoursPerDay: HOURS_PER_DAY,
     })
     .sectorList(DRAFT_FIELD.sectors)
+    .windowList(DRAFT_FIELD.windows, { limitField: WINDOWS_LIMIT_CONSTRAINT })
     .build();
 }
 

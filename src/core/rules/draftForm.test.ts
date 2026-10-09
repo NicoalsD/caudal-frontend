@@ -4,8 +4,10 @@ import {
   bandsToRows,
   rowsToBands,
   rowsToSectors,
+  rowsToWindows,
   sectorsToRows,
   toDraftFormValues,
+  windowsToRows,
 } from './draftForm';
 import type { RuleBand } from './ruleSetParts';
 
@@ -23,6 +25,8 @@ const CRITICAL: RuleBand = {
   dailyServiceHours: 3,
   priorityOnly: true,
 };
+
+const SATURDAY = 6;
 
 describe('bandsToRows', () => {
   it('writes numbers with decimal comma and orders from the highest band down', () => {
@@ -50,7 +54,9 @@ describe('bandsToRows', () => {
     bandsToRows(bands);
 
     expect(bands).toEqual([CRITICAL, HIGH]);
-    expect(toDraftFormValues({ bands, sectors: [] }, []).bands).toHaveLength(bands.length);
+    expect(toDraftFormValues({ bands, sectors: [], operatingWindows: [] }, []).bands).toHaveLength(
+      bands.length,
+    );
   });
 });
 
@@ -106,6 +112,25 @@ describe('sector rows', () => {
     ).toEqual([
       { sectorId: 'x', isIncluded: true, isPriority: false, priorityRank: null },
       { sectorId: 'y', isIncluded: false, isPriority: true, priorityRank: 1 },
+    ]);
+  });
+});
+
+describe('window rows', () => {
+  it('writes "all" for every day, orders by day and start, and goes back to the API shape', () => {
+    const rows = windowsToRows([
+      { dayOfWeek: SATURDAY, start: '14:00', end: '18:00' },
+      { dayOfWeek: null, start: '05:00', end: '21:00' },
+      { dayOfWeek: SATURDAY, start: '06:00', end: '10:00' },
+    ]);
+
+    expect(rows.map((row) => `${row.day} ${row.start_time}`)).toEqual([
+      'all 05:00',
+      '6 06:00',
+      '6 14:00',
+    ]);
+    expect(rowsToWindows([{ day: null, start_time: '05:00', end_time: '21:00' }])).toEqual([
+      { dayOfWeek: null, start: '05:00', end: '21:00' },
     ]);
   });
 });

@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 import { analyzeBands } from '../rules/bandCoverage';
+import { analyzeWindows, timeToMinutes } from '../rules/operatingWindows';
 import type { Gauge } from '../rules/ruleSetParts';
 import { countFractionDigits, parseDecimalInput } from '../format/decimal';
 import type { ConstraintsMap, FieldConstraint } from './FieldConstraint';
-import type { ValidationMessageFactory } from './validationMessages';
+import type { ValidationMessageFactory, ValidationParams } from './validationMessages';
 
 /** The form needs a limit that the server did not send: a configuration error, not a user error. */
 export class MissingConstraintError extends Error {
@@ -59,6 +60,10 @@ export interface PasswordOptions {
   readonly anyLength?: boolean;
 }
 
+/** Value of the day select for a window that applies every day. */
+export const ALL_DAYS_VALUE = 'all';
+const MONDAY = 1;
+const SUNDAY = 7;
 const LINE_BREAK = /\r\n|\r|\n/;
 const MINIMUM_REQUIRED_LENGTH = 1;
 
@@ -246,6 +251,69 @@ export class FormSchemaBuilder {
           });
         }
         seen.add(value.sector_id);
+      });
+    });
+    return this;
+  }
+
+  /**
+   * The operating windows of a rule set: a day ("every day" or Monday to Sunday), a start and an
+   * end as HH:MM. Each end must be after its start and windows of the same day cannot cross.
+   * `limitField` names a constraint whose `max` caps how many windows there can be; without it
+   * (the server did not send one) the count is not limited here and the server decides.
+   */
+  windowList(field: string, options: { readonly limitField?: string } = {}): this {
+    const maxWindows =
+      options.limitField === undefined ? undefined : this.constraints[options.limitField]?.max;
+    const time = z.string().transform((raw, context) => {
+      const value = raw.trim();
+      if (timeToMinutes(value) === null) {
+        context.addIssue({ code: 'custom', message: this.messages('time', {}) });
+        return z.NEVER;
+      }
+      return value;
+    });
+    const day = z.string().transform((raw, context): number | null => {
+      if (raw === ALL_DAYS_VALUE) {
+        return null;
+      }
+      const parsed = Number(raw);
+      if (!Number.isInteger(parsed) || parsed < MONDAY || parsed > SUNDAY) {
+        context.addIssue({ code: 'custom', message: this.messages('required', {}) });
+        return z.NEVER;
+      }
+      return parsed;
+    });
+    const row = z.object({ day, start_time: time, end_time: time });
+    this.shape[field] = z.array(row).check((context) => {
+      const rows = context.value;
+      const push = (
+        key: Parameters<ValidationMessageFactory>[0],
+        params: ValidationParams,
+        path: (string | number)[],
+      ): void => {
+        context.issues.push({
+          code: 'custom',
+          message: this.messages(key, params),
+          path,
+          input: rows,
+        });
+      };
+      if (maxWindows !== undefined && rows.length > maxWindows) {
+        push('tooManyItems', { max: maxWindows }, []);
+      }
+      const analysis = analyzeWindows(
+        rows.map((value) => ({
+          dayOfWeek: value.day,
+          start: value.start_time,
+          end: value.end_time,
+        })),
+      );
+      analysis.inverted.forEach((index) => {
+        push('windowOrder', {}, [index, 'end_time']);
+      });
+      analysis.overlapping.forEach((index) => {
+        push('windowOverlap', {}, [index, 'start_time']);
       });
     });
     return this;

@@ -1,6 +1,7 @@
 import { toInputText } from '../format/decimal';
+import { ALL_DAYS_VALUE } from '../forms/FormSchemaBuilder';
 import { isBandCode } from './ruleSetParts';
-import type { RuleBand, SectorSetting } from './ruleSetParts';
+import type { OperatingWindow, RuleBand, SectorSetting } from './ruleSetParts';
 import { assignPriorityRanks, buildSectorRows } from './sectorOrder';
 
 /** One band as the person edits it: numbers are text so "3,5" and "3.5" both work. */
@@ -19,10 +20,18 @@ export interface SectorRowValues {
   is_priority: boolean;
 }
 
+/** One operating window: the day is "all" or "1" (Monday) to "7" (Sunday); times are "HH:MM". */
+export interface WindowRowValues {
+  day: string;
+  start_time: string;
+  end_time: string;
+}
+
 /** The draft form as typed. */
 export interface DraftFormValues {
   bands: BandRowValues[];
   sectors: SectorRowValues[];
+  windows: WindowRowValues[];
 }
 
 /** The draft form after the schema parsed it: numbers are numbers. */
@@ -35,6 +44,7 @@ export interface DraftFormOutput {
     priority_only: boolean;
   }[];
   sectors: SectorRowValues[];
+  windows: { day: number | null; start_time: string; end_time: string }[];
 }
 
 export function bandsToRows(bands: readonly RuleBand[]): BandRowValues[] {
@@ -70,11 +80,33 @@ export function rowsToSectors(rows: readonly SectorRowValues[]): SectorSetting[]
   );
 }
 
+export function windowsToRows(windows: readonly OperatingWindow[]): WindowRowValues[] {
+  return [...windows]
+    .sort((a, b) => (a.dayOfWeek ?? 0) - (b.dayOfWeek ?? 0) || a.start.localeCompare(b.start))
+    .map((window) => ({
+      day: window.dayOfWeek === null ? ALL_DAYS_VALUE : String(window.dayOfWeek),
+      start_time: window.start,
+      end_time: window.end,
+    }));
+}
+
+export function rowsToWindows(rows: DraftFormOutput['windows']): OperatingWindow[] {
+  return rows.map((row) => ({ dayOfWeek: row.day, start: row.start_time, end: row.end_time }));
+}
+
 export function toDraftFormValues(
-  rules: { readonly bands: readonly RuleBand[]; readonly sectors: readonly SectorSetting[] },
+  rules: {
+    readonly bands: readonly RuleBand[];
+    readonly sectors: readonly SectorSetting[];
+    readonly operatingWindows: readonly OperatingWindow[];
+  },
   knownSectorIds: readonly string[],
 ): DraftFormValues {
-  return { bands: bandsToRows(rules.bands), sectors: sectorsToRows(rules.sectors, knownSectorIds) };
+  return {
+    bands: bandsToRows(rules.bands),
+    sectors: sectorsToRows(rules.sectors, knownSectorIds),
+    windows: windowsToRows(rules.operatingWindows),
+  };
 }
 
 /** Parsed rows back to the bands the API takes. A code that is not a band is a programming error. */

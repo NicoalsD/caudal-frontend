@@ -15,7 +15,11 @@ export type ValidationMessageKey =
   | 'bandOrder'
   | 'bandOverlap'
   | 'bandGap'
-  | 'duplicateSector';
+  | 'duplicateSector'
+  | 'time'
+  | 'windowOrder'
+  | 'windowOverlap'
+  | 'tooManyItems';
 
 export type ValidationParams = Readonly<Record<string, number>>;
 

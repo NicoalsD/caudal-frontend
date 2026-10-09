@@ -6,9 +6,11 @@ import { draftRulesFormSchema } from '../../core/forms/formSchemas';
 import {
   rowsToBands,
   rowsToSectors,
+  rowsToWindows,
   sectorsToRows,
   toDraftFormValues,
 } from '../../core/rules/draftForm';
+import { sameWindows } from '../../core/rules/operatingWindows';
 import { sameSectorSettings } from '../../core/rules/sectorOrder';
 import type { DraftFormOutput, DraftFormValues } from '../../core/rules/draftForm';
 import type { RuleSetChanges } from '../../core/rules/ruleSetParts';
@@ -20,8 +22,10 @@ import { FormAlert } from '../../ui/feedback/FormAlert';
 import { Button } from '../../ui/primitives/Button';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { cn } from '../../ui/styles/cn';
+import { useConstraints } from '../../state/hooks/useConstraints';
 import { BandsEditor } from './BandsEditor';
 import { SectorsEditor } from './SectorsEditor';
+import { WindowsEditor } from './WindowsEditor';
 import styles from './Rules.module.css';
 import { useSaveDraft } from './ruleQueries';
 
@@ -39,9 +43,10 @@ export function DraftEditor({ rules, sectors }: DraftEditorProps): JSX.Element {
   const save = useSaveDraft(rules.id);
   const [failure, setFailure] = useState<ReturnType<typeof errorText> | null>(null);
   const [saved, setSaved] = useState(false);
+  const constraints = useConstraints().data;
   const schema = useMemo(
-    () => draftRulesFormSchema({ gauge: rules.gauge }, validationMessages),
-    [rules.gauge],
+    () => draftRulesFormSchema({ gauge: rules.gauge }, validationMessages, constraints ?? {}),
+    [rules.gauge, constraints],
   );
   const sectorIds = useMemo(() => sectors.map((sector) => sector.id), [sectors]);
   const baselineSectors = useMemo(
@@ -60,9 +65,11 @@ export function DraftEditor({ rules, sectors }: DraftEditorProps): JSX.Element {
     setFailure(null);
     setSaved(false);
     const newSectors = rowsToSectors(values.sectors);
+    const newWindows = rowsToWindows(values.windows);
     const changes: RuleSetChanges = {
       ...(dirtyFields.bands === undefined ? {} : { bands: rowsToBands(values.bands) }),
       ...(sameSectorSettings(newSectors, baselineSectors) ? {} : { sectors: newSectors }),
+      ...(sameWindows(newWindows, rules.operatingWindows) ? {} : { operatingWindows: newWindows }),
     };
     if (Object.keys(changes).length === 0) {
       // Only the order of sectors without priority changed: that is not part of the rules.
@@ -87,6 +94,7 @@ export function DraftEditor({ rules, sectors }: DraftEditorProps): JSX.Element {
           )}
           <BandsEditor gauge={rules.gauge} />
           <SectorsEditor sectors={sectors} />
+          <WindowsEditor />
           <div className={cn(styles.actions)}>
             <Button
               type="submit"

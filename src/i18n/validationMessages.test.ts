@@ -21,6 +21,10 @@ const KEYS: readonly ValidationMessageKey[] = [
   'bandOverlap',
   'bandGap',
   'duplicateSector',
+  'time',
+  'windowOrder',
+  'windowOverlap',
+  'tooManyItems',
 ];
 
 const MAX_HOURS = 24;
