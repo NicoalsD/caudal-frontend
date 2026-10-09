@@ -33,6 +33,13 @@ export class SessionStore {
     this.update(RESTORING);
   }
 
+  /** The server answered PASSWORD_CHANGE_REQUIRED: from now on only the change screen is open. */
+  requirePasswordChange(): void {
+    if (this.state.status === 'authenticated' && !this.state.user.mustChangePassword) {
+      this.signIn({ ...this.state.user, mustChangePassword: true });
+    }
+  }
+
   expire(): void {
     this.update(EXPIRED);
   }

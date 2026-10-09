@@ -55,7 +55,11 @@ export function createAppServices(
   });
   const api = new CaudalApi(http, adapter);
   const sessionStore = new SessionStore();
-  const queryClient = createQueryClient();
+  // The query client is needed to build the controller, and the controller reads its errors.
+  const errorSink = { handle: (_error: unknown): void => undefined };
+  const queryClient = createQueryClient((error) => {
+    errorSink.handle(error);
+  });
   const session = new SessionController({
     api,
     tokens,
@@ -65,5 +69,8 @@ export function createAppServices(
     clock,
     scheduler,
   });
+  errorSink.handle = (error) => {
+    session.handleError(error);
+  };
   return { api, tokens, sessionStore, session, queryClient };
 }

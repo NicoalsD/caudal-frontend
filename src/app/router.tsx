@@ -1,9 +1,10 @@
 import { createBrowserRouter } from 'react-router';
 import type { RouteObject } from 'react-router';
 
-import { LoginPage } from '../features/auth';
+import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
+import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
 import { RequireRole } from './guards/RequireRole';
 import { BoardLayout } from './layouts/BoardLayout';
 import { EntityLayout } from './layouts/EntityLayout';
@@ -35,7 +36,7 @@ const publicRoutes: RouteObject = {
 const sessionRoutes: RouteObject = {
   element: <PublicLayout />,
   children: [
-    screen(ROUTE_PATHS.changePassword, t('screens.changePassword')),
+    { path: ROUTE_PATHS.changePassword, element: <ChangePasswordPage /> },
     screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice')),
   ],
 };
@@ -130,11 +131,10 @@ export function buildRoutes(): RouteObject[] {
           element: <RequireAuth />,
           children: [
             sessionRoutes,
-            operatorRoutes,
-            boardRoutes,
-            teamRoutes,
-            entityRoutes,
-            sharedRoutes,
+            {
+              element: <RequirePasswordChanged />,
+              children: [operatorRoutes, boardRoutes, teamRoutes, entityRoutes, sharedRoutes],
+            },
           ],
         },
         {

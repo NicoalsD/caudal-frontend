@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 
+import { DomainError } from '../core/errors/DomainError';
 import { NetworkError } from '../core/errors/NetworkError';
 import { readAccessTokenClaims } from '../core/session/accessTokenClaims';
 import type { SessionUser } from '../core/session/SessionState';
@@ -13,6 +14,7 @@ import type { TokenStore } from '../services/session/TokenStore';
 import type { SessionStore } from './SessionStore';
 
 const MS_PER_SECOND = 1000;
+const PASSWORD_CHANGE_REQUIRED_CODE = 'PASSWORD_CHANGE_REQUIRED';
 
 export interface SessionControllerDependencies {
   readonly api: CaudalApi;
@@ -98,6 +100,16 @@ export class SessionController {
     } finally {
       this.cleanUp();
       this.deps.store.clear();
+    }
+  }
+
+  /**
+   * Looks at every failed query or mutation. PASSWORD_CHANGE_REQUIRED (403) means the account
+   * must change its password first, whatever screen noticed it (API.md section 1.4).
+   */
+  handleError(error: unknown): void {
+    if (error instanceof DomainError && error.code === PASSWORD_CHANGE_REQUIRED_CODE) {
+      this.deps.store.requirePasswordChange();
     }
   }
 
