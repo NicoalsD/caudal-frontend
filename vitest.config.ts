@@ -5,6 +5,11 @@ import viteConfig from './vite.config.ts';
 export default mergeConfig(
   viteConfig,
   defineConfig({
+    resolve: {
+      // Under Node, react-router and react-router/dom resolve to different builds, which splits
+      // the router contexts in two. Tests use the root entry point for both.
+      alias: [{ find: /^react-router\/dom$/, replacement: 'react-router' }],
+    },
     test: {
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],

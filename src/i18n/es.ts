@@ -62,6 +62,10 @@ export const strings = {
     imports: 'Importar historial',
     summaries: 'Resúmenes autorizados',
   },
+  connection: {
+    constraintsMissing:
+      'No pudimos cargar los límites de los campos. Conéctate a internet para registrar datos.',
+  },
   validation: {
     required: 'Este dato es obligatorio',
     min: 'Escribe al menos {min} caracteres',

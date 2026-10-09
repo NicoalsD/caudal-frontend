@@ -33,3 +33,9 @@ export const SERVER_ERROR_MIN_STATUS = 500;
 /** First status code that is not a success. */
 export const FIRST_NON_SUCCESS_STATUS = 300;
 export const NO_CONTENT_STATUS = 204;
+
+/** Reference data (constraints, catalogs) changes rarely: kept fresh for one hour. */
+export const REFERENCE_STALE_TIME_MS = 3_600_000;
+
+/** Client policy: retries of a failed query before showing the error (architecture.md 6.1). */
+export const QUERY_RETRY_COUNT = 1;
