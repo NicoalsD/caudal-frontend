@@ -39,6 +39,7 @@ Solo esas tres cuentas. Cambio de cuenta, ramas, commits y PR: [`.agents/workflo
 - `tipo: descripción` en español, minúscula, máximo 72 caracteres. Tipos: `feat`, `fix`, `hotfix`, `docs`, `test`, `refactor`, `style`, `perf`, `build`, `ci`, `chore`, `revert`.
 - Un commit por unidad lógica; hook activo con `git config core.hooksPath .githooks`.
 - PR hacia `develop` con plantilla; merge commit.
+- **Todo PR se fusiona** en cuanto sus checks estén en verde, con merge commit y con la cuenta de su autor (`gh auth switch` a esa cuenta antes de `gh pr merge`); ningún agente deja PR abiertos. Pasos: [`.agents/workflow.md`](.agents/workflow.md#4-pull-requests-y-fusión-obligatorio).
 - **Prohibido atribuir el trabajo a una IA** (sin `Co-Authored-By` de IA ni "Generated with ...").
 
 ### 3.2 Sin valores quemados
