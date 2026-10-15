@@ -5,7 +5,7 @@ import { toBogotaDateKey } from '../../core/format/time';
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { PERMISSIONS_BY_ROLE } from '../../test/factories/auth';
-import { buildProposalSummary } from '../../test/factories/proposals';
+import { buildProposal } from '../../test/factories/proposals';
 import { buildSessionUser } from '../../test/factories/session';
 import { createProposalsBackend } from '../../test/msw/proposalsBackend';
 import { server } from '../../test/msw/server';
@@ -27,7 +27,7 @@ describe('BoardDayGuide (F088): one next step on the tank screen', () => {
   });
 
   it('asks to review a pending proposal', async () => {
-    server.use(...createProposalsBackend([buildProposalSummary({ service_date: TODAY })]).handlers);
+    server.use(...createProposalsBackend([buildProposal({ service_date: TODAY })]).handlers);
     renderApp(ROUTE_PATHS.board.tank, { user: board() });
 
     const guide = within(await GUIDE());
@@ -37,7 +37,7 @@ describe('BoardDayGuide (F088): one next step on the tank screen', () => {
   it('asks to publish an approved proposal', async () => {
     server.use(
       ...createProposalsBackend([
-        buildProposalSummary({ service_date: TODAY, status: 'APPROVED', lock_version: 1 }),
+        buildProposal({ service_date: TODAY, status: 'APPROVED', lock_version: 1 }),
       ]).handlers,
     );
     renderApp(ROUTE_PATHS.board.tank, { user: board() });
@@ -49,7 +49,7 @@ describe('BoardDayGuide (F088): one next step on the tank screen', () => {
   it('shows the published schedule with a link to it', async () => {
     server.use(
       ...createProposalsBackend([
-        buildProposalSummary({ service_date: TODAY, status: 'PUBLISHED', lock_version: 2 }),
+        buildProposal({ service_date: TODAY, status: 'PUBLISHED', lock_version: 2 }),
       ]).handlers,
     );
     renderApp(ROUTE_PATHS.board.tank, { user: board() });

@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
-import { buildProposalSummary } from '../factories/proposals';
+import { buildProposal, buildProposalSummary, DAY_HOURS } from '../factories/proposals';
 import type { components } from '../../services/api/schema';
 import type { ProposalDto, ProposalSummaryDto } from '../factories/proposals';
 import { apiUrl } from './apiUrl';
@@ -116,12 +116,12 @@ export function createProposalsBackend(initial: readonly ProposalDto[]) {
         rule_set_id: items[0]?.rule_set_id ?? crypto.randomUUID(),
         tank_level_snapshot: 2.1,
         tank_band: 'LOW',
-        available_hours: 8,
+        available_hours: DAY_HOURS,
         forecast_run_id: null,
         strategy_code: 'PRIORITY_THEN_LONGEST_WAIT',
         generated_at: new Date().toISOString(),
         lock_version: 0,
-        items: [],
+        items: buildProposal().items,
         unserved_sectors: [],
         decisions: [],
         snapshot_taken: false,
