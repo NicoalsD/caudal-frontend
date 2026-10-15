@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SubmitReadingCommand } from '../core/commands/SubmitReadingCommand';
 import { ROUTE_PATHS } from '../core/session/routes';
 import type { Scheduler } from '../core/time/Scheduler';
 import { t } from '../i18n/t';
@@ -235,6 +236,41 @@ describe('sign out', () => {
     expect(services.tokens.get()).toBeNull();
     expect(services.sessionStore.getSnapshot()).toEqual({ status: 'anonymous' });
     expect(services.queryClient.getQueryData(['datos'])).toBeUndefined();
+  });
+
+  it('keeps the queued readings and clears the reference copies', async () => {
+    const backend = createSessionBackend(TEST_USERS.operator);
+    server.use(...backend.handlers);
+    const services = createAppServices(ENV);
+    const user = await services.session.signIn({
+      username: TEST_USERS.operator.username,
+      password: TEST_PASSWORD,
+    });
+    const clientId = `queued-${crypto.randomUUID()}`;
+    const cacheKey = `${user.aqueductId}|tanks-${clientId}`;
+    await services.offline.outbox.enqueue(
+      new SubmitReadingCommand(clientId, {
+        tankId: 't-1',
+        gaugeValue: 2.1,
+        waterAppearanceCode: 'NORMAL',
+        damageNoticed: false,
+        note: '',
+        observedAt: '2026-10-14T08:00:00.000Z',
+      }),
+      { userId: user.userId, aqueductId: user.aqueductId },
+      null,
+    );
+    await OfflineDatabase.shared.referenceCache.put({
+      key: cacheKey,
+      aqueductId: user.aqueductId,
+      fetchedAtMs: 1,
+      payload: [],
+    });
+
+    await services.session.logout();
+
+    expect(await OfflineDatabase.shared.outbox.get(clientId)).toBeDefined();
+    expect(await OfflineDatabase.shared.referenceCache.get(cacheKey)).toBeUndefined();
   });
 
   it('closes the local session even if the server is unreachable', async () => {

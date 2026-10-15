@@ -98,6 +98,7 @@ export function createAppServices(
   const queryClient = createQueryClient((error) => {
     errorSink.handle(error);
   });
+  const referenceStore = new IndexedReferenceStore(OfflineDatabase.shared);
   const session = new SessionController({
     api,
     tokens,
@@ -107,6 +108,7 @@ export function createAppServices(
     clock,
     scheduler,
     hints: hintStore,
+    references: referenceStore,
   });
   errorSink.handle = (error) => {
     session.handleError(error);
@@ -140,7 +142,7 @@ export function createAppServices(
     ids,
     outbox,
     sync,
-    reference: new ReferenceFallback(new IndexedReferenceStore(OfflineDatabase.shared), clock),
+    reference: new ReferenceFallback(referenceStore, clock),
     connectivity,
     syncQueue: new SyncQueueStore(outbox),
     syncTrigger: new SyncTrigger(sync, connectivity, scheduler, FLUSH_INTERVAL_MS),

@@ -13,8 +13,8 @@ import { useSessionActions } from '../../state/hooks/sessionActionsContext';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
-import { Button } from '../../ui/primitives/Button';
 import { ChangePasswordForm } from './ChangePasswordForm';
+import { SignOutButton } from './SignOutButton';
 
 /**
  * Screen S02. While the server demands a change (first sign in, or after a reset) it explains
@@ -65,13 +65,7 @@ export function ChangePasswordPage(): JSX.Element {
           onSubmit={(change) => actions.changePassword(change)}
         />
       ) : null}
-      <Button
-        onClick={() => {
-          void actions.logout();
-        }}
-      >
-        {t('auth.signOut')}
-      </Button>
+      <SignOutButton />
     </>
   );
 }

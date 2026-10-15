@@ -516,6 +516,13 @@ export const strings = {
     pending: 'Pendientes: {count}',
     needsReviewOne: '1 lectura necesita revisión',
     needsReviewMany: '{count} lecturas necesitan revisión',
+    signOutTitle: '¿Cerrar sesión?',
+    signOutOneUnsent:
+      'Tienes 1 lectura sin enviar en este celular. Si cierras sesión, queda guardada y se enviará cuando vuelvas a entrar con tu cuenta. ¿Cerrar sesión de todos modos?',
+    signOutManyUnsent:
+      'Tienes {count} lecturas sin enviar en este celular. Si cierras sesión, quedan guardadas y se enviarán cuando vuelvas a entrar con tu cuenta. ¿Cerrar sesión de todos modos?',
+    signOutStay: 'Seguir aquí',
+    signOutConfirm: 'Cerrar sesión',
   },
   connection: {
     constraintsMissing:
