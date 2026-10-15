@@ -7,6 +7,8 @@ import {
   toBogotaDateKey,
 } from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
+
+const MS_PER_HOUR = 3_600_000;
 import type { components } from '../schema';
 import type { Membership } from '../../../core/session/memberships';
 import { isBandCode } from '../../../core/rules/ruleSetParts';
@@ -18,6 +20,8 @@ import type {
   ValveOrder,
 } from '../../../core/rules/ruleSetParts';
 import { isReportStatus } from '../../../core/incidents/reportStatus';
+import { isProposalStatus } from '../../../core/proposal/proposalStatus';
+import { bogotaMinutesOf } from '../../../core/proposal/proposalTime';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -29,6 +33,11 @@ import type {
   DamageReportReceiptView,
   IncidentPageView,
   IncidentView,
+  ScheduleItemView,
+  ScheduleProposalPageView,
+  ScheduleProposalSummaryView,
+  ScheduleProposalView,
+  SchedulePublicationView,
   PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
@@ -62,6 +71,11 @@ type CatalogItemDto = components['schemas']['CatalogItem'];
 type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
+type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
+type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
+type ProposalDto = components['schemas']['ScheduleProposal'];
+type ProposalItemDto = components['schemas']['ScheduleItem'];
+type PublicationDto = components['schemas']['SchedulePublication'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -181,6 +195,80 @@ export class ApiDtoAdapter {
   toIncidentPage(dto: IncidentPageDto): IncidentPageView {
     return {
       items: dto.items.map((item) => this.toIncident(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toProposalSummary(dto: ProposalSummaryDto): ScheduleProposalSummaryView {
+    if (!isProposalStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      serviceDate: dto.service_date,
+      status: dto.status,
+      generatedAt: this.toTimestamp('generated_at', dto.generated_at),
+      availableHours: this.toDecimal('available_hours', dto.available_hours),
+      tankBand: dto.tank_band ?? null,
+      tankLevel:
+        dto.tank_level_snapshot === undefined || dto.tank_level_snapshot === null
+          ? null
+          : this.toDecimal('tank_level_snapshot', dto.tank_level_snapshot),
+      lockVersion: dto.lock_version,
+    };
+  }
+
+  toProposal(dto: ProposalDto): ScheduleProposalView {
+    const summary = this.toProposalSummary(dto);
+    return {
+      ...summary,
+      ruleSetId: dto.rule_set_id,
+      strategyCode: dto.strategy_code,
+      items: dto.items
+        .map((item) => this.toScheduleItem(item))
+        .sort((a, b) => a.sequence - b.sequence),
+      unservedSectors: dto.unserved_sectors.map((sector) => ({
+        sectorId: sector.sector_id,
+        reason: sector.reason,
+      })),
+      decisions: dto.decisions.map((decision) => ({
+        decision: decision.decision,
+        reason: decision.reason ?? null,
+        decidedAt: this.toTimestamp('decided_at', decision.decided_at),
+      })),
+      snapshotTaken: dto.snapshot_taken,
+    };
+  }
+
+  private toScheduleItem(dto: ProposalItemDto): ScheduleItemView {
+    const start = parseInstant(dto.start_at);
+    const end = parseInstant(dto.end_at);
+    return {
+      id: dto.id,
+      sectorId: dto.sector_id,
+      sequence: dto.sequence,
+      startMinutes: bogotaMinutesOf(dto.start_at),
+      startTime: formatTime(dto.start_at),
+      endTime: formatTime(dto.end_at),
+      hours: (end.getTime() - start.getTime()) / MS_PER_HOUR,
+      origin: dto.origin,
+      reasons: dto.reasons.map((reason) => ({ code: reason.code, text: reason.text })),
+    };
+  }
+
+  toPublication(dto: PublicationDto): SchedulePublicationView {
+    return {
+      id: dto.id,
+      proposalId: dto.proposal_id,
+      publishedAt: this.toTimestamp('published_at', dto.published_at),
+      whatsappText: dto.whatsapp_text,
+      posterSha256: dto.poster_sha256 ?? null,
+    };
+  }
+
+  toProposalPage(dto: ProposalPageDto): ScheduleProposalPageView {
+    return {
+      items: dto.items.map((item) => this.toProposalSummary(item)),
       nextCursor: dto.next_cursor ?? null,
     };
   }

@@ -311,86 +311,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/readings/batch": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Sincroniza la cola offline de lecturas
-         * @description Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.
-         */
-        post: operations["submitReadingBatch"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/readings/{id}/corrections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Corrige una lectura ya guardada, con motivo
-         * @description Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.
-         */
-        post: operations["correctReading"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/tanks/{id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Estado del tanque: último nivel, tendencia, antigüedad y pronóstico
-         * @description Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.
-         */
-        get: operations["getTankStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/imports/readings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Importa historial simulado de lecturas (acueducto demo)
-         * @description Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.
-         */
-        post: operations["importSimulatedReadings"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/public/{aqueductSlug}/schedule": {
         parameters: {
             query?: never;
@@ -549,6 +469,210 @@ export interface paths {
          * @description Permiso INCIDENT_CREATE o INCIDENT_MANAGE. Cada cambio queda en el historial.
          */
         patch: operations["changeIncidentStatus"];
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Propuestas de turnos
+         * @description Permiso PROPOSAL_VIEW. API.md sección 10.2. Sin turnos: el detalle está en GET /{id}.
+         */
+        get: operations["listScheduleProposals"];
+        put?: never;
+        /**
+         * Genera la propuesta de un día
+         * @description Permiso PROPOSAL_GENERATE. Estado inicial PENDING_REVIEW. API.md sección 10.1.
+         */
+        post: operations["generateScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una propuesta
+         * @description Permiso PROPOSAL_VIEW. Incluye turnos, sectores sin turno y decisiones (API.md 10.3).
+         */
+        get: operations["getScheduleProposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aprueba la propuesta
+         * @description Permiso PROPOSAL_DECIDE. API.md 10.4.
+         */
+        post: operations["approveScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/modify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Modifica los turnos con motivo
+         * @description Permiso PROPOSAL_DECIDE. Guarda un snapshot antes del cambio. API.md 10.5.
+         */
+        post: operations["modifyScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rechaza la propuesta con motivo
+         * @description Permiso PROPOSAL_DECIDE. Estado final REJECTED. API.md 10.6.
+         */
+        post: operations["rejectScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publica el horario aprobado
+         * @description Permiso SCHEDULE_PUBLISH. La propuesta pasa a PUBLISHED. API.md 10.7.
+         */
+        post: operations["publishScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/readings/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sincroniza la cola offline de lecturas
+         * @description Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.
+         */
+        post: operations["submitReadingBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/readings/{id}/corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corrige una lectura ya guardada, con motivo
+         * @description Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.
+         */
+        post: operations["correctReading"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tanks/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado del tanque: último nivel, tendencia, antigüedad y pronóstico
+         * @description Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.
+         */
+        get: operations["getTankStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Importa historial simulado de lecturas (acueducto demo)
+         * @description Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.
+         */
+        post: operations["importSimulatedReadings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/tanks/{id}/forecasts/latest": {
@@ -920,6 +1044,237 @@ export interface components {
         ValveList: {
             items: components["schemas"]["Valve"][];
         };
+        /** @description Acueducto del horario público. Sin datos personales. */
+        PublicScheduleAqueduct: {
+            name: string;
+            is_demo: boolean;
+        };
+        PublicSchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        /** @description Turno de un sector. Solo nombre del sector y horas. */
+        PublicScheduleItem: {
+            sector_name: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+        };
+        PublicSchedule: {
+            aqueduct: components["schemas"]["PublicScheduleAqueduct"];
+            /**
+             * Format: date
+             * @description Día de servicio en America/Bogota.
+             */
+            service_date: string;
+            publication: components["schemas"]["PublicSchedulePublication"];
+            items: components["schemas"]["PublicScheduleItem"][];
+        };
+        /** @description Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan. */
+        CreateDamageReportRequest: {
+            /** @description Código de DAMAGE_CATEGORY. */
+            category_code: string;
+            /** @description 10 a 500 caracteres (incident.description). */
+            description: string;
+            /** @description 0 a 120 caracteres. */
+            location_hint?: string;
+            /** @description Campo trampa oculto. Debe llegar vacío. */
+            website: string;
+            /**
+             * Format: date-time
+             * @description Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío.
+             */
+            form_started_at: string;
+        };
+        DamageReportCreated: {
+            /** @description 8 caracteres Crockford base32. Se muestra una sola vez. */
+            tracking_code: string;
+            /** @enum {string} */
+            status: "REPORTED";
+            message: string;
+        };
+        CatalogItem: {
+            code: string;
+            label_es: string;
+            sort_order: number;
+        };
+        CatalogList: {
+            items: components["schemas"]["CatalogItem"][];
+        };
+        /** @description Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante. */
+        PublicDamageReportStatus: {
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            status_label_es: string;
+            category_label_es: string;
+            /** Format: date-time */
+            reported_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        /** @description Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante. */
+        Incident: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            source: "PUBLIC_FORM" | "OPERATOR" | "ANOMALY" | "IMPORT";
+            category_code: string;
+            /** Format: uuid */
+            sector_id?: string | null;
+            description: string;
+            location_hint?: string | null;
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            /** Format: date-time */
+            reported_at: string;
+        };
+        IncidentPage: {
+            items: components["schemas"]["Incident"][];
+            next_cursor: string | null;
+        };
+        /** @description Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500). */
+        UpdateIncidentStatusRequest: {
+            /** @enum {string} */
+            status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            note?: string;
+        };
+        /** @description Propuesta de turnos sin sus turnos (API.md 10.2). */
+        ScheduleProposalSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            /** @enum {string} */
+            status: "PENDING_REVIEW" | "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED" | "PUBLISHED" | "CLOSED";
+            /** Format: uuid */
+            rule_set_id: string;
+            /** Format: double */
+            tank_level_snapshot?: number | null;
+            tank_band: string | null;
+            /** Format: double */
+            available_hours: number;
+            /** Format: uuid */
+            forecast_run_id?: string | null;
+            strategy_code: string;
+            /** Format: date-time */
+            generated_at: string;
+            lock_version: number;
+        };
+        ScheduleProposalPage: {
+            items: components["schemas"]["ScheduleProposalSummary"][];
+            next_cursor: string | null;
+        };
+        GenerateScheduleProposalRequest: {
+            /** Format: date */
+            service_date: string;
+        };
+        /** @description Motivo de un turno (API.md 10.3). El texto lo arma el servidor. */
+        ScheduleReason: {
+            /** @example PRIORITY_SECTOR */
+            code: string;
+            params: {
+                [key: string]: unknown;
+            };
+            text: string;
+        };
+        ScheduleItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sector_id: string;
+            sequence: number;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            /** @enum {string} */
+            origin: "PROPOSED" | "MODIFIED" | "ADDED";
+            reasons: components["schemas"]["ScheduleReason"][];
+        };
+        /** @description Sector sin turno y su motivo (API.md 10.3). */
+        UnservedSector: {
+            /** Format: uuid */
+            sector_id: string;
+            /** @example NO_BUDGET */
+            reason: string;
+        };
+        /** @description Decisión de la Junta (historial de la propuesta). */
+        ScheduleDecision: {
+            /** @enum {string} */
+            decision: "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED";
+            reason?: string | null;
+            /** Format: uuid */
+            decided_by: string;
+            /** Format: date-time */
+            decided_at: string;
+        };
+        /** @description Propuesta completa de turnos con sus explicaciones (API.md 10.1 y 10.3). */
+        ScheduleProposal: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            /** @enum {string} */
+            status: "PENDING_REVIEW" | "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED" | "PUBLISHED" | "CLOSED";
+            /** Format: uuid */
+            rule_set_id: string;
+            /** Format: double */
+            tank_level_snapshot?: number | null;
+            tank_band: string | null;
+            /** Format: double */
+            available_hours: number;
+            /** Format: uuid */
+            forecast_run_id?: string | null;
+            strategy_code: string;
+            /** Format: date-time */
+            generated_at: string;
+            lock_version: number;
+            items: components["schemas"]["ScheduleItem"][];
+            unserved_sectors: components["schemas"]["UnservedSector"][];
+            decisions: components["schemas"]["ScheduleDecision"][];
+            snapshot_taken: boolean;
+        };
+        /** @description Versión que vio la Junta (lock_version, API.md 10.4 y 10.7). */
+        DecideScheduleProposalRequest: {
+            lock_version: number;
+        };
+        /** @description Rechazo con motivo de 10 a 500 caracteres (API.md 10.6). */
+        RejectScheduleProposalRequest: {
+            lock_version: number;
+            reason: string;
+        };
+        /** @description Turno que deja la Junta (API.md 10.5). */
+        ScheduleItemInput: {
+            /** Format: uuid */
+            id?: string | null;
+            /** Format: uuid */
+            sector_id: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            sequence: number;
+        };
+        /** @description Cambios de la Junta con motivo (API.md 10.5). */
+        ModifyScheduleProposalRequest: {
+            lock_version: number;
+            reason: string;
+            items: components["schemas"]["ScheduleItemInput"][];
+        };
+        /** @description Publicación del horario, sin datos personales (API.md 10.7). */
+        SchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            proposal_id: string;
+            /** Format: date-time */
+            published_at: string;
+            whatsapp_text: string;
+            poster_sha256?: string | null;
+        };
         ReadingBatchItem: {
             /**
              * Format: uuid
@@ -1058,103 +1413,6 @@ export interface components {
             rows_accepted: number;
             rows_rejected: number;
             rejections: components["schemas"]["ImportRejection"][];
-        };
-        /** @description Acueducto del horario público. Sin datos personales. */
-        PublicScheduleAqueduct: {
-            name: string;
-            is_demo: boolean;
-        };
-        PublicSchedulePublication: {
-            /** Format: uuid */
-            id: string;
-            /** Format: date-time */
-            published_at: string;
-        };
-        /** @description Turno de un sector. Solo nombre del sector y horas. */
-        PublicScheduleItem: {
-            sector_name: string;
-            /** Format: date-time */
-            start_at: string;
-            /** Format: date-time */
-            end_at: string;
-        };
-        PublicSchedule: {
-            aqueduct: components["schemas"]["PublicScheduleAqueduct"];
-            /**
-             * Format: date
-             * @description Día de servicio en America/Bogota.
-             */
-            service_date: string;
-            publication: components["schemas"]["PublicSchedulePublication"];
-            items: components["schemas"]["PublicScheduleItem"][];
-        };
-        /** @description Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan. */
-        CreateDamageReportRequest: {
-            /** @description Código de DAMAGE_CATEGORY. */
-            category_code: string;
-            /** @description 10 a 500 caracteres (incident.description). */
-            description: string;
-            /** @description 0 a 120 caracteres. */
-            location_hint?: string;
-            /** @description Campo trampa oculto. Debe llegar vacío. */
-            website: string;
-            /**
-             * Format: date-time
-             * @description Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío.
-             */
-            form_started_at: string;
-        };
-        DamageReportCreated: {
-            /** @description 8 caracteres Crockford base32. Se muestra una sola vez. */
-            tracking_code: string;
-            /** @enum {string} */
-            status: "REPORTED";
-            message: string;
-        };
-        CatalogItem: {
-            code: string;
-            label_es: string;
-            sort_order: number;
-        };
-        CatalogList: {
-            items: components["schemas"]["CatalogItem"][];
-        };
-        /** @description Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante. */
-        PublicDamageReportStatus: {
-            /** @enum {string} */
-            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
-            status_label_es: string;
-            category_label_es: string;
-            /** Format: date-time */
-            reported_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante. */
-        Incident: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            source: "PUBLIC_FORM" | "OPERATOR" | "ANOMALY" | "IMPORT";
-            category_code: string;
-            /** Format: uuid */
-            sector_id?: string | null;
-            description: string;
-            location_hint?: string | null;
-            /** @enum {string} */
-            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
-            /** Format: date-time */
-            reported_at: string;
-        };
-        IncidentPage: {
-            items: components["schemas"]["Incident"][];
-            next_cursor: string | null;
-        };
-        /** @description Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500). */
-        UpdateIncidentStatusRequest: {
-            /** @enum {string} */
-            status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
-            note?: string;
         };
         ForecastRun: {
             /** Format: uuid */
@@ -1824,201 +2082,6 @@ export interface operations {
             };
         };
     };
-    submitReadingBatch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadingBatchRequest"];
-            };
-        };
-        responses: {
-            /** @description Resultado por lectura, en el orden del envío. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReadingBatchResponse"];
-                };
-            };
-            /** @description VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    correctReading: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadingCorrectionRequest"];
-            };
-        };
-        responses: {
-            /** @description Corrección creada y valor efectivo de la lectura. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReadingCorrectionResponse"];
-                };
-            };
-            /** @description FORBIDDEN: un OPERATOR solo corrige sus propias lecturas. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description NOT_FOUND: la lectura no existe o es de otro acueducto. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres). */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    getTankStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Estado del tanque. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TankStatus"];
-                };
-            };
-            /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    importSimulatedReadings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ImportReadingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Lote importado con sus conteos y los rechazos por fila. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImportReadingsResponse"];
-                };
-            };
-            /** @description DEMO_ONLY: el acueducto no es el de demostración. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description CONFLICT: este file_sha256 ya se importó. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     getPublicSchedule: {
         parameters: {
             query?: {
@@ -2306,6 +2369,458 @@ export interface operations {
                 };
             };
             /** @description REASON_REQUIRED: descarte sin nota válida. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listScheduleProposals: {
+        parameters: {
+            query?: {
+                service_date_from?: string;
+                service_date_to?: string;
+                status?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de propuestas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposalPage"];
+                };
+            };
+        };
+    };
+    generateScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta generada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT: ya existe una propuesta no rechazada para la fecha. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NO_LEVEL_DATA, OUTSIDE_OPERATING_WINDOW. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Propuesta completa. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approveScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    modifyScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModifyScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    rejectScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    publishScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Publicación creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulePublication"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (no está aprobada) o CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitReadingBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Resultado por lectura, en el orden del envío. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingBatchResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    correctReading: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingCorrectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Corrección creada y valor efectivo de la lectura. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingCorrectionResponse"];
+                };
+            };
+            /** @description FORBIDDEN: un OPERATOR solo corrige sus propias lecturas. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND: la lectura no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getTankStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estado del tanque. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TankStatus"];
+                };
+            };
+            /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    importSimulatedReadings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportReadingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Lote importado con sus conteos y los rechazos por fila. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReadingsResponse"];
+                };
+            };
+            /** @description DEMO_ONLY: el acueducto no es el de demostración. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: este file_sha256 ya se importó. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
             422: {
                 headers: {
                     [name: string]: unknown;

@@ -12,6 +12,8 @@ interface DialogProps {
   readonly children: ReactNode;
   /** The control that opens the dialog: the focus goes back to it when the dialog closes. */
   readonly trigger: ReactNode;
+  /** Chooses the first control that gets the focus (for example Cancelar in a destructive action). */
+  readonly onOpenAutoFocus?: (event: Event) => void;
   /** Takes the focus when the dialog opens (Cancel in destructive actions, ux-guidelines 6). */
   readonly initialFocusRef?: RefObject<HTMLElement | null>;
 }
@@ -27,6 +29,7 @@ export function Dialog({
   description,
   children,
   trigger,
+  onOpenAutoFocus,
   initialFocusRef,
 }: DialogProps): JSX.Element {
   return (
@@ -37,6 +40,10 @@ export function Dialog({
         <RadixDialog.Content
           className={cn(styles.content)}
           onOpenAutoFocus={(event) => {
+            if (onOpenAutoFocus !== undefined) {
+              onOpenAutoFocus(event);
+              return;
+            }
             if (initialFocusRef?.current) {
               event.preventDefault();
               initialFocusRef.current.focus();

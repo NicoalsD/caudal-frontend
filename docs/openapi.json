@@ -712,244 +712,6 @@
         }
       }
     },
-    "/api/v1/readings/batch": {
-      "post": {
-        "operationId": "submitReadingBatch",
-        "summary": "Sincroniza la cola offline de lecturas",
-        "description": "Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReadingBatchRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Resultado por lectura, en el orden del envío.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReadingBatchResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/readings/{id}/corrections": {
-      "post": {
-        "operationId": "correctReading",
-        "summary": "Corrige una lectura ya guardada, con motivo",
-        "description": "Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReadingCorrectionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Corrección creada y valor efectivo de la lectura.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReadingCorrectionResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "FORBIDDEN: un OPERATOR solo corrige sus propias lecturas.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "NOT_FOUND: la lectura no existe o es de otro acueducto.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tanks/{id}/status": {
-      "get": {
-        "operationId": "getTankStatus",
-        "summary": "Estado del tanque: último nivel, tendencia, antigüedad y pronóstico",
-        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Estado del tanque.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TankStatus"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "NOT_FOUND: el tanque no existe o es de otro acueducto.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/imports/readings": {
-      "post": {
-        "operationId": "importSimulatedReadings",
-        "summary": "Importa historial simulado de lecturas (acueducto demo)",
-        "description": "Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ImportReadingsRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Lote importado con sus conteos y los rechazos por fila.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ImportReadingsResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "DEMO_ONLY: el acueducto no es el de demostración.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "CONFLICT: este file_sha256 ya se importó.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "413": {
-            "description": "PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "IMPORT_LIMIT_EXCEEDED: más de 5.000 filas.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/public/{aqueductSlug}/schedule": {
       "get": {
         "operationId": "getPublicSchedule",
@@ -1344,6 +1106,609 @@
           },
           "422": {
             "description": "REASON_REQUIRED: descarte sin nota válida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals": {
+      "get": {
+        "operationId": "listScheduleProposals",
+        "summary": "Propuestas de turnos",
+        "description": "Permiso PROPOSAL_VIEW. API.md sección 10.2. Sin turnos: el detalle está en GET /{id}.",
+        "parameters": [
+          {
+            "name": "service_date_from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "service_date_to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de propuestas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposalPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "generateScheduleProposal",
+        "summary": "Genera la propuesta de un día",
+        "description": "Permiso PROPOSAL_GENERATE. Estado inicial PENDING_REVIEW. API.md sección 10.1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateScheduleProposalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Propuesta generada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: ya existe una propuesta no rechazada para la fecha.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_LEVEL_DATA, OUTSIDE_OPERATING_WINDOW.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{id}": {
+      "get": {
+        "operationId": "getScheduleProposal",
+        "summary": "Detalle de una propuesta",
+        "description": "Permiso PROPOSAL_VIEW. Incluye turnos, sectores sin turno y decisiones (API.md 10.3).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Propuesta completa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{id}/approve": {
+      "post": {
+        "operationId": "approveScheduleProposal",
+        "summary": "Aprueba la propuesta",
+        "description": "Permiso PROPOSAL_DECIDE. API.md 10.4.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideScheduleProposalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Propuesta actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT o INVALID_STATE_TRANSITION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{id}/modify": {
+      "post": {
+        "operationId": "modifyScheduleProposal",
+        "summary": "Modifica los turnos con motivo",
+        "description": "Permiso PROPOSAL_DECIDE. Guarda un snapshot antes del cambio. API.md 10.5.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyScheduleProposalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Propuesta actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{id}/reject": {
+      "post": {
+        "operationId": "rejectScheduleProposal",
+        "summary": "Rechaza la propuesta con motivo",
+        "description": "Permiso PROPOSAL_DECIDE. Estado final REJECTED. API.md 10.6.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectScheduleProposalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Propuesta actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT o INVALID_STATE_TRANSITION.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{id}/publish": {
+      "post": {
+        "operationId": "publishScheduleProposal",
+        "summary": "Publica el horario aprobado",
+        "description": "Permiso SCHEDULE_PUBLISH. La propuesta pasa a PUBLISHED. API.md 10.7.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecideScheduleProposalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Publicación creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulePublication"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION (no está aprobada) o CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readings/batch": {
+      "post": {
+        "operationId": "submitReadingBatch",
+        "summary": "Sincroniza la cola offline de lecturas",
+        "description": "Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado por lectura, en el orden del envío.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingBatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readings/{id}/corrections": {
+      "post": {
+        "operationId": "correctReading",
+        "summary": "Corrige una lectura ya guardada, con motivo",
+        "description": "Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingCorrectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Corrección creada y valor efectivo de la lectura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingCorrectionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: un OPERATOR solo corrige sus propias lecturas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: la lectura no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tanks/{id}/status": {
+      "get": {
+        "operationId": "getTankStatus",
+        "summary": "Estado del tanque: último nivel, tendencia, antigüedad y pronóstico",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado del tanque.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TankStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/imports/readings": {
+      "post": {
+        "operationId": "importSimulatedReadings",
+        "summary": "Importa historial simulado de lecturas (acueducto demo)",
+        "description": "Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportReadingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lote importado con sus conteos y los rechazos por fila.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReadingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "DEMO_ONLY: el acueducto no es el de demostración.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: este file_sha256 ya se importó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "IMPORT_LIMIT_EXCEEDED: más de 5.000 filas.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2455,6 +2820,749 @@
           }
         }
       },
+      "PublicScheduleAqueduct": {
+        "type": "object",
+        "description": "Acueducto del horario público. Sin datos personales.",
+        "required": [
+          "name",
+          "is_demo"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "is_demo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PublicSchedulePublication": {
+        "type": "object",
+        "required": [
+          "id",
+          "published_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicScheduleItem": {
+        "type": "object",
+        "description": "Turno de un sector. Solo nombre del sector y horas.",
+        "required": [
+          "sector_name",
+          "start_at",
+          "end_at"
+        ],
+        "properties": {
+          "sector_name": {
+            "type": "string"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicSchedule": {
+        "type": "object",
+        "required": [
+          "aqueduct",
+          "service_date",
+          "publication",
+          "items"
+        ],
+        "properties": {
+          "aqueduct": {
+            "$ref": "#/components/schemas/PublicScheduleAqueduct"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Día de servicio en America/Bogota."
+          },
+          "publication": {
+            "$ref": "#/components/schemas/PublicSchedulePublication"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicScheduleItem"
+            }
+          }
+        }
+      },
+      "CreateDamageReportRequest": {
+        "type": "object",
+        "description": "Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan.",
+        "required": [
+          "category_code",
+          "description",
+          "website",
+          "form_started_at"
+        ],
+        "properties": {
+          "category_code": {
+            "type": "string",
+            "description": "Código de DAMAGE_CATEGORY."
+          },
+          "description": {
+            "type": "string",
+            "description": "10 a 500 caracteres (incident.description)."
+          },
+          "location_hint": {
+            "type": "string",
+            "description": "0 a 120 caracteres."
+          },
+          "website": {
+            "type": "string",
+            "description": "Campo trampa oculto. Debe llegar vacío."
+          },
+          "form_started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío."
+          }
+        }
+      },
+      "DamageReportCreated": {
+        "type": "object",
+        "required": [
+          "tracking_code",
+          "status",
+          "message"
+        ],
+        "properties": {
+          "tracking_code": {
+            "type": "string",
+            "description": "8 caracteres Crockford base32. Se muestra una sola vez."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogItem": {
+        "type": "object",
+        "required": [
+          "code",
+          "label_es",
+          "sort_order"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label_es": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "CatalogList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItem"
+            }
+          }
+        }
+      },
+      "PublicDamageReportStatus": {
+        "type": "object",
+        "description": "Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante.",
+        "required": [
+          "status",
+          "status_label_es",
+          "category_label_es",
+          "reported_at",
+          "updated_at"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "status_label_es": {
+            "type": "string"
+          },
+          "category_label_es": {
+            "type": "string"
+          },
+          "reported_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Incident": {
+        "type": "object",
+        "description": "Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante.",
+        "required": [
+          "id",
+          "source",
+          "category_code",
+          "description",
+          "status",
+          "reported_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "PUBLIC_FORM",
+              "OPERATOR",
+              "ANOMALY",
+              "IMPORT"
+            ]
+          },
+          "category_code": {
+            "type": "string"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "location_hint": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "reported_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IncidentPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateIncidentStatusRequest": {
+        "type": "object",
+        "description": "Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500).",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "ScheduleProposalSummary": {
+        "type": "object",
+        "description": "Propuesta de turnos sin sus turnos (API.md 10.2).",
+        "required": [
+          "id",
+          "service_date",
+          "status",
+          "rule_set_id",
+          "tank_band",
+          "available_hours",
+          "strategy_code",
+          "generated_at",
+          "lock_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_REVIEW",
+              "APPROVED",
+              "APPROVED_WITH_CHANGES",
+              "REJECTED",
+              "PUBLISHED",
+              "CLOSED"
+            ]
+          },
+          "rule_set_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_level_snapshot": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tank_band": {
+            "type": "string",
+            "nullable": true
+          },
+          "available_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "forecast_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "strategy_code": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ScheduleProposalPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleProposalSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GenerateScheduleProposalRequest": {
+        "type": "object",
+        "required": [
+          "service_date"
+        ],
+        "properties": {
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ScheduleReason": {
+        "type": "object",
+        "description": "Motivo de un turno (API.md 10.3). El texto lo arma el servidor.",
+        "required": [
+          "code",
+          "params",
+          "text"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "PRIORITY_SECTOR"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ScheduleItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "sector_id",
+          "sequence",
+          "start_at",
+          "end_at",
+          "origin",
+          "reasons"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "PROPOSED",
+              "MODIFIED",
+              "ADDED"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleReason"
+            }
+          }
+        }
+      },
+      "UnservedSector": {
+        "type": "object",
+        "description": "Sector sin turno y su motivo (API.md 10.3).",
+        "required": [
+          "sector_id",
+          "reason"
+        ],
+        "properties": {
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "example": "NO_BUDGET"
+          }
+        }
+      },
+      "ScheduleDecision": {
+        "type": "object",
+        "description": "Decisión de la Junta (historial de la propuesta).",
+        "required": [
+          "decision",
+          "decided_by",
+          "decided_at"
+        ],
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "APPROVED_WITH_CHANGES",
+              "REJECTED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "decided_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ScheduleProposal": {
+        "type": "object",
+        "description": "Propuesta completa de turnos con sus explicaciones (API.md 10.1 y 10.3).",
+        "required": [
+          "id",
+          "service_date",
+          "status",
+          "rule_set_id",
+          "tank_band",
+          "available_hours",
+          "strategy_code",
+          "generated_at",
+          "lock_version",
+          "items",
+          "unserved_sectors",
+          "decisions",
+          "snapshot_taken"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_REVIEW",
+              "APPROVED",
+              "APPROVED_WITH_CHANGES",
+              "REJECTED",
+              "PUBLISHED",
+              "CLOSED"
+            ]
+          },
+          "rule_set_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_level_snapshot": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tank_band": {
+            "type": "string",
+            "nullable": true
+          },
+          "available_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "forecast_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "strategy_code": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItem"
+            }
+          },
+          "unserved_sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnservedSector"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDecision"
+            }
+          },
+          "snapshot_taken": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DecideScheduleProposalRequest": {
+        "type": "object",
+        "description": "Versión que vio la Junta (lock_version, API.md 10.4 y 10.7).",
+        "required": [
+          "lock_version"
+        ],
+        "properties": {
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "RejectScheduleProposalRequest": {
+        "type": "object",
+        "description": "Rechazo con motivo de 10 a 500 caracteres (API.md 10.6).",
+        "required": [
+          "lock_version",
+          "reason"
+        ],
+        "properties": {
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          }
+        }
+      },
+      "ScheduleItemInput": {
+        "type": "object",
+        "description": "Turno que deja la Junta (API.md 10.5).",
+        "required": [
+          "sector_id",
+          "start_at",
+          "end_at",
+          "sequence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ModifyScheduleProposalRequest": {
+        "type": "object",
+        "description": "Cambios de la Junta con motivo (API.md 10.5).",
+        "required": [
+          "lock_version",
+          "reason",
+          "items"
+        ],
+        "properties": {
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItemInput"
+            }
+          }
+        }
+      },
+      "SchedulePublication": {
+        "type": "object",
+        "description": "Publicación del horario, sin datos personales (API.md 10.7).",
+        "required": [
+          "id",
+          "proposal_id",
+          "published_at",
+          "whatsapp_text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whatsapp_text": {
+            "type": "string"
+          },
+          "poster_sha256": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "ReadingBatchItem": {
         "type": "object",
         "required": [
@@ -2947,312 +4055,6 @@
             "items": {
               "$ref": "#/components/schemas/ImportRejection"
             }
-          }
-        }
-      },
-      "PublicScheduleAqueduct": {
-        "type": "object",
-        "description": "Acueducto del horario público. Sin datos personales.",
-        "required": [
-          "name",
-          "is_demo"
-        ],
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "is_demo": {
-            "type": "boolean"
-          }
-        }
-      },
-      "PublicSchedulePublication": {
-        "type": "object",
-        "required": [
-          "id",
-          "published_at"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "published_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PublicScheduleItem": {
-        "type": "object",
-        "description": "Turno de un sector. Solo nombre del sector y horas.",
-        "required": [
-          "sector_name",
-          "start_at",
-          "end_at"
-        ],
-        "properties": {
-          "sector_name": {
-            "type": "string"
-          },
-          "start_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "end_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PublicSchedule": {
-        "type": "object",
-        "required": [
-          "aqueduct",
-          "service_date",
-          "publication",
-          "items"
-        ],
-        "properties": {
-          "aqueduct": {
-            "$ref": "#/components/schemas/PublicScheduleAqueduct"
-          },
-          "service_date": {
-            "type": "string",
-            "format": "date",
-            "description": "Día de servicio en America/Bogota."
-          },
-          "publication": {
-            "$ref": "#/components/schemas/PublicSchedulePublication"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublicScheduleItem"
-            }
-          }
-        }
-      },
-      "CreateDamageReportRequest": {
-        "type": "object",
-        "description": "Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan.",
-        "required": [
-          "category_code",
-          "description",
-          "website",
-          "form_started_at"
-        ],
-        "properties": {
-          "category_code": {
-            "type": "string",
-            "description": "Código de DAMAGE_CATEGORY."
-          },
-          "description": {
-            "type": "string",
-            "description": "10 a 500 caracteres (incident.description)."
-          },
-          "location_hint": {
-            "type": "string",
-            "description": "0 a 120 caracteres."
-          },
-          "website": {
-            "type": "string",
-            "description": "Campo trampa oculto. Debe llegar vacío."
-          },
-          "form_started_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío."
-          }
-        }
-      },
-      "DamageReportCreated": {
-        "type": "object",
-        "required": [
-          "tracking_code",
-          "status",
-          "message"
-        ],
-        "properties": {
-          "tracking_code": {
-            "type": "string",
-            "description": "8 caracteres Crockford base32. Se muestra una sola vez."
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "REPORTED"
-            ]
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "CatalogItem": {
-        "type": "object",
-        "required": [
-          "code",
-          "label_es",
-          "sort_order"
-        ],
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label_es": {
-            "type": "string"
-          },
-          "sort_order": {
-            "type": "integer"
-          }
-        }
-      },
-      "CatalogList": {
-        "type": "object",
-        "required": [
-          "items"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CatalogItem"
-            }
-          }
-        }
-      },
-      "PublicDamageReportStatus": {
-        "type": "object",
-        "description": "Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante.",
-        "required": [
-          "status",
-          "status_label_es",
-          "category_label_es",
-          "reported_at",
-          "updated_at"
-        ],
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "REPORTED",
-              "VERIFYING",
-              "CONFIRMED",
-              "RESOLVED",
-              "DISMISSED"
-            ]
-          },
-          "status_label_es": {
-            "type": "string"
-          },
-          "category_label_es": {
-            "type": "string"
-          },
-          "reported_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "Incident": {
-        "type": "object",
-        "description": "Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante.",
-        "required": [
-          "id",
-          "source",
-          "category_code",
-          "description",
-          "status",
-          "reported_at"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "source": {
-            "type": "string",
-            "enum": [
-              "PUBLIC_FORM",
-              "OPERATOR",
-              "ANOMALY",
-              "IMPORT"
-            ]
-          },
-          "category_code": {
-            "type": "string"
-          },
-          "sector_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "description": {
-            "type": "string"
-          },
-          "location_hint": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "REPORTED",
-              "VERIFYING",
-              "CONFIRMED",
-              "RESOLVED",
-              "DISMISSED"
-            ]
-          },
-          "reported_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "IncidentPage": {
-        "type": "object",
-        "required": [
-          "items",
-          "next_cursor"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Incident"
-            }
-          },
-          "next_cursor": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "UpdateIncidentStatusRequest": {
-        "type": "object",
-        "description": "Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500).",
-        "required": [
-          "status"
-        ],
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "VERIFYING",
-              "CONFIRMED",
-              "RESOLVED",
-              "DISMISSED"
-            ]
-          },
-          "note": {
-            "type": "string",
-            "maxLength": 500
           }
         }
       },

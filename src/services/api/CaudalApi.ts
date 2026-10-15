@@ -5,6 +5,7 @@ import { CatalogApi } from './endpoints/CatalogApi';
 import { IncidentsApi } from './endpoints/IncidentsApi';
 import { MetaApi } from './endpoints/MetaApi';
 import { NetworkApi } from './endpoints/NetworkApi';
+import { ProposalsApi } from './endpoints/ProposalsApi';
 import { ImportsApi } from './endpoints/ImportsApi';
 import { ReadingsApi } from './endpoints/ReadingsApi';
 import { PublicApi } from './endpoints/PublicApi';
@@ -26,6 +27,8 @@ export class CaudalApi {
   readonly incidents: IncidentsApi;
   readonly meta: MetaApi;
   readonly network: NetworkApi;
+  /** Schedule proposals of the Board (section 10). */
+  readonly proposals: ProposalsApi;
   readonly readings: ReadingsApi;
   /** The public pages without login (section 15). */
   readonly public: PublicApi;
@@ -42,6 +45,7 @@ export class CaudalApi {
     this.incidents = new IncidentsApi(http, adapter);
     this.meta = new MetaApi(http, adapter);
     this.network = new NetworkApi(http, adapter);
+    this.proposals = new ProposalsApi(http, adapter);
     this.readings = new ReadingsApi(http, adapter);
     this.public = new PublicApi(http, adapter, apiBaseUrl);
     this.rules = new RulesApi(http, adapter);

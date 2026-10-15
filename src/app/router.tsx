@@ -9,6 +9,13 @@ import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
+import { BoardDayGuide } from '../features/board/BoardDayGuide';
+import {
+  ProposalDetailPage,
+  ProposalEditorPage,
+  ProposalListPage,
+  ProposalPublicationPage,
+} from '../features/proposals';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
@@ -81,10 +88,19 @@ const boardRoutes: RouteObject = {
     {
       element: <BoardLayout />,
       children: [
-        { path: ROUTE_PATHS.board.tank, element: <TankStatusPage /> },
-        screen(ROUTE_PATHS.board.proposals, t('screens.proposals')),
-        screen(ROUTE_PATHS.board.proposalDetail, t('screens.proposalDetail')),
-        screen(ROUTE_PATHS.board.publication, t('screens.publication')),
+        {
+          path: ROUTE_PATHS.board.tank,
+          element: (
+            <>
+              <BoardDayGuide />
+              <TankStatusPage />
+            </>
+          ),
+        },
+        { path: ROUTE_PATHS.board.proposals, element: <ProposalListPage /> },
+        { path: ROUTE_PATHS.board.proposalDetail, element: <ProposalDetailPage /> },
+        { path: ROUTE_PATHS.board.proposalEdit, element: <ProposalEditorPage /> },
+        { path: ROUTE_PATHS.board.publication, element: <ProposalPublicationPage /> },
         { path: ROUTE_PATHS.board.rules, element: <RulesPage /> },
         { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),

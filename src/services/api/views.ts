@@ -10,6 +10,7 @@ import type {
 } from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
 import type { ReportStatus } from '../../core/incidents/reportStatus';
+import type { ProposalStatus } from '../../core/proposal/proposalDay';
 import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
@@ -343,6 +344,77 @@ export interface IncidentPageView {
   readonly nextCursor: string | null;
 }
 
+/** A proposal without its shifts, as the Board's list shows it (API.md 10.2). */
+export interface ScheduleProposalSummaryView {
+  readonly id: string;
+  /** Calendar day of service as YYYY-MM-DD (no zone). */
+  readonly serviceDate: string;
+  readonly status: ProposalStatus;
+  readonly generatedAt: TimestampView;
+  readonly availableHours: DecimalView;
+  readonly tankBand: string | null;
+  readonly tankLevel: DecimalView | null;
+  readonly lockVersion: number;
+}
+
+/** One page of proposals; `nextCursor` is null when there are no more (API.md 1.5). */
+export interface ScheduleProposalPageView {
+  readonly items: readonly ScheduleProposalSummaryView[];
+  readonly nextCursor: string | null;
+}
+
+/** A reason of a shift, with the sentence the server wrote for it (API.md 10.3). */
+export interface ScheduleReasonView {
+  readonly code: string;
+  readonly text: string;
+}
+
+/** A shift of a proposal, with its times in America/Bogota and its reasons. */
+export interface ScheduleItemView {
+  readonly id: string;
+  readonly sectorId: string;
+  readonly sequence: number;
+  /** Start in minutes from midnight of America/Bogota (the editor lays the shifts out from it). */
+  readonly startMinutes: number;
+  readonly startTime: string;
+  readonly endTime: string;
+  /** Length of the shift in hours (end minus start). */
+  readonly hours: number;
+  readonly origin: 'PROPOSED' | 'MODIFIED' | 'ADDED';
+  readonly reasons: readonly ScheduleReasonView[];
+}
+
+/** A sector that got no shift, and why (code from the server). */
+export interface UnservedSectorView {
+  readonly sectorId: string;
+  readonly reason: string;
+}
+
+/** A decision of the Board in the history of a proposal. */
+export interface ScheduleDecisionView {
+  readonly decision: 'APPROVED' | 'APPROVED_WITH_CHANGES' | 'REJECTED';
+  readonly reason: string | null;
+  readonly decidedAt: TimestampView;
+}
+
+/** A full proposal (API.md 10.3): the list fields plus its shifts and history. */
+export interface ScheduleProposalView extends ScheduleProposalSummaryView {
+  readonly ruleSetId: string;
+  readonly strategyCode: string;
+  readonly items: readonly ScheduleItemView[];
+  readonly unservedSectors: readonly UnservedSectorView[];
+  readonly decisions: readonly ScheduleDecisionView[];
+  readonly snapshotTaken: boolean;
+}
+
+/** The publication of an approved proposal (API.md 10.7). Its text has no personal data. */
+export interface SchedulePublicationView {
+  readonly id: string;
+  readonly proposalId: string;
+  readonly publishedAt: TimestampView;
+  readonly whatsappText: string;
+  readonly posterSha256: string | null;
+}
 /** The kinds of anomaly the server detects (API.md 9). They are suspicions until someone confirms. */
 export type AnomalyKind =
   'POSSIBLE_LEAK' | 'SENSOR_FAULT' | 'STALE_DATA' | 'SUSPECTED_DUPLICATE' | 'ABNORMAL_DROP';
