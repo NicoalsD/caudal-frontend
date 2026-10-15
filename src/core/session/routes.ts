@@ -69,6 +69,8 @@ export const ROLES_BY_AREA = {
   board: ['BOARD_ADMIN', 'BOARD_MEMBER'],
   boardAdmin: ['BOARD_ADMIN'],
   team: ['PROJECT_TEAM'],
+  /** The AI evaluation: the project team, and the Board's administrator (seed V45: every permission). */
+  evaluation: ['BOARD_ADMIN', 'PROJECT_TEAM'],
   /** The audit log is read by the Board's administrator and by the project team (seed V45). */
   audit: ['BOARD_ADMIN', 'PROJECT_TEAM'],
   entity: ['SUPPORT_ENTITY'],

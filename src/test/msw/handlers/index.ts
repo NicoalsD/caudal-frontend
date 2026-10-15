@@ -1,6 +1,7 @@
 import { anomaliesHandlers } from './anomalies';
 import { authHandlers } from './auth';
 import { catalogHandlers } from './catalogs';
+import { evaluationHandlers } from './evaluation';
 import { incidentsHandlers } from './incidents';
 import { scheduleHandlers } from './schedule';
 import { metaHandlers } from './meta';
@@ -23,4 +24,5 @@ export const handlers = [
   ...incidentsHandlers,
   ...scheduleHandlers,
   ...proposalsHandlers,
+  ...evaluationHandlers,
 ];
