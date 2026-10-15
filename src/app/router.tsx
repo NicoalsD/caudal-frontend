@@ -6,6 +6,7 @@ import { NetworkPage } from '../features/admin';
 import { ImportPage } from '../features/imports';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
 import { DayClosurePage } from '../features/closure';
+import { MinutesPage } from '../features/minutes';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
@@ -90,7 +91,7 @@ const boardRoutes: RouteObject = {
         { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
-        screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
+        { path: ROUTE_PATHS.board.minutes, element: <MinutesPage /> },
         { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
         screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {

@@ -1,3 +1,5 @@
+import type { EpistemicSection } from '../../core/minutes/minutesPeriod';
+export type MinutesStatus = 'DRAFT' | 'FINAL';
 import type { ShiftStatus } from '../../core/execution/shiftExecution';
 import type { BatchItemAnswer } from '../../core/commands/batchOutcome';
 import type { ReadingImportRow } from '../../core/imports/readingImport';
@@ -415,4 +417,33 @@ export interface DayClosureView {
   readonly notes: string | null;
   readonly closedAt: TimestampView;
   readonly executions: readonly ShiftExecutionView[];
+}
+
+/** An acta without its sections (API.md 13.8). `finalizedAt` and `pdfSha256` are null while it is a draft. */
+export interface MinutesSummaryView {
+  readonly id: string;
+  readonly periodFrom: string;
+  readonly periodTo: string;
+  readonly status: MinutesStatus;
+  readonly generatedAt: TimestampView;
+  readonly finalizedAt: TimestampView | null;
+  readonly pdfSha256: string | null;
+}
+
+/** One record of an acta section, already in plain words (the server writes the summary). */
+export interface MinutesEntryView {
+  readonly source: string;
+  readonly sourceId: string;
+  readonly at: TimestampView;
+  readonly summary: string;
+}
+
+/** An acta with its four sections (API.md 13.2). */
+export interface MinutesView extends MinutesSummaryView {
+  readonly content: Readonly<Record<EpistemicSection, readonly MinutesEntryView[]>>;
+}
+
+export interface MinutesPageView {
+  readonly items: readonly MinutesSummaryView[];
+  readonly nextCursor: string | null;
 }

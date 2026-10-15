@@ -1794,6 +1794,132 @@
           }
         }
       }
+    },
+    "/api/v1/minutes": {
+      "get": {
+        "operationId": "listMinutes",
+        "summary": "Actas del acueducto, de la más reciente a la más antigua",
+        "description": "Permiso MINUTES_VIEW. Sin secciones (content): el detalle está en GET /minutes/{id}. API.md 13.8.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de actas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinutesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "generateMinutes",
+        "summary": "Genera un acta del periodo en borrador",
+        "description": "Permiso MINUTES_GENERATE. API.md 13.1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MinutesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Acta en borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Minutes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: periodo invertido o de más de 366 días.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/minutes/{id}": {
+      "get": {
+        "operationId": "getMinutes",
+        "summary": "Acta con sus cuatro secciones",
+        "description": "Permiso MINUTES_VIEW. API.md 13.2.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Minutes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3938,6 +4064,207 @@
             "items": {
               "$ref": "#/components/schemas/ShiftExecution"
             }
+          }
+        }
+      },
+      "MinutesRequest": {
+        "type": "object",
+        "required": [
+          "period_from",
+          "period_to"
+        ],
+        "properties": {
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MinutesEntry": {
+        "type": "object",
+        "description": "Un registro del acta, en palabras llanas.",
+        "required": [
+          "source",
+          "source_id",
+          "at",
+          "summary"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      },
+      "MinutesContent": {
+        "type": "object",
+        "required": [
+          "observed",
+          "estimated",
+          "inferred",
+          "confirmed"
+        ],
+        "properties": {
+          "observed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          },
+          "estimated": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          },
+          "inferred": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          },
+          "confirmed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          }
+        }
+      },
+      "Minutes": {
+        "type": "object",
+        "required": [
+          "id",
+          "period_from",
+          "period_to",
+          "status",
+          "content",
+          "generated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "FINAL"
+            ]
+          },
+          "content": {
+            "$ref": "#/components/schemas/MinutesContent"
+          },
+          "generated_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pdf_sha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "audit_head_hash": {
+            "type": "string",
+            "nullable": true
+          },
+          "finalized_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "finalized_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MinutesSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "period_from",
+          "period_to",
+          "status",
+          "generated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "FINAL"
+            ]
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finalized_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pdf_sha256": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MinutesPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

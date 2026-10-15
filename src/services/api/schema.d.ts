@@ -695,6 +695,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/minutes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Actas del acueducto, de la más reciente a la más antigua
+         * @description Permiso MINUTES_VIEW. Sin secciones (content): el detalle está en GET /minutes/{id}. API.md 13.8.
+         */
+        get: operations["listMinutes"];
+        put?: never;
+        /**
+         * Genera un acta del periodo en borrador
+         * @description Permiso MINUTES_GENERATE. API.md 13.1.
+         */
+        post: operations["generateMinutes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/minutes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Acta con sus cuatro secciones
+         * @description Permiso MINUTES_VIEW. API.md 13.2.
+         */
+        get: operations["getMinutes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1367,6 +1411,66 @@ export interface components {
             /** Format: date-time */
             closed_at: string;
             executions: components["schemas"]["ShiftExecution"][];
+        };
+        MinutesRequest: {
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+        };
+        /** @description Un registro del acta, en palabras llanas. */
+        MinutesEntry: {
+            source: string;
+            source_id: string;
+            /** Format: date-time */
+            at: string;
+            summary: string;
+        };
+        MinutesContent: {
+            observed: components["schemas"]["MinutesEntry"][];
+            estimated: components["schemas"]["MinutesEntry"][];
+            inferred: components["schemas"]["MinutesEntry"][];
+            confirmed: components["schemas"]["MinutesEntry"][];
+        };
+        Minutes: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            /** @enum {string} */
+            status: "DRAFT" | "FINAL";
+            content: components["schemas"]["MinutesContent"];
+            /** Format: uuid */
+            generated_by?: string;
+            /** Format: date-time */
+            generated_at: string;
+            pdf_sha256?: string | null;
+            audit_head_hash?: string | null;
+            /** Format: uuid */
+            finalized_by?: string | null;
+            /** Format: date-time */
+            finalized_at?: string | null;
+        };
+        MinutesSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            /** @enum {string} */
+            status: "DRAFT" | "FINAL";
+            /** Format: date-time */
+            generated_at: string;
+            /** Format: date-time */
+            finalized_at?: string | null;
+            pdf_sha256?: string | null;
+        };
+        MinutesPage: {
+            items: components["schemas"]["MinutesSummary"][];
+            next_cursor: string | null;
         };
     };
     responses: never;
@@ -2751,6 +2855,102 @@ export interface operations {
             };
             /** @description INVALID_STATE_TRANSITION (no hay propuesta publicada) o CONFLICT (día ya cerrado). */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listMinutes: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de actas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MinutesPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    generateMinutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MinutesRequest"];
+            };
+        };
+        responses: {
+            /** @description Acta en borrador. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Minutes"];
+                };
+            };
+            /** @description VALIDATION_ERROR: periodo invertido o de más de 366 días. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getMinutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Acta. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Minutes"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
