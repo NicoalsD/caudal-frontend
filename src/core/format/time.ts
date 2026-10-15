@@ -20,6 +20,15 @@ const dateTimeFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, {
 });
 
 /** en-CA writes dates as YYYY-MM-DD, the format of `service_date` in the API. */
+const dayMonthFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, {
+  timeZone: DISPLAY_TIME_ZONE,
+  day: 'numeric',
+  month: 'short',
+});
+
+/** Hour at which a calendar day is anchored to format it without a time-zone shift. */
+const DAY_ANCHOR = 'T12:00:00-05:00';
+
 const dateKeyFormatter = new Intl.DateTimeFormat('en-CA', {
   timeZone: DISPLAY_TIME_ZONE,
   year: 'numeric',
@@ -54,4 +63,9 @@ export function formatDateTime(iso: string): string {
 /** The calendar day of an instant in America/Bogota as YYYY-MM-DD. */
 export function toBogotaDateKey(iso: string): string {
   return dateKeyFormatter.format(parseInstant(iso));
+}
+
+/** "9 oct" for a calendar day given as YYYY-MM-DD (a forecast target date). */
+export function formatDayKey(dayKey: string): string {
+  return dayMonthFormatter.format(parseInstant(`${dayKey}${DAY_ANCHOR}`));
 }

@@ -10,6 +10,7 @@ import { ReadingsApi } from './endpoints/ReadingsApi';
 import { PublicApi } from './endpoints/PublicApi';
 import { RulesApi } from './endpoints/RulesApi';
 import { SystemApi } from './endpoints/SystemApi';
+import { AnomaliesApi } from './endpoints/AnomaliesApi';
 import { TankStatusApi } from './endpoints/TankStatusApi';
 
 /**
@@ -31,6 +32,7 @@ export class CaudalApi {
   readonly rules: RulesApi;
   readonly system: SystemApi;
   readonly tankStatus: TankStatusApi;
+  readonly anomalies: AnomaliesApi;
   readonly imports: ImportsApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
@@ -45,6 +47,7 @@ export class CaudalApi {
     this.rules = new RulesApi(http, adapter);
     this.system = new SystemApi(http, adapter);
     this.tankStatus = new TankStatusApi(http, adapter);
+    this.anomalies = new AnomaliesApi(http, adapter);
     this.imports = new ImportsApi(http);
   }
 }

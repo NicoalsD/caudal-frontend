@@ -77,7 +77,13 @@ export function buildLoginResponse(user: AuthUserDto, serial = 1): LoginResponse
   };
 }
 
-const BOARD_PERMISSIONS = ['NETWORK_VIEW', 'RULESET_VIEW', 'RULESET_DRAFT', 'STATUS_VIEW'] as const;
+const BOARD_PERMISSIONS = [
+  'NETWORK_VIEW',
+  'RULESET_VIEW',
+  'RULESET_DRAFT',
+  'STATUS_VIEW',
+  'ANOMALY_REVIEW',
+] as const;
 
 /** Permission codes by role, as in Actores-y-permisos.md section 3.3 (the ones the screens use). */
 export const PERMISSIONS_BY_ROLE: Record<AuthUserDto['role'], readonly string[]> = {

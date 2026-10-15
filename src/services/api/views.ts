@@ -342,3 +342,25 @@ export interface IncidentPageView {
   readonly items: readonly IncidentView[];
   readonly nextCursor: string | null;
 }
+
+/** The kinds of anomaly the server detects (API.md 9). They are suspicions until someone confirms. */
+export type AnomalyKind =
+  'POSSIBLE_LEAK' | 'SENSOR_FAULT' | 'STALE_DATA' | 'SUSPECTED_DUPLICATE' | 'ABNORMAL_DROP';
+
+export type AnomalyStatus = 'OPEN' | 'CONFIRMED' | 'DISMISSED';
+
+/** An anomaly as the Board sees it (GET /anomalies). */
+export interface AnomalyView {
+  readonly id: string;
+  readonly kind: AnomalyKind;
+  readonly status: AnomalyStatus;
+  readonly detectedAt: TimestampView;
+  /** The level the anomaly points at, when the server's evidence carries one. */
+  readonly gaugeValue: DecimalView | null;
+  readonly resolutionNote: string | null;
+}
+
+export interface AnomalyPageView {
+  readonly items: readonly AnomalyView[];
+  readonly nextCursor: string | null;
+}

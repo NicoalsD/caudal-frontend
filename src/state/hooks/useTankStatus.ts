@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
 
-import type { TankStatusView, TankView } from '../../services/api/views';
+import type { ForecastView, TankStatusView, TankView } from '../../services/api/views';
 import { aqueductKey } from '../queryKeys';
 import { useCaudalApi } from './apiContext';
 import { useAqueductId } from './useAqueductId';
@@ -20,6 +20,17 @@ export function useTankStatus(tankId: string): UseQueryResult<TankStatusView> {
   return useQuery({
     queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'status', tankId),
     queryFn: () => api.tankStatus.get(tankId),
+    refetchInterval: STATUS_REFETCH_INTERVAL_MS,
+  });
+}
+
+/** GET /tanks/{id}/forecasts/latest. A tank that never had a forecast answers 404. */
+export function useLatestForecast(tankId: string): UseQueryResult<ForecastView> {
+  const api = useCaudalApi();
+  const aqueductId = useAqueductId();
+  return useQuery({
+    queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'forecast', tankId),
+    queryFn: () => api.tankStatus.latestForecast(tankId),
     refetchInterval: STATUS_REFETCH_INTERVAL_MS,
   });
 }
