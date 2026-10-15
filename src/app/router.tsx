@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router';
 import type { RouteObject } from 'react-router';
 
 import { ChangePasswordPage, LoginPage } from '../features/auth';
+import { NetworkPage } from '../features/admin';
+import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
@@ -67,10 +69,10 @@ const boardRoutes: RouteObject = {
         screen(ROUTE_PATHS.board.proposals, t('screens.proposals')),
         screen(ROUTE_PATHS.board.proposalDetail, t('screens.proposalDetail')),
         screen(ROUTE_PATHS.board.publication, t('screens.publication')),
-        screen(ROUTE_PATHS.board.rules, t('screens.rules')),
-        screen(ROUTE_PATHS.board.ruleDetail, t('screens.ruleDetail')),
+        { path: ROUTE_PATHS.board.rules, element: <RulesPage /> },
+        { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
-        screen(ROUTE_PATHS.board.network, t('screens.network')),
+        { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
         screen(ROUTE_PATHS.board.incidents, t('screens.incidents')),
         screen(ROUTE_PATHS.board.entities, t('screens.entities')),

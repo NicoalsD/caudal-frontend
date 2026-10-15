@@ -1,3 +1,6 @@
+import { HOURS_PER_DAY } from '../policy/clientPolicy';
+import { gaugeDecimals } from '../rules/bandCoverage';
+import type { Gauge } from '../rules/ruleSetParts';
 import { FormSchemaBuilder, type DecimalRule } from './FormSchemaBuilder';
 import type { ConstraintsMap } from './FieldConstraint';
 import type { ValidationMessageFactory } from './validationMessages';
@@ -36,6 +39,37 @@ export function loginFormSchema(constraints: ConstraintsMap, messages: Validatio
   return new FormSchemaBuilder(constraints, messages)
     .text(FIELD.username, { lowercase: true })
     .password(FIELD.password)
+    .build();
+}
+
+/** Names of the fields of the draft rules form. */
+export const DRAFT_FIELD = { bands: 'bands', sectors: 'sectors', windows: 'windows' } as const;
+
+/** Optional constraint whose `max` caps the operating windows of a version (API.md 6.5). */
+export const WINDOWS_LIMIT_CONSTRAINT = 'rule_set.operating_windows';
+
+/** What the draft form needs to know about the active tank (all from the rule set). */
+export interface DraftFormContext {
+  readonly gauge: Gauge;
+}
+
+/**
+ * The editable parts of a rule set draft. The tank range and the decimals come from the rule set
+ * itself; nothing about levels or hours is written here.
+ */
+export function draftRulesFormSchema(
+  context: DraftFormContext,
+  messages: ValidationMessageFactory,
+  constraints: ConstraintsMap = {},
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .bandList(DRAFT_FIELD.bands, {
+      gauge: context.gauge,
+      decimals: gaugeDecimals(context.gauge),
+      maxHoursPerDay: HOURS_PER_DAY,
+    })
+    .sectorList(DRAFT_FIELD.sectors)
+    .windowList(DRAFT_FIELD.windows, { limitField: WINDOWS_LIMIT_CONSTRAINT })
     .build();
 }
 

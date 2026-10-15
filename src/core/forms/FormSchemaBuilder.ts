@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
+import { analyzeBands } from '../rules/bandCoverage';
+import { analyzeWindows, timeToMinutes } from '../rules/operatingWindows';
+import type { Gauge } from '../rules/ruleSetParts';
 import { countFractionDigits, parseDecimalInput } from '../format/decimal';
 import type { ConstraintsMap, FieldConstraint } from './FieldConstraint';
-import type { ValidationMessageFactory } from './validationMessages';
+import type { ValidationMessageFactory, ValidationParams } from './validationMessages';
 
 /** The form needs a limit that the server did not send: a configuration error, not a user error. */
 export class MissingConstraintError extends Error {
@@ -24,6 +27,15 @@ export class InvalidConstraintError extends Error {
     this.name = 'InvalidConstraintError';
     this.field = field;
   }
+}
+
+export interface BandListRule {
+  /** Range of the tank, from the rule set. */
+  readonly gauge: Gauge;
+  /** Decimals the levels and hours have (those of the gauge step). */
+  readonly decimals: number;
+  /** Most hours a band can give in a day (the hours of a day). */
+  readonly maxHoursPerDay: number;
 }
 
 export interface DecimalRule {
@@ -48,6 +60,10 @@ export interface PasswordOptions {
   readonly anyLength?: boolean;
 }
 
+/** Value of the day select for a window that applies every day. */
+export const ALL_DAYS_VALUE = 'all';
+const MONDAY = 1;
+const SUNDAY = 7;
 const LINE_BREAK = /\r\n|\r|\n/;
 const MINIMUM_REQUIRED_LENGTH = 1;
 
@@ -125,28 +141,58 @@ export class FormSchemaBuilder {
    * The range comes from the active rule set, not from constants.
    */
   decimal(field: string, rule: DecimalRule): this {
-    this.shape[field] = z.string().transform((raw, context) => {
-      const value = parseDecimalInput(raw);
-      if (value === null) {
-        context.addIssue({ code: 'custom', message: this.messages('number', {}) });
-        return z.NEVER;
-      }
-      if (countFractionDigits(raw) > rule.decimals) {
-        context.addIssue({
+    this.shape[field] = this.decimalSchema(rule);
+    return this;
+  }
+
+  /**
+   * The level bands of a rule set as typed in the editor: one row per band with its range and
+   * hours (decimals with comma accepted), and the whole list checked against the tank range: every
+   * band needs a top above its bottom, bands cannot overlap and together they must cover the gauge
+   * without gaps (Reglas-de-negocio.md section 2). The range comes from the rule set, not from code.
+   */
+  bandList(field: string, rule: BandListRule): this {
+    const levels: DecimalRule = {
+      min: rule.gauge.min,
+      max: rule.gauge.max,
+      decimals: rule.decimals,
+    };
+    const hours: DecimalRule = { min: 0, max: rule.maxHoursPerDay, decimals: rule.decimals };
+    const row = z.object({
+      band: z.string(),
+      min_level: this.decimalSchema(levels),
+      max_level: this.decimalSchema(levels),
+      daily_service_hours: this.decimalSchema(hours),
+      priority_only: z.boolean(),
+    });
+    this.shape[field] = z.array(row).check((context) => {
+      const rows = context.value;
+      const analysis = analyzeBands(
+        rows.map((value) => ({ minLevel: value.min_level, maxLevel: value.max_level })),
+        rule.gauge,
+        rule.decimals,
+      );
+      const report = (
+        key: Parameters<ValidationMessageFactory>[0],
+        params: Parameters<ValidationMessageFactory>[1],
+        path: (string | number)[],
+      ): void => {
+        context.issues.push({
           code: 'custom',
-          message: this.messages('decimalPlaces', { max: rule.decimals }),
+          message: this.messages(key, params),
+          path,
+          input: rows,
         });
-        return z.NEVER;
-      }
-      if (value < rule.min) {
-        context.addIssue({ code: 'custom', message: this.messages('rangeMin', { min: rule.min }) });
-        return z.NEVER;
-      }
-      if (value > rule.max) {
-        context.addIssue({ code: 'custom', message: this.messages('rangeMax', { max: rule.max }) });
-        return z.NEVER;
-      }
-      return value;
+      };
+      analysis.inverted.forEach((index) => {
+        report('bandOrder', {}, [index, 'max_level']);
+      });
+      analysis.overlaps.forEach((span) => {
+        report('bandOverlap', { from: span.from, to: span.to }, []);
+      });
+      analysis.gaps.forEach((span) => {
+        report('bandGap', { from: span.from, to: span.to }, []);
+      });
     });
     return this;
   }
@@ -182,6 +228,97 @@ export class FormSchemaBuilder {
     return this;
   }
 
+  /**
+   * The sector settings of a rule set: one row per sector with its two flags. The position in the
+   * list is the order of attention; the ranks are computed when the list is sent. A sector can
+   * appear only once.
+   */
+  sectorList(field: string): this {
+    const row = z.object({
+      sector_id: z.string().min(1),
+      is_included: z.boolean(),
+      is_priority: z.boolean(),
+    });
+    this.shape[field] = z.array(row).check((context) => {
+      const seen = new Set<string>();
+      context.value.forEach((value, index) => {
+        if (seen.has(value.sector_id)) {
+          context.issues.push({
+            code: 'custom',
+            message: this.messages('duplicateSector', {}),
+            path: [index, 'sector_id'],
+            input: value,
+          });
+        }
+        seen.add(value.sector_id);
+      });
+    });
+    return this;
+  }
+
+  /**
+   * The operating windows of a rule set: a day ("every day" or Monday to Sunday), a start and an
+   * end as HH:MM. Each end must be after its start and windows of the same day cannot cross.
+   * `limitField` names a constraint whose `max` caps how many windows there can be; without it
+   * (the server did not send one) the count is not limited here and the server decides.
+   */
+  windowList(field: string, options: { readonly limitField?: string } = {}): this {
+    const maxWindows =
+      options.limitField === undefined ? undefined : this.constraints[options.limitField]?.max;
+    const time = z.string().transform((raw, context) => {
+      const value = raw.trim();
+      if (timeToMinutes(value) === null) {
+        context.addIssue({ code: 'custom', message: this.messages('time', {}) });
+        return z.NEVER;
+      }
+      return value;
+    });
+    const day = z.string().transform((raw, context): number | null => {
+      if (raw === ALL_DAYS_VALUE) {
+        return null;
+      }
+      const parsed = Number(raw);
+      if (!Number.isInteger(parsed) || parsed < MONDAY || parsed > SUNDAY) {
+        context.addIssue({ code: 'custom', message: this.messages('required', {}) });
+        return z.NEVER;
+      }
+      return parsed;
+    });
+    const row = z.object({ day, start_time: time, end_time: time });
+    this.shape[field] = z.array(row).check((context) => {
+      const rows = context.value;
+      const push = (
+        key: Parameters<ValidationMessageFactory>[0],
+        params: ValidationParams,
+        path: (string | number)[],
+      ): void => {
+        context.issues.push({
+          code: 'custom',
+          message: this.messages(key, params),
+          path,
+          input: rows,
+        });
+      };
+      if (maxWindows !== undefined && rows.length > maxWindows) {
+        push('tooManyItems', { max: maxWindows }, []);
+      }
+      const analysis = analyzeWindows(
+        rows.map((value) => ({
+          dayOfWeek: value.day,
+          start: value.start_time,
+          end: value.end_time,
+        })),
+      );
+      analysis.inverted.forEach((index) => {
+        push('windowOrder', {}, [index, 'end_time']);
+      });
+      analysis.overlapping.forEach((index) => {
+        push('windowOverlap', {}, [index, 'start_time']);
+      });
+    });
+    return this;
+  }
+
   build(): z.ZodObject<FormShape> {
     const checks = [...this.crossChecks];
     const messages = this.messages;
@@ -197,6 +334,32 @@ export class FormSchemaBuilder {
           });
         }
       }
+    });
+  }
+
+  private decimalSchema(rule: DecimalRule): z.ZodType<number> {
+    return z.string().transform((raw, context) => {
+      const value = parseDecimalInput(raw);
+      if (value === null) {
+        context.addIssue({ code: 'custom', message: this.messages('number', {}) });
+        return z.NEVER;
+      }
+      if (countFractionDigits(raw) > rule.decimals) {
+        context.addIssue({
+          code: 'custom',
+          message: this.messages('decimalPlaces', { max: rule.decimals }),
+        });
+        return z.NEVER;
+      }
+      if (value < rule.min) {
+        context.addIssue({ code: 'custom', message: this.messages('rangeMin', { min: rule.min }) });
+        return z.NEVER;
+      }
+      if (value > rule.max) {
+        context.addIssue({ code: 'custom', message: this.messages('rangeMax', { max: rule.max }) });
+        return z.NEVER;
+      }
+      return value;
     });
   }
 

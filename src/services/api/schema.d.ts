@@ -163,6 +163,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/rule-sets/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reglas vigentes
+         * @description Versión ACTIVE completa. API.md sección 6.1.
+         */
+        get: operations["getCurrentRuleSet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rule-sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Versiones de reglas
+         * @description Requiere RULESET_VIEW. API.md sección 6.2.
+         */
+        get: operations["listRuleSets"];
+        put?: never;
+        /**
+         * Crea un borrador
+         * @description Copia la versión ACTIVE. Requiere RULESET_DRAFT. API.md sección 6.4.
+         */
+        post: operations["createRuleSet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rule-sets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Una versión de reglas
+         * @description API.md sección 6.3.
+         */
+        get: operations["getRuleSet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edita un borrador
+         * @description Solo DRAFT. Requiere RULESET_DRAFT. API.md sección 6.5.
+         */
+        patch: operations["updateRuleSet"];
+        trace?: never;
+    };
+    "/api/v1/rule-sets/{id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Activa un borrador
+         * @description Solo BOARD_ADMIN (RULESET_ACTIVATE). Motivo de 10 a 500 caracteres. API.md sección 6.6.
+         */
+        post: operations["activateRuleSet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sectors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sectores del acueducto
+         * @description Autenticado. API.md sección 5.3.
+         */
+        get: operations["listSectors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tanks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tanques del acueducto
+         * @description Autenticado. API.md sección 5.1.
+         */
+        get: operations["listTanks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sectors/{id}/valves": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Válvulas de un sector
+         * @description Autenticado. API.md sección 5.6.
+         */
+        get: operations["listValves"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -267,6 +415,210 @@ export interface components {
         SwitchAqueductRequest: {
             /** Format: uuid */
             aqueduct_id: string;
+        };
+        /** @description Banda de nivel [min_level, max_level). La banda superior incluye gauge_max. */
+        RuleBand: {
+            /** @enum {string} */
+            band: "HIGH" | "LOW" | "CRITICAL";
+            /** Format: double */
+            min_level: number;
+            /** Format: double */
+            max_level: number;
+            /** Format: double */
+            daily_service_hours: number;
+            priority_only: boolean;
+        };
+        RuleSectorSetting: {
+            /** Format: uuid */
+            sector_id: string;
+            is_included: boolean;
+            is_priority: boolean;
+            /** Format: int32 */
+            priority_rank?: number | null;
+        };
+        RuleValveOrder: {
+            /** Format: uuid */
+            valve_id: string;
+            /** Format: int32 */
+            sequence_order: number;
+        };
+        /** @description Ventana de operación. day_of_week 1 a 7 (lunes a domingo); nulo = todos los días. Horas locales HH:MM, fin mayor que inicio. */
+        RuleOperatingWindow: {
+            /** Format: int32 */
+            day_of_week?: number | null;
+            start_time: string;
+            end_time: string;
+        };
+        RuleGauge: {
+            /** Format: double */
+            min: number;
+            /** Format: double */
+            max: number;
+            /** Format: double */
+            step: number;
+        };
+        RuleSet: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            version: number;
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "SUPERSEDED" | "DISCARDED";
+            /** Format: date-time */
+            valid_from?: string | null;
+            /** Format: date-time */
+            valid_to?: string | null;
+            /** Format: uuid */
+            based_on_rule_set_id?: string | null;
+            change_reason?: string | null;
+            /**
+             * Format: int32
+             * @description Propuesta de API.md 6.5.
+             */
+            lock_version?: number;
+            /** Format: double */
+            reserve_level: number;
+            /** @enum {string} */
+            reserve_policy: "NONE" | "REDUCE_TO_CRITICAL_BAND" | "PRIORITY_ONLY";
+            /** Format: double */
+            max_daily_service_hours: number;
+            /** Format: double */
+            min_shift_hours: number;
+            /** Format: double */
+            max_shift_hours: number;
+            /** @enum {string} */
+            allocation_strategy: "PRIORITY_THEN_LONGEST_WAIT" | "EQUAL_SPLIT";
+            /** Format: int32 */
+            duplicate_window_minutes: number;
+            /** Format: double */
+            max_level_change_per_hour: number;
+            /** Format: int32 */
+            stale_reading_hours: number;
+            /** Format: int32 */
+            max_backdate_days: number;
+            /** Format: int32 */
+            forecast_horizon_days: number;
+            /** Format: int32 */
+            forecast_context_days: number;
+            /** Format: double */
+            trend_threshold_per_day: number;
+            bands: components["schemas"]["RuleBand"][];
+            sectors: components["schemas"]["RuleSectorSetting"][];
+            valve_order: components["schemas"]["RuleValveOrder"][];
+            operating_windows: components["schemas"]["RuleOperatingWindow"][];
+            gauge: components["schemas"]["RuleGauge"];
+            /** Format: date-time */
+            server_time?: string;
+        };
+        RuleSetSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            version: number;
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "SUPERSEDED" | "DISCARDED";
+            /** Format: date-time */
+            valid_from?: string | null;
+            /** Format: date-time */
+            valid_to?: string | null;
+            /** Format: date-time */
+            activated_at?: string | null;
+            /** Format: uuid */
+            based_on_rule_set_id?: string | null;
+        };
+        RuleSetPage: {
+            items: components["schemas"]["RuleSetSummary"][];
+            next_cursor?: string | null;
+        };
+        CreateRuleSetRequest: {
+            change_reason?: string;
+        };
+        /** @description Todos los campos son opcionales y solo valen en DRAFT. Las listas reemplazan a las actuales. */
+        UpdateRuleSetRequest: {
+            /** Format: double */
+            reserve_level?: number;
+            /** @enum {string} */
+            reserve_policy?: "NONE" | "REDUCE_TO_CRITICAL_BAND" | "PRIORITY_ONLY";
+            /** Format: double */
+            max_daily_service_hours?: number;
+            /** Format: double */
+            min_shift_hours?: number;
+            /** Format: double */
+            max_shift_hours?: number;
+            /** @enum {string} */
+            allocation_strategy?: "PRIORITY_THEN_LONGEST_WAIT" | "EQUAL_SPLIT";
+            /** Format: int32 */
+            duplicate_window_minutes?: number;
+            /** Format: double */
+            max_level_change_per_hour?: number;
+            /** Format: int32 */
+            stale_reading_hours?: number;
+            /** Format: int32 */
+            max_backdate_days?: number;
+            /** Format: int32 */
+            forecast_horizon_days?: number;
+            /** Format: int32 */
+            forecast_context_days?: number;
+            /** Format: double */
+            trend_threshold_per_day?: number;
+            bands?: components["schemas"]["RuleBand"][];
+            sectors?: components["schemas"]["RuleSectorSetting"][];
+            valve_order?: components["schemas"]["RuleValveOrder"][];
+            operating_windows?: components["schemas"]["RuleOperatingWindow"][];
+        };
+        ActivateRuleSetRequest: {
+            change_reason: string;
+        };
+        /** @description Sector de la red. Sin datos personales (API.md sección 5.3). */
+        Sector: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** Format: uuid */
+            parent_sector_id?: string | null;
+            /** Format: int32 */
+            households_count: number;
+            is_active: boolean;
+        };
+        /** @description Lista de sectores. La forma exacta (items) se confirma con el OpenAPI del backend. */
+        SectorList: {
+            items: components["schemas"]["Sector"][];
+        };
+        /** @description Tanque (API.md sección 5.1). */
+        Tank: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: double */
+            gauge_min: number;
+            /** Format: double */
+            gauge_max: number;
+            /** Format: double */
+            gauge_step: number;
+            /** Format: int32 */
+            capacity_liters?: number | null;
+            is_active: boolean;
+        };
+        /** @description Lista de tanques. La forma exacta (items) se confirma con el OpenAPI del backend. */
+        TankList: {
+            items: components["schemas"]["Tank"][];
+        };
+        /** @description Válvula de un sector (API.md sección 5.6). */
+        Valve: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            location_hint?: string | null;
+            is_motorized: boolean;
+            /** @enum {string} */
+            fail_safe_position: "KEEP" | "OPEN" | "CLOSED";
+            is_active: boolean;
+        };
+        /** @description Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend. */
+        ValveList: {
+            items: components["schemas"]["Valve"][];
         };
     };
     responses: never;
@@ -544,6 +896,336 @@ export interface operations {
             };
             /** @description La membresía no está vigente o no existe (FORBIDDEN). */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCurrentRuleSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Versión vigente. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleSet"];
+                };
+            };
+            /** @description No hay versión activa (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listRuleSets: {
+        parameters: {
+            query?: {
+                status?: "DRAFT" | "ACTIVE" | "SUPERSEDED" | "DISCARDED";
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de versiones. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleSetPage"];
+                };
+            };
+            /** @description Sin permiso (FORBIDDEN). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createRuleSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateRuleSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Borrador creado. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleSet"];
+                };
+            };
+            /** @description Sin permiso (FORBIDDEN). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Ya existe un borrador abierto (CONFLICT). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRuleSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description La versión completa. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleSet"];
+                };
+            };
+            /** @description No existe (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateRuleSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRuleSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Borrador actualizado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleSet"];
+                };
+            };
+            /** @description Datos inválidos (VALIDATION_ERROR). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso (FORBIDDEN). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La versión no es un borrador (RULE_SET_IMMUTABLE). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    activateRuleSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivateRuleSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Versión activada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RuleSet"];
+                };
+            };
+            /** @description Sin permiso (FORBIDDEN). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No es un borrador (INVALID_STATE_TRANSITION). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Reglas inválidas o motivo ausente (RULE_SET_INVALID, REASON_REQUIRED). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSectors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sectores. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectorList"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listTanks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tanques. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TankList"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listValves: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Válvulas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValveList"];
+                };
+            };
+            /** @description El sector no existe (NOT_FOUND). */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

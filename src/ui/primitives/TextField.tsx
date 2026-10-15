@@ -17,6 +17,8 @@ interface TextFieldProps extends InputProps {
   readonly error?: string | undefined;
   /** Id of other content that describes the field, for example a checklist of requirements. */
   readonly describedBy?: string | undefined;
+  /** The label stays for assistive technology but is not drawn (a table cell under its header). */
+  readonly hideLabel?: boolean | undefined;
 }
 
 /**
@@ -28,6 +30,7 @@ export function TextField({
   hint,
   error,
   describedBy: extraDescription,
+  hideLabel = false,
   className,
   ...input
 }: TextFieldProps): JSX.Element {
@@ -44,7 +47,7 @@ export function TextField({
 
   return (
     <div className={cn(styles.field)}>
-      <label className={cn(styles.label)} htmlFor={id}>
+      <label className={cn(styles.label, hideLabel && styles.hidden)} htmlFor={id}>
         {label}
       </label>
       {hint === undefined ? null : (

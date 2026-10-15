@@ -4,6 +4,14 @@ import { formatDateTime, parseInstant, toBogotaDateKey } from '../../../core/for
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
 import type { components } from '../schema';
 import type { Membership } from '../../../core/session/memberships';
+import { isBandCode } from '../../../core/rules/ruleSetParts';
+import type {
+  Gauge,
+  OperatingWindow,
+  RuleBand,
+  SectorSetting,
+  ValveOrder,
+} from '../../../core/rules/ruleSetParts';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -12,6 +20,11 @@ import type {
   LoginView,
   MeView,
   RefreshView,
+  RuleSetSummaryView,
+  RuleSetView,
+  SectorView,
+  TankView,
+  ValveView,
   TimestampView,
 } from '../views';
 import { InvalidDtoError } from './InvalidDtoError';
@@ -24,6 +37,18 @@ type LoginDto = components['schemas']['LoginResponse'];
 type RefreshDto = components['schemas']['RefreshResponse'];
 type MeDto = components['schemas']['MeResponse'];
 type MembershipDto = components['schemas']['Membership'];
+type RuleSetDto = components['schemas']['RuleSet'];
+type RuleSetSummaryDto = components['schemas']['RuleSetSummary'];
+type RuleBandDto = components['schemas']['RuleBand'];
+type RuleSectorSettingDto = components['schemas']['RuleSectorSetting'];
+type RuleValveOrderDto = components['schemas']['RuleValveOrder'];
+type RuleOperatingWindowDto = components['schemas']['RuleOperatingWindow'];
+type RuleGaugeDto = components['schemas']['RuleGauge'];
+type SectorDto = components['schemas']['Sector'];
+type TankDto = components['schemas']['Tank'];
+type ValveDto = components['schemas']['Valve'];
+
+const TIME_OF_DAY = /^(?<hours>\d{2}):(?<minutes>\d{2})(?::\d{2})?$/;
 
 /**
  * Adapter between the server contract and the view models (api-integration.md section 5).
@@ -42,6 +67,7 @@ export class ApiDtoAdapter {
 
   /** `max_lines` becomes `maxLines`; only the limits that arrived are present. */
   toConstraints(dto: ConstraintsDto): ConstraintsMap {
+    // fromEntries defines own properties, so a field named "__proto__" cannot change the prototype.
     return Object.fromEntries(
       Object.entries(dto).map(([field, limits]) => [field, this.toFieldConstraint(limits)]),
     );
@@ -82,6 +108,147 @@ export class ApiDtoAdapter {
       permissions: [...dto.permissions],
       memberships: dto.memberships.map((membership) => this.toMembership(membership)),
     };
+  }
+
+  toRuleSet(dto: RuleSetDto): RuleSetView {
+    return {
+      id: dto.id,
+      version: dto.version,
+      status: dto.status,
+      validFrom: this.toOptionalTimestamp('valid_from', dto.valid_from),
+      validTo: this.toOptionalTimestamp('valid_to', dto.valid_to),
+      basedOnRuleSetId: dto.based_on_rule_set_id ?? null,
+      changeReason: dto.change_reason ?? null,
+      lockVersion: dto.lock_version ?? null,
+      reserveLevel: dto.reserve_level,
+      reservePolicy: dto.reserve_policy,
+      maxDailyServiceHours: dto.max_daily_service_hours,
+      minShiftHours: dto.min_shift_hours,
+      maxShiftHours: dto.max_shift_hours,
+      allocationStrategy: dto.allocation_strategy,
+      duplicateWindowMinutes: dto.duplicate_window_minutes,
+      maxLevelChangePerHour: dto.max_level_change_per_hour,
+      staleReadingHours: dto.stale_reading_hours,
+      maxBackdateDays: dto.max_backdate_days,
+      forecastHorizonDays: dto.forecast_horizon_days,
+      forecastContextDays: dto.forecast_context_days,
+      trendThresholdPerDay: dto.trend_threshold_per_day,
+      bands: dto.bands.map((band) => this.toRuleBand(band)),
+      sectors: dto.sectors.map((sector) => this.toSectorSetting(sector)),
+      valveOrder: dto.valve_order.map((valve) => this.toValveOrder(valve)),
+      operatingWindows: dto.operating_windows.map((window) => this.toOperatingWindow(window)),
+      gauge: this.toGauge(dto.gauge),
+    };
+  }
+
+  toSector(dto: SectorDto): SectorView {
+    return {
+      id: dto.id,
+      code: dto.code,
+      name: dto.name,
+      parentSectorId: dto.parent_sector_id ?? null,
+      householdsCount: dto.households_count,
+      isActive: dto.is_active,
+    };
+  }
+
+  toTank(dto: TankDto): TankView {
+    if (
+      ![dto.gauge_min, dto.gauge_max, dto.gauge_step].every(Number.isFinite) ||
+      dto.gauge_max <= dto.gauge_min
+    ) {
+      throw new InvalidDtoError('tank.gauge');
+    }
+    return {
+      id: dto.id,
+      name: dto.name,
+      gaugeMin: dto.gauge_min,
+      gaugeMax: dto.gauge_max,
+      gaugeStep: dto.gauge_step,
+      capacityLiters: dto.capacity_liters ?? null,
+      isActive: dto.is_active,
+    };
+  }
+
+  toValve(dto: ValveDto): ValveView {
+    return {
+      id: dto.id,
+      code: dto.code,
+      name: dto.name,
+      locationHint: dto.location_hint ?? null,
+      isMotorized: dto.is_motorized,
+      failSafePosition: dto.fail_safe_position,
+      isActive: dto.is_active,
+    };
+  }
+
+  toRuleSetSummary(dto: RuleSetSummaryDto): RuleSetSummaryView {
+    return {
+      id: dto.id,
+      version: dto.version,
+      status: dto.status,
+      validFrom: this.toOptionalTimestamp('valid_from', dto.valid_from),
+      validTo: this.toOptionalTimestamp('valid_to', dto.valid_to),
+      activatedAt: this.toOptionalTimestamp('activated_at', dto.activated_at),
+    };
+  }
+
+  private toRuleBand(dto: RuleBandDto): RuleBand {
+    if (!isBandCode(dto.band)) {
+      throw new InvalidDtoError('bands.band');
+    }
+    return {
+      band: dto.band,
+      minLevel: dto.min_level,
+      maxLevel: dto.max_level,
+      dailyServiceHours: dto.daily_service_hours,
+      priorityOnly: dto.priority_only,
+    };
+  }
+
+  private toSectorSetting(dto: RuleSectorSettingDto): SectorSetting {
+    return {
+      sectorId: dto.sector_id,
+      isIncluded: dto.is_included,
+      isPriority: dto.is_priority,
+      priorityRank: dto.priority_rank ?? null,
+    };
+  }
+
+  private toValveOrder(dto: RuleValveOrderDto): ValveOrder {
+    return { valveId: dto.valve_id, sequenceOrder: dto.sequence_order };
+  }
+
+  private toOperatingWindow(dto: RuleOperatingWindowDto): OperatingWindow {
+    return {
+      dayOfWeek: dto.day_of_week ?? null,
+      start: this.toTimeOfDay('operating_windows.start_time', dto.start_time),
+      end: this.toTimeOfDay('operating_windows.end_time', dto.end_time),
+    };
+  }
+
+  /** Accepts "05:00" and "05:00:00" (a database time) and keeps "05:00". */
+  private toTimeOfDay(field: string, raw: string): string {
+    const match = TIME_OF_DAY.exec(raw);
+    if (match === null) {
+      throw new InvalidDtoError(field);
+    }
+    return `${match.groups?.hours ?? ''}:${match.groups?.minutes ?? ''}`;
+  }
+
+  private toGauge(dto: RuleGaugeDto): Gauge {
+    if (
+      ![dto.min, dto.max, dto.step].every(Number.isFinite) ||
+      dto.max <= dto.min ||
+      dto.step <= 0
+    ) {
+      throw new InvalidDtoError('gauge');
+    }
+    return { min: dto.min, max: dto.max, step: dto.step };
+  }
+
+  private toOptionalTimestamp(field: string, iso: string | null | undefined): TimestampView | null {
+    return iso === undefined || iso === null ? null : this.toTimestamp(field, iso);
   }
 
   private toMembership(dto: MembershipDto): Membership {

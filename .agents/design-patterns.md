@@ -18,6 +18,7 @@ Este documento describe los patrones que `caudal-frontend` implementa de forma e
 | P01 | Singleton | `OfflineDatabase` | `services/offline` | NicoalsD |
 | P04 | Builder | `FormSchemaBuilder` | `core/forms` | NicoalsD |
 | P06 | Adapter | `ApiDtoAdapter` | `services/api/adapters` | NicoalsD |
+| P08 | Composite | `NetworkNode`, `SectorNode`, `ValveNode`, `TankNode`, `NetworkRoot` | `core/network` | NicoalsD |
 | P09 | Decorator | `HttpClient`, `AuthHttpClient`, `RetryHttpClient`, `LoggingHttpClient` | `services/http` | NicoalsD (en el frontend) |
 | P10 | Facade | `CaudalApi` | `services/api` | Drako / NicoalsD |
 | P11 | Proxy | `SessionRefreshProxy` | `services/session` | NicoalsD |
@@ -190,6 +191,8 @@ const schema = new FormSchemaBuilder(constraints)
 
 **Prueba.** Casos: `"2,1"` y `"2.1"` producen el mismo número; `"8"` con máximo 5 produce `validation.rangeMax`; `"2,123"` con dos decimales produce `validation.decimalPlaces`; campo ausente en el mapa lanza error; cadena vacía produce `validation.number`.
 
+**Extensiones de la fase de reglas.** `FormSchemaBuilder` también arma `bandList` (bandas de nivel: rango del tanque y decimales salen de la versión de reglas; revisa que cada banda tenga arriba mayor que abajo, que no se solapen y que cubran todo el rango, con la lógica pura de `core/rules/bandCoverage.ts`), `password`, `confirmation`, `notContaining` y `differentFrom`. Prueba: `FormSchemaBuilder.test.ts` y `bandCoverage.test.ts` (incluye pruebas de propiedades).
+
 ---
 
 ## P06 Adapter: `ApiDtoAdapter`
@@ -235,6 +238,18 @@ export class ApiDtoAdapter {
 Los nombres exactos de los campos del DTO se confirman con el OpenAPI. Los del ejemplo son ilustrativos.
 
 **Prueba.** Con un DTO fijo, el adapter devuelve `lastLevelText` `"2,1"` para `2.1`, convierte `observed_at` a `Date`, y falla con error de tipo si falta un campo obligatorio (el test de tipos lo detecta en compilación).
+
+---
+
+## P08 Composite: `NetworkNode`
+
+**Problema.** La pantalla de red muestra tanques, sectores que contienen sub-sectores y válvulas, y pide los mismos totales en cada nivel: cuántas válvulas hay, cuántas están activas, cuántas viviendas atiende. Escribir un recorrido distinto para cada nivel repite lógica y se rompe al cambiar la forma del árbol.
+
+**Qué ofrece el nativo.** Una función recursiva sobre objetos planos. Sirve, pero cada pantalla vuelve a escribir el recorrido.
+
+**Por qué se implementa explícito.** `NetworkNode` es la interfaz común (`children()`, `valveCount()`, `activeValveCount()`, `sectorCount()`, `householdCount()`). `ValveNode` y `TankNode` son hojas; `SectorNode` es compuesto (válvulas y sub-sectores) y `NetworkRoot` agrupa tanques y sectores de primer nivel. `buildNetwork` arma el árbol desde `GET /tanks`, `GET /sectors` y `GET /sectors/{id}/valves`, y corta ciclos de `parent_sector_id` para que un dato malo no congele la pantalla.
+
+**Prueba.** `buildNetwork.test.ts`: totales por sector y por red, hijos en orden, padre inexistente, ciclo y una propiedad (cada sector aparece una sola vez, sea cual sea el padre).
 
 ---
 

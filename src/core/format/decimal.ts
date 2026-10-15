@@ -9,6 +9,11 @@ export function formatDecimal(
   return new Intl.NumberFormat(locale, { maximumFractionDigits: fractionDigits }).format(value);
 }
 
+/** A number as the person would type it in a field: decimal comma, no thousands separator. */
+export function toInputText(value: number): string {
+  return String(value).replace('.', ',');
+}
+
 const DECIMAL_TEXT = /^-?\d+(?:\.\d+)?$/;
 
 /**

@@ -11,7 +11,15 @@ export type ValidationMessageKey =
   | 'number'
   | 'mismatch'
   | 'containsUsername'
-  | 'sameAsCurrent';
+  | 'sameAsCurrent'
+  | 'bandOrder'
+  | 'bandOverlap'
+  | 'bandGap'
+  | 'duplicateSector'
+  | 'time'
+  | 'windowOrder'
+  | 'windowOverlap'
+  | 'tooManyItems';
 
 export type ValidationParams = Readonly<Record<string, number>>;
 

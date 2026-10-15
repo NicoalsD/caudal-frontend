@@ -1,3 +1,11 @@
+import type {
+  Gauge,
+  OperatingWindow,
+  RuleBand,
+  RuleSetStatus,
+  SectorSetting,
+  ValveOrder,
+} from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
 import type { Role } from '../../core/session/roles';
 
@@ -55,4 +63,74 @@ export interface MeView {
   readonly mustChangePassword: boolean;
   readonly permissions: readonly string[];
   readonly memberships: readonly Membership[];
+}
+
+/** A version of the Junta's rules, complete (GET /rule-sets/current and /rule-sets/{id}). */
+export interface RuleSetView {
+  readonly id: string;
+  readonly version: number;
+  readonly status: RuleSetStatus;
+  readonly validFrom: TimestampView | null;
+  readonly validTo: TimestampView | null;
+  readonly basedOnRuleSetId: string | null;
+  readonly changeReason: string | null;
+  readonly lockVersion: number | null;
+  readonly reserveLevel: number;
+  readonly reservePolicy: 'NONE' | 'REDUCE_TO_CRITICAL_BAND' | 'PRIORITY_ONLY';
+  readonly maxDailyServiceHours: number;
+  readonly minShiftHours: number;
+  readonly maxShiftHours: number;
+  readonly allocationStrategy: 'PRIORITY_THEN_LONGEST_WAIT' | 'EQUAL_SPLIT';
+  readonly duplicateWindowMinutes: number;
+  readonly maxLevelChangePerHour: number;
+  readonly staleReadingHours: number;
+  readonly maxBackdateDays: number;
+  readonly forecastHorizonDays: number;
+  readonly forecastContextDays: number;
+  readonly trendThresholdPerDay: number;
+  readonly bands: readonly RuleBand[];
+  readonly sectors: readonly SectorSetting[];
+  readonly valveOrder: readonly ValveOrder[];
+  readonly operatingWindows: readonly OperatingWindow[];
+  readonly gauge: Gauge;
+}
+
+/** A row of the versions list (GET /rule-sets). */
+export interface RuleSetSummaryView {
+  readonly id: string;
+  readonly version: number;
+  readonly status: RuleSetStatus;
+  readonly validFrom: TimestampView | null;
+  readonly validTo: TimestampView | null;
+  readonly activatedAt: TimestampView | null;
+}
+
+/** A sector of the network. It never carries names or phones of families. */
+export interface SectorView {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly parentSectorId: string | null;
+  readonly householdsCount: number;
+  readonly isActive: boolean;
+}
+
+export interface TankView {
+  readonly id: string;
+  readonly name: string;
+  readonly gaugeMin: number;
+  readonly gaugeMax: number;
+  readonly gaugeStep: number;
+  readonly capacityLiters: number | null;
+  readonly isActive: boolean;
+}
+
+export interface ValveView {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly locationHint: string | null;
+  readonly isMotorized: boolean;
+  readonly failSafePosition: 'KEEP' | 'OPEN' | 'CLOSED';
+  readonly isActive: boolean;
 }

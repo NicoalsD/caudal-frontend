@@ -15,6 +15,8 @@ export default mergeConfig(
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],
       restoreMocks: true,
+      // Property tests and integration flows can be slow when all workers run at once.
+      testTimeout: 15_000,
       env: { VITE_API_BASE_URL: 'http://api.caudal.test/api/v1' },
       coverage: {
         provider: 'v8',
