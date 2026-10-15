@@ -671,6 +671,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/days/{date}/closure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cierre de un día con sus ejecuciones
+         * @description Permiso DAY_CLOSE (o EXECUTION_RECORD). API.md 11.2.
+         */
+        get: operations["getDayClosure"];
+        put?: never;
+        /**
+         * Cierra el día de servicio
+         * @description Permiso DAY_CLOSE. Pasa la propuesta del día a CLOSED. API.md 11.3.
+         */
+        post: operations["closeDay"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1328,6 +1352,21 @@ export interface components {
             note?: string | null;
             /** Format: uuid */
             supersedes_id?: string | null;
+        };
+        DayClosureRequest: {
+            notes: string;
+        };
+        DayClosure: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            notes?: string | null;
+            /** Format: uuid */
+            closed_by?: string;
+            /** Format: date-time */
+            closed_at: string;
+            executions: components["schemas"]["ShiftExecution"][];
         };
     };
     responses: never;
@@ -2645,6 +2684,72 @@ export interface operations {
                 };
             };
             /** @description INVALID_STATE_TRANSITION (propuesta no publicada o día cerrado) o CONFLICT (ya reemplazada). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getDayClosure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cierre del día. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayClosure"];
+                };
+            };
+            /** @description NOT_FOUND: el día no tiene cierre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    closeDay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DayClosureRequest"];
+            };
+        };
+        responses: {
+            /** @description Cierre creado. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayClosure"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (no hay propuesta publicada) o CONFLICT (día ya cerrado). */
             409: {
                 headers: {
                     [name: string]: unknown;

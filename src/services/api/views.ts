@@ -407,3 +407,12 @@ export interface ShiftExecutionView {
   readonly status: ShiftStatus;
   readonly supersedesId: string | null;
 }
+
+/** The closure of a day: its note and the executions of its shifts (API.md 11.2). */
+export interface DayClosureView {
+  readonly id: string;
+  readonly serviceDate: string;
+  readonly notes: string | null;
+  readonly closedAt: TimestampView;
+  readonly executions: readonly ShiftExecutionView[];
+}

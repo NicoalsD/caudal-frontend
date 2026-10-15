@@ -11,6 +11,7 @@ import { PublicApi } from './endpoints/PublicApi';
 import { RulesApi } from './endpoints/RulesApi';
 import { SystemApi } from './endpoints/SystemApi';
 import { ScheduleApi } from './endpoints/ScheduleApi';
+import { ClosureApi } from './endpoints/ClosureApi';
 import { AnomaliesApi } from './endpoints/AnomaliesApi';
 import { TankStatusApi } from './endpoints/TankStatusApi';
 
@@ -37,6 +38,8 @@ export class CaudalApi {
   readonly imports: ImportsApi;
   /** Published shifts of a day and the executions of each one (API.md 10 and 11). */
   readonly schedule: ScheduleApi;
+  /** The closure of a day (API.md 11.2 and 11.3). */
+  readonly closure: ClosureApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -53,5 +56,6 @@ export class CaudalApi {
     this.anomalies = new AnomaliesApi(http, adapter);
     this.imports = new ImportsApi(http);
     this.schedule = new ScheduleApi(http, adapter);
+    this.closure = new ClosureApi(http, adapter);
   }
 }

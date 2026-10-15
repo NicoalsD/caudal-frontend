@@ -1,7 +1,8 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
 import type {
+  DayClosureView,
   ScheduleProposalView,
   ShiftExecutionInput,
   ShiftExecutionView,
@@ -11,6 +12,7 @@ import { useCaudalApi } from '../../state/hooks/apiContext';
 import { aqueductKey } from '../../state/queryKeys';
 
 const DAY_SCOPE = 'closure-day';
+const CLOSURE_SCOPE = 'closure';
 
 /** Proposal statuses that hold the shifts of a day: a published day, or a day already closed. */
 const SHIFT_HOLDING_STATUSES: readonly string[] = ['PUBLISHED', 'CLOSED'];
@@ -42,5 +44,33 @@ export function useRecordExecution(): UseMutationResult<
   const api = useCaudalApi();
   return useMutation({
     mutationFn: (input) => api.schedule.recordExecution(input),
+  });
+}
+
+/** GET /days/{date}/closure: null while the day is open (its 404). */
+export function useDayClosure(serviceDate: string): UseQueryResult<DayClosureView | null> {
+  const api = useCaudalApi();
+  const aqueductId = useAqueductId();
+  return useQuery({
+    queryKey: aqueductKey(aqueductId, CLOSURE_SCOPE, serviceDate),
+    queryFn: () => api.closure.get(serviceDate),
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * POST /days/{date}/closure. A closed day is shown from the answer; the day's shifts are read
+ * again, since the proposal moves to CLOSED.
+ */
+export function useCloseDay(serviceDate: string): UseMutationResult<DayClosureView, Error, string> {
+  const api = useCaudalApi();
+  const client = useQueryClient();
+  const aqueductId = useAqueductId();
+  return useMutation({
+    mutationFn: (notes: string) => api.closure.close(serviceDate, notes),
+    onSuccess: async (closure) => {
+      client.setQueryData(aqueductKey(aqueductId, CLOSURE_SCOPE, serviceDate), closure);
+      await client.invalidateQueries({ queryKey: aqueductKey(aqueductId, DAY_SCOPE, serviceDate) });
+    },
   });
 }

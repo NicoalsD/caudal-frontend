@@ -2,6 +2,7 @@ import { SHIFT_STATUSES } from '../../../core/execution/shiftExecution';
 import type { ShiftStatus } from '../../../core/execution/shiftExecution';
 import type { components } from '../schema';
 import type {
+  DayClosureView,
   ScheduleItemView,
   ScheduleProposalSummaryView,
   ScheduleProposalView,
@@ -14,6 +15,7 @@ type ScheduleItemDto = components['schemas']['ScheduleItem'];
 type ScheduleProposalDto = components['schemas']['ScheduleProposal'];
 type ScheduleProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 type ShiftExecutionDto = components['schemas']['ShiftExecution'];
+type DayClosureDto = components['schemas']['DayClosure'];
 
 function toShiftStatus(value: string): ShiftStatus {
   const found = SHIFT_STATUSES.find((status) => status === value);
@@ -58,5 +60,16 @@ export function toShiftExecution(dto: ShiftExecutionDto): ShiftExecutionView {
     scheduleItemId: dto.schedule_item_id,
     status: toShiftStatus(dto.status),
     supersedesId: dto.supersedes_id ?? null,
+  };
+}
+
+/** The closure of a day with its executions (API.md 11.2). */
+export function toDayClosure(adapter: ApiDtoAdapter, dto: DayClosureDto): DayClosureView {
+  return {
+    id: dto.id,
+    serviceDate: dto.service_date,
+    notes: dto.notes ?? null,
+    closedAt: adapter.toTimestamp('closed_at', dto.closed_at),
+    executions: dto.executions.map((execution) => toShiftExecution(execution)),
   };
 }

@@ -1706,6 +1706,94 @@
           }
         }
       }
+    },
+    "/api/v1/days/{date}/closure": {
+      "get": {
+        "operationId": "getDayClosure",
+        "summary": "Cierre de un día con sus ejecuciones",
+        "description": "Permiso DAY_CLOSE (o EXECUTION_RECORD). API.md 11.2.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cierre del día.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayClosure"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el día no tiene cierre.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "closeDay",
+        "summary": "Cierra el día de servicio",
+        "description": "Permiso DAY_CLOSE. Pasa la propuesta del día a CLOSED. API.md 11.3.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayClosureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cierre creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayClosure"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION (no hay propuesta publicada) o CONFLICT (día ya cerrado).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3801,6 +3889,55 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
+          }
+        }
+      },
+      "DayClosureRequest": {
+        "type": "object",
+        "required": [
+          "notes"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "DayClosure": {
+        "type": "object",
+        "required": [
+          "id",
+          "service_date",
+          "closed_at",
+          "executions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "closed_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "executions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShiftExecution"
+            }
           }
         }
       }

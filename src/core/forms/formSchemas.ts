@@ -246,3 +246,17 @@ export function shiftExecutionFormSchema(
       [SHIFT_FIELD.endTime]: z.string(),
     });
 }
+
+/** The note of the day's closure (API.md 11.3): optional, with the `reading.note` limits. */
+export const CLOSURE_NOTES_FIELD = 'notes';
+
+export function closureNotesSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .text(CLOSURE_NOTES_FIELD, {
+      constraint: FIELD.readingNote,
+    })
+    .build();
+}
