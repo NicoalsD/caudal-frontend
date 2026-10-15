@@ -6,8 +6,8 @@ import { NetworkError } from '../../core/errors/NetworkError';
 import { t } from '../../i18n/t';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
-import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
+import { PublicScheduleContent } from './PublicScheduleContent';
 import { usePublicSchedule } from './publicQueries';
 
 const NOT_FOUND_CODE = 'NOT_FOUND';
@@ -42,20 +42,5 @@ export function PublicSchedulePage(): JSX.Element {
       />
     );
   }
-  return (
-    <>
-      <ScreenTitle>{t('publicSchedule.title', { name: schedule.data.aqueductName })}</ScreenTitle>
-      <ul>
-        {schedule.data.items.map((item) => (
-          <li key={`${item.sectorName}-${item.startTime}`}>
-            {t('publicSchedule.turn', {
-              sector: item.sectorName,
-              start: item.startTime,
-              end: item.endTime,
-            })}
-          </li>
-        ))}
-      </ul>
-    </>
-  );
+  return <PublicScheduleContent schedule={schedule.data} />;
 }

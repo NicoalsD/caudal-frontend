@@ -1,0 +1,50 @@
+/* Big text for reading outdoors on a phone: the hours are the largest thing on the page. */
+
+.serviceDay {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+  font-weight: var(--font-weight-bold);
+}
+
+.published {
+  margin: var(--space-1) 0 var(--space-5);
+  color: var(--color-text-secondary);
+}
+
+.sectorList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.sectorName {
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+  font-weight: var(--font-weight-bold);
+}
+
+.hours {
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-h1);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-800);
+}
+
+@media (min-width: 48rem) {
+  .sector {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+}

@@ -491,7 +491,11 @@ export const strings = {
     errorTitle: 'No pudimos cargar el horario',
     errorBody: 'Intenta de nuevo.',
     offline: 'Sin conexión. Intenta cuando tengas señal.',
-    turn: '{sector}: {start} a {end}',
+    serviceDay: 'Horario del {date}',
+    publishedAt: 'Publicado el {date}',
+    sectorsHeading: 'Horario por sector',
+    range: '{start} a {end}',
+    empty: 'Todavía no hay horario publicado para hoy.',
   },
   connection: {
     constraintsMissing:
