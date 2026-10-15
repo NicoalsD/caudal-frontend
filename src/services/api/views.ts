@@ -15,6 +15,7 @@ import type { Membership } from '../../core/session/memberships';
 import type { ReportStatus } from '../../core/incidents/reportStatus';
 import type { ProposalStatus } from '../../core/proposal/proposalDay';
 import type { Role } from '../../core/session/roles';
+import type { DeviceKind, DeviceStatus } from '../../core/devices/deviceModel';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
 
@@ -685,4 +686,35 @@ export interface SecurityEventView {
 export interface SecurityEventPageView {
   readonly items: readonly SecurityEventView[];
   readonly nextCursor: string | null;
+}
+
+/** The key a device accepts right now (API.md 16.9). `validUntil` is null when it has no end. */
+export interface ActiveDeviceKeyView {
+  readonly id: string;
+  readonly validFrom: TimestampView;
+  readonly validUntil: TimestampView | null;
+}
+
+/** A registered device (GET /devices). Key material never reaches the client. */
+export interface DeviceView {
+  readonly id: string;
+  readonly kind: DeviceKind;
+  readonly name: string;
+  readonly status: DeviceStatus;
+  readonly tankId: string | null;
+  readonly valveId: string | null;
+  readonly createdAt: TimestampView;
+  readonly lastSeenAt: TimestampView | null;
+  readonly activeKey: ActiveDeviceKeyView | null;
+}
+
+export interface DevicePageView {
+  readonly items: readonly DeviceView[];
+  readonly nextCursor: string | null;
+}
+
+/** The result of registering a key (POST /devices/{id}/keys). The fingerprint is not shown. */
+export interface RotatedDeviceKeyView {
+  readonly keyId: string;
+  readonly activatedAt: TimestampView;
 }

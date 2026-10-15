@@ -1131,6 +1131,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dispositivos del acueducto, del registro más reciente al más antiguo
+         * @description Permiso DEVICE_MANAGE (BOARD_ADMIN y PROJECT_TEAM). Nunca devuelve material de clave, huellas ni secretos.
+         */
+        get: operations["listDevices"];
+        put?: never;
+        /**
+         * Registra un dispositivo (sin clave; la clave se registra aparte)
+         * @description Permiso DEVICE_MANAGE. tank_id es obligatorio para LEVEL_SENSOR; valve_id para VALVE_ACTUATOR.
+         */
+        post: operations["registerDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/devices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cambia el estado de un dispositivo
+         * @description Permiso DEVICE_MANAGE. Un dispositivo SUSPENDED o RETIRED no acepta telemetría ni entrega comandos.
+         */
+        patch: operations["updateDevice"];
+        trace?: never;
+    };
+    "/api/v1/devices/{id}/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registra una clave pública nueva del dispositivo
+         * @description Permiso DEVICE_MANAGE. La clave anterior sigue válida durante la gracia y luego queda revocada.
+         */
+        post: operations["rotateDeviceKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/devices/{id}/keys/{keyId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoca una clave del dispositivo
+         * @description Permiso DEVICE_MANAGE. Desde ese momento las firmas con esa clave dejan de aceptarse.
+         */
+        delete: operations["revokeDeviceKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/forecast-evaluation": {
         parameters: {
             query?: never;
@@ -2216,6 +2300,61 @@ export interface components {
             /** Format: date-time */
             published_at: string;
             items: components["schemas"]["ScheduleItem"][];
+        };
+        /** @description Clave que se acepta ahora (API.md 16.9). */
+        ActiveDeviceKey: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            valid_from: string;
+            /** Format: date-time */
+            valid_until: string | null;
+        };
+        Device: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "LEVEL_SENSOR" | "VALVE_ACTUATOR" | "GATEWAY";
+            name: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "SUSPENDED" | "RETIRED";
+            /** Format: uuid */
+            tank_id?: string | null;
+            /** Format: uuid */
+            valve_id?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            last_seen_at: string | null;
+            active_key: components["schemas"]["ActiveDeviceKey"] | null;
+        };
+        DevicePage: {
+            items: components["schemas"]["Device"][];
+            next_cursor: string | null;
+        };
+        RegisterDeviceRequest: {
+            /** @enum {string} */
+            kind: "LEVEL_SENSOR" | "VALVE_ACTUATOR" | "GATEWAY";
+            name: string;
+            /** Format: uuid */
+            tank_id?: string | null;
+            /** Format: uuid */
+            valve_id?: string | null;
+        };
+        UpdateDeviceRequest: {
+            /** @enum {string} */
+            status: "ACTIVE" | "SUSPENDED" | "RETIRED";
+        };
+        /** @description Clave pública Ed25519: base64url sin relleno, 43 caracteres (32 bytes). API.md 16.5. */
+        DeviceKeyRequest: {
+            public_key: string;
+        };
+        DeviceKeyCreated: {
+            /** Format: uuid */
+            key_id: string;
+            fingerprint: string;
+            /** Format: date-time */
+            activated_at: string;
         };
         ForecastEvaluation: {
             horizon_days: number;
@@ -4578,6 +4717,261 @@ export interface operations {
             };
             /** @description NOT_FOUND: el día no tiene horario publicado. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listDevices: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de dispositivos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DevicePage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description UNAUTHORIZED. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    registerDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterDeviceRequest"];
+            };
+        };
+        responses: {
+            /** @description Dispositivo registrado, ACTIVE y sin clave. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Device"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDeviceRequest"];
+            };
+        };
+        responses: {
+            /** @description Dispositivo actualizado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Device"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    rotateDeviceKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceKeyRequest"];
+            };
+        };
+        responses: {
+            /** @description Clave registrada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceKeyCreated"];
+                };
+            };
+            /** @description FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: la misma clave ya está registrada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_KEY. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revokeDeviceKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                keyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Clave revocada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: la clave ya estaba revocada. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
