@@ -11,6 +11,7 @@ export const strings = {
   },
   common: {
     simulatedData: 'Datos simulados',
+    retry: 'Reintentar',
   },
   nav: {
     operatorHome: 'Inicio',
@@ -481,6 +482,16 @@ export const strings = {
     draftSaved: 'Borrador guardado.',
     noChangesToSave: 'No hay cambios por guardar.',
     readOnlyNotice: 'Puedes ver este borrador, pero no editarlo con tu rol.',
+  },
+  publicSchedule: {
+    title: 'Horario de agua de {name}',
+    loading: 'Cargando el horario...',
+    notFoundTitle: 'No encontramos el horario de esta vereda',
+    notFoundBody: 'Revisa el enlace o vuelve a intentarlo más tarde.',
+    errorTitle: 'No pudimos cargar el horario',
+    errorBody: 'Intenta de nuevo.',
+    offline: 'Sin conexión. Intenta cuando tengas señal.',
+    turn: '{sector}: {start} a {end}',
   },
   connection: {
     constraintsMissing:

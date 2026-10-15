@@ -711,6 +711,54 @@
           }
         }
       }
+    },
+    "/api/v1/public/{aqueductSlug}/schedule": {
+      "get": {
+        "operationId": "getPublicSchedule",
+        "summary": "Horario publicado del acueducto",
+        "description": "Público. Muestra solo el horario publicado; no revela nombres ni teléfonos.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horario publicado para la fecha (hoy en America/Bogota por defecto).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicSchedule"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Slug inexistente, página desactivada o sin publicación (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1631,6 +1679,89 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Valve"
+            }
+          }
+        }
+      },
+      "PublicScheduleAqueduct": {
+        "type": "object",
+        "description": "Acueducto del horario público. Sin datos personales.",
+        "required": [
+          "name",
+          "is_demo"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "is_demo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PublicSchedulePublication": {
+        "type": "object",
+        "required": [
+          "id",
+          "published_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicScheduleItem": {
+        "type": "object",
+        "description": "Turno de un sector. Solo nombre del sector y horas.",
+        "required": [
+          "sector_name",
+          "start_at",
+          "end_at"
+        ],
+        "properties": {
+          "sector_name": {
+            "type": "string"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicSchedule": {
+        "type": "object",
+        "required": [
+          "aqueduct",
+          "service_date",
+          "publication",
+          "items"
+        ],
+        "properties": {
+          "aqueduct": {
+            "$ref": "#/components/schemas/PublicScheduleAqueduct"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Día de servicio en America/Bogota."
+          },
+          "publication": {
+            "$ref": "#/components/schemas/PublicSchedulePublication"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicScheduleItem"
             }
           }
         }

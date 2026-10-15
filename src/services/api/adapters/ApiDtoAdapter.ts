@@ -1,6 +1,11 @@
 import type { ConstraintsMap, FieldConstraint } from '../../../core/forms/FieldConstraint';
 import { formatDecimal } from '../../../core/format/decimal';
-import { formatDateTime, parseInstant, toBogotaDateKey } from '../../../core/format/time';
+import {
+  formatDateTime,
+  formatTime,
+  parseInstant,
+  toBogotaDateKey,
+} from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
 import type { components } from '../schema';
 import type { Membership } from '../../../core/session/memberships';
@@ -19,6 +24,7 @@ import type {
   HealthView,
   LoginView,
   MeView,
+  PublicScheduleView,
   RefreshView,
   RuleSetSummaryView,
   RuleSetView,
@@ -45,6 +51,7 @@ type RuleValveOrderDto = components['schemas']['RuleValveOrder'];
 type RuleOperatingWindowDto = components['schemas']['RuleOperatingWindow'];
 type RuleGaugeDto = components['schemas']['RuleGauge'];
 type SectorDto = components['schemas']['Sector'];
+type PublicScheduleDto = components['schemas']['PublicSchedule'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
 
@@ -138,6 +145,21 @@ export class ApiDtoAdapter {
       valveOrder: dto.valve_order.map((valve) => this.toValveOrder(valve)),
       operatingWindows: dto.operating_windows.map((window) => this.toOperatingWindow(window)),
       gauge: this.toGauge(dto.gauge),
+    };
+  }
+
+  /** Keeps the aqueduct name and demo flag, the service day and the sector turns; nothing else. */
+  toPublicSchedule(dto: PublicScheduleDto): PublicScheduleView {
+    return {
+      aqueductName: dto.aqueduct.name,
+      isDemo: dto.aqueduct.is_demo,
+      serviceDate: dto.service_date,
+      publishedAt: this.toTimestamp('publication.published_at', dto.publication.published_at),
+      items: dto.items.map((item) => ({
+        sectorName: item.sector_name,
+        startTime: formatTime(item.start_at),
+        endTime: formatTime(item.end_at),
+      })),
     };
   }
 

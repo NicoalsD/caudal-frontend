@@ -134,3 +134,21 @@ export interface ValveView {
   readonly failSafePosition: 'KEEP' | 'OPEN' | 'CLOSED';
   readonly isActive: boolean;
 }
+
+/** One sector's turn in the public schedule. Only the sector name and the hours are kept. */
+export interface PublicScheduleItemView {
+  readonly sectorName: string;
+  /** Start hour in 12 h format, America/Bogota, for example "6:00 a. m.". */
+  readonly startTime: string;
+  readonly endTime: string;
+}
+
+/** The published schedule of one aqueduct for one service day (API.md 15.1). No personal data. */
+export interface PublicScheduleView {
+  readonly aqueductName: string;
+  readonly isDemo: boolean;
+  /** Service day as YYYY-MM-DD in America/Bogota; shown without a time zone shift. */
+  readonly serviceDate: string;
+  readonly publishedAt: TimestampView;
+  readonly items: readonly PublicScheduleItemView[];
+}

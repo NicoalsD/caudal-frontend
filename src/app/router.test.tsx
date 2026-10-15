@@ -14,10 +14,15 @@ function renderAt(path: string, role?: Role) {
 const heading = (name: string) => screen.getByRole('heading', { level: 1, name });
 
 describe('role router', () => {
-  it('shows the public schedule without a session', () => {
+  it('shows the public schedule without a session', async () => {
     renderAt('/a/vereda-de-prueba');
 
-    expect(heading(t('screens.publicSchedule'))).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: t('publicSchedule.title', { name: 'Guaitarilla' }),
+      }),
+    ).toBeInTheDocument();
   });
 
   it('sends anonymous visitors of a private route to login keeping the next path', () => {

@@ -311,6 +311,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/{aqueductSlug}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Horario publicado del acueducto
+         * @description Público. Muestra solo el horario publicado; no revela nombres ni teléfonos.
+         */
+        get: operations["getPublicSchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -619,6 +639,35 @@ export interface components {
         /** @description Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend. */
         ValveList: {
             items: components["schemas"]["Valve"][];
+        };
+        /** @description Acueducto del horario público. Sin datos personales. */
+        PublicScheduleAqueduct: {
+            name: string;
+            is_demo: boolean;
+        };
+        PublicSchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        /** @description Turno de un sector. Solo nombre del sector y horas. */
+        PublicScheduleItem: {
+            sector_name: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+        };
+        PublicSchedule: {
+            aqueduct: components["schemas"]["PublicScheduleAqueduct"];
+            /**
+             * Format: date
+             * @description Día de servicio en America/Bogota.
+             */
+            service_date: string;
+            publication: components["schemas"]["PublicSchedulePublication"];
+            items: components["schemas"]["PublicScheduleItem"][];
         };
     };
     responses: never;
@@ -1225,6 +1274,39 @@ export interface operations {
                 };
             };
             /** @description El sector no existe (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicSchedule: {
+        parameters: {
+            query?: {
+                date?: string;
+            };
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Horario publicado para la fecha (hoy en America/Bogota por defecto). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicSchedule"];
+                };
+            };
+            /** @description Slug inexistente, página desactivada o sin publicación (NOT_FOUND). */
             404: {
                 headers: {
                     [name: string]: unknown;
