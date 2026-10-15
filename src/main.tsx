@@ -9,6 +9,7 @@ import { App } from './app/App';
 import { createAppServices } from './app/createAppServices';
 import { prefetchReferences } from './app/providers/queryClient';
 import { createAppRouter } from './app/router';
+import { UpdatePrompt } from './app/pwa/UpdatePrompt';
 
 const container = document.getElementById('root');
 if (container === null) {
@@ -33,5 +34,7 @@ createRoot(container).render(
       queryClient={services.queryClient}
       offline={services.offline}
     />
+    {/* Registers the service worker; the update offer never reloads the page by itself. */}
+    <UpdatePrompt />
   </StrictMode>,
 );

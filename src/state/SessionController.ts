@@ -200,8 +200,13 @@ export class SessionController {
     this.deps.store.signIn(user);
   }
 
-  /** Forgets the token, the cache and (unless the server was just unreachable) the hints. */
+  /**
+   * Forgets the token, the cache and (unless the server was just unreachable) the hints. The cache
+   * is kept only when no one was signed in: it then holds public data that belongs to nobody, and
+   * clearing it would strand the queries of a public page that are still loading.
+   */
   private cleanUp(keepHints = false): void {
+    const hadIdentity = this.cacheIdentity !== null;
     this.cacheIdentity = null;
     if (!keepHints) {
       this.deps.hints.clear();
@@ -209,7 +214,9 @@ export class SessionController {
     this.cancelRenewal?.();
     this.cancelRenewal = null;
     this.deps.tokens.clear();
-    this.deps.queryClient.clear();
+    if (hadIdentity) {
+      this.deps.queryClient.clear();
+    }
   }
 
   /** A failed clear must not keep the person signed in; the copies are simply read again later. */

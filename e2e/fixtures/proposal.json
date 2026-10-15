@@ -1,0 +1,55 @@
+{
+  "id": "0190f3a2-9a00-7000-8000-000000000001",
+  "service_date": "2026-10-09",
+  "status": "PENDING_REVIEW",
+  "rule_set_id": "0190f3a2-0000-7000-8000-0000000000c3",
+  "tank_level_snapshot": 2.1,
+  "tank_band": "LOW",
+  "available_hours": 16,
+  "forecast_run_id": null,
+  "strategy_code": "PRIORITY_THEN_LONGEST_WAIT",
+  "generated_at": "2026-10-09T06:00:00-05:00",
+  "lock_version": 0,
+  "items": [
+    {
+      "id": "0190f3a2-9b00-7000-8000-0000000000a1",
+      "sector_id": "0190f3a2-0000-7000-8000-0000000000d1",
+      "sequence": 1,
+      "start_at": "2026-10-09T06:00:00-05:00",
+      "end_at": "2026-10-09T09:00:00-05:00",
+      "origin": "PROPOSED",
+      "reasons": [
+        {
+          "code": "PRIORITY_SECTOR",
+          "params": {
+            "sector": "Escuela",
+            "priority_rank": 1
+          },
+          "text": "Escuela es prioritario y recibe turno antes que los demás."
+        }
+      ]
+    },
+    {
+      "id": "0190f3a2-9b00-7000-8000-0000000000a2",
+      "sector_id": "0190f3a2-0000-7000-8000-0000000000d2",
+      "sequence": 2,
+      "start_at": "2026-10-09T09:00:00-05:00",
+      "end_at": "2026-10-09T17:00:00-05:00",
+      "origin": "PROPOSED",
+      "reasons": [
+        {
+          "code": "HOURS_WITHOUT_SERVICE",
+          "params": {
+            "sector": "Alto",
+            "horas": 38,
+            "origen": "CONFIRMED"
+          },
+          "text": "Alto lleva 38 horas sin servicio."
+        }
+      ]
+    }
+  ],
+  "unserved_sectors": [],
+  "decisions": [],
+  "snapshot_taken": false
+}

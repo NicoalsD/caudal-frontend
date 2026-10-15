@@ -14,6 +14,8 @@ export default mergeConfig(
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],
+      // Playwright specs run under `pnpm e2e`, never under Vitest.
+      exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
       restoreMocks: true,
       // Property tests and integration flows can be slow when all workers run at once.
       testTimeout: 15_000,
@@ -27,6 +29,7 @@ export default mergeConfig(
           'src/**/*.d.ts',
           'src/**/*.test.{ts,tsx}',
           'src/main.tsx',
+          'e2e/**',
         ],
         thresholds: {
           lines: 80,

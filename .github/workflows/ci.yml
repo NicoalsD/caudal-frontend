@@ -31,6 +31,9 @@ jobs:
       - name: Instala dependencias
         run: pnpm install --frozen-lockfile
 
+      - name: Auditoría de dependencias de producción
+        run: pnpm audit --prod --audit-level high
+
       - name: Revisa el formato
         run: pnpm format:check
 
@@ -45,3 +48,35 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instala dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Instala Chromium y sus dependencias del sistema
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Ejecuta los dos proyectos (móvil 390 px y escritorio 1280 px) contra el build de producción.
+      - name: Pruebas end-to-end con axe
+        run: pnpm e2e
+
+      - name: Sube el reporte de Playwright si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14

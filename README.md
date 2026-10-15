@@ -12,10 +12,11 @@ React 19 · Vite · TypeScript · PWA sin conexión.
 
 ## Estado
 
-**Fase 1 y 2: fundaciones.** Ya están la aplicación con Vite, las capas con ESLint, las pruebas con Vitest y MSW, el router por rol, los tokens de diseño, los textos en español, el cliente HTTP decorado y los formularios armados desde la API. Las pantallas se construyen por fases.
+**v1.0.0.** La aplicación cubre a los cinco actores: horario público y reporte de daños, sesión, fontanero (con cola sin conexión), Junta (tanque, propuestas, reglas, actas, incidentes, entidades y usuarios), equipo del proyecto y entidades de apoyo. Detalle por actor, rutas y verificación en [docs/Version-1.0.0.md](docs/Version-1.0.0.md).
 
 ## Documentación
 
+- [docs/Version-1.0.0.md](docs/Version-1.0.0.md): qué incluye la versión 1.0.0, rutas, verificación, despliegue y faltas del contrato de la API.
 - [AGENTS.md](AGENTS.md): reglas obligatorias para personas y agentes.
 - [`.agents/`](.agents/): arquitectura, pantallas, cola sin conexión, tema visual, seguridad, patrones y pruebas.
 - Documentación canónica del proyecto: [`caudal-backend/docs`](https://github.com/NicoalsD/caudal-backend/tree/develop/docs).
@@ -32,13 +33,14 @@ pnpm dev          # http://localhost:5173
 Verificación antes de cada commit:
 
 ```bash
+pnpm format:check
 pnpm lint
 pnpm typecheck
-pnpm test --run
+pnpm test:coverage
 pnpm build
 ```
 
-Otros comandos: `pnpm format:check`, `pnpm test:coverage` y `pnpm gen:api` (tipos desde `docs/openapi.json`).
+Pruebas end-to-end (Playwright, con axe): `pnpm e2e:install` una vez y después `pnpm e2e`. Otros comandos: `pnpm gen:api` (tipos desde `docs/openapi.json`).
 
 ## Equipo
 

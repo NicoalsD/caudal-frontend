@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "code": "NORMAL", "label_es": "Normal", "sort_order": 1 },
+    { "code": "MUDDY", "label_es": "Con barro", "sort_order": 2 },
+    { "code": "TURBID", "label_es": "Turbia", "sort_order": 3 },
+    { "code": "NOT_OBSERVED", "label_es": "Sin observar", "sort_order": 4 }
+  ]
+}

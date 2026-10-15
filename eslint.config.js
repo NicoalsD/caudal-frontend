@@ -261,6 +261,18 @@ export default tseslint.config(
       'no-restricted-properties': 'off',
     },
   },
+  // Playwright tests and config: typed by tsconfig.e2e.json, outside the app's project.
+  {
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
+    languageOptions: {
+      globals: { ...globals.node },
+      parserOptions: {
+        projectService: false,
+        project: ['./tsconfig.e2e.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   {
     files: ['**/*.js', '**/*.mjs'],
     ...tseslint.configs.disableTypeChecked,

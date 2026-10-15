@@ -61,6 +61,20 @@ describe('SessionController.restore (boot)', () => {
     expect(services.tokens.get()).not.toBeNull();
   });
 
+  it('keeps the public data in the cache when there was no session to restore', async () => {
+    server.use(
+      http.post(apiUrl('/auth/refresh'), () => errorResponse(STATUS.unauthorized, 'UNAUTHORIZED')),
+    );
+    const services = createAppServices(ENV);
+    const publicKey = ['public', 'schedule', 'vereda'];
+    services.queryClient.setQueryData(publicKey, { loaded: true });
+
+    await services.session.restore();
+
+    expect(services.sessionStore.getSnapshot().status).toBe('anonymous');
+    expect(services.queryClient.getQueryData(publicKey)).toEqual({ loaded: true });
+  });
+
   it('refreshes only once even if restore is called twice (StrictMode)', async () => {
     const backend = createSessionBackend(TEST_USERS.operator);
     server.use(...backend.handlers);
@@ -106,11 +120,23 @@ describe('SessionController.restore (boot)', () => {
 
   it('waits on a loading message instead of redirecting while it restores', async () => {
     const backend = createSessionBackend(TEST_USERS.operator);
-    server.use(...backend.handlers);
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    // The refresh waits until the loading message was seen; returning nothing hands the request
+    // to the fake backend below, so a fast machine cannot finish the restore before the check.
+    server.use(
+      http.post(apiUrl('/auth/refresh'), async () => {
+        await gate;
+      }),
+      ...backend.handlers,
+    );
     const { services, router } = renderApp(ROUTE_PATHS.operator.home);
 
     const pending = services.session.restore();
     expect(await screen.findByText(t('auth.restoring'))).toBeInTheDocument();
+    release();
     await pending;
 
     await waitFor(() => {

@@ -88,10 +88,11 @@ Notas:
 | Service worker | `sw.js` en la raíz, `Cache-Control: no-cache`, para que los navegadores vean las versiones nuevas. |
 | Assets con hash | `/assets/*` con caché inmutable de un año (los nombres cambian con cada build). |
 | Manifiesto | `manifest.webmanifest` con `name: "CAUDAL"`, `short_name: "CAUDAL"`, `lang: "es"`, `start_url: "/"`, `scope: "/"`, `display: "standalone"`, `theme_color: "#1D5A6E"`, `background_color: "#F4F0E6"` (tokens de `design-theme.md`). |
-| Iconos | 192, 512 y maskable 512 en `public/icons/`. |
+| Iconos | 192, 512 y maskable 512 en `public/icons/` (PNG generados desde `public/icons/caudal-icon.svg`, con `magick`). |
+| Registro | `vite-plugin-pwa` fijado en 1.3.0. La 2.0.0 (publicada el 2026-10-03, peer `vite ^8.0.0`) también soporta Vite 8, pero no se usó: salió hace doce días y una versión mayor recién publicada no entra en esta entrega. Migrar a 2.x es una tarea aparte con su propia verificación. El registro lo hace `UpdatePrompt` (`src/app/pwa/`), importado desde `main.tsx`; no se inyecta ningún script en `index.html`. |
 | Actualización | `registerType: 'prompt'` (propuesta, `architecture.md`, sección 8). La nueva versión espera a que el usuario no esté en una captura. |
 | Persistencia | `navigator.storage.persist()` al entrar, para que el navegador no borre la cola (`offline-sync.md`, sección 12). |
-| Horario público | Caché del service worker con `NetworkFirst` y tiempo de espera (`architecture.md`, sección 8). |
+| Horario público | En esta versión el service worker no cachea `/api/v1` (regla de `security.md`, sección 11). El horario sin señal queda pendiente de una caché en IndexedDB. |
 
 Verificación antes de cada entrega: instalar la PWA en Android (Chrome) y en iPhone (Safari, "Agregar a pantalla de inicio"), cortar la red y recargar.
 
@@ -163,6 +164,20 @@ Reglas:
 | Cambio de contrato con la API | Drako y Nicolas Diaz | Desplegar primero la API compatible con el frontend anterior, después el frontend. |
 
 Compatibilidad: el frontend nuevo debe funcionar con la API de la versión anterior durante la ventana de despliegue. Los campos nuevos de la API se agregan antes de que el frontend los use.
+
+### 8.1 Despliegue automático desde GitHub Actions
+
+El workflow `.github/workflows/deploy.yml` publica en Vercel en cada push a `main`, con Vercel CLI fijado en `62.0.0` (`vercel pull`, `vercel build --prod` y `vercel deploy --prebuilt --prod`). Si falta algún secreto, el job termina en verde con un aviso y no despliega.
+
+Secretos del repositorio (Settings > Secrets and variables > Actions):
+
+| Secreto | Qué es | Dónde se obtiene |
+|---------|--------|------------------|
+| `VERCEL_TOKEN` | Token personal o de equipo con permiso de despliegue | Vercel > Account Settings > Tokens |
+| `VERCEL_ORG_ID` | Identificador del equipo o cuenta | `orgId` en `.vercel/project.json` tras `vercel link` |
+| `VERCEL_PROJECT_ID` | Identificador del proyecto | `projectId` en `.vercel/project.json` tras `vercel link` |
+
+Ninguno de estos valores va en el repositorio. `VITE_API_BASE_URL` no es un secreto: se define como variable de entorno del proyecto en Vercel (sección 2).
 
 ## 9. Observabilidad sin rastreadores de terceros
 

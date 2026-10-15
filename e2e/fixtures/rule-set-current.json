@@ -1,0 +1,80 @@
+{
+  "id": "0190f3a2-0000-7000-8000-0000000000c3",
+  "version": 3,
+  "status": "ACTIVE",
+  "valid_from": "2026-10-01T08:00:00-05:00",
+  "valid_to": null,
+  "based_on_rule_set_id": null,
+  "change_reason": "Versión inicial de prueba.",
+  "lock_version": 1,
+  "reserve_level": 1,
+  "reserve_policy": "REDUCE_TO_CRITICAL_BAND",
+  "max_daily_service_hours": 16,
+  "min_shift_hours": 1,
+  "max_shift_hours": 8,
+  "allocation_strategy": "PRIORITY_THEN_LONGEST_WAIT",
+  "duplicate_window_minutes": 5,
+  "max_level_change_per_hour": 0.5,
+  "stale_reading_hours": 12,
+  "max_backdate_days": 2,
+  "forecast_horizon_days": 3,
+  "forecast_context_days": 14,
+  "trend_threshold_per_day": 0.1,
+  "bands": [
+    {
+      "band": "HIGH",
+      "min_level": 3.5,
+      "max_level": 5,
+      "daily_service_hours": 16,
+      "priority_only": false
+    },
+    {
+      "band": "LOW",
+      "min_level": 1.5,
+      "max_level": 3.5,
+      "daily_service_hours": 8,
+      "priority_only": false
+    },
+    {
+      "band": "CRITICAL",
+      "min_level": 0,
+      "max_level": 1.5,
+      "daily_service_hours": 3,
+      "priority_only": true
+    }
+  ],
+  "sectors": [
+    {
+      "sector_id": "0190f3a2-0000-7000-8000-0000000000d1",
+      "is_included": true,
+      "is_priority": true,
+      "priority_rank": 1
+    },
+    {
+      "sector_id": "0190f3a2-0000-7000-8000-0000000000d2",
+      "is_included": true,
+      "is_priority": false,
+      "priority_rank": null
+    },
+    {
+      "sector_id": "0190f3a2-0000-7000-8000-0000000000d3",
+      "is_included": true,
+      "is_priority": false,
+      "priority_rank": null
+    }
+  ],
+  "valve_order": [],
+  "operating_windows": [
+    {
+      "day_of_week": null,
+      "start_time": "05:00",
+      "end_time": "21:00"
+    }
+  ],
+  "gauge": {
+    "min": 0,
+    "max": 5,
+    "step": 0.01
+  },
+  "server_time": "2026-10-09T04:30:00-05:00"
+}
