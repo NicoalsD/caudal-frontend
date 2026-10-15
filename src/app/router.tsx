@@ -17,6 +17,7 @@ import {
   ProposalPublicationPage,
 } from '../features/proposals';
 import { RuleDraftPage, RulesPage } from '../features/rules';
+import { UsersPage } from '../features/users';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
@@ -110,7 +111,7 @@ const boardRoutes: RouteObject = {
         screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,
-          children: [screen(ROUTE_PATHS.board.users, t('screens.users'))],
+          children: [{ path: ROUTE_PATHS.board.users, element: <UsersPage /> }],
         },
       ],
     },

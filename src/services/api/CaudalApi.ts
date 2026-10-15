@@ -13,6 +13,7 @@ import { RulesApi } from './endpoints/RulesApi';
 import { SystemApi } from './endpoints/SystemApi';
 import { AnomaliesApi } from './endpoints/AnomaliesApi';
 import { TankStatusApi } from './endpoints/TankStatusApi';
+import { UsersApi } from './endpoints/UsersApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -37,6 +38,8 @@ export class CaudalApi {
   readonly tankStatus: TankStatusApi;
   readonly anomalies: AnomaliesApi;
   readonly imports: ImportsApi;
+  /** Accounts, one-time codes and memberships (API.md section 3). */
+  readonly users: UsersApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -53,5 +56,6 @@ export class CaudalApi {
     this.tankStatus = new TankStatusApi(http, adapter);
     this.anomalies = new AnomaliesApi(http, adapter);
     this.imports = new ImportsApi(http);
+    this.users = new UsersApi(http, adapter);
   }
 }

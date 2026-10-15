@@ -339,12 +339,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "DRAFT",
-                "ACTIVE",
-                "SUPERSEDED",
-                "DISCARDED"
-              ]
+              "enum": ["DRAFT", "ACTIVE", "SUPERSEDED", "DISCARDED"]
             }
           },
           {
@@ -928,10 +923,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "enum": [
-                "WATER_APPEARANCE",
-                "DAMAGE_CATEGORY"
-              ]
+              "enum": ["WATER_APPEARANCE", "DAMAGE_CATEGORY"]
             }
           }
         ],
@@ -1772,11 +1764,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "OPEN",
-                "CONFIRMED",
-                "DISMISSED"
-              ]
+              "enum": ["OPEN", "CONFIRMED", "DISMISSED"]
             }
           },
           {
@@ -1785,13 +1773,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "POSSIBLE_LEAK",
-                "SENSOR_FAULT",
-                "STALE_DATA",
-                "SUSPECTED_DUPLICATE",
-                "ABNORMAL_DROP"
-              ]
+              "enum": ["POSSIBLE_LEAK", "SENSOR_FAULT", "STALE_DATA", "SUSPECTED_DUPLICATE", "ABNORMAL_DROP"]
             }
           },
           {
@@ -1896,17 +1878,425 @@
           }
         }
       }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "Cuentas del acueducto, paginadas por cursor",
+        "description": "Permiso USER_MANAGE. Orden por username.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ACTIVE", "LOCKED", "DISABLED"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de cuentas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedUserPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUser",
+        "summary": "Crea una cuenta con su primera membresía",
+        "description": "Permiso USER_MANAGE. Devuelve el código de activación una sola vez.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cuenta creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: el usuario ya existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "patch": {
+        "operationId": "updateUser",
+        "summary": "Cambia el nombre o el estado de una cuenta",
+        "description": "Permiso USER_MANAGE. Bloquear o desactivar cierra sus sesiones. DISABLED es definitivo.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cuenta actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedUser"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION o CONFLICT con reason SELF_LOCKOUT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/reset-grants": {
+      "post": {
+        "operationId": "issueResetGrant",
+        "summary": "Emite un código para fijar una contraseña",
+        "description": "Permiso USER_MANAGE. Los códigos anteriores no usados quedan revocados.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetGrantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Código emitido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetGrant"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION: cuenta desactivada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memberships": {
+      "get": {
+        "operationId": "listMemberships",
+        "summary": "Membresías del acueducto, paginadas por cursor",
+        "description": "Permiso USER_MANAGE.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "aqueduct_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de membresías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedMembershipPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "grantMembership",
+        "summary": "Otorga un rol a una cuenta",
+        "description": "Permiso USER_MANAGE. Una cuenta tiene un solo rol a la vez en el acueducto.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantMembershipRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Membresía creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedMembership"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con reason MEMBERSHIP_OVERLAP.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memberships/{id}": {
+      "delete": {
+        "operationId": "revokeMembership",
+        "summary": "Termina una membresía vigente",
+        "description": "Permiso USER_MANAGE. No borra la fila: pone valid_to ahora.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Membresía terminada."
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con reason SELF_LOCKOUT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "ErrorBody": {
         "type": "object",
-        "required": [
-          "code",
-          "message",
-          "request_id"
-        ],
+        "required": ["code", "message", "request_id"],
         "properties": {
           "code": {
             "type": "string",
@@ -1930,9 +2320,7 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "required": [
-          "error"
-        ],
+        "required": ["error"],
         "properties": {
           "error": {
             "$ref": "#/components/schemas/ErrorBody"
@@ -1941,16 +2329,11 @@
       },
       "HealthResponse": {
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "UP",
-              "DOWN"
-            ]
+            "enum": ["UP", "DOWN"]
           }
         }
       },
@@ -1988,10 +2371,7 @@
       },
       "LoginRequest": {
         "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
+        "required": ["username", "password"],
         "properties": {
           "username": {
             "type": "string"
@@ -2003,14 +2383,7 @@
       },
       "AuthUser": {
         "type": "object",
-        "required": [
-          "id",
-          "username",
-          "full_name",
-          "role",
-          "aqueduct_id",
-          "must_change_password"
-        ],
+        "required": ["id", "username", "full_name", "role", "aqueduct_id", "must_change_password"],
         "properties": {
           "id": {
             "type": "string",
@@ -2024,13 +2397,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "BOARD_ADMIN",
-              "BOARD_MEMBER",
-              "OPERATOR",
-              "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
-            ]
+            "enum": ["BOARD_ADMIN", "BOARD_MEMBER", "OPERATOR", "PROJECT_TEAM", "SUPPORT_ENTITY"]
           },
           "aqueduct_id": {
             "type": "string",
@@ -2043,21 +2410,14 @@
       },
       "LoginResponse": {
         "type": "object",
-        "required": [
-          "access_token",
-          "token_type",
-          "expires_in",
-          "user"
-        ],
+        "required": ["access_token", "token_type", "expires_in", "user"],
         "properties": {
           "access_token": {
             "type": "string"
           },
           "token_type": {
             "type": "string",
-            "enum": [
-              "Bearer"
-            ]
+            "enum": ["Bearer"]
           },
           "expires_in": {
             "type": "integer",
@@ -2071,19 +2431,14 @@
       },
       "RefreshResponse": {
         "type": "object",
-        "required": [
-          "access_token",
-          "expires_in"
-        ],
+        "required": ["access_token", "expires_in"],
         "properties": {
           "access_token": {
             "type": "string"
           },
           "token_type": {
             "type": "string",
-            "enum": [
-              "Bearer"
-            ]
+            "enum": ["Bearer"]
           },
           "expires_in": {
             "type": "integer",
@@ -2093,10 +2448,7 @@
       },
       "Membership": {
         "type": "object",
-        "required": [
-          "aqueduct_id",
-          "role"
-        ],
+        "required": ["aqueduct_id", "role"],
         "properties": {
           "aqueduct_id": {
             "type": "string",
@@ -2104,13 +2456,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "BOARD_ADMIN",
-              "BOARD_MEMBER",
-              "OPERATOR",
-              "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
-            ]
+            "enum": ["BOARD_ADMIN", "BOARD_MEMBER", "OPERATOR", "PROJECT_TEAM", "SUPPORT_ENTITY"]
           },
           "valid_from": {
             "type": "string",
@@ -2125,14 +2471,7 @@
       },
       "MeResponse": {
         "type": "object",
-        "required": [
-          "id",
-          "username",
-          "full_name",
-          "must_change_password",
-          "memberships",
-          "permissions"
-        ],
+        "required": ["id", "username", "full_name", "must_change_password", "memberships", "permissions"],
         "properties": {
           "id": {
             "type": "string",
@@ -2172,10 +2511,7 @@
       },
       "ChangePasswordRequest": {
         "type": "object",
-        "required": [
-          "current_password",
-          "new_password"
-        ],
+        "required": ["current_password", "new_password"],
         "properties": {
           "current_password": {
             "type": "string"
@@ -2187,9 +2523,7 @@
       },
       "SwitchAqueductRequest": {
         "type": "object",
-        "required": [
-          "aqueduct_id"
-        ],
+        "required": ["aqueduct_id"],
         "properties": {
           "aqueduct_id": {
             "type": "string",
@@ -2199,22 +2533,12 @@
       },
       "RuleBand": {
         "type": "object",
-        "required": [
-          "band",
-          "min_level",
-          "max_level",
-          "daily_service_hours",
-          "priority_only"
-        ],
+        "required": ["band", "min_level", "max_level", "daily_service_hours", "priority_only"],
         "description": "Banda de nivel [min_level, max_level). La banda superior incluye gauge_max.",
         "properties": {
           "band": {
             "type": "string",
-            "enum": [
-              "HIGH",
-              "LOW",
-              "CRITICAL"
-            ]
+            "enum": ["HIGH", "LOW", "CRITICAL"]
           },
           "min_level": {
             "type": "number",
@@ -2235,11 +2559,7 @@
       },
       "RuleSectorSetting": {
         "type": "object",
-        "required": [
-          "sector_id",
-          "is_included",
-          "is_priority"
-        ],
+        "required": ["sector_id", "is_included", "is_priority"],
         "properties": {
           "sector_id": {
             "type": "string",
@@ -2261,10 +2581,7 @@
       },
       "RuleValveOrder": {
         "type": "object",
-        "required": [
-          "valve_id",
-          "sequence_order"
-        ],
+        "required": ["valve_id", "sequence_order"],
         "properties": {
           "valve_id": {
             "type": "string",
@@ -2279,10 +2596,7 @@
       },
       "RuleOperatingWindow": {
         "type": "object",
-        "required": [
-          "start_time",
-          "end_time"
-        ],
+        "required": ["start_time", "end_time"],
         "description": "Ventana de operación. day_of_week 1 a 7 (lunes a domingo); nulo = todos los días. Horas locales HH:MM, fin mayor que inicio.",
         "properties": {
           "day_of_week": {
@@ -2304,11 +2618,7 @@
       },
       "RuleGauge": {
         "type": "object",
-        "required": [
-          "min",
-          "max",
-          "step"
-        ],
+        "required": ["min", "max", "step"],
         "properties": {
           "min": {
             "type": "number",
@@ -2360,12 +2670,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "DRAFT",
-              "ACTIVE",
-              "SUPERSEDED",
-              "DISCARDED"
-            ]
+            "enum": ["DRAFT", "ACTIVE", "SUPERSEDED", "DISCARDED"]
           },
           "valid_from": {
             "type": "string",
@@ -2397,11 +2702,7 @@
           },
           "reserve_policy": {
             "type": "string",
-            "enum": [
-              "NONE",
-              "REDUCE_TO_CRITICAL_BAND",
-              "PRIORITY_ONLY"
-            ]
+            "enum": ["NONE", "REDUCE_TO_CRITICAL_BAND", "PRIORITY_ONLY"]
           },
           "max_daily_service_hours": {
             "type": "number",
@@ -2417,10 +2718,7 @@
           },
           "allocation_strategy": {
             "type": "string",
-            "enum": [
-              "PRIORITY_THEN_LONGEST_WAIT",
-              "EQUAL_SPLIT"
-            ]
+            "enum": ["PRIORITY_THEN_LONGEST_WAIT", "EQUAL_SPLIT"]
           },
           "duplicate_window_minutes": {
             "type": "integer",
@@ -2485,11 +2783,7 @@
       },
       "RuleSetSummary": {
         "type": "object",
-        "required": [
-          "id",
-          "version",
-          "status"
-        ],
+        "required": ["id", "version", "status"],
         "properties": {
           "id": {
             "type": "string",
@@ -2501,12 +2795,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "DRAFT",
-              "ACTIVE",
-              "SUPERSEDED",
-              "DISCARDED"
-            ]
+            "enum": ["DRAFT", "ACTIVE", "SUPERSEDED", "DISCARDED"]
           },
           "valid_from": {
             "type": "string",
@@ -2532,9 +2821,7 @@
       },
       "RuleSetPage": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "properties": {
           "items": {
             "type": "array",
@@ -2566,11 +2853,7 @@
           },
           "reserve_policy": {
             "type": "string",
-            "enum": [
-              "NONE",
-              "REDUCE_TO_CRITICAL_BAND",
-              "PRIORITY_ONLY"
-            ]
+            "enum": ["NONE", "REDUCE_TO_CRITICAL_BAND", "PRIORITY_ONLY"]
           },
           "max_daily_service_hours": {
             "type": "number",
@@ -2586,10 +2869,7 @@
           },
           "allocation_strategy": {
             "type": "string",
-            "enum": [
-              "PRIORITY_THEN_LONGEST_WAIT",
-              "EQUAL_SPLIT"
-            ]
+            "enum": ["PRIORITY_THEN_LONGEST_WAIT", "EQUAL_SPLIT"]
           },
           "duplicate_window_minutes": {
             "type": "integer",
@@ -2647,9 +2927,7 @@
       },
       "ActivateRuleSetRequest": {
         "type": "object",
-        "required": [
-          "change_reason"
-        ],
+        "required": ["change_reason"],
         "properties": {
           "change_reason": {
             "type": "string"
@@ -2658,13 +2936,7 @@
       },
       "Sector": {
         "type": "object",
-        "required": [
-          "id",
-          "code",
-          "name",
-          "households_count",
-          "is_active"
-        ],
+        "required": ["id", "code", "name", "households_count", "is_active"],
         "description": "Sector de la red. Sin datos personales (API.md sección 5.3).",
         "properties": {
           "id": {
@@ -2694,9 +2966,7 @@
       },
       "SectorList": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "description": "Lista de sectores. La forma exacta (items) se confirma con el OpenAPI del backend.",
         "properties": {
           "items": {
@@ -2709,14 +2979,7 @@
       },
       "Tank": {
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "gauge_min",
-          "gauge_max",
-          "gauge_step",
-          "is_active"
-        ],
+        "required": ["id", "name", "gauge_min", "gauge_max", "gauge_step", "is_active"],
         "description": "Tanque (API.md sección 5.1).",
         "properties": {
           "id": {
@@ -2750,9 +3013,7 @@
       },
       "TankList": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "description": "Lista de tanques. La forma exacta (items) se confirma con el OpenAPI del backend.",
         "properties": {
           "items": {
@@ -2765,14 +3026,7 @@
       },
       "Valve": {
         "type": "object",
-        "required": [
-          "id",
-          "code",
-          "name",
-          "is_motorized",
-          "fail_safe_position",
-          "is_active"
-        ],
+        "required": ["id", "code", "name", "is_motorized", "fail_safe_position", "is_active"],
         "description": "Válvula de un sector (API.md sección 5.6).",
         "properties": {
           "id": {
@@ -2794,11 +3048,7 @@
           },
           "fail_safe_position": {
             "type": "string",
-            "enum": [
-              "KEEP",
-              "OPEN",
-              "CLOSED"
-            ]
+            "enum": ["KEEP", "OPEN", "CLOSED"]
           },
           "is_active": {
             "type": "boolean"
@@ -2807,9 +3057,7 @@
       },
       "ValveList": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "description": "Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend.",
         "properties": {
           "items": {
@@ -2823,10 +3071,7 @@
       "PublicScheduleAqueduct": {
         "type": "object",
         "description": "Acueducto del horario público. Sin datos personales.",
-        "required": [
-          "name",
-          "is_demo"
-        ],
+        "required": ["name", "is_demo"],
         "properties": {
           "name": {
             "type": "string"
@@ -2838,10 +3083,7 @@
       },
       "PublicSchedulePublication": {
         "type": "object",
-        "required": [
-          "id",
-          "published_at"
-        ],
+        "required": ["id", "published_at"],
         "properties": {
           "id": {
             "type": "string",
@@ -2856,11 +3098,7 @@
       "PublicScheduleItem": {
         "type": "object",
         "description": "Turno de un sector. Solo nombre del sector y horas.",
-        "required": [
-          "sector_name",
-          "start_at",
-          "end_at"
-        ],
+        "required": ["sector_name", "start_at", "end_at"],
         "properties": {
           "sector_name": {
             "type": "string"
@@ -2877,12 +3115,7 @@
       },
       "PublicSchedule": {
         "type": "object",
-        "required": [
-          "aqueduct",
-          "service_date",
-          "publication",
-          "items"
-        ],
+        "required": ["aqueduct", "service_date", "publication", "items"],
         "properties": {
           "aqueduct": {
             "$ref": "#/components/schemas/PublicScheduleAqueduct"
@@ -2906,12 +3139,7 @@
       "CreateDamageReportRequest": {
         "type": "object",
         "description": "Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan.",
-        "required": [
-          "category_code",
-          "description",
-          "website",
-          "form_started_at"
-        ],
+        "required": ["category_code", "description", "website", "form_started_at"],
         "properties": {
           "category_code": {
             "type": "string",
@@ -2938,11 +3166,7 @@
       },
       "DamageReportCreated": {
         "type": "object",
-        "required": [
-          "tracking_code",
-          "status",
-          "message"
-        ],
+        "required": ["tracking_code", "status", "message"],
         "properties": {
           "tracking_code": {
             "type": "string",
@@ -2950,9 +3174,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "REPORTED"
-            ]
+            "enum": ["REPORTED"]
           },
           "message": {
             "type": "string"
@@ -2961,11 +3183,7 @@
       },
       "CatalogItem": {
         "type": "object",
-        "required": [
-          "code",
-          "label_es",
-          "sort_order"
-        ],
+        "required": ["code", "label_es", "sort_order"],
         "properties": {
           "code": {
             "type": "string"
@@ -2980,9 +3198,7 @@
       },
       "CatalogList": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "properties": {
           "items": {
             "type": "array",
@@ -2995,23 +3211,11 @@
       "PublicDamageReportStatus": {
         "type": "object",
         "description": "Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante.",
-        "required": [
-          "status",
-          "status_label_es",
-          "category_label_es",
-          "reported_at",
-          "updated_at"
-        ],
+        "required": ["status", "status_label_es", "category_label_es", "reported_at", "updated_at"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "REPORTED",
-              "VERIFYING",
-              "CONFIRMED",
-              "RESOLVED",
-              "DISMISSED"
-            ]
+            "enum": ["REPORTED", "VERIFYING", "CONFIRMED", "RESOLVED", "DISMISSED"]
           },
           "status_label_es": {
             "type": "string"
@@ -3032,14 +3236,7 @@
       "Incident": {
         "type": "object",
         "description": "Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante.",
-        "required": [
-          "id",
-          "source",
-          "category_code",
-          "description",
-          "status",
-          "reported_at"
-        ],
+        "required": ["id", "source", "category_code", "description", "status", "reported_at"],
         "properties": {
           "id": {
             "type": "string",
@@ -3047,12 +3244,7 @@
           },
           "source": {
             "type": "string",
-            "enum": [
-              "PUBLIC_FORM",
-              "OPERATOR",
-              "ANOMALY",
-              "IMPORT"
-            ]
+            "enum": ["PUBLIC_FORM", "OPERATOR", "ANOMALY", "IMPORT"]
           },
           "category_code": {
             "type": "string"
@@ -3071,13 +3263,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "REPORTED",
-              "VERIFYING",
-              "CONFIRMED",
-              "RESOLVED",
-              "DISMISSED"
-            ]
+            "enum": ["REPORTED", "VERIFYING", "CONFIRMED", "RESOLVED", "DISMISSED"]
           },
           "reported_at": {
             "type": "string",
@@ -3087,10 +3273,7 @@
       },
       "IncidentPage": {
         "type": "object",
-        "required": [
-          "items",
-          "next_cursor"
-        ],
+        "required": ["items", "next_cursor"],
         "properties": {
           "items": {
             "type": "array",
@@ -3107,18 +3290,11 @@
       "UpdateIncidentStatusRequest": {
         "type": "object",
         "description": "Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500).",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "VERIFYING",
-              "CONFIRMED",
-              "RESOLVED",
-              "DISMISSED"
-            ]
+            "enum": ["VERIFYING", "CONFIRMED", "RESOLVED", "DISMISSED"]
           },
           "note": {
             "type": "string",
@@ -3151,14 +3327,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING_REVIEW",
-              "APPROVED",
-              "APPROVED_WITH_CHANGES",
-              "REJECTED",
-              "PUBLISHED",
-              "CLOSED"
-            ]
+            "enum": ["PENDING_REVIEW", "APPROVED", "APPROVED_WITH_CHANGES", "REJECTED", "PUBLISHED", "CLOSED"]
           },
           "rule_set_id": {
             "type": "string",
@@ -3197,10 +3366,7 @@
       },
       "ScheduleProposalPage": {
         "type": "object",
-        "required": [
-          "items",
-          "next_cursor"
-        ],
+        "required": ["items", "next_cursor"],
         "properties": {
           "items": {
             "type": "array",
@@ -3216,9 +3382,7 @@
       },
       "GenerateScheduleProposalRequest": {
         "type": "object",
-        "required": [
-          "service_date"
-        ],
+        "required": ["service_date"],
         "properties": {
           "service_date": {
             "type": "string",
@@ -3229,11 +3393,7 @@
       "ScheduleReason": {
         "type": "object",
         "description": "Motivo de un turno (API.md 10.3). El texto lo arma el servidor.",
-        "required": [
-          "code",
-          "params",
-          "text"
-        ],
+        "required": ["code", "params", "text"],
         "properties": {
           "code": {
             "type": "string",
@@ -3250,15 +3410,7 @@
       },
       "ScheduleItem": {
         "type": "object",
-        "required": [
-          "id",
-          "sector_id",
-          "sequence",
-          "start_at",
-          "end_at",
-          "origin",
-          "reasons"
-        ],
+        "required": ["id", "sector_id", "sequence", "start_at", "end_at", "origin", "reasons"],
         "properties": {
           "id": {
             "type": "string",
@@ -3282,11 +3434,7 @@
           },
           "origin": {
             "type": "string",
-            "enum": [
-              "PROPOSED",
-              "MODIFIED",
-              "ADDED"
-            ]
+            "enum": ["PROPOSED", "MODIFIED", "ADDED"]
           },
           "reasons": {
             "type": "array",
@@ -3299,10 +3447,7 @@
       "UnservedSector": {
         "type": "object",
         "description": "Sector sin turno y su motivo (API.md 10.3).",
-        "required": [
-          "sector_id",
-          "reason"
-        ],
+        "required": ["sector_id", "reason"],
         "properties": {
           "sector_id": {
             "type": "string",
@@ -3317,19 +3462,11 @@
       "ScheduleDecision": {
         "type": "object",
         "description": "Decisión de la Junta (historial de la propuesta).",
-        "required": [
-          "decision",
-          "decided_by",
-          "decided_at"
-        ],
+        "required": ["decision", "decided_by", "decided_at"],
         "properties": {
           "decision": {
             "type": "string",
-            "enum": [
-              "APPROVED",
-              "APPROVED_WITH_CHANGES",
-              "REJECTED"
-            ]
+            "enum": ["APPROVED", "APPROVED_WITH_CHANGES", "REJECTED"]
           },
           "reason": {
             "type": "string",
@@ -3374,14 +3511,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING_REVIEW",
-              "APPROVED",
-              "APPROVED_WITH_CHANGES",
-              "REJECTED",
-              "PUBLISHED",
-              "CLOSED"
-            ]
+            "enum": ["PENDING_REVIEW", "APPROVED", "APPROVED_WITH_CHANGES", "REJECTED", "PUBLISHED", "CLOSED"]
           },
           "rule_set_id": {
             "type": "string",
@@ -3442,9 +3572,7 @@
       "DecideScheduleProposalRequest": {
         "type": "object",
         "description": "Versión que vio la Junta (lock_version, API.md 10.4 y 10.7).",
-        "required": [
-          "lock_version"
-        ],
+        "required": ["lock_version"],
         "properties": {
           "lock_version": {
             "type": "integer",
@@ -3455,10 +3583,7 @@
       "RejectScheduleProposalRequest": {
         "type": "object",
         "description": "Rechazo con motivo de 10 a 500 caracteres (API.md 10.6).",
-        "required": [
-          "lock_version",
-          "reason"
-        ],
+        "required": ["lock_version", "reason"],
         "properties": {
           "lock_version": {
             "type": "integer",
@@ -3474,12 +3599,7 @@
       "ScheduleItemInput": {
         "type": "object",
         "description": "Turno que deja la Junta (API.md 10.5).",
-        "required": [
-          "sector_id",
-          "start_at",
-          "end_at",
-          "sequence"
-        ],
+        "required": ["sector_id", "start_at", "end_at", "sequence"],
         "properties": {
           "id": {
             "type": "string",
@@ -3507,11 +3627,7 @@
       "ModifyScheduleProposalRequest": {
         "type": "object",
         "description": "Cambios de la Junta con motivo (API.md 10.5).",
-        "required": [
-          "lock_version",
-          "reason",
-          "items"
-        ],
+        "required": ["lock_version", "reason", "items"],
         "properties": {
           "lock_version": {
             "type": "integer",
@@ -3535,12 +3651,7 @@
       "SchedulePublication": {
         "type": "object",
         "description": "Publicación del horario, sin datos personales (API.md 10.7).",
-        "required": [
-          "id",
-          "proposal_id",
-          "published_at",
-          "whatsapp_text"
-        ],
+        "required": ["id", "proposal_id", "published_at", "whatsapp_text"],
         "properties": {
           "id": {
             "type": "string",
@@ -3565,14 +3676,7 @@
       },
       "ReadingBatchItem": {
         "type": "object",
-        "required": [
-          "id",
-          "tank_id",
-          "gauge_value",
-          "water_appearance_code",
-          "damage_noticed",
-          "observed_at"
-        ],
+        "required": ["id", "tank_id", "gauge_value", "water_appearance_code", "damage_noticed", "observed_at"],
         "properties": {
           "id": {
             "type": "string",
@@ -3604,10 +3708,7 @@
       },
       "ReadingBatchRequest": {
         "type": "object",
-        "required": [
-          "sync_batch_id",
-          "readings"
-        ],
+        "required": ["sync_batch_id", "readings"],
         "properties": {
           "sync_batch_id": {
             "type": "string",
@@ -3625,10 +3726,7 @@
       },
       "ReadingBatchResult": {
         "type": "object",
-        "required": [
-          "id",
-          "status"
-        ],
+        "required": ["id", "status"],
         "properties": {
           "id": {
             "type": "string",
@@ -3636,19 +3734,11 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACCEPTED",
-              "FLAGGED",
-              "REPLAYED",
-              "REJECTED"
-            ]
+            "enum": ["ACCEPTED", "FLAGGED", "REPLAYED", "REJECTED"]
           },
           "error": {
             "type": "object",
-            "required": [
-              "code",
-              "message"
-            ],
+            "required": ["code", "message"],
             "properties": {
               "code": {
                 "type": "string"
@@ -3701,10 +3791,7 @@
       },
       "ReadingCorrectionRequest": {
         "type": "object",
-        "required": [
-          "corrected_gauge_value",
-          "reason"
-        ],
+        "required": ["corrected_gauge_value", "reason"],
         "properties": {
           "corrected_gauge_value": {
             "type": "number",
@@ -3759,11 +3846,7 @@
       },
       "TankStatusLevel": {
         "type": "object",
-        "required": [
-          "value",
-          "observed_at",
-          "hours_ago"
-        ],
+        "required": ["value", "observed_at", "hours_ago"],
         "properties": {
           "value": {
             "type": "number",
@@ -3780,21 +3863,14 @@
       },
       "TankStatusTrend": {
         "type": "object",
-        "required": [
-          "slope_per_day",
-          "label"
-        ],
+        "required": ["slope_per_day", "label"],
         "properties": {
           "slope_per_day": {
             "type": "number"
           },
           "label": {
             "type": "string",
-            "enum": [
-              "DOWN",
-              "STABLE",
-              "UP"
-            ]
+            "enum": ["DOWN", "STABLE", "UP"]
           },
           "label_es": {
             "type": "string"
@@ -3803,12 +3879,7 @@
       },
       "TankStatusForecastPoint": {
         "type": "object",
-        "required": [
-          "target_date",
-          "p10",
-          "p50",
-          "p90"
-        ],
+        "required": ["target_date", "p10", "p50", "p90"],
         "properties": {
           "target_date": {
             "type": "string",
@@ -3827,10 +3898,7 @@
       },
       "TankStatusForecast": {
         "type": "object",
-        "required": [
-          "is_fallback",
-          "points"
-        ],
+        "required": ["is_fallback", "points"],
         "properties": {
           "run_id": {
             "type": "string",
@@ -3841,13 +3909,7 @@
           },
           "fallback_reason": {
             "type": "string",
-            "enum": [
-              "IA_TIMEOUT",
-              "CIRCUIT_OPEN",
-              "IA_ERROR",
-              "INSUFFICIENT_HISTORY",
-              "SHADOW_BASELINE"
-            ]
+            "enum": ["IA_TIMEOUT", "CIRCUIT_OPEN", "IA_ERROR", "INSUFFICIENT_HISTORY", "SHADOW_BASELINE"]
           },
           "model_name": {
             "type": "string"
@@ -3866,10 +3928,7 @@
       },
       "TankStatus": {
         "type": "object",
-        "required": [
-          "trend",
-          "stale"
-        ],
+        "required": ["trend", "stale"],
         "properties": {
           "level": {
             "oneOf": [
@@ -3886,10 +3945,7 @@
           },
           "stale": {
             "type": "object",
-            "required": [
-              "is_stale",
-              "stale_after_hours"
-            ],
+            "required": ["is_stale", "stale_after_hours"],
             "properties": {
               "is_stale": {
                 "type": "boolean"
@@ -3903,11 +3959,7 @@
             "oneOf": [
               {
                 "type": "string",
-                "enum": [
-                  "HIGH",
-                  "LOW",
-                  "CRITICAL"
-                ]
+                "enum": ["HIGH", "LOW", "CRITICAL"]
               },
               {
                 "type": "null"
@@ -3932,14 +3984,7 @@
       },
       "ImportReadingRow": {
         "type": "object",
-        "required": [
-          "id",
-          "tank_id",
-          "gauge_value",
-          "water_appearance_code",
-          "damage_noticed",
-          "observed_at"
-        ],
+        "required": ["id", "tank_id", "gauge_value", "water_appearance_code", "damage_noticed", "observed_at"],
         "properties": {
           "id": {
             "type": "string",
@@ -3970,14 +4015,7 @@
       },
       "ImportReadingsRequest": {
         "type": "object",
-        "required": [
-          "aqueduct_id",
-          "scenario_name",
-          "seed",
-          "simulator_version",
-          "file_sha256",
-          "rows"
-        ],
+        "required": ["aqueduct_id", "scenario_name", "seed", "simulator_version", "file_sha256", "rows"],
         "properties": {
           "aqueduct_id": {
             "type": "string",
@@ -4013,10 +4051,7 @@
       },
       "ImportRejection": {
         "type": "object",
-        "required": [
-          "row",
-          "code"
-        ],
+        "required": ["row", "code"],
         "properties": {
           "row": {
             "type": "integer",
@@ -4029,13 +4064,7 @@
       },
       "ImportReadingsResponse": {
         "type": "object",
-        "required": [
-          "import_batch_id",
-          "rows_received",
-          "rows_accepted",
-          "rows_rejected",
-          "rejections"
-        ],
+        "required": ["import_batch_id", "rows_received", "rows_accepted", "rows_rejected", "rejections"],
         "properties": {
           "import_batch_id": {
             "type": "string",
@@ -4060,10 +4089,7 @@
       },
       "ForecastRun": {
         "type": "object",
-        "required": [
-          "is_fallback",
-          "points"
-        ],
+        "required": ["is_fallback", "points"],
         "properties": {
           "run_id": {
             "type": "string",
@@ -4079,17 +4105,8 @@
             "type": "boolean"
           },
           "fallback_reason": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "enum": [
-              "IA_TIMEOUT",
-              "CIRCUIT_OPEN",
-              "IA_ERROR",
-              "INSUFFICIENT_HISTORY",
-              null
-            ],
+            "type": ["string", "null"],
+            "enum": ["IA_TIMEOUT", "CIRCUIT_OPEN", "IA_ERROR", "INSUFFICIENT_HISTORY", null],
             "description": "Motivo cuando la estimación simple reemplazó a la IA."
           },
           "horizon_days": {
@@ -4117,12 +4134,7 @@
       },
       "Anomaly": {
         "type": "object",
-        "required": [
-          "id",
-          "kind",
-          "detected_at",
-          "status"
-        ],
+        "required": ["id", "kind", "detected_at", "status"],
         "properties": {
           "id": {
             "type": "string",
@@ -4130,13 +4142,7 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "POSSIBLE_LEAK",
-              "SENSOR_FAULT",
-              "STALE_DATA",
-              "SUSPECTED_DUPLICATE",
-              "ABNORMAL_DROP"
-            ]
+            "enum": ["POSSIBLE_LEAK", "SENSOR_FAULT", "STALE_DATA", "SUSPECTED_DUPLICATE", "ABNORMAL_DROP"]
           },
           "detected_at": {
             "type": "string",
@@ -4144,11 +4150,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "OPEN",
-              "CONFIRMED",
-              "DISMISSED"
-            ]
+            "enum": ["OPEN", "CONFIRMED", "DISMISSED"]
           },
           "evidence": {
             "type": "object",
@@ -4156,39 +4158,25 @@
             "description": "Datos que llevaron a sospechar la anomalía."
           },
           "resolved_by": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "uuid"
           },
           "resolved_at": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "date-time"
           },
           "resolution_note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "related_incident_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "uuid"
           }
         }
       },
       "AnomalyPage": {
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "properties": {
           "items": {
             "type": "array",
@@ -4197,25 +4185,17 @@
             }
           },
           "next_cursor": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           }
         }
       },
       "UpdateAnomalyRequest": {
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "CONFIRMED",
-              "DISMISSED"
-            ]
+            "enum": ["CONFIRMED", "DISMISSED"]
           },
           "resolution_note": {
             "type": "string",
@@ -4224,11 +4204,270 @@
             "description": "0 a 500; de 10 a 500 al descartar."
           },
           "related_incident_id": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "uuid"
+          }
+        }
+      },
+      "ManagedUser": {
+        "type": "object",
+        "description": "Cuenta del acueducto vista por la Junta (API.md 3.1). full_name es dato confidencial.",
+        "required": ["id", "username", "full_name", "status", "must_change_password"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE", "LOCKED", "DISABLED"]
+          },
+          "locked_until": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "must_change_password": {
+            "type": "boolean"
+          },
+          "last_login_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ManagedUserPage": {
+        "type": "object",
+        "required": ["items", "next_cursor"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagedUser"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "description": "Alta de una persona con su primera membresía (API.md 3.2). Campos desconocidos responden 400.",
+        "required": ["username", "full_name", "aqueduct_id", "role"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 32
+          },
+          "full_name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["BOARD_ADMIN", "BOARD_MEMBER", "OPERATOR", "PROJECT_TEAM", "SUPPORT_ENTITY"]
+          }
+        }
+      },
+      "CreatedUserMembership": {
+        "type": "object",
+        "required": ["id", "aqueduct_id", "role"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["BOARD_ADMIN", "BOARD_MEMBER", "OPERATOR", "PROJECT_TEAM", "SUPPORT_ENTITY"]
+          }
+        }
+      },
+      "CreatedUser": {
+        "type": "object",
+        "description": "Cuenta creada y su código de activación, que se muestra una sola vez (API.md 3.2).",
+        "required": [
+          "id",
+          "username",
+          "full_name",
+          "status",
+          "must_change_password",
+          "membership",
+          "activation_code",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE", "LOCKED", "DISABLED"]
+          },
+          "must_change_password": {
+            "type": "boolean"
+          },
+          "membership": {
+            "$ref": "#/components/schemas/CreatedUserMembership"
+          },
+          "activation_code": {
+            "type": "string",
+            "description": "Código de un solo uso, por ejemplo ABCD-EFGH-JKMN. Solo en esta respuesta."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "description": "Cambio de nombre o estado (API.md 3.3). Ningún rol: el rol se cambia con membresías.",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["ACTIVE", "LOCKED", "DISABLED"]
+          }
+        }
+      },
+      "ResetGrantRequest": {
+        "type": "object",
+        "required": ["reason"],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          }
+        }
+      },
+      "ResetGrant": {
+        "type": "object",
+        "description": "Código de un solo uso para fijar una contraseña (API.md 3.4). Se muestra una sola vez.",
+        "required": ["id", "code", "expires_at"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ManagedMembership": {
+        "type": "object",
+        "description": "Membresía de una cuenta en un acueducto (API.md 3.5).",
+        "required": ["id", "user_id", "aqueduct_id", "role_code", "valid_from", "granted_by"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role_code": {
+            "type": "string",
+            "enum": ["BOARD_ADMIN", "BOARD_MEMBER", "OPERATOR", "PROJECT_TEAM", "SUPPORT_ENTITY"]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "granted_by": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ManagedMembershipPage": {
+        "type": "object",
+        "required": ["items", "next_cursor"],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagedMembership"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GrantMembershipRequest": {
+        "type": "object",
+        "description": "Membresía nueva de una cuenta existente (API.md 3.6).",
+        "required": ["user_id", "aqueduct_id", "role_code"],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role_code": {
+            "type": "string",
+            "enum": ["BOARD_ADMIN", "BOARD_MEMBER", "OPERATOR", "PROJECT_TEAM", "SUPPORT_ENTITY"]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

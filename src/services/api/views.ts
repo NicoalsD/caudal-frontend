@@ -436,3 +436,62 @@ export interface AnomalyPageView {
   readonly items: readonly AnomalyView[];
   readonly nextCursor: string | null;
 }
+
+/** Account status as the Board sees it (API.md 3.1). */
+export type ManagedUserStatus = 'ACTIVE' | 'LOCKED' | 'DISABLED';
+
+/** An account of the aqueduct, as the Board administers it. `fullName` is confidential. */
+export interface ManagedUserView {
+  readonly id: string;
+  readonly username: string;
+  readonly fullName: string;
+  readonly status: ManagedUserStatus;
+  readonly lockedUntil: TimestampView | null;
+  readonly mustChangePassword: boolean;
+  readonly lastLoginAt: TimestampView | null;
+}
+
+/** One page of accounts; `nextCursor` is null when there are no more (API.md 1.5). */
+export interface ManagedUserPageView {
+  readonly items: readonly ManagedUserView[];
+  readonly nextCursor: string | null;
+}
+
+/**
+ * A new account. `activationCode` is the one-time code of the account (API.md 3.2): it is shown
+ * once, in the dialog that created it, and never stored.
+ */
+export interface CreatedUserView {
+  readonly id: string;
+  readonly username: string;
+  readonly fullName: string;
+  readonly status: ManagedUserStatus;
+  readonly mustChangePassword: boolean;
+  readonly membership: { readonly id: string; readonly aqueductId: string; readonly role: Role };
+  readonly activationCode: string;
+  readonly expiresAt: TimestampView;
+}
+
+/** A one-time code to set a password (API.md 3.4). Shown once, never stored. */
+export interface ResetGrantView {
+  readonly id: string;
+  readonly code: string;
+  readonly expiresAt: TimestampView;
+}
+
+/** A role of an account in the aqueduct, with its period (API.md 3.5). */
+export interface ManagedMembershipView {
+  readonly id: string;
+  readonly userId: string;
+  readonly aqueductId: string;
+  readonly roleCode: Role;
+  readonly validFrom: TimestampView;
+  readonly validTo: TimestampView | null;
+  readonly grantedBy: string;
+}
+
+/** One page of memberships; `nextCursor` is null when there are no more. */
+export interface ManagedMembershipPageView {
+  readonly items: readonly ManagedMembershipView[];
+  readonly nextCursor: string | null;
+}

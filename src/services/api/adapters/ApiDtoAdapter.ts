@@ -33,6 +33,13 @@ import type {
   DamageReportReceiptView,
   IncidentPageView,
   IncidentView,
+  ManagedMembershipPageView,
+  ManagedMembershipView,
+  ManagedUserPageView,
+  ManagedUserStatus,
+  ManagedUserView,
+  CreatedUserView,
+  ResetGrantView,
   ScheduleItemView,
   ScheduleProposalPageView,
   ScheduleProposalSummaryView,
@@ -71,6 +78,12 @@ type CatalogItemDto = components['schemas']['CatalogItem'];
 type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
+type ManagedUserDto = components['schemas']['ManagedUser'];
+type ManagedUserPageDto = components['schemas']['ManagedUserPage'];
+type CreatedUserDto = components['schemas']['CreatedUser'];
+type ResetGrantDto = components['schemas']['ResetGrant'];
+type ManagedMembershipDto = components['schemas']['ManagedMembership'];
+type ManagedMembershipPageDto = components['schemas']['ManagedMembershipPage'];
 type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
 type ProposalDto = components['schemas']['ScheduleProposal'];
@@ -92,6 +105,12 @@ const TIME_OF_DAY = /^(?<hours>\d{2}):(?<minutes>\d{2})(?::\d{2})?$/;
  *
  * @pattern P06 Adapter
  */
+const MANAGED_USER_STATUSES: readonly string[] = ['ACTIVE', 'LOCKED', 'DISABLED'];
+
+function isManagedUserStatus(value: string): value is ManagedUserStatus {
+  return MANAGED_USER_STATUSES.includes(value);
+}
+
 export class ApiDtoAdapter {
   toHealth(dto: HealthDto): HealthView {
     return { isUp: dto.status === 'UP' };
@@ -189,6 +208,79 @@ export class ApiDtoAdapter {
       locationHint: dto.location_hint ?? null,
       status: dto.status,
       reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+    };
+  }
+
+  /** Accounts of the Board's list. The status is trusted only after the value is known. */
+  toManagedUser(dto: ManagedUserDto): ManagedUserView {
+    if (!isManagedUserStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      status: dto.status,
+      lockedUntil: dto.locked_until ? this.toTimestamp('locked_until', dto.locked_until) : null,
+      mustChangePassword: dto.must_change_password,
+      lastLoginAt: dto.last_login_at ? this.toTimestamp('last_login_at', dto.last_login_at) : null,
+    };
+  }
+
+  toManagedUserPage(dto: ManagedUserPageDto): ManagedUserPageView {
+    return {
+      items: dto.items.map((item) => this.toManagedUser(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toCreatedUser(dto: CreatedUserDto): CreatedUserView {
+    if (!isManagedUserStatus(dto.status) || !isRole(dto.membership.role)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      status: dto.status,
+      mustChangePassword: dto.must_change_password,
+      membership: {
+        id: dto.membership.id,
+        aqueductId: dto.membership.aqueduct_id,
+        role: dto.membership.role,
+      },
+      activationCode: dto.activation_code,
+      expiresAt: this.toTimestamp('expires_at', dto.expires_at),
+    };
+  }
+
+  toResetGrant(dto: ResetGrantDto): ResetGrantView {
+    return {
+      id: dto.id,
+      code: dto.code,
+      expiresAt: this.toTimestamp('expires_at', dto.expires_at),
+    };
+  }
+
+  toManagedMembership(dto: ManagedMembershipDto): ManagedMembershipView {
+    if (!isRole(dto.role_code)) {
+      throw new InvalidDtoError('role_code');
+    }
+    return {
+      id: dto.id,
+      userId: dto.user_id,
+      aqueductId: dto.aqueduct_id,
+      roleCode: dto.role_code,
+      validFrom: this.toTimestamp('valid_from', dto.valid_from),
+      validTo: dto.valid_to ? this.toTimestamp('valid_to', dto.valid_to) : null,
+      grantedBy: dto.granted_by,
+    };
+  }
+
+  toManagedMembershipPage(dto: ManagedMembershipPageDto): ManagedMembershipPageView {
+    return {
+      items: dto.items.map((item) => this.toManagedMembership(item)),
+      nextCursor: dto.next_cursor ?? null,
     };
   }
 

@@ -10,8 +10,11 @@ interface DialogProps {
   readonly title: string;
   readonly description: string;
   readonly children: ReactNode;
-  /** The control that opens the dialog: the focus goes back to it when the dialog closes. */
-  readonly trigger: ReactNode;
+  /**
+   * The control that opens the dialog: the focus goes back to it when the dialog closes. Omit it
+   * for a dialog that the screen opens by its own state (for example a code shown after an action).
+   */
+  readonly trigger?: ReactNode;
   /** Chooses the first control that gets the focus (for example Cancelar in a destructive action). */
   readonly onOpenAutoFocus?: (event: Event) => void;
   /** Takes the focus when the dialog opens (Cancel in destructive actions, ux-guidelines 6). */
@@ -34,7 +37,7 @@ export function Dialog({
 }: DialogProps): JSX.Element {
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
-      <RadixDialog.Trigger asChild>{trigger}</RadixDialog.Trigger>
+      {trigger === undefined ? null : <RadixDialog.Trigger asChild>{trigger}</RadixDialog.Trigger>}
       <RadixDialog.Portal>
         <RadixDialog.Overlay className={cn(styles.overlay)} />
         <RadixDialog.Content
