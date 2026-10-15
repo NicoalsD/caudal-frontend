@@ -92,6 +92,9 @@ export const strings = {
     offlineLogin:
       'Necesitas conexión para entrar. Si ya entraste en este celular, puedes registrar lecturas sin conexión.',
     tooManyAttempts: 'Demasiados intentos. Intenta de nuevo en {minutes} min.',
+    showPassword: 'Mostrar contraseña',
+    hidePassword: 'Ocultar contraseña',
+    capsLockOn: 'Las mayúsculas están activadas.',
   },
   network: {
     summary:
