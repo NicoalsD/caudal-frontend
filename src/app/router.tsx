@@ -24,6 +24,7 @@ import { PrivacyNoticePage } from '../features/privacy';
 import { EntitiesPage } from '../features/entities';
 import { EntitySummariesPage } from '../features/entity-summaries';
 import { AuditPage } from '../features/audit';
+import { DevicesPage } from '../features/devices';
 import { AuditLayout } from './layouts/AuditLayout';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
@@ -136,7 +137,6 @@ const teamRoutes: RouteObject = {
       children: [
         screen(ROUTE_PATHS.team.evaluation, t('screens.evaluation')),
         screen(ROUTE_PATHS.team.health, t('screens.health')),
-        screen(ROUTE_PATHS.team.devices, t('screens.devices')),
         { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
     },
@@ -149,6 +149,17 @@ const auditRoutes: RouteObject = {
     {
       element: <AuditLayout />,
       children: [{ path: ROUTE_PATHS.team.audit, element: <AuditPage /> }],
+    },
+  ],
+};
+
+/** Devices are shared by the Board's administrator and the project team (DEVICE_MANAGE). */
+const devicesRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.devices} />,
+  children: [
+    {
+      element: <AuditLayout />,
+      children: [{ path: ROUTE_PATHS.team.devices, element: <DevicesPage /> }],
     },
   ],
 };
@@ -196,6 +207,7 @@ export function buildRoutes(): RouteObject[] {
                     boardRoutes,
                     teamRoutes,
                     auditRoutes,
+                    devicesRoutes,
                     entityRoutes,
                     sharedRoutes,
                   ],

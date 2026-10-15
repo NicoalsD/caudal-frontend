@@ -20,6 +20,7 @@ import type {
   ValveOrder,
 } from '../../../core/rules/ruleSetParts';
 import { isReportStatus } from '../../../core/incidents/reportStatus';
+import { isDeviceKind, isDeviceStatus } from '../../../core/devices/deviceModel';
 import { isProposalStatus } from '../../../core/proposal/proposalStatus';
 import { bogotaMinutesOf } from '../../../core/proposal/proposalTime';
 import { isRole } from '../../../core/session/roles';
@@ -63,6 +64,10 @@ import type {
   TankView,
   ValveView,
   TimestampView,
+  ActiveDeviceKeyView,
+  DevicePageView,
+  DeviceView,
+  RotatedDeviceKeyView,
 } from '../views';
 import { InvalidDtoError } from './InvalidDtoError';
 
@@ -110,6 +115,10 @@ type PublicationDto = components['schemas']['SchedulePublication'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
+type DeviceDto = components['schemas']['Device'];
+type DevicePageDto = components['schemas']['DevicePage'];
+type ActiveDeviceKeyDto = components['schemas']['ActiveDeviceKey'];
+type DeviceKeyCreatedDto = components['schemas']['DeviceKeyCreated'];
 
 const TIME_OF_DAY = /^(?<hours>\d{2}):(?<minutes>\d{2})(?::\d{2})?$/;
 
@@ -130,6 +139,48 @@ function isManagedUserStatus(value: string): value is ManagedUserStatus {
 }
 
 export class ApiDtoAdapter {
+  toDevice(dto: DeviceDto): DeviceView {
+    if (!isDeviceKind(dto.kind)) {
+      throw new InvalidDtoError('kind');
+    }
+    if (!isDeviceStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      kind: dto.kind,
+      name: dto.name,
+      status: dto.status,
+      tankId: dto.tank_id ?? null,
+      valveId: dto.valve_id ?? null,
+      createdAt: this.toTimestamp('created_at', dto.created_at),
+      lastSeenAt: this.toOptionalTimestamp('last_seen_at', dto.last_seen_at),
+      activeKey: dto.active_key ? this.toActiveDeviceKey(dto.active_key) : null,
+    };
+  }
+
+  toDevicePage(dto: DevicePageDto): DevicePageView {
+    return {
+      items: dto.items.map((item) => this.toDevice(item)),
+      nextCursor: dto.next_cursor,
+    };
+  }
+
+  toRotatedDeviceKey(dto: DeviceKeyCreatedDto): RotatedDeviceKeyView {
+    return {
+      keyId: dto.key_id,
+      activatedAt: this.toTimestamp('activated_at', dto.activated_at),
+    };
+  }
+
+  private toActiveDeviceKey(dto: ActiveDeviceKeyDto): ActiveDeviceKeyView {
+    return {
+      id: dto.id,
+      validFrom: this.toTimestamp('valid_from', dto.valid_from),
+      validUntil: this.toOptionalTimestamp('valid_until', dto.valid_until),
+    };
+  }
+
   toHealth(dto: HealthDto): HealthView {
     return { isUp: dto.status === 'UP' };
   }

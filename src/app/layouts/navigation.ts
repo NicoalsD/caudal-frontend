@@ -20,10 +20,11 @@ export const BOARD_NAV: readonly NavItem[] = [
   { to: ROUTE_PATHS.board.incidents, label: t('nav.incidents') },
 ];
 
-/** Extra items only for BOARD_ADMIN: accounts, entities and the audit log. */
+/** Extra items only for BOARD_ADMIN: accounts, entities, devices and the audit log. */
 export const BOARD_ADMIN_NAV: readonly NavItem[] = [
   { to: ROUTE_PATHS.board.users, label: t('nav.users') },
   { to: ROUTE_PATHS.board.entities, label: t('nav.entities') },
+  { to: ROUTE_PATHS.team.devices, label: t('nav.devices') },
   { to: ROUTE_PATHS.team.audit, label: t('nav.audit') },
 ];
 
