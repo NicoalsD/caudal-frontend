@@ -1,0 +1,10 @@
+.banner {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-ochre-100);
+  color: var(--color-ochre-800);
+  border: 2px solid var(--color-ochre-700);
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}

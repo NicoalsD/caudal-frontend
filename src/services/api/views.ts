@@ -7,6 +7,7 @@ import type {
   ValveOrder,
 } from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
+import type { ReportStatus } from '../../core/incidents/reportStatus';
 import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
@@ -133,4 +134,71 @@ export interface ValveView {
   readonly isMotorized: boolean;
   readonly failSafePosition: 'KEEP' | 'OPEN' | 'CLOSED';
   readonly isActive: boolean;
+}
+
+/** One sector's turn in the public schedule. Only the sector name and the hours are kept. */
+export interface PublicScheduleItemView {
+  readonly sectorName: string;
+  /** Start hour in 12 h format, America/Bogota, for example "6:00 a. m.". */
+  readonly startTime: string;
+  readonly endTime: string;
+}
+
+/** The published schedule of one aqueduct for one service day (API.md 15.1). No personal data. */
+export interface PublicScheduleView {
+  readonly aqueductName: string;
+  readonly isDemo: boolean;
+  /** Service day as YYYY-MM-DD in America/Bogota; shown without a time zone shift. */
+  readonly serviceDate: string;
+  readonly publishedAt: TimestampView;
+  readonly items: readonly PublicScheduleItemView[];
+}
+
+/** One option of a catalog (GET /catalogs/{catalog}), with its text in Spanish. */
+export interface CatalogOptionView {
+  readonly code: string;
+  readonly label: string;
+}
+
+/** What the person gets back after a damage report: the code is shown once (API.md 15.4). */
+export interface DamageReportReceiptView {
+  readonly trackingCode: string;
+  readonly status: string;
+  readonly message: string;
+}
+
+/** What the person typed, before it becomes the request body. */
+export interface DamageReportInput {
+  readonly categoryCode: string;
+  readonly description: string;
+  /** Empty when the person left it blank: then the field is not sent. */
+  readonly locationHint: string;
+  /** The honeypot field: always sent, empty for people. */
+  readonly website: string;
+  /** ISO instant when the form was opened (the server checks the minimum filling time). */
+  readonly formStartedAt: string;
+}
+
+/** The status of a damage report for the person who has its code (API.md 15.5). No personal data. */
+export interface PublicDamageReportView {
+  readonly status: ReportStatus;
+  readonly reportedAt: TimestampView;
+  readonly updatedAt: TimestampView;
+}
+
+/** A damage report as the Board sees it (API.md 12.1). The reporter's data never leaves the server. */
+export interface IncidentView {
+  readonly id: string;
+  readonly categoryCode: string;
+  readonly sectorId: string | null;
+  readonly description: string;
+  readonly locationHint: string | null;
+  readonly status: ReportStatus;
+  readonly reportedAt: TimestampView;
+}
+
+/** One page of incidents. `nextCursor` is null when there are no more (API.md 1.5). */
+export interface IncidentPageView {
+  readonly items: readonly IncidentView[];
+  readonly nextCursor: string | null;
 }

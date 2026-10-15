@@ -48,6 +48,10 @@ export interface DecimalRule {
 export interface TextOptions {
   /** Normalizes to lower case before checking, for example the username (API.md 2.1). */
   readonly lowercase?: boolean;
+  /** Upper case before checking, for example a tracking code (Crockford base32 is case-blind). */
+  readonly uppercase?: boolean;
+  /** Name of the constraint that holds the limits, when it differs from the field name. */
+  readonly constraint?: string;
 }
 
 export interface PasswordOptions {
@@ -76,6 +80,14 @@ interface CrossCheck {
   readonly fails: (values: Readonly<Record<string, unknown>>) => boolean;
 }
 
+/** Case normalization a text option asks for; nothing changes unless the option says so. */
+function normalizeCase(value: string, options: TextOptions): string {
+  if (options.lowercase === true) {
+    return value.toLowerCase();
+  }
+  return options.uppercase === true ? value.toUpperCase() : value;
+}
+
 /**
  * Builds Zod schemas at run time from the limits of GET /meta/constraints and the rule set,
  * so forms never hold a hardcoded limit (configuration.md section 3). The rest of the app does
@@ -96,7 +108,8 @@ export class FormSchemaBuilder {
 
   /** Text limited by the min, max, pattern and max lines the server sent for `field`. */
   text(field: string, options: TextOptions = {}): this {
-    this.shape[field] = this.textSchema(field, this.require(field).min ?? 0, options);
+    const minimum = this.require(options.constraint ?? field).min ?? 0;
+    this.shape[field] = this.textSchema(field, minimum, options);
     return this;
   }
 
@@ -364,11 +377,11 @@ export class FormSchemaBuilder {
   }
 
   private textSchema(field: string, minimum: number, options: TextOptions): z.ZodType<string> {
-    const limits = this.require(field);
-    const pattern = this.compilePattern(field, limits);
+    const limits = this.require(options.constraint ?? field);
+    const pattern = this.compilePattern(options.constraint ?? field, limits);
     return z.string().transform((raw, context) => {
       const trimmed = raw.trim();
-      const value = options.lowercase === true ? trimmed.toLowerCase() : trimmed;
+      const value = normalizeCase(trimmed, options);
       const fail = (key: Parameters<ValidationMessageFactory>[0], params = {}): typeof z.NEVER => {
         context.addIssue({ code: 'custom', message: this.messages(key, params) });
         return z.NEVER;

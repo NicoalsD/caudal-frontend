@@ -12,6 +12,7 @@ export function createTestApi(): CaudalApi {
   return new CaudalApi(
     new BaseFetchHttpClient({ baseUrl: import.meta.env.VITE_API_BASE_URL }),
     new ApiDtoAdapter(),
+    import.meta.env.VITE_API_BASE_URL,
   );
 }
 

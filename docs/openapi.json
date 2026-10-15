@@ -711,6 +711,411 @@
           }
         }
       }
+    },
+    "/api/v1/public/{aqueductSlug}/schedule": {
+      "get": {
+        "operationId": "getPublicSchedule",
+        "summary": "Horario publicado del acueducto",
+        "description": "Público. Muestra solo el horario publicado; no revela nombres ni teléfonos.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horario publicado para la fecha (hoy en America/Bogota por defecto).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicSchedule"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Slug inexistente, página desactivada o sin publicación (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/{aqueductSlug}/schedule/whatsapp-text": {
+      "get": {
+        "operationId": "getPublicWhatsAppText",
+        "summary": "Horario en texto para copiar a WhatsApp",
+        "description": "Público. Texto plano del horario del día, sin datos personales.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensaje de WhatsApp.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sin publicación para el acueducto (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/{aqueductSlug}/schedule/poster.pdf": {
+      "get": {
+        "operationId": "getPublicPosterPdf",
+        "summary": "Cartel del horario en PDF",
+        "description": "Público. El PDF es determinista; X-Content-SHA256 trae el hash guardado en poster_sha256.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cartel del horario.",
+            "headers": {
+              "X-Content-SHA256": {
+                "description": "SHA-256 del PDF.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sin cartel para el acueducto (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/{aqueductSlug}/damage-reports": {
+      "post": {
+        "operationId": "createPublicDamageReport",
+        "summary": "Reporta un daño sin login",
+        "description": "Público. Límite de 3 por hora por IP, honeypot y tiempo mínimo de llenado.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDamageReportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte recibido, con su código de seguimiento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DamageReportCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR (tiempo mínimo o campos).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Slug inexistente (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite por IP (RATE_LIMITED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalogs/{catalog}": {
+      "get": {
+        "operationId": "getCatalog",
+        "summary": "Opciones de un catálogo",
+        "description": "Público. Solo etiquetas activas (API.md 4.2).",
+        "parameters": [
+          {
+            "name": "catalog",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "WATER_APPEARANCE",
+                "DAMAGE_CATEGORY"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Opciones del catálogo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catálogo desconocido (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/damage-reports/{trackingCode}": {
+      "get": {
+        "operationId": "getPublicDamageReport",
+        "summary": "Estado de un reporte por código de seguimiento",
+        "description": "Público. El código no trae el acueducto: la búsqueda usa su hash.",
+        "parameters": [
+          {
+            "name": "trackingCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado del reporte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicDamageReportStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de código inválido (VALIDATION_ERROR).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Código no existe (NOT_FOUND, mensaje genérico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/incidents": {
+      "get": {
+        "operationId": "listIncidents",
+        "summary": "Reportes de daño, paginados por cursor",
+        "description": "Permiso INCIDENT_READ. Orden descendente por fecha de reporte.",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de reportes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/incidents/{id}/status": {
+      "patch": {
+        "operationId": "changeIncidentStatus",
+        "summary": "Cambia el estado de un reporte",
+        "description": "Permiso INCIDENT_CREATE o INCIDENT_MANAGE. Cada cambio queda en el historial.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIncidentStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reporte actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Incident"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION o CONFLICT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED: descarte sin nota válida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1632,6 +2037,312 @@
             "items": {
               "$ref": "#/components/schemas/Valve"
             }
+          }
+        }
+      },
+      "PublicScheduleAqueduct": {
+        "type": "object",
+        "description": "Acueducto del horario público. Sin datos personales.",
+        "required": [
+          "name",
+          "is_demo"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "is_demo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PublicSchedulePublication": {
+        "type": "object",
+        "required": [
+          "id",
+          "published_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicScheduleItem": {
+        "type": "object",
+        "description": "Turno de un sector. Solo nombre del sector y horas.",
+        "required": [
+          "sector_name",
+          "start_at",
+          "end_at"
+        ],
+        "properties": {
+          "sector_name": {
+            "type": "string"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicSchedule": {
+        "type": "object",
+        "required": [
+          "aqueduct",
+          "service_date",
+          "publication",
+          "items"
+        ],
+        "properties": {
+          "aqueduct": {
+            "$ref": "#/components/schemas/PublicScheduleAqueduct"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Día de servicio en America/Bogota."
+          },
+          "publication": {
+            "$ref": "#/components/schemas/PublicSchedulePublication"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicScheduleItem"
+            }
+          }
+        }
+      },
+      "CreateDamageReportRequest": {
+        "type": "object",
+        "description": "Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan.",
+        "required": [
+          "category_code",
+          "description",
+          "website",
+          "form_started_at"
+        ],
+        "properties": {
+          "category_code": {
+            "type": "string",
+            "description": "Código de DAMAGE_CATEGORY."
+          },
+          "description": {
+            "type": "string",
+            "description": "10 a 500 caracteres (incident.description)."
+          },
+          "location_hint": {
+            "type": "string",
+            "description": "0 a 120 caracteres."
+          },
+          "website": {
+            "type": "string",
+            "description": "Campo trampa oculto. Debe llegar vacío."
+          },
+          "form_started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío."
+          }
+        }
+      },
+      "DamageReportCreated": {
+        "type": "object",
+        "required": [
+          "tracking_code",
+          "status",
+          "message"
+        ],
+        "properties": {
+          "tracking_code": {
+            "type": "string",
+            "description": "8 caracteres Crockford base32. Se muestra una sola vez."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogItem": {
+        "type": "object",
+        "required": [
+          "code",
+          "label_es",
+          "sort_order"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label_es": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "CatalogList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItem"
+            }
+          }
+        }
+      },
+      "PublicDamageReportStatus": {
+        "type": "object",
+        "description": "Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante.",
+        "required": [
+          "status",
+          "status_label_es",
+          "category_label_es",
+          "reported_at",
+          "updated_at"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "status_label_es": {
+            "type": "string"
+          },
+          "category_label_es": {
+            "type": "string"
+          },
+          "reported_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Incident": {
+        "type": "object",
+        "description": "Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante.",
+        "required": [
+          "id",
+          "source",
+          "category_code",
+          "description",
+          "status",
+          "reported_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "PUBLIC_FORM",
+              "OPERATOR",
+              "ANOMALY",
+              "IMPORT"
+            ]
+          },
+          "category_code": {
+            "type": "string"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "location_hint": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "reported_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IncidentPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateIncidentStatusRequest": {
+        "type": "object",
+        "description": "Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500).",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
           }
         }
       }

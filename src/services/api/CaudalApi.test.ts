@@ -10,11 +10,13 @@ import { ApiError } from '../http/errors';
 import { ApiDtoAdapter } from './adapters/ApiDtoAdapter';
 import { CaudalApi } from './CaudalApi';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 describe('CaudalApi.system.health', () => {
   it('asks GET /actuator/health at the root scope', async () => {
     const fake = new FakeHttpClient(okResponse({ status: 'UP' }));
 
-    await new CaudalApi(fake, new ApiDtoAdapter()).system.health();
+    await new CaudalApi(fake, new ApiDtoAdapter(), BASE_URL).system.health();
 
     expect(fake.requests).toEqual([{ method: 'GET', path: '/actuator/health', scope: 'root' }]);
   });
@@ -23,6 +25,7 @@ describe('CaudalApi.system.health', () => {
     const api = new CaudalApi(
       new FakeHttpClient(okResponse({ status: 'UP' })),
       new ApiDtoAdapter(),
+      BASE_URL,
     );
 
     expect(await api.system.health()).toEqual({ isUp: true });
@@ -32,6 +35,7 @@ describe('CaudalApi.system.health', () => {
     const api = new CaudalApi(
       new FakeHttpClient(okResponse({ status: 'DOWN' })),
       new ApiDtoAdapter(),
+      BASE_URL,
     );
 
     expect(await api.system.health()).toEqual({ isUp: false });
@@ -42,7 +46,7 @@ describe('CaudalApi over the real transport', () => {
   const transport = new BaseFetchHttpClient({ baseUrl: import.meta.env.VITE_API_BASE_URL });
 
   it('reaches the actuator outside /api/v1', async () => {
-    expect(await new CaudalApi(transport, new ApiDtoAdapter()).system.health()).toEqual({
+    expect(await new CaudalApi(transport, new ApiDtoAdapter(), BASE_URL).system.health()).toEqual({
       isUp: true,
     });
   });
@@ -54,10 +58,12 @@ describe('CaudalApi over the real transport', () => {
       ),
     );
 
-    const failure = await new CaudalApi(transport, new ApiDtoAdapter()).system.health().then(
-      () => null,
-      (error: unknown) => error,
-    );
+    const failure = await new CaudalApi(transport, new ApiDtoAdapter(), BASE_URL).system
+      .health()
+      .then(
+        () => null,
+        (error: unknown) => error,
+      );
 
     expect(failure).toBeInstanceOf(ApiError);
     expect((failure as ApiError).status).toBe(STATUS.serviceUnavailable);

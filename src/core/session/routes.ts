@@ -13,7 +13,8 @@ export const ROUTE_PATHS = {
   public: {
     schedule: `${PUBLIC_PREFIX}/:aqueductSlug`,
     damageReport: `${PUBLIC_PREFIX}/:aqueductSlug/reportar-dano`,
-    tracking: `${PUBLIC_PREFIX}/seguimiento/:trackingCode`,
+    /** Without the code it is the entry form; the static word wins over :aqueductSlug. */
+    tracking: `${PUBLIC_PREFIX}/seguimiento/:trackingCode?`,
   },
   operator: {
     base: '/operador',

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ConstraintsMap } from './FieldConstraint';
-import { loginFormSchema, readingFormSchema, reasonSchema } from './formSchemas';
+import {
+  damageReportFormSchema,
+  loginFormSchema,
+  readingFormSchema,
+  reasonSchema,
+} from './formSchemas';
 import { keyMessages } from './validationMessages';
 
 const GAUGE = { min: 0, max: 5, decimals: 2 };
@@ -52,5 +57,58 @@ describe('loginFormSchema', () => {
 
   it('fails with empty fields', () => {
     expect(schema.safeParse({ username: '', password: '' }).success).toBe(false);
+  });
+});
+
+const DESCRIPTION_MAX = 500;
+const PLACE_MAX = 120;
+
+describe('damageReportFormSchema', () => {
+  const reportConstraints: ConstraintsMap = {
+    'incident.description': { min: 10, max: DESCRIPTION_MAX },
+    'incident.location_hint': { min: 0, max: PLACE_MAX },
+  };
+  const schema = damageReportFormSchema(reportConstraints, keyMessages);
+  const valid = {
+    category_code: 'LEAK',
+    description: '  Hay agua saliendo del tubo.  ',
+    location_hint: '',
+    website: '',
+  };
+
+  it('parses a complete report and trims the texts', () => {
+    expect(schema.parse(valid)).toEqual({
+      category_code: 'LEAK',
+      description: 'Hay agua saliendo del tubo.',
+      location_hint: '',
+      website: '',
+    });
+  });
+
+  it('requires a category', () => {
+    expect(schema.safeParse({ ...valid, category_code: '' }).success).toBe(false);
+  });
+
+  it('keeps the description between the limits of the server', () => {
+    expect(schema.safeParse({ ...valid, description: 'corto' }).success).toBe(false);
+    expect(
+      schema.safeParse({ ...valid, description: 'x'.repeat(DESCRIPTION_MAX + 1) }).success,
+    ).toBe(false);
+  });
+
+  it('limits the place with the server limit when the server sends it', () => {
+    expect(schema.safeParse({ ...valid, location_hint: 'x'.repeat(PLACE_MAX + 1) }).success).toBe(
+      false,
+    );
+  });
+
+  it('accepts a place without a limit from the server, and does not invent a maximum', () => {
+    const withoutPlaceLimit = damageReportFormSchema(
+      { 'incident.description': { min: 10, max: 500 } },
+      keyMessages,
+    );
+    expect(
+      withoutPlaceLimit.safeParse({ ...valid, location_hint: 'x'.repeat(PLACE_MAX + 1) }).success,
+    ).toBe(true);
   });
 });

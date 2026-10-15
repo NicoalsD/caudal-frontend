@@ -151,3 +151,27 @@ describe('ApiDtoAdapter.toMe', () => {
     ).toThrow(InvalidDtoError);
   });
 });
+
+describe('ApiDtoAdapter.toPublicDamageReport', () => {
+  const dto = {
+    status: 'VERIFYING' as const,
+    status_label_es: 'En verificación',
+    category_label_es: 'Fuga',
+    reported_at: '2026-10-09T14:30:00Z',
+    updated_at: '2026-10-09T20:40:00Z',
+  };
+
+  it('keeps the status and the two instants, and nothing else', () => {
+    const view = adapter.toPublicDamageReport(dto);
+
+    expect(view.status).toBe('VERIFYING');
+    expect(view.updatedAt.text).toBe('9 de oct de 2026, 3:40 p. m.');
+    expect(Object.keys(view).sort()).toEqual(['reportedAt', 'status', 'updatedAt']);
+  });
+
+  it('refuses a status the screens do not know', () => {
+    expect(() =>
+      adapter.toPublicDamageReport({ ...dto, status: 'ARCHIVED' as unknown as 'REPORTED' }),
+    ).toThrow(InvalidDtoError);
+  });
+});

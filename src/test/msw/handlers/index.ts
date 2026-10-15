@@ -1,7 +1,18 @@
 import { authHandlers } from './auth';
+import { catalogHandlers } from './catalogs';
+import { incidentsHandlers } from './incidents';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
+import { publicHandlers } from './public';
 import { rulesHandlers } from './rules';
 
 /** Default handlers: one file per API area, written from caudal-backend/docs/API.md. */
-export const handlers = [...authHandlers, ...metaHandlers, ...networkHandlers, ...rulesHandlers];
+export const handlers = [
+  ...authHandlers,
+  ...metaHandlers,
+  ...networkHandlers,
+  ...rulesHandlers,
+  ...publicHandlers,
+  ...catalogHandlers,
+  ...incidentsHandlers,
+];

@@ -1,6 +1,11 @@
 import type { ConstraintsMap, FieldConstraint } from '../../../core/forms/FieldConstraint';
 import { formatDecimal } from '../../../core/format/decimal';
-import { formatDateTime, parseInstant, toBogotaDateKey } from '../../../core/format/time';
+import {
+  formatDateTime,
+  formatTime,
+  parseInstant,
+  toBogotaDateKey,
+} from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
 import type { components } from '../schema';
 import type { Membership } from '../../../core/session/memberships';
@@ -12,6 +17,7 @@ import type {
   SectorSetting,
   ValveOrder,
 } from '../../../core/rules/ruleSetParts';
+import { isReportStatus } from '../../../core/incidents/reportStatus';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -19,6 +25,12 @@ import type {
   HealthView,
   LoginView,
   MeView,
+  CatalogOptionView,
+  DamageReportReceiptView,
+  IncidentPageView,
+  IncidentView,
+  PublicDamageReportView,
+  PublicScheduleView,
   RefreshView,
   RuleSetSummaryView,
   RuleSetView,
@@ -45,6 +57,12 @@ type RuleValveOrderDto = components['schemas']['RuleValveOrder'];
 type RuleOperatingWindowDto = components['schemas']['RuleOperatingWindow'];
 type RuleGaugeDto = components['schemas']['RuleGauge'];
 type SectorDto = components['schemas']['Sector'];
+type PublicScheduleDto = components['schemas']['PublicSchedule'];
+type CatalogItemDto = components['schemas']['CatalogItem'];
+type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
+type IncidentDto = components['schemas']['Incident'];
+type IncidentPageDto = components['schemas']['IncidentPage'];
+type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
 
@@ -138,6 +156,62 @@ export class ApiDtoAdapter {
       valveOrder: dto.valve_order.map((valve) => this.toValveOrder(valve)),
       operatingWindows: dto.operating_windows.map((window) => this.toOperatingWindow(window)),
       gauge: this.toGauge(dto.gauge),
+    };
+  }
+
+  toCatalogOption(dto: CatalogItemDto): CatalogOptionView {
+    return { code: dto.code, label: dto.label_es };
+  }
+
+  toIncident(dto: IncidentDto): IncidentView {
+    if (!isReportStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      categoryCode: dto.category_code,
+      sectorId: dto.sector_id ?? null,
+      description: dto.description,
+      locationHint: dto.location_hint ?? null,
+      status: dto.status,
+      reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+    };
+  }
+
+  toIncidentPage(dto: IncidentPageDto): IncidentPageView {
+    return {
+      items: dto.items.map((item) => this.toIncident(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toPublicDamageReport(dto: PublicDamageReportDto): PublicDamageReportView {
+    if (!isReportStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      status: dto.status,
+      reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+      updatedAt: this.toTimestamp('updated_at', dto.updated_at),
+    };
+  }
+
+  toDamageReportReceipt(dto: DamageReportCreatedDto): DamageReportReceiptView {
+    return { trackingCode: dto.tracking_code, status: dto.status, message: dto.message };
+  }
+
+  /** Keeps the aqueduct name and demo flag, the service day and the sector turns; nothing else. */
+  toPublicSchedule(dto: PublicScheduleDto): PublicScheduleView {
+    return {
+      aqueductName: dto.aqueduct.name,
+      isDemo: dto.aqueduct.is_demo,
+      serviceDate: dto.service_date,
+      publishedAt: this.toTimestamp('publication.published_at', dto.publication.published_at),
+      items: dto.items.map((item) => ({
+        sectorName: item.sector_name,
+        startTime: formatTime(item.start_at),
+        endTime: formatTime(item.end_at),
+      })),
     };
   }
 

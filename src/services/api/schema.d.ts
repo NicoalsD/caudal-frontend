@@ -311,6 +311,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/{aqueductSlug}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Horario publicado del acueducto
+         * @description Público. Muestra solo el horario publicado; no revela nombres ni teléfonos.
+         */
+        get: operations["getPublicSchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/{aqueductSlug}/schedule/whatsapp-text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Horario en texto para copiar a WhatsApp
+         * @description Público. Texto plano del horario del día, sin datos personales.
+         */
+        get: operations["getPublicWhatsAppText"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/{aqueductSlug}/schedule/poster.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cartel del horario en PDF
+         * @description Público. El PDF es determinista; X-Content-SHA256 trae el hash guardado en poster_sha256.
+         */
+        get: operations["getPublicPosterPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/{aqueductSlug}/damage-reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reporta un daño sin login
+         * @description Público. Límite de 3 por hora por IP, honeypot y tiempo mínimo de llenado.
+         */
+        post: operations["createPublicDamageReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalogs/{catalog}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Opciones de un catálogo
+         * @description Público. Solo etiquetas activas (API.md 4.2).
+         */
+        get: operations["getCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/damage-reports/{trackingCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado de un reporte por código de seguimiento
+         * @description Público. El código no trae el acueducto: la búsqueda usa su hash.
+         */
+        get: operations["getPublicDamageReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reportes de daño, paginados por cursor
+         * @description Permiso INCIDENT_READ. Orden descendente por fecha de reporte.
+         */
+        get: operations["listIncidents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/incidents/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cambia el estado de un reporte
+         * @description Permiso INCIDENT_CREATE o INCIDENT_MANAGE. Cada cambio queda en el historial.
+         */
+        patch: operations["changeIncidentStatus"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -619,6 +779,103 @@ export interface components {
         /** @description Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend. */
         ValveList: {
             items: components["schemas"]["Valve"][];
+        };
+        /** @description Acueducto del horario público. Sin datos personales. */
+        PublicScheduleAqueduct: {
+            name: string;
+            is_demo: boolean;
+        };
+        PublicSchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        /** @description Turno de un sector. Solo nombre del sector y horas. */
+        PublicScheduleItem: {
+            sector_name: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+        };
+        PublicSchedule: {
+            aqueduct: components["schemas"]["PublicScheduleAqueduct"];
+            /**
+             * Format: date
+             * @description Día de servicio en America/Bogota.
+             */
+            service_date: string;
+            publication: components["schemas"]["PublicSchedulePublication"];
+            items: components["schemas"]["PublicScheduleItem"][];
+        };
+        /** @description Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan. */
+        CreateDamageReportRequest: {
+            /** @description Código de DAMAGE_CATEGORY. */
+            category_code: string;
+            /** @description 10 a 500 caracteres (incident.description). */
+            description: string;
+            /** @description 0 a 120 caracteres. */
+            location_hint?: string;
+            /** @description Campo trampa oculto. Debe llegar vacío. */
+            website: string;
+            /**
+             * Format: date-time
+             * @description Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío.
+             */
+            form_started_at: string;
+        };
+        DamageReportCreated: {
+            /** @description 8 caracteres Crockford base32. Se muestra una sola vez. */
+            tracking_code: string;
+            /** @enum {string} */
+            status: "REPORTED";
+            message: string;
+        };
+        CatalogItem: {
+            code: string;
+            label_es: string;
+            sort_order: number;
+        };
+        CatalogList: {
+            items: components["schemas"]["CatalogItem"][];
+        };
+        /** @description Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante. */
+        PublicDamageReportStatus: {
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            status_label_es: string;
+            category_label_es: string;
+            /** Format: date-time */
+            reported_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        /** @description Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante. */
+        Incident: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            source: "PUBLIC_FORM" | "OPERATOR" | "ANOMALY" | "IMPORT";
+            category_code: string;
+            /** Format: uuid */
+            sector_id?: string | null;
+            description: string;
+            location_hint?: string | null;
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            /** Format: date-time */
+            reported_at: string;
+        };
+        IncidentPage: {
+            items: components["schemas"]["Incident"][];
+            next_cursor: string | null;
+        };
+        /** @description Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500). */
+        UpdateIncidentStatusRequest: {
+            /** @enum {string} */
+            status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            note?: string;
         };
     };
     responses: never;
@@ -1226,6 +1483,303 @@ export interface operations {
             };
             /** @description El sector no existe (NOT_FOUND). */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicSchedule: {
+        parameters: {
+            query?: {
+                date?: string;
+            };
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Horario publicado para la fecha (hoy en America/Bogota por defecto). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicSchedule"];
+                };
+            };
+            /** @description Slug inexistente, página desactivada o sin publicación (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicWhatsAppText: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mensaje de WhatsApp. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Sin publicación para el acueducto (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicPosterPdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cartel del horario. */
+            200: {
+                headers: {
+                    /** @description SHA-256 del PDF. */
+                    "X-Content-SHA256"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            /** @description Sin cartel para el acueducto (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createPublicDamageReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDamageReportRequest"];
+            };
+        };
+        responses: {
+            /** @description Reporte recibido, con su código de seguimiento. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DamageReportCreated"];
+                };
+            };
+            /** @description VALIDATION_ERROR (tiempo mínimo o campos). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Slug inexistente (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Límite por IP (RATE_LIMITED). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                catalog: "WATER_APPEARANCE" | "DAMAGE_CATEGORY";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Opciones del catálogo. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogList"];
+                };
+            };
+            /** @description Catálogo desconocido (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicDamageReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                trackingCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estado del reporte. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicDamageReportStatus"];
+                };
+            };
+            /** @description Formato de código inválido (VALIDATION_ERROR). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Código no existe (NOT_FOUND, mensaje genérico). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listIncidents: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de reportes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IncidentPage"];
+                };
+            };
+            /** @description CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    changeIncidentStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateIncidentStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Reporte actualizado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Incident"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION o CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED: descarte sin nota válida. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

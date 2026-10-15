@@ -74,6 +74,8 @@
   --focus-ring-width: 3px;
   --focus-ring-offset: 2px;
   --level-line-height: 2px;
+  /* Wide tracking for codes people copy by hand (tracking codes). */
+  --tracking-code: 0.08em;
 
   /* Motion */
   --duration-fast: 150ms;
