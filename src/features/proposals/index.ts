@@ -1,0 +1,1 @@
+export { ProposalListPage } from './ProposalListPage';

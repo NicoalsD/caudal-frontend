@@ -8,6 +8,7 @@ import type {
 } from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
 import type { ReportStatus } from '../../core/incidents/reportStatus';
+import type { ProposalStatus } from '../../core/proposal/proposalDay';
 import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
@@ -200,5 +201,24 @@ export interface IncidentView {
 /** One page of incidents. `nextCursor` is null when there are no more (API.md 1.5). */
 export interface IncidentPageView {
   readonly items: readonly IncidentView[];
+  readonly nextCursor: string | null;
+}
+
+/** A proposal without its shifts, as the Board's list shows it (API.md 10.2). */
+export interface ScheduleProposalSummaryView {
+  readonly id: string;
+  /** Calendar day of service as YYYY-MM-DD (no zone). */
+  readonly serviceDate: string;
+  readonly status: ProposalStatus;
+  readonly generatedAt: TimestampView;
+  readonly availableHours: DecimalView;
+  readonly tankBand: string | null;
+  readonly tankLevel: DecimalView | null;
+  readonly lockVersion: number;
+}
+
+/** One page of proposals; `nextCursor` is null when there are no more (API.md 1.5). */
+export interface ScheduleProposalPageView {
+  readonly items: readonly ScheduleProposalSummaryView[];
   readonly nextCursor: string | null;
 }

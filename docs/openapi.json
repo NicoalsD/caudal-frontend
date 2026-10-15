@@ -1116,6 +1116,111 @@
           }
         }
       }
+    },
+    "/api/v1/schedule-proposals": {
+      "get": {
+        "operationId": "listScheduleProposals",
+        "summary": "Propuestas de turnos",
+        "description": "Permiso PROPOSAL_VIEW. API.md sección 10.2. Sin turnos: el detalle está en GET /{id}.",
+        "parameters": [
+          {
+            "name": "service_date_from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "service_date_to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de propuestas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposalPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "generateScheduleProposal",
+        "summary": "Genera la propuesta de un día",
+        "description": "Permiso PROPOSAL_GENERATE. Estado inicial PENDING_REVIEW. API.md sección 10.1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateScheduleProposalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Propuesta generada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: ya existe una propuesta no rechazada para la fecha.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_LEVEL_DATA, OUTSIDE_OPERATING_WINDOW.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2343,6 +2448,318 @@
           "note": {
             "type": "string",
             "maxLength": 500
+          }
+        }
+      },
+      "ScheduleProposalSummary": {
+        "type": "object",
+        "description": "Propuesta de turnos sin sus turnos (API.md 10.2).",
+        "required": [
+          "id",
+          "service_date",
+          "status",
+          "rule_set_id",
+          "tank_band",
+          "available_hours",
+          "strategy_code",
+          "generated_at",
+          "lock_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_REVIEW",
+              "APPROVED",
+              "APPROVED_WITH_CHANGES",
+              "REJECTED",
+              "PUBLISHED",
+              "CLOSED"
+            ]
+          },
+          "rule_set_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_level_snapshot": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tank_band": {
+            "type": "string",
+            "nullable": true
+          },
+          "available_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "forecast_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "strategy_code": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ScheduleProposalPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleProposalSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GenerateScheduleProposalRequest": {
+        "type": "object",
+        "required": [
+          "service_date"
+        ],
+        "properties": {
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ScheduleReason": {
+        "type": "object",
+        "description": "Motivo de un turno (API.md 10.3). El texto lo arma el servidor.",
+        "required": [
+          "code",
+          "params",
+          "text"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "PRIORITY_SECTOR"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ScheduleItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "sector_id",
+          "sequence",
+          "start_at",
+          "end_at",
+          "origin",
+          "reasons"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "PROPOSED",
+              "MODIFIED",
+              "ADDED"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleReason"
+            }
+          }
+        }
+      },
+      "UnservedSector": {
+        "type": "object",
+        "description": "Sector sin turno y su motivo (API.md 10.3).",
+        "required": [
+          "sector_id",
+          "reason"
+        ],
+        "properties": {
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "example": "NO_BUDGET"
+          }
+        }
+      },
+      "ScheduleDecision": {
+        "type": "object",
+        "description": "Decisión de la Junta (historial de la propuesta).",
+        "required": [
+          "decision",
+          "decided_by",
+          "decided_at"
+        ],
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "APPROVED_WITH_CHANGES",
+              "REJECTED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "decided_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ScheduleProposal": {
+        "type": "object",
+        "description": "Propuesta completa de turnos con sus explicaciones (API.md 10.1 y 10.3).",
+        "required": [
+          "id",
+          "service_date",
+          "status",
+          "rule_set_id",
+          "available_hours",
+          "strategy_code",
+          "generated_at",
+          "lock_version",
+          "items",
+          "unserved_sectors",
+          "decisions",
+          "snapshot_taken"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_REVIEW",
+              "APPROVED",
+              "APPROVED_WITH_CHANGES",
+              "REJECTED",
+              "PUBLISHED",
+              "CLOSED"
+            ]
+          },
+          "rule_set_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_level_snapshot": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tank_band": {
+            "type": "string",
+            "nullable": true
+          },
+          "available_hours": {
+            "type": "number",
+            "format": "double"
+          },
+          "forecast_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "strategy_code": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItem"
+            }
+          },
+          "unserved_sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnservedSector"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDecision"
+            }
+          },
+          "snapshot_taken": {
+            "type": "boolean"
           }
         }
       }

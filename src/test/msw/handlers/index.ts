@@ -3,6 +3,7 @@ import { catalogHandlers } from './catalogs';
 import { incidentsHandlers } from './incidents';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
+import { proposalsHandlers } from './proposals';
 import { publicHandlers } from './public';
 import { rulesHandlers } from './rules';
 
@@ -15,4 +16,5 @@ export const handlers = [
   ...publicHandlers,
   ...catalogHandlers,
   ...incidentsHandlers,
+  ...proposalsHandlers,
 ];

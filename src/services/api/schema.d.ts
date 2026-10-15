@@ -471,6 +471,30 @@ export interface paths {
         patch: operations["changeIncidentStatus"];
         trace?: never;
     };
+    "/api/v1/schedule-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Propuestas de turnos
+         * @description Permiso PROPOSAL_VIEW. API.md sección 10.2. Sin turnos: el detalle está en GET /{id}.
+         */
+        get: operations["listScheduleProposals"];
+        put?: never;
+        /**
+         * Genera la propuesta de un día
+         * @description Permiso PROPOSAL_GENERATE. Estado inicial PENDING_REVIEW. API.md sección 10.1.
+         */
+        post: operations["generateScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -876,6 +900,102 @@ export interface components {
             /** @enum {string} */
             status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
             note?: string;
+        };
+        /** @description Propuesta de turnos sin sus turnos (API.md 10.2). */
+        ScheduleProposalSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            /** @enum {string} */
+            status: "PENDING_REVIEW" | "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED" | "PUBLISHED" | "CLOSED";
+            /** Format: uuid */
+            rule_set_id: string;
+            /** Format: double */
+            tank_level_snapshot?: number | null;
+            tank_band: string | null;
+            /** Format: double */
+            available_hours: number;
+            /** Format: uuid */
+            forecast_run_id?: string | null;
+            strategy_code: string;
+            /** Format: date-time */
+            generated_at: string;
+            lock_version: number;
+        };
+        ScheduleProposalPage: {
+            items: components["schemas"]["ScheduleProposalSummary"][];
+            next_cursor: string | null;
+        };
+        GenerateScheduleProposalRequest: {
+            /** Format: date */
+            service_date: string;
+        };
+        /** @description Motivo de un turno (API.md 10.3). El texto lo arma el servidor. */
+        ScheduleReason: {
+            /** @example PRIORITY_SECTOR */
+            code: string;
+            params: {
+                [key: string]: unknown;
+            };
+            text: string;
+        };
+        ScheduleItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sector_id: string;
+            sequence: number;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            /** @enum {string} */
+            origin: "PROPOSED" | "MODIFIED" | "ADDED";
+            reasons: components["schemas"]["ScheduleReason"][];
+        };
+        /** @description Sector sin turno y su motivo (API.md 10.3). */
+        UnservedSector: {
+            /** Format: uuid */
+            sector_id: string;
+            /** @example NO_BUDGET */
+            reason: string;
+        };
+        /** @description Decisión de la Junta (historial de la propuesta). */
+        ScheduleDecision: {
+            /** @enum {string} */
+            decision: "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED";
+            reason?: string | null;
+            /** Format: uuid */
+            decided_by: string;
+            /** Format: date-time */
+            decided_at: string;
+        };
+        /** @description Propuesta completa de turnos con sus explicaciones (API.md 10.1 y 10.3). */
+        ScheduleProposal: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            /** @enum {string} */
+            status: "PENDING_REVIEW" | "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED" | "PUBLISHED" | "CLOSED";
+            /** Format: uuid */
+            rule_set_id: string;
+            /** Format: double */
+            tank_level_snapshot?: number | null;
+            tank_band?: string | null;
+            /** Format: double */
+            available_hours: number;
+            /** Format: uuid */
+            forecast_run_id?: string | null;
+            strategy_code: string;
+            /** Format: date-time */
+            generated_at: string;
+            lock_version: number;
+            items: components["schemas"]["ScheduleItem"][];
+            unserved_sectors: components["schemas"]["UnservedSector"][];
+            decisions: components["schemas"]["ScheduleDecision"][];
+            snapshot_taken: boolean;
         };
     };
     responses: never;
@@ -1779,6 +1899,74 @@ export interface operations {
                 };
             };
             /** @description REASON_REQUIRED: descarte sin nota válida. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listScheduleProposals: {
+        parameters: {
+            query?: {
+                service_date_from?: string;
+                service_date_to?: string;
+                status?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de propuestas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposalPage"];
+                };
+            };
+        };
+    };
+    generateScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta generada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT: ya existe una propuesta no rechazada para la fecha. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NO_LEVEL_DATA, OUTSIDE_OPERATING_WINDOW. */
             422: {
                 headers: {
                     [name: string]: unknown;

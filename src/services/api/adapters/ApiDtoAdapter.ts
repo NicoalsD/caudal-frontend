@@ -18,6 +18,7 @@ import type {
   ValveOrder,
 } from '../../../core/rules/ruleSetParts';
 import { isReportStatus } from '../../../core/incidents/reportStatus';
+import { isProposalStatus } from '../../../core/proposal/proposalStatus';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -29,6 +30,8 @@ import type {
   DamageReportReceiptView,
   IncidentPageView,
   IncidentView,
+  ScheduleProposalPageView,
+  ScheduleProposalSummaryView,
   PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
@@ -62,6 +65,8 @@ type CatalogItemDto = components['schemas']['CatalogItem'];
 type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
+type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
+type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -181,6 +186,32 @@ export class ApiDtoAdapter {
   toIncidentPage(dto: IncidentPageDto): IncidentPageView {
     return {
       items: dto.items.map((item) => this.toIncident(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toProposalSummary(dto: ProposalSummaryDto): ScheduleProposalSummaryView {
+    if (!isProposalStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      serviceDate: dto.service_date,
+      status: dto.status,
+      generatedAt: this.toTimestamp('generated_at', dto.generated_at),
+      availableHours: this.toDecimal('available_hours', dto.available_hours),
+      tankBand: dto.tank_band ?? null,
+      tankLevel:
+        dto.tank_level_snapshot === undefined || dto.tank_level_snapshot === null
+          ? null
+          : this.toDecimal('tank_level_snapshot', dto.tank_level_snapshot),
+      lockVersion: dto.lock_version,
+    };
+  }
+
+  toProposalPage(dto: ProposalPageDto): ScheduleProposalPageView {
+    return {
+      items: dto.items.map((item) => this.toProposalSummary(item)),
       nextCursor: dto.next_cursor ?? null,
     };
   }
