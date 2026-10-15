@@ -86,11 +86,30 @@
   width: 100%;
 }
 
-.posterLink {
+.linkButton {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-min);
   padding: 0 var(--space-3);
   border-radius: var(--radius-control);
   font-weight: var(--font-weight-bold);
+}
+
+.codeLabel {
+  margin: var(--space-5) 0 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.code {
+  margin: var(--space-2) 0 var(--space-4);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-display);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  color: var(--color-water-800);
+}
+
+.submit {
+  align-self: flex-start;
 }

@@ -108,3 +108,13 @@ describe('PublicSchedulePage: only the published schedule', () => {
     ).toBeInTheDocument();
   });
 });
+
+describe('PublicSchedulePage: way to report damage', () => {
+  it('links to the damage report of the same aqueduct', async () => {
+    renderApp(SCHEDULE_PATH);
+
+    expect(
+      await screen.findByRole('link', { name: t('publicSchedule.reportDamage') }),
+    ).toHaveAttribute('href', '/a/guaitarilla/reportar-dano');
+  });
+});

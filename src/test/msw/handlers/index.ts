@@ -1,4 +1,5 @@
 import { authHandlers } from './auth';
+import { catalogHandlers } from './catalogs';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
 import { publicHandlers } from './public';
@@ -11,4 +12,5 @@ export const handlers = [
   ...networkHandlers,
   ...rulesHandlers,
   ...publicHandlers,
+  ...catalogHandlers,
 ];

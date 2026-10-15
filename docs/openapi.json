@@ -846,6 +846,118 @@
           }
         }
       }
+    },
+    "/api/v1/public/{aqueductSlug}/damage-reports": {
+      "post": {
+        "operationId": "createPublicDamageReport",
+        "summary": "Reporta un daño sin login",
+        "description": "Público. Límite de 3 por hora por IP, honeypot y tiempo mínimo de llenado.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDamageReportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte recibido, con su código de seguimiento.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DamageReportCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR (tiempo mínimo o campos).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Slug inexistente (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite por IP (RATE_LIMITED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalogs/{catalog}": {
+      "get": {
+        "operationId": "getCatalog",
+        "summary": "Opciones de un catálogo",
+        "description": "Público. Solo etiquetas activas (API.md 4.2).",
+        "parameters": [
+          {
+            "name": "catalog",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "WATER_APPEARANCE",
+                "DAMAGE_CATEGORY"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Opciones del catálogo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catálogo desconocido (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1849,6 +1961,95 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PublicScheduleItem"
+            }
+          }
+        }
+      },
+      "CreateDamageReportRequest": {
+        "type": "object",
+        "description": "Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan.",
+        "required": [
+          "category_code",
+          "description",
+          "website",
+          "form_started_at"
+        ],
+        "properties": {
+          "category_code": {
+            "type": "string",
+            "description": "Código de DAMAGE_CATEGORY."
+          },
+          "description": {
+            "type": "string",
+            "description": "10 a 500 caracteres (incident.description)."
+          },
+          "location_hint": {
+            "type": "string",
+            "description": "0 a 120 caracteres."
+          },
+          "website": {
+            "type": "string",
+            "description": "Campo trampa oculto. Debe llegar vacío."
+          },
+          "form_started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío."
+          }
+        }
+      },
+      "DamageReportCreated": {
+        "type": "object",
+        "required": [
+          "tracking_code",
+          "status",
+          "message"
+        ],
+        "properties": {
+          "tracking_code": {
+            "type": "string",
+            "description": "8 caracteres Crockford base32. Se muestra una sola vez."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogItem": {
+        "type": "object",
+        "required": [
+          "code",
+          "label_es",
+          "sort_order"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label_es": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "CatalogList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItem"
             }
           }
         }

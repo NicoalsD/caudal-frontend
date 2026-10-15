@@ -48,6 +48,8 @@ export interface DecimalRule {
 export interface TextOptions {
   /** Normalizes to lower case before checking, for example the username (API.md 2.1). */
   readonly lowercase?: boolean;
+  /** Name of the constraint that holds the limits, when it differs from the field name. */
+  readonly constraint?: string;
 }
 
 export interface PasswordOptions {
@@ -96,7 +98,8 @@ export class FormSchemaBuilder {
 
   /** Text limited by the min, max, pattern and max lines the server sent for `field`. */
   text(field: string, options: TextOptions = {}): this {
-    this.shape[field] = this.textSchema(field, this.require(field).min ?? 0, options);
+    const minimum = this.require(options.constraint ?? field).min ?? 0;
+    this.shape[field] = this.textSchema(field, minimum, options);
     return this;
   }
 
@@ -364,8 +367,8 @@ export class FormSchemaBuilder {
   }
 
   private textSchema(field: string, minimum: number, options: TextOptions): z.ZodType<string> {
-    const limits = this.require(field);
-    const pattern = this.compilePattern(field, limits);
+    const limits = this.require(options.constraint ?? field);
+    const pattern = this.compilePattern(options.constraint ?? field, limits);
     return z.string().transform((raw, context) => {
       const trimmed = raw.trim();
       const value = options.lowercase === true ? trimmed.toLowerCase() : trimmed;

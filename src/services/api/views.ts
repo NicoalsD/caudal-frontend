@@ -152,3 +152,28 @@ export interface PublicScheduleView {
   readonly publishedAt: TimestampView;
   readonly items: readonly PublicScheduleItemView[];
 }
+
+/** One option of a catalog (GET /catalogs/{catalog}), with its text in Spanish. */
+export interface CatalogOptionView {
+  readonly code: string;
+  readonly label: string;
+}
+
+/** What the person gets back after a damage report: the code is shown once (API.md 15.4). */
+export interface DamageReportReceiptView {
+  readonly trackingCode: string;
+  readonly status: string;
+  readonly message: string;
+}
+
+/** What the person typed, before it becomes the request body. */
+export interface DamageReportInput {
+  readonly categoryCode: string;
+  readonly description: string;
+  /** Empty when the person left it blank: then the field is not sent. */
+  readonly locationHint: string;
+  /** The honeypot field: always sent, empty for people. */
+  readonly website: string;
+  /** ISO instant when the form was opened (the server checks the minimum filling time). */
+  readonly formStartedAt: string;
+}

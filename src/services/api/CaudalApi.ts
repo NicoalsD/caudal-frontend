@@ -1,6 +1,7 @@
 import type { HttpClient } from '../http/HttpClient';
 import type { ApiDtoAdapter } from './adapters/ApiDtoAdapter';
 import { AuthApi } from './endpoints/AuthApi';
+import { CatalogApi } from './endpoints/CatalogApi';
 import { MetaApi } from './endpoints/MetaApi';
 import { NetworkApi } from './endpoints/NetworkApi';
 import { PublicApi } from './endpoints/PublicApi';
@@ -16,6 +17,7 @@ import { SystemApi } from './endpoints/SystemApi';
  */
 export class CaudalApi {
   readonly auth: AuthApi;
+  readonly catalogs: CatalogApi;
   readonly meta: MetaApi;
   readonly network: NetworkApi;
   /** The public pages without login (section 15). */
@@ -26,6 +28,7 @@ export class CaudalApi {
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
     this.auth = new AuthApi(http, adapter);
+    this.catalogs = new CatalogApi(http, adapter);
     this.meta = new MetaApi(http, adapter);
     this.network = new NetworkApi(http, adapter);
     this.public = new PublicApi(http, adapter, apiBaseUrl);

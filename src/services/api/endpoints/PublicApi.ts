@@ -1,9 +1,11 @@
 import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import type { components } from '../schema';
-import type { PublicScheduleView } from '../views';
+import type { DamageReportInput, DamageReportReceiptView, PublicScheduleView } from '../views';
 
 type PublicScheduleDto = components['schemas']['PublicSchedule'];
+type CreateDamageReportDto = components['schemas']['CreateDamageReportRequest'];
+type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 
 /** The public pages (API.md section 15). No session: nothing here carries a token. */
 export class PublicApi {
@@ -31,6 +33,29 @@ export class PublicApi {
       responseType: 'text',
     });
     return response.body;
+  }
+
+  /**
+   * POST /public/{slug}/damage-reports (S05). The body is built field by field: the API rejects
+   * unknown fields, and the location is sent only when the person wrote one.
+   */
+  async createDamageReport(
+    aqueductSlug: string,
+    input: DamageReportInput,
+  ): Promise<DamageReportReceiptView> {
+    const body: CreateDamageReportDto = {
+      category_code: input.categoryCode,
+      description: input.description,
+      ...(input.locationHint === '' ? {} : { location_hint: input.locationHint }),
+      website: input.website,
+      form_started_at: input.formStartedAt,
+    };
+    const response = await this.http.request<DamageReportCreatedDto>({
+      method: 'POST',
+      path: `/public/${encodeURIComponent(aqueductSlug)}/damage-reports`,
+      body,
+    });
+    return this.adapter.toDamageReportReceipt(response.body);
   }
 
   /**

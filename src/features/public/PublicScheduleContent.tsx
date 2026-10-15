@@ -1,6 +1,8 @@
 import type { JSX } from 'react';
+import { generatePath, Link } from 'react-router';
 
 import { formatServiceDate } from '../../core/format/serviceDate';
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import type { PublicScheduleView } from '../../services/api/views';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
@@ -55,6 +57,14 @@ export function PublicScheduleContent({
         <WhatsAppCopy aqueductSlug={aqueductSlug} />
         <PosterLink aqueductSlug={aqueductSlug} />
       </section>
+      <p>
+        <Link
+          className={cn(styles.linkButton)}
+          to={generatePath(ROUTE_PATHS.public.damageReport, { aqueductSlug })}
+        >
+          {t('publicSchedule.reportDamage')}
+        </Link>
+      </p>
     </>
   );
 }

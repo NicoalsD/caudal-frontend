@@ -24,6 +24,8 @@ import type {
   HealthView,
   LoginView,
   MeView,
+  CatalogOptionView,
+  DamageReportReceiptView,
   PublicScheduleView,
   RefreshView,
   RuleSetSummaryView,
@@ -52,6 +54,8 @@ type RuleOperatingWindowDto = components['schemas']['RuleOperatingWindow'];
 type RuleGaugeDto = components['schemas']['RuleGauge'];
 type SectorDto = components['schemas']['Sector'];
 type PublicScheduleDto = components['schemas']['PublicSchedule'];
+type CatalogItemDto = components['schemas']['CatalogItem'];
+type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
 
@@ -146,6 +150,14 @@ export class ApiDtoAdapter {
       operatingWindows: dto.operating_windows.map((window) => this.toOperatingWindow(window)),
       gauge: this.toGauge(dto.gauge),
     };
+  }
+
+  toCatalogOption(dto: CatalogItemDto): CatalogOptionView {
+    return { code: dto.code, label: dto.label_es };
+  }
+
+  toDamageReportReceipt(dto: DamageReportCreatedDto): DamageReportReceiptView {
+    return { trackingCode: dto.tracking_code, status: dto.status, message: dto.message };
   }
 
   /** Keeps the aqueduct name and demo flag, the service day and the sector turns; nothing else. */

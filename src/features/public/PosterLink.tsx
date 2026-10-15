@@ -13,7 +13,7 @@ interface PosterLinkProps {
 export function PosterLink({ aqueductSlug }: PosterLinkProps): JSX.Element {
   const api = useCaudalApi();
   return (
-    <a className={cn(styles.posterLink)} href={api.public.posterPdfUrl(aqueductSlug)} download>
+    <a className={cn(styles.linkButton)} href={api.public.posterPdfUrl(aqueductSlug)} download>
       {t('publicSchedule.share.poster')}
     </a>
   );

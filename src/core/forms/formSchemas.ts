@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import { HOURS_PER_DAY } from '../policy/clientPolicy';
 import { gaugeDecimals } from '../rules/bandCoverage';
 import type { Gauge } from '../rules/ruleSetParts';
@@ -40,6 +42,41 @@ export function loginFormSchema(constraints: ConstraintsMap, messages: Validatio
     .text(FIELD.username, { lowercase: true })
     .password(FIELD.password)
     .build();
+}
+
+/** Fields of the public damage report (API.md 15.4), named as the API sends them. */
+export const DAMAGE_REPORT_FIELD = {
+  categoryCode: 'category_code',
+  description: 'description',
+  locationHint: 'location_hint',
+  website: 'website',
+} as const;
+
+/** Constraints that limit the report text (GET /meta/constraints). */
+export const INCIDENT_DESCRIPTION_CONSTRAINT = 'incident.description';
+export const INCIDENT_LOCATION_CONSTRAINT = 'incident.location_hint';
+
+/**
+ * Public damage report (S05). The category must be chosen; the description and the place follow
+ * the limits of the server. The place is optional, so a missing limit only means it has no
+ * maximum here: the server still rejects a place that is too long.
+ */
+export function damageReportFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  const limits: ConstraintsMap =
+    constraints[INCIDENT_LOCATION_CONSTRAINT] === undefined
+      ? { ...constraints, [INCIDENT_LOCATION_CONSTRAINT]: { min: 0 } }
+      : constraints;
+  return new FormSchemaBuilder(limits, messages)
+    .text(DAMAGE_REPORT_FIELD.description, { constraint: INCIDENT_DESCRIPTION_CONSTRAINT })
+    .text(DAMAGE_REPORT_FIELD.locationHint, { constraint: INCIDENT_LOCATION_CONSTRAINT })
+    .build()
+    .extend({
+      [DAMAGE_REPORT_FIELD.categoryCode]: z.string().min(1, { message: messages('required', {}) }),
+      [DAMAGE_REPORT_FIELD.website]: z.string(),
+    });
 }
 
 /** Names of the fields of the draft rules form. */
