@@ -8,6 +8,11 @@ export const strings = {
     skipToContent: 'Saltar al contenido',
     mainNavigation: 'Navegación principal',
   },
+  pwa: {
+    updateAvailable: 'Hay una versión nueva.',
+    update: 'Actualizar',
+    later: 'Más tarde',
+  },
   common: {
     retry: 'Reintentar',
     cancel: 'Cancelar',

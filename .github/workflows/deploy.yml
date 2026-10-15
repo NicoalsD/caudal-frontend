@@ -1,0 +1,60 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Un despliegue a producción a la vez; el siguiente espera en lugar de cancelar al anterior.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  vercel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      # Sin secretos el job termina en verde con un aviso: el repositorio puede existir sin Vercel.
+      - name: Comprueba los secretos de Vercel
+        id: secrets
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "::notice::Faltan los secretos VERCEL_TOKEN, VERCEL_ORG_ID o VERCEL_PROJECT_ID. Se omite el despliegue."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          persist-credentials: false
+
+      # La versión de pnpm sale del campo packageManager de package.json.
+      - uses: pnpm/action-setup@v6
+        if: steps.secrets.outputs.ready == 'true'
+
+      - uses: actions/setup-node@v7
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version-file: .nvmrc
+
+      # Vercel CLI fijado a una versión concreta. Se ejecuta con pnpm dlx, sin agregarlo a package.json.
+      - name: Descarga la configuración del proyecto de Vercel
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm dlx vercel@62.0.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
+
+      - name: Compila para producción
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm dlx vercel@62.0.0 build --prod --token "$VERCEL_TOKEN"
+
+      - name: Publica en producción
+        if: steps.secrets.outputs.ready == 'true'
+        run: pnpm dlx vercel@62.0.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
