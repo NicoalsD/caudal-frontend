@@ -150,3 +150,84 @@ describe('CommandQueue', () => {
     ]);
   });
 });
+
+describe('CommandQueue corrections and session log', () => {
+  it('keeps the range the server sent with a refusal', async () => {
+    const { queue } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.settle('c-1', {
+      type: 'REJECTED',
+      code: 'GAUGE_OUT_OF_RANGE',
+      details: { gauge_min: '0,00', gauge_max: '5,00' },
+    });
+    expect(await queue.correctionsFor(OWNER)).toEqual([
+      expect.objectContaining({
+        lastErrorDetails: { gauge_min: '0,00', gauge_max: '5,00' },
+      }),
+    ]);
+  });
+
+  it('replaces a refused item with a new one and removes the refused one', async () => {
+    const { queue, repository } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.settle('c-1', { type: 'REJECTED', code: 'GAUGE_OUT_OF_RANGE' });
+
+    const fixed = { ...PAYLOAD, gaugeValue: 2.5 };
+    const record = await queue.replace(
+      'c-1',
+      new SubmitReadingCommand('c-2', fixed),
+      OWNER,
+      'rs-7',
+    );
+
+    expect(record).toMatchObject({
+      clientId: 'c-2',
+      status: 'PENDING',
+      payload: fixed,
+      ruleSetVersionId: 'rs-7',
+      replacesClientId: 'c-1',
+    });
+    expect(await repository.get('c-1')).toBeNull();
+    expect((await queue.pendingFor(OWNER)).map((item) => item.clientId)).toEqual(['c-2']);
+  });
+
+  it('drops a refused item with its reason and keeps the reason for the session', async () => {
+    const { queue } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.settle('c-1', { type: 'REJECTED', code: 'TOO_OLD' });
+
+    await queue.discard('c-1', 'La lectura era de otro día.');
+
+    expect(await queue.correctionsFor(OWNER)).toEqual([]);
+    expect(queue.closedFor(OWNER)).toEqual([
+      expect.objectContaining({
+        clientId: 'c-1',
+        outcome: 'DISCARDED',
+        reason: 'La lectura era de otro día.',
+      }),
+    ]);
+  });
+
+  it('does nothing when discarding an unknown item', async () => {
+    const { queue } = setup();
+    await queue.discard('missing', 'Motivo de prueba.');
+    expect(queue.closedFor(OWNER)).toEqual([]);
+  });
+
+  it('records a sent reading in the session log and leaves the queue', async () => {
+    const { queue } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.settle('c-1', { type: 'SAVED' });
+    expect(queue.closedFor(OWNER)).toEqual([
+      expect.objectContaining({ clientId: 'c-1', outcome: 'SENT', payload: PAYLOAD }),
+    ]);
+    expect(queue.closedFor(OTHER_OWNER)).toEqual([]);
+  });
+
+  it('finds a stored item by its client id', async () => {
+    const { queue } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    expect(await queue.find('c-1')).toMatchObject({ clientId: 'c-1' });
+    expect(await queue.find('missing')).toBeNull();
+  });
+});

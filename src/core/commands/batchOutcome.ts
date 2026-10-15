@@ -1,11 +1,14 @@
 import type { SubmitOutcome } from './CommandQueue';
 import { NETWORK_CODE, outcomeForCode } from './classifyFailure';
+import type { RejectionDetails } from './OutboxRecord';
 
 /** One item's answer inside POST /readings/batch (API.md 7.2). */
 export interface BatchItemAnswer {
   readonly id: string;
   readonly status: string;
   readonly errorCode: string | null;
+  /** The `details` of the item's error, when the server refused it (API.md 7.2). */
+  readonly errorDetails?: RejectionDetails | undefined;
 }
 
 /** Statuses that mean the reading is on the server (a repeated send counts as saved). */
@@ -26,7 +29,7 @@ export function outcomeForAnswer(answer: BatchItemAnswer | undefined): SubmitOut
     return { type: 'SAVED' };
   }
   if (answer.status === REJECTED_STATUS) {
-    return outcomeForCode(answer.errorCode ?? UNSPECIFIED_REFUSAL);
+    return outcomeForCode(answer.errorCode ?? UNSPECIFIED_REFUSAL, answer.errorDetails);
   }
   return { type: 'RETRY', code: answer.status };
 }

@@ -48,7 +48,7 @@ export class SyncQueueStore {
       this.queue.correctionsFor(owner),
     ]);
     if (round === this.readRound) {
-      this.publish(summarizeOutbox([...unsent, ...review]));
+      this.publish(summarizeOutbox([...unsent, ...review], this.queue.closedFor(owner)));
     }
   }
 

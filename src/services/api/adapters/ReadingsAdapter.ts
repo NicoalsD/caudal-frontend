@@ -56,7 +56,10 @@ export interface ReadingBatchResponseDto {
   readonly results: readonly {
     readonly id: string;
     readonly status: string;
-    readonly error?: { readonly code: string };
+    readonly error?: {
+      readonly code: string;
+      readonly details?: Readonly<Record<string, unknown>>;
+    };
   }[];
 }
 
@@ -68,6 +71,7 @@ export function toReadingBatchResult(dto: ReadingBatchResponseDto): ReadingBatch
       id: item.id,
       status: item.status,
       errorCode: item.error?.code ?? null,
+      errorDetails: item.error?.details,
     })),
   };
 }

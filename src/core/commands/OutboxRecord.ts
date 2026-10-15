@@ -28,4 +28,11 @@ export interface OutboxRecord extends OutboxOwner {
   nextAttemptAtMs: number | null;
   lastErrorCode: string | null;
   lastErrorAtMs: number | null;
+  /** Details the server gave with the refusal (for example the gauge range). Absent in old records. */
+  lastErrorDetails?: RejectionDetails | null;
+  /** The refused item this one replaces (offline-sync.md 7.4). Absent in old records. */
+  replacesClientId?: string | null;
 }
+
+/** Plain data the server sends with an error: values are shown only after a check in the UI. */
+export type RejectionDetails = Readonly<Record<string, unknown>>;

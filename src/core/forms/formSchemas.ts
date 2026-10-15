@@ -50,6 +50,15 @@ export function readingEntrySchema(
     .build();
 }
 
+/** The gauge value alone, for correcting a refused reading: same range rules as the reading form. */
+export function gaugeValueSchema(
+  constraints: ConstraintsMap,
+  gauge: DecimalRule,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages).decimal(FIELD.gaugeValue, gauge).build();
+}
+
 /** Mandatory reason for a change (rule activation, proposal changes, corrections). */
 export function reasonSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
   return new FormSchemaBuilder(constraints, messages).requiredReason(FIELD.changeReason).build();

@@ -1,13 +1,18 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
-import { SubmitReadingCommand } from '../../core/commands/SubmitReadingCommand';
+import {
+  SubmitReadingCommand,
+  readSubmitReadingPayload,
+} from '../../core/commands/SubmitReadingCommand';
 import { REFERENCE_STALE_TIME_MS } from '../../core/policy/clientPolicy';
 import type { CatalogItemView } from '../../services/api/views';
 import { GLOBAL_REFERENCE_SCOPE } from '../../core/cache/ReferenceFallback';
 import { useCaudalApi } from '../../state/hooks/apiContext';
 import { useOfflineServices, useReferenceFetch } from '../../state/hooks/offlineContext';
 import { useOutboxOwner } from '../../state/hooks/useOutboxOwner';
+
+const NOT_QUEUED_MESSAGE = 'La lectura ya no está en la cola.';
 
 /** GET /catalogs/WATER_APPEARANCE: the options for how the water looks. Changes rarely. */
 export function useWaterAppearances(): UseQueryResult<CatalogItemView[]> {
@@ -66,5 +71,60 @@ export function useSaveReading(): UseMutationResult<SavedReading, Error, SaveRea
       }
       return { clientId, sendingNow };
     },
+  });
+}
+
+export interface ResendDraft {
+  /** The refused item being corrected. */
+  readonly clientId: string;
+  readonly gaugeValue: number;
+  readonly ruleSetVersionId: string | null;
+}
+
+export interface ResendResult {
+  readonly clientId: string;
+  readonly sendingNow: boolean;
+}
+
+/**
+ * Corrects a refused reading and sends it again as a new item (offline-sync.md 7.4). The refused
+ * item leaves the queue at once: the server never stored it.
+ */
+export function useResendRejectedReading(): UseMutationResult<ResendResult, Error, ResendDraft> {
+  const offline = useOfflineServices();
+  const owner = useOutboxOwner();
+  return useMutation({
+    mutationFn: async (draft) => {
+      const refused = await offline.outbox.find(draft.clientId);
+      const payload = refused === null ? null : readSubmitReadingPayload(refused.payload);
+      if (payload === null) {
+        throw new Error(NOT_QUEUED_MESSAGE);
+      }
+      const clientId = offline.ids.nextId();
+      await offline.outbox.replace(
+        draft.clientId,
+        new SubmitReadingCommand(clientId, { ...payload, gaugeValue: draft.gaugeValue }),
+        owner,
+        draft.ruleSetVersionId,
+      );
+      const sendingNow = offline.connectivity.isOnline();
+      if (sendingNow) {
+        void offline.sync.flush();
+      }
+      return { clientId, sendingNow };
+    },
+  });
+}
+
+export interface DiscardDraft {
+  readonly clientId: string;
+  readonly reason: string;
+}
+
+/** Drops a refused reading, with the reason the person wrote (ux-guidelines section 6). */
+export function useDiscardRejectedReading(): UseMutationResult<void, Error, DiscardDraft> {
+  const offline = useOfflineServices();
+  return useMutation({
+    mutationFn: (draft) => offline.outbox.discard(draft.clientId, draft.reason),
   });
 }

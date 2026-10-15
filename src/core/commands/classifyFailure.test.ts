@@ -9,6 +9,7 @@ describe('classifyFailure', () => {
     expect(classifyFailure(new DomainError('GAUGE_OUT_OF_RANGE', 'x'))).toEqual({
       type: 'REJECTED',
       code: 'GAUGE_OUT_OF_RANGE',
+      details: {},
     });
   });
 

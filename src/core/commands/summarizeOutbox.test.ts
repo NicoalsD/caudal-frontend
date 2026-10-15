@@ -23,6 +23,15 @@ function record(clientId: string, status: OutboxStatus): OutboxRecord {
   };
 }
 
+const VALID_PAYLOAD = {
+  tankId: 't-1',
+  gaugeValue: 2.1,
+  waterAppearanceCode: 'NORMAL',
+  damageNoticed: false,
+  note: '',
+  observedAt: '2026-10-14T08:00:00.000Z',
+};
+
 describe('summarizeOutbox', () => {
   it('counts waiting and sending items apart from the ones to review', () => {
     const summary = summarizeOutbox([
@@ -40,7 +49,54 @@ describe('summarizeOutbox', () => {
     const summary = summarizeOutbox([record('a', 'PENDING')]);
 
     expect(summary.items).toEqual([
-      { clientId: 'a', status: 'PENDING', attempts: ATTEMPTS, lastErrorCode: 'NETWORK' },
+      expect.objectContaining({
+        clientId: 'a',
+        status: 'PENDING',
+        attempts: ATTEMPTS,
+        lastErrorCode: 'NETWORK',
+      }),
+    ]);
+  });
+
+  it('reads the value and the time of each item, and leaves them empty when corrupt', () => {
+    const valid = { ...record('a', 'PENDING'), payload: VALID_PAYLOAD };
+    const corrupt = { ...record('b', 'CORRECTION_PENDING'), payload: 'broken' };
+
+    const summary = summarizeOutbox([valid, corrupt]);
+
+    expect(summary.items).toEqual([
+      expect.objectContaining({
+        clientId: 'a',
+        gaugeValue: 2.1,
+        observedAt: VALID_PAYLOAD.observedAt,
+      }),
+      expect.objectContaining({ clientId: 'b', gaugeValue: null, observedAt: null }),
+    ]);
+  });
+
+  it('lists what left the queue during the session', () => {
+    const summary = summarizeOutbox(
+      [],
+      [
+        {
+          clientId: 'c',
+          owner: { userId: 'u-1', aqueductId: 'a-1' },
+          outcome: 'DISCARDED',
+          payload: VALID_PAYLOAD,
+          reason: 'Dato duplicado',
+          closedAtMs: 0,
+        },
+      ],
+    );
+
+    expect(summary.closed).toEqual([
+      {
+        clientId: 'c',
+        outcome: 'DISCARDED',
+        gaugeValue: 2.1,
+        observedAt: VALID_PAYLOAD.observedAt,
+        reason: 'Dato duplicado',
+      },
     ]);
   });
 
@@ -50,6 +106,7 @@ describe('summarizeOutbox', () => {
       sendingCount: 0,
       needsReviewCount: 0,
       items: [],
+      closed: [],
     });
   });
 });
