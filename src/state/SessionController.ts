@@ -5,6 +5,7 @@ import { NetworkError } from '../core/errors/NetworkError';
 import { currentMembershipChoices } from '../core/session/memberships';
 import { toSessionHint } from '../core/session/SessionHint';
 import type { SessionHintRepository } from '../core/session/SessionHint';
+import type { ReferenceStore } from '../core/cache/ReferenceStore';
 import { readAccessTokenClaims } from '../core/session/accessTokenClaims';
 import type { SessionUser } from '../core/session/SessionState';
 import { OPERATOR_SESSION_HINT_MS, PROACTIVE_REFRESH_FRACTION } from '../core/policy/clientPolicy';
@@ -30,6 +31,8 @@ export interface SessionControllerDependencies {
   readonly clock: Clock;
   readonly scheduler: Scheduler;
   readonly hints: SessionHintRepository;
+  /** Reference copies kept for offline use: cleared on sign out. The reading queue is not. */
+  readonly references?: ReferenceStore;
 }
 
 function toSessionUser(
@@ -121,6 +124,7 @@ export class SessionController {
       // The refresh cookie will expire on the server; the local session closes anyway.
     } finally {
       this.cleanUp();
+      await this.clearReferences();
       this.deps.store.clear();
     }
   }
@@ -189,6 +193,15 @@ export class SessionController {
     this.cancelRenewal = null;
     this.deps.tokens.clear();
     this.deps.queryClient.clear();
+  }
+
+  /** A failed clear must not keep the person signed in; the copies are simply read again later. */
+  private async clearReferences(): Promise<void> {
+    try {
+      await this.deps.references?.clear();
+    } catch {
+      // Nothing else depends on it: the next online read replaces the copies.
+    }
   }
 
   private async runRestore(): Promise<void> {

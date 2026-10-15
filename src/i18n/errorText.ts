@@ -27,6 +27,8 @@ export interface ErrorText {
 }
 
 const SERVER_ERROR_CODE = 'INTERNAL_ERROR';
+/** A placeholder that was not filled: the text would show braces to the person. */
+const UNFILLED_PLACEHOLDER = /\{[A-Za-z]+\}/;
 
 /**
  * The text to show for an error. Known API codes use es.ts; an unknown code falls back to the
@@ -41,12 +43,14 @@ export function errorText(error: unknown): ErrorText {
   }
   const key = mapper.keyFor(error.code);
   const template = key === null ? undefined : (strings.errors.api as ApiTexts)[key];
+  const filled =
+    template === undefined ? '' : interpolate(template, placeholderValues(error.details));
   const message =
-    template === undefined
+    template === undefined || UNFILLED_PLACEHOLDER.test(filled)
       ? error.message === ''
         ? t('errors.generic')
         : error.message
-      : interpolate(template, placeholderValues(error.details));
+      : filled;
   const showSupportCode = error.code === SERVER_ERROR_CODE && error.requestId !== null;
   return {
     message,

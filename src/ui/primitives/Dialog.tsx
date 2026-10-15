@@ -1,5 +1,5 @@
 import * as RadixDialog from '@radix-ui/react-dialog';
-import type { JSX, ReactNode } from 'react';
+import type { JSX, ReactNode, RefObject } from 'react';
 
 import { cn } from '../styles/cn';
 import styles from './Dialog.module.css';
@@ -14,6 +14,8 @@ interface DialogProps {
   readonly trigger: ReactNode;
   /** Chooses the first control that gets the focus (for example Cancelar in a destructive action). */
   readonly onOpenAutoFocus?: (event: Event) => void;
+  /** Takes the focus when the dialog opens (Cancel in destructive actions, ux-guidelines 6). */
+  readonly initialFocusRef?: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -28,13 +30,26 @@ export function Dialog({
   children,
   trigger,
   onOpenAutoFocus,
+  initialFocusRef,
 }: DialogProps): JSX.Element {
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Trigger asChild>{trigger}</RadixDialog.Trigger>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className={cn(styles.overlay)} />
-        <RadixDialog.Content className={cn(styles.content)} onOpenAutoFocus={onOpenAutoFocus}>
+        <RadixDialog.Content
+          className={cn(styles.content)}
+          onOpenAutoFocus={(event) => {
+            if (onOpenAutoFocus !== undefined) {
+              onOpenAutoFocus(event);
+              return;
+            }
+            if (initialFocusRef?.current) {
+              event.preventDefault();
+              initialFocusRef.current.focus();
+            }
+          }}
+        >
           <RadixDialog.Title className={cn(styles.title)}>{title}</RadixDialog.Title>
           <RadixDialog.Description className={cn(styles.description)}>
             {description}

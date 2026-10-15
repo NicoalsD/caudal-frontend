@@ -32,6 +32,13 @@ describe('errorText', () => {
     expect(errorText(error).message).toBe('Mensaje del servidor');
   });
 
+  it('never shows a text with an unfilled placeholder', () => {
+    const text = errorText(new DomainError('GAUGE_OUT_OF_RANGE', 'Texto del servidor')).message;
+
+    expect(text).toBe('Texto del servidor');
+    expect(text).not.toMatch(/\{[A-Za-z]+\}/);
+  });
+
   it('falls back to the generic text when there is nothing else', () => {
     expect(errorText(new DomainError('BRAND_NEW_CODE', '')).message).toBe(strings.errors.generic);
     expect(errorText(new Error('boom')).message).toBe(strings.errors.generic);
@@ -87,8 +94,10 @@ describe('errorText', () => {
       'INTERNAL_ERROR',
       'UNEXPECTED_RESPONSE',
     ];
+    // The details fill the placeholders of the texts that have one (the gauge range).
+    const details = { gauge_min: '0,00', gauge_max: '5,00' };
     for (const code of catalog) {
-      const text = errorText(new DomainError(code, 'respaldo-del-servidor')).message;
+      const text = errorText(new DomainError(code, 'respaldo-del-servidor', details)).message;
       expect(text, code).not.toBe('respaldo-del-servidor');
     }
   });

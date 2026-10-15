@@ -1481,6 +1481,421 @@
           }
         }
       }
+    },
+    "/api/v1/readings/batch": {
+      "post": {
+        "operationId": "submitReadingBatch",
+        "summary": "Sincroniza la cola offline de lecturas",
+        "description": "Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado por lectura, en el orden del envío.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingBatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readings/{id}/corrections": {
+      "post": {
+        "operationId": "correctReading",
+        "summary": "Corrige una lectura ya guardada, con motivo",
+        "description": "Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingCorrectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Corrección creada y valor efectivo de la lectura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingCorrectionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: un OPERATOR solo corrige sus propias lecturas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: la lectura no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tanks/{id}/status": {
+      "get": {
+        "operationId": "getTankStatus",
+        "summary": "Estado del tanque: último nivel, tendencia, antigüedad y pronóstico",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado del tanque.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TankStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/imports/readings": {
+      "post": {
+        "operationId": "importSimulatedReadings",
+        "summary": "Importa historial simulado de lecturas (acueducto demo)",
+        "description": "Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportReadingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lote importado con sus conteos y los rechazos por fila.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReadingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "DEMO_ONLY: el acueducto no es el de demostración.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: este file_sha256 ya se importó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "IMPORT_LIMIT_EXCEEDED: más de 5.000 filas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tanks/{id}/forecasts/latest": {
+      "get": {
+        "operationId": "getLatestForecast",
+        "summary": "Última corrida de pronóstico del tanque",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 8.2. Nunca devuelve la corrida de sombra.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Última corrida mostrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastRun"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe, es de otro acueducto o nunca se pronosticó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anomalies": {
+      "get": {
+        "operationId": "listAnomalies",
+        "summary": "Anomalías del acueducto",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 9.1. De la más nueva a la más antigua.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "CONFIRMED",
+                "DISMISSED"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "POSSIBLE_LEAK",
+                "SENSOR_FAULT",
+                "STALE_DATA",
+                "SUSPECTED_DUPLICATE",
+                "ABNORMAL_DROP"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Una página de anomalías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyPage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anomalies/{id}": {
+      "patch": {
+        "operationId": "resolveAnomaly",
+        "summary": "Confirmar o descartar una anomalía",
+        "description": "Autenticado, permiso ANOMALY_REVIEW (BOARD_ADMIN y BOARD_MEMBER). API.md sección 9.2. El motivo es obligatorio al descartar.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAnomalyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Anomalía actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Anomaly"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION: la anomalía no está OPEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED: descarte sin motivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3145,6 +3560,675 @@
           "poster_sha256": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ReadingBatchItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "tank_id",
+          "gauge_value",
+          "water_appearance_code",
+          "damage_noticed",
+          "observed_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID del cliente: clave de idempotencia de la lectura."
+          },
+          "tank_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gauge_value": {
+            "type": "number"
+          },
+          "water_appearance_code": {
+            "type": "string"
+          },
+          "damage_noticed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReadingBatchRequest": {
+        "type": "object",
+        "required": [
+          "sync_batch_id",
+          "readings"
+        ],
+        "properties": {
+          "sync_batch_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "readings": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/ReadingBatchItem"
+            }
+          }
+        }
+      },
+      "ReadingBatchResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "FLAGGED",
+              "REPLAYED",
+              "REJECTED"
+            ]
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "ReadingBatchResponse": {
+        "type": "object",
+        "required": [
+          "sync_batch_id",
+          "items_received",
+          "items_accepted",
+          "items_rejected",
+          "idempotent_replay",
+          "results"
+        ],
+        "properties": {
+          "sync_batch_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items_received": {
+            "type": "integer"
+          },
+          "items_accepted": {
+            "type": "integer"
+          },
+          "items_rejected": {
+            "type": "integer"
+          },
+          "idempotent_replay": {
+            "type": "boolean"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingBatchResult"
+            }
+          }
+        }
+      },
+      "ReadingCorrectionRequest": {
+        "type": "object",
+        "required": [
+          "corrected_gauge_value",
+          "reason"
+        ],
+        "properties": {
+          "corrected_gauge_value": {
+            "type": "number",
+            "description": "Decimal con 2 cifras, dentro del rango del tanque."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          }
+        }
+      },
+      "ReadingCorrectionResponse": {
+        "type": "object",
+        "description": "Corrección creada y el valor efectivo nuevo de la lectura. El dato original no cambia.",
+        "required": [
+          "id",
+          "reading_id",
+          "corrected_gauge_value",
+          "reason",
+          "corrected_by",
+          "created_at",
+          "effective_gauge_value"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reading_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "corrected_gauge_value": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "corrected_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effective_gauge_value": {
+            "type": "number"
+          }
+        }
+      },
+      "TankStatusLevel": {
+        "type": "object",
+        "required": [
+          "value",
+          "observed_at",
+          "hours_ago"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Nivel en la regla, dos cifras."
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hours_ago": {
+            "type": "number"
+          }
+        }
+      },
+      "TankStatusTrend": {
+        "type": "object",
+        "required": [
+          "slope_per_day",
+          "label"
+        ],
+        "properties": {
+          "slope_per_day": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string",
+            "enum": [
+              "DOWN",
+              "STABLE",
+              "UP"
+            ]
+          },
+          "label_es": {
+            "type": "string"
+          }
+        }
+      },
+      "TankStatusForecastPoint": {
+        "type": "object",
+        "required": [
+          "target_date",
+          "p10",
+          "p50",
+          "p90"
+        ],
+        "properties": {
+          "target_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "p10": {
+            "type": "number"
+          },
+          "p50": {
+            "type": "number"
+          },
+          "p90": {
+            "type": "number"
+          }
+        }
+      },
+      "TankStatusForecast": {
+        "type": "object",
+        "required": [
+          "is_fallback",
+          "points"
+        ],
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_fallback": {
+            "type": "boolean"
+          },
+          "fallback_reason": {
+            "type": "string",
+            "enum": [
+              "IA_TIMEOUT",
+              "CIRCUIT_OPEN",
+              "IA_ERROR",
+              "INSUFFICIENT_HISTORY",
+              "SHADOW_BASELINE"
+            ]
+          },
+          "model_name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TankStatusForecastPoint"
+            }
+          }
+        }
+      },
+      "TankStatus": {
+        "type": "object",
+        "required": [
+          "trend",
+          "stale"
+        ],
+        "properties": {
+          "level": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TankStatusLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trend": {
+            "$ref": "#/components/schemas/TankStatusTrend"
+          },
+          "stale": {
+            "type": "object",
+            "required": [
+              "is_stale",
+              "stale_after_hours"
+            ],
+            "properties": {
+              "is_stale": {
+                "type": "boolean"
+              },
+              "stale_after_hours": {
+                "type": "number"
+              }
+            }
+          },
+          "band": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "HIGH",
+                  "LOW",
+                  "CRITICAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Banda del nivel actual."
+          },
+          "forecast": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TankStatusForecast"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "open_anomalies": {
+            "type": "integer"
+          }
+        }
+      },
+      "ImportReadingRow": {
+        "type": "object",
+        "required": [
+          "id",
+          "tank_id",
+          "gauge_value",
+          "water_appearance_code",
+          "damage_noticed",
+          "observed_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gauge_value": {
+            "type": "number"
+          },
+          "water_appearance_code": {
+            "type": "string"
+          },
+          "damage_noticed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ImportReadingsRequest": {
+        "type": "object",
+        "required": [
+          "aqueduct_id",
+          "scenario_name",
+          "seed",
+          "simulator_version",
+          "file_sha256",
+          "rows"
+        ],
+        "properties": {
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scenario_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "simulator_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "file_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "rows": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5000,
+            "items": {
+              "$ref": "#/components/schemas/ImportReadingRow"
+            }
+          }
+        }
+      },
+      "ImportRejection": {
+        "type": "object",
+        "required": [
+          "row",
+          "code"
+        ],
+        "properties": {
+          "row": {
+            "type": "integer",
+            "description": "Posición de la fila en el lote, desde 1."
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "ImportReadingsResponse": {
+        "type": "object",
+        "required": [
+          "import_batch_id",
+          "rows_received",
+          "rows_accepted",
+          "rows_rejected",
+          "rejections"
+        ],
+        "properties": {
+          "import_batch_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows_received": {
+            "type": "integer"
+          },
+          "rows_accepted": {
+            "type": "integer"
+          },
+          "rows_rejected": {
+            "type": "integer"
+          },
+          "rejections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportRejection"
+            }
+          }
+        }
+      },
+      "ForecastRun": {
+        "type": "object",
+        "required": [
+          "is_fallback",
+          "points"
+        ],
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "model_name": {
+            "type": "string"
+          },
+          "model_version": {
+            "type": "string"
+          },
+          "is_fallback": {
+            "type": "boolean"
+          },
+          "fallback_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "IA_TIMEOUT",
+              "CIRCUIT_OPEN",
+              "IA_ERROR",
+              "INSUFFICIENT_HISTORY",
+              null
+            ],
+            "description": "Motivo cuando la estimación simple reemplazó a la IA."
+          },
+          "horizon_days": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "context_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "context_to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TankStatusForecastPoint"
+            }
+          }
+        }
+      },
+      "Anomaly": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "detected_at",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "POSSIBLE_LEAK",
+              "SENSOR_FAULT",
+              "STALE_DATA",
+              "SUSPECTED_DUPLICATE",
+              "ABNORMAL_DROP"
+            ]
+          },
+          "detected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CONFIRMED",
+              "DISMISSED"
+            ]
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Datos que llevaron a sospechar la anomalía."
+          },
+          "resolved_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "resolved_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "resolution_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related_incident_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "AnomalyPage": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Anomaly"
+            }
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateAnomalyRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "DISMISSED"
+            ]
+          },
+          "resolution_note": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 500,
+            "description": "0 a 500; de 10 a 500 al descartar."
+          },
+          "related_incident_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           }
         }
       }

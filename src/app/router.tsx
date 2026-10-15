@@ -3,6 +3,10 @@ import type { RouteObject } from 'react-router';
 
 import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
+import { ImportPage } from '../features/imports';
+import { OperatorHomePage } from '../features/home/OperatorHomePage';
+import { PendingReadingsPage, ReadingPage } from '../features/readings';
+import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
 import { BoardDayGuide } from '../features/board/BoardDayGuide';
@@ -68,9 +72,9 @@ const operatorRoutes: RouteObject = {
     {
       element: <OperatorLayout />,
       children: [
-        screen(ROUTE_PATHS.operator.home, t('screens.operatorHome')),
-        screen(ROUTE_PATHS.operator.newReading, t('screens.newReading')),
-        screen(ROUTE_PATHS.operator.pending, t('screens.pendingReadings')),
+        { path: ROUTE_PATHS.operator.home, element: <OperatorHomePage /> },
+        { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
+        { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
         screen(ROUTE_PATHS.operator.dayClosure, t('screens.dayClosure')),
         screen(ROUTE_PATHS.operator.damage, t('screens.operatorDamage')),
       ],
@@ -89,7 +93,7 @@ const boardRoutes: RouteObject = {
           element: (
             <>
               <BoardDayGuide />
-              <PlaceholderPage title={t('screens.tankStatus')} />
+              <TankStatusPage />
             </>
           ),
         },
@@ -123,7 +127,7 @@ const teamRoutes: RouteObject = {
         screen(ROUTE_PATHS.team.health, t('screens.health')),
         screen(ROUTE_PATHS.team.devices, t('screens.devices')),
         screen(ROUTE_PATHS.team.audit, t('screens.audit')),
-        screen(ROUTE_PATHS.team.imports, t('screens.imports')),
+        { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
     },
   ],
@@ -144,7 +148,7 @@ const sharedRoutes: RouteObject = {
   children: [
     {
       element: <SharedLayout />,
-      children: [screen(ROUTE_PATHS.tank, t('screens.tankStatus'))],
+      children: [{ path: ROUTE_PATHS.tank, element: <TankStatusPage /> }],
     },
   ],
 };

@@ -86,6 +86,7 @@ const BOARD_PERMISSIONS = [
   'PROPOSAL_GENERATE',
   'PROPOSAL_DECIDE',
   'SCHEDULE_PUBLISH',
+  'ANOMALY_REVIEW',
 ] as const;
 
 /** Permission codes by role, as in Actores-y-permisos.md section 3.3 (the ones the screens use). */
