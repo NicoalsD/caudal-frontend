@@ -24,7 +24,7 @@ Vercel debe usar `pnpm` porque el proyecto tiene `pnpm-lock.yaml`. No se mezclan
 
 | Variable | Production | Preview | Development (local) |
 |----------|-----------|---------|---------------------|
-| `VITE_API_BASE_URL` | `https://caudal-api.onrender.com/api/v1` | URL de la API de pruebas (por definir, sección 7) | `http://localhost:8080/api/v1` en `.env.local` |
+| `VITE_API_BASE_URL` | `https://caudal-api-7crk.onrender.com/api/v1` | URL de la API de pruebas (por definir, sección 7) | `http://localhost:8080/api/v1` en `.env.local` |
 
 Reglas:
 
@@ -51,7 +51,7 @@ El archivo vive en la raíz del repo. Define cabeceras de seguridad, caché y la
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; worker-src 'self'; manifest-src 'self'; connect-src 'self' https://caudal-api.onrender.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; worker-src 'self'; manifest-src 'self'; connect-src 'self' https://caudal-api-7crk.onrender.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         }
       ]
     },
@@ -74,7 +74,7 @@ El archivo vive en la raíz del repo. Define cabeceras de seguridad, caché y la
 
 Notas:
 
-- La CSP es la de la sección 21 de los hechos canónicos. `vercel.json` permite el origen `https://caudal-api.onrender.com`; si Render asigna otro dominio, hay que cambiarlo aquí antes de desplegar. Cambiar esta lista requiere revisión de Drako (líder de seguridad).
+- La CSP es la de la sección 21 de los hechos canónicos. `vercel.json` permite el origen `https://caudal-api-7crk.onrender.com`. Cambiar esta lista requiere revisión de Drako (líder de seguridad).
 - `style-src 'self' 'unsafe-inline'` existe por Radix y sonner. `'unsafe-inline'` nunca se usa en `script-src`. Las fuentes son autoalojadas con `@fontsource`, sin `fonts.gstatic.com`.
 - `frame-ancestors` solo funciona como cabecera; por eso va en `vercel.json` y no en una etiqueta `meta`.
 - Las cabeceras de la API (`default-src 'none'` y la política de Swagger de la sección 21 de los hechos) están en el backend, no aquí.
@@ -99,7 +99,7 @@ Verificación antes de cada entrega: instalar la PWA en Android (Chrome) y en iP
 
 ### 5.1 Hechos
 
-- La API corre en Render (Docker), con el dominio previsto `caudal-api.onrender.com`.
+- La API corre en Render (Docker), en `caudal-api-7crk.onrender.com`.
 - El frontend corre en Vercel; se debe copiar el dominio final de Vercel a `CORS_ALLOWED_ORIGINS` en Render.
 - El refresh token es la cookie `caudal_rt` (`HttpOnly; Secure; SameSite=None; Path=/api/v1/auth`), porque frontend y API son sitios distintos (hechos, sección 21).
 

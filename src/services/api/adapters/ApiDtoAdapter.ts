@@ -27,11 +27,9 @@ export class ApiDtoAdapter {
 
   /** `max_lines` becomes `maxLines`; only the limits that arrived are present. */
   toConstraints(dto: ConstraintsDto): ConstraintsMap {
-    const map: Record<string, FieldConstraint> = {};
-    for (const [field, limits] of Object.entries(dto)) {
-      map[field] = this.toFieldConstraint(limits);
-    }
-    return map;
+    return Object.fromEntries(
+      Object.entries(dto).map(([field, limits]) => [field, this.toFieldConstraint(limits)]),
+    );
   }
 
   /** Converts an ISO-8601 instant from the API into a view with its Bogota text. */
