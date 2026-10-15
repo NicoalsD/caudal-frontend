@@ -29,6 +29,7 @@ createRoot(container).render(
       router={createAppRouter()}
       api={services.api}
       queryClient={services.queryClient}
+      offline={services.offline}
     />
   </StrictMode>,
 );

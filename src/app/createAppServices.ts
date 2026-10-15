@@ -18,6 +18,11 @@ import { SessionController } from '../state/SessionController';
 import { SessionStore } from '../state/SessionStore';
 import { OfflineDatabase } from '../services/offline/OfflineDatabase';
 import { IndexedSessionHintRepository } from '../services/offline/IndexedSessionHintRepository';
+import { IndexedOutboxRepository } from '../services/offline/IndexedOutboxRepository';
+import { CryptoIdGenerator } from '../services/ids/CryptoIdGenerator';
+import { CommandQueue } from '../core/commands/CommandQueue';
+import { OutboxSync } from '../state/OutboxSync';
+import type { OfflineServices } from '../state/hooks/offlineContext';
 import { createQueryClient } from './providers/queryClient';
 
 export interface AppEnvironment {
@@ -36,6 +41,8 @@ export interface AppServices {
   readonly hints: SessionHintRepository;
   /** Loads the stored hints into memory; await it before reading hints at boot. */
   readonly hintsReady: Promise<void>;
+  /** Reading queue and its sender (offline-sync.md). */
+  readonly offline: OfflineServices;
 }
 
 /**
@@ -93,5 +100,21 @@ export function createAppServices(
   const hintsReady = hintStore.load().catch((error: unknown) => {
     logger.warn('hints.load_failed', { error: String(error) });
   });
-  return { api, tokens, sessionStore, session, queryClient, hints: hintStore, hintsReady };
+  const outbox = new CommandQueue(new IndexedOutboxRepository(OfflineDatabase.shared), clock);
+  const offline: OfflineServices = {
+    clock,
+    ids: new CryptoIdGenerator(),
+    outbox,
+    sync: new OutboxSync(outbox, api.readings),
+  };
+  return {
+    api,
+    tokens,
+    sessionStore,
+    session,
+    queryClient,
+    hints: hintStore,
+    hintsReady,
+    offline,
+  };
 }

@@ -9,7 +9,7 @@ import { formatDecimal, toInputText } from '../../core/format/decimal';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { gaugeDecimals } from '../../core/rules/bandCoverage';
 import { t } from '../../i18n/t';
-import type { ReadingResultView, TankView } from '../../services/api/views';
+import type { TankView } from '../../services/api/views';
 import { useFormSchema } from '../../state/hooks/useFormSchema';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
@@ -23,9 +23,8 @@ import { TextAreaField } from '../../ui/primitives/TextAreaField';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
-import { readingFailure } from './readingErrors';
-import type { ReadingFailure } from './readingErrors';
-import { useSubmitReading, useWaterAppearances } from './readingQueries';
+import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
+import { useSaveReading, useWaterAppearances } from './readingQueries';
 
 const GAUGE_DISPLAY_DIGITS = 2;
 
@@ -97,14 +96,14 @@ interface ReadingFieldsProps {
 
 function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Element {
   const appearances = useWaterAppearances();
-  const { mutation, reset } = useSubmitReading();
-  const [failure, setFailure] = useState<ReadingFailure | null>(null);
-  const [saved, setSaved] = useState<ReadingResultView | null>(null);
+  const ruleSet = useCurrentRuleSet();
+  const save = useSaveReading();
+  const [saveFailed, setSaveFailed] = useState(false);
+  const [saved, setSaved] = useState<{ value: number; sendingNow: boolean } | null>(null);
   const {
     register,
     handleSubmit,
     control,
-    setError,
     reset: resetForm,
     formState,
   } = useForm<ReadingFormValues, unknown, ReadingFormOutput>({
@@ -116,23 +115,19 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
   const { errors, isSubmitting } = formState;
 
   const submit = handleSubmit(async (values) => {
-    setFailure(null);
+    setSaveFailed(false);
     try {
-      const result = await mutation.mutateAsync({
+      const result = await save.mutateAsync({
         tankId: tank.id,
         gaugeValue: values.gauge_value,
         waterAppearanceCode: values.water_appearance_code,
         damageNoticed: values.damage_noticed,
         note: values.note,
+        ruleSetVersionId: ruleSet.data?.id ?? null,
       });
-      setSaved(result);
-    } catch (error) {
-      const result = readingFailure(error);
-      if (result.field === null) {
-        setFailure(result);
-      } else {
-        setError(result.field, { type: 'server', message: result.message }, { shouldFocus: true });
-      }
+      setSaved({ value: values.gauge_value, sendingNow: result.sendingNow });
+    } catch {
+      setSaveFailed(true);
     }
   });
 
@@ -140,16 +135,14 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
     return (
       <section className={cn(styles.confirmation)} role="status" aria-labelledby="reading-saved">
         <h2 id="reading-saved">{t('readings.savedTitle')}</h2>
-        <p>{t('readings.saved', { value: saved.gaugeValue.text, date: saved.observedAt.text })}</p>
-        {saved.isReplay ? <p>{t('readings.savedAgain')}</p> : null}
-        {saved.issueCodes.length > 0 ? (
-          <p className={cn(styles.warning)}>{t('readings.flagged')}</p>
-        ) : null}
+        <p>{saved.sendingNow ? t('readings.savedQueued') : t('readings.savedOffline')}</p>
+        <p>
+          {t('readings.savedValue', { value: formatDecimal(saved.value, GAUGE_DISPLAY_DIGITS) })}
+        </p>
         <div className={cn(styles.actions)}>
           <Button
             variant="primary"
             onClick={() => {
-              reset();
               resetForm();
               setSaved(null);
             }}
@@ -168,9 +161,7 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
   return (
     <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
       <FormFields disabled={isSubmitting}>
-        {failure === null ? null : (
-          <FormAlert message={failure.message} detail={failure.supportCode} />
-        )}
+        {saveFailed ? <FormAlert message={t('readings.serverError')} /> : null}
         <TextField
           label={t('readings.gaugeLabel')}
           hint={t('readings.gaugeHint', {

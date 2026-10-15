@@ -1,15 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-import { useRef } from 'react';
 
+import { SubmitReadingCommand } from '../../core/commands/SubmitReadingCommand';
 import { REFERENCE_STALE_TIME_MS } from '../../core/policy/clientPolicy';
-import type { CatalogItemView, ReadingInput, ReadingResultView } from '../../services/api/views';
+import type { CatalogItemView } from '../../services/api/views';
 import { useCaudalApi } from '../../state/hooks/apiContext';
-import { useAqueductId } from '../../state/hooks/useAqueductId';
-import { aqueductKey } from '../../state/queryKeys';
-
-/** Scope shared with the tank status queries, so a saved reading refreshes them. */
-export const TANK_STATUS_SCOPE = 'tank-status';
+import { useOfflineServices } from '../../state/hooks/offlineContext';
+import { useOutboxOwner } from '../../state/hooks/useOutboxOwner';
 
 /** GET /catalogs/WATER_APPEARANCE: the options for how the water looks. Changes rarely. */
 export function useWaterAppearances(): UseQueryResult<CatalogItemView[]> {
@@ -22,45 +19,46 @@ export function useWaterAppearances(): UseQueryResult<CatalogItemView[]> {
   });
 }
 
-/** What identifies one reading across retries: the same id and the same observation moment. */
-interface Attempt {
-  readonly id: string;
-  readonly observedAt: Date;
+export interface SaveReadingDraft {
+  readonly tankId: string;
+  readonly gaugeValue: number;
+  readonly waterAppearanceCode: string;
+  readonly damageNoticed: boolean;
+  readonly note: string;
+  readonly ruleSetVersionId: string | null;
 }
 
-export type ReadingDraft = Omit<ReadingInput, 'id' | 'observedAt'>;
-
-export interface SubmitReading {
-  readonly mutation: UseMutationResult<ReadingResultView, Error, ReadingDraft>;
-  /** Forgets the pending attempt so the next reading gets a new id (after a saved one). */
-  readonly reset: () => void;
+export interface SavedReading {
+  readonly clientId: string;
+  /** True when the phone had a connection at save time, so a send starts now. */
+  readonly sendingNow: boolean;
 }
 
 /**
- * POST /readings with a client UUID. A failed send keeps its id and observation time, so sending
- * it again is the same reading to the server (idempotency, API.md 1.6) and never a duplicate.
+ * Save first, send later (offline-sync.md): the reading goes into the queue with its client id and
+ * its capture time, then a send starts if the phone has a connection. The form never waits for
+ * the server.
  */
-export function useSubmitReading(): SubmitReading {
-  const api = useCaudalApi();
-  const client = useQueryClient();
-  const aqueductId = useAqueductId();
-  const attempt = useRef<Attempt | null>(null);
-
-  const mutation = useMutation({
-    mutationFn: (draft: ReadingDraft) => {
-      attempt.current ??= { id: crypto.randomUUID(), observedAt: new Date() };
-      return api.readings.submit({ ...draft, ...attempt.current });
-    },
-    onSuccess: async () => {
-      attempt.current = null;
-      await client.invalidateQueries({ queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE) });
+export function useSaveReading(): UseMutationResult<SavedReading, Error, SaveReadingDraft> {
+  const offline = useOfflineServices();
+  const owner = useOutboxOwner();
+  return useMutation({
+    mutationFn: async (draft) => {
+      const clientId = offline.ids.nextId();
+      const command = new SubmitReadingCommand(clientId, {
+        tankId: draft.tankId,
+        gaugeValue: draft.gaugeValue,
+        waterAppearanceCode: draft.waterAppearanceCode,
+        damageNoticed: draft.damageNoticed,
+        note: draft.note,
+        observedAt: new Date(offline.clock.nowMs()).toISOString(),
+      });
+      await offline.outbox.enqueue(command, owner, draft.ruleSetVersionId);
+      const sendingNow = navigator.onLine;
+      if (sendingNow) {
+        void offline.sync.flush(owner);
+      }
+      return { clientId, sendingNow };
     },
   });
-  return {
-    mutation,
-    reset: () => {
-      attempt.current = null;
-      mutation.reset();
-    },
-  };
 }

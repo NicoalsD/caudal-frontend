@@ -59,6 +59,7 @@ export function renderApp(
       router={router}
       api={services.api}
       queryClient={services.queryClient}
+      offline={services.offline}
     />,
   );
   return { services, router };
