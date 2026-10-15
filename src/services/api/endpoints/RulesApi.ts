@@ -35,12 +35,15 @@ export class RulesApi {
     return this.adapter.toRuleSet(response.body);
   }
 
-  /** GET /rule-sets filtered by status (first page only: there is at most one open draft). */
-  async list(status: RuleSetStatus): Promise<RuleSetSummaryView[]> {
+  /**
+   * GET /rule-sets, first page only, newest first: filtered by status when one is given (there is
+   * at most one open draft), every version otherwise (the history, API.md 6.2).
+   */
+  async list(status?: RuleSetStatus): Promise<RuleSetSummaryView[]> {
     const response = await this.http.request<RuleSetPageDto>({
       method: 'GET',
       path: '/rule-sets',
-      query: { status },
+      ...(status === undefined ? {} : { query: { status } }),
     });
     return response.body.items.map((item) => this.adapter.toRuleSetSummary(item));
   }

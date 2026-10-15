@@ -10,11 +10,10 @@ import { FormAlert } from '../../ui/feedback/FormAlert';
 import { Button } from '../../ui/primitives/Button';
 import { FormFields } from '../../ui/primitives/FormFields';
 import { formResolver } from '../../ui/primitives/formResolver';
-import { RadioGroupField } from '../../ui/primitives/RadioGroupField';
-import { TextAreaField } from '../../ui/primitives/TextAreaField';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { damageReportErrorMessage } from './damageReportErrors';
+import { DamageReportFields } from '../../ui/forms/DamageReportFields';
 import styles from './PublicSchedule.module.css';
 
 interface DamageReportValues {
@@ -56,6 +55,10 @@ export function DamageReportForm({
   });
   const { errors, isSubmitting, isValid } = formState;
   const description = useWatch({ control, name: DAMAGE_REPORT_FIELD.description }) ?? '';
+  const categoryOptions = categories.map((category) => ({
+    value: category.code,
+    label: category.label,
+  }));
 
   const submit = handleSubmit(async (values) => {
     setFailure(null);
@@ -76,30 +79,19 @@ export function DamageReportForm({
     <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
       <FormFields disabled={isSubmitting}>
         {failure === null ? null : <FormAlert message={failure} />}
-        <RadioGroupField
-          legend={t('publicReport.categoryLegend')}
-          options={categories.map((category) => ({ value: category.code, label: category.label }))}
-          error={errors.category_code?.message}
-          {...register(DAMAGE_REPORT_FIELD.categoryCode)}
-        />
-        <TextAreaField
-          label={t('publicReport.descriptionLabel')}
-          hint={t('publicReport.descriptionHint')}
-          length={description.length}
-          maxLength={descriptionMax}
-          counterText={(length, max) =>
-            t('publicReport.counter', { length: String(length), max: String(max) })
-          }
-          error={errors.description?.message}
-          {...register(DAMAGE_REPORT_FIELD.description)}
-        />
-        <TextField
-          label={t('publicReport.locationLabel')}
-          hint={t('publicReport.locationHint')}
-          maxLength={locationMax}
-          autoComplete="off"
-          error={errors.location_hint?.message}
-          {...register(DAMAGE_REPORT_FIELD.locationHint)}
+        <DamageReportFields
+          categories={categoryOptions}
+          descriptionMax={descriptionMax}
+          locationMax={locationMax}
+          description={description}
+          errors={{
+            category: errors.category_code?.message,
+            description: errors.description?.message,
+            location: errors.location_hint?.message,
+          }}
+          categoryField={register(DAMAGE_REPORT_FIELD.categoryCode)}
+          descriptionField={register(DAMAGE_REPORT_FIELD.description)}
+          locationField={register(DAMAGE_REPORT_FIELD.locationHint)}
         />
         <div hidden>
           <TextField

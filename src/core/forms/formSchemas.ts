@@ -118,14 +118,11 @@ export const INCIDENT_DESCRIPTION_CONSTRAINT = 'incident.description';
 export const INCIDENT_LOCATION_CONSTRAINT = 'incident.location_hint';
 
 /**
- * Public damage report (S05). The category must be chosen; the description and the place follow
- * the limits of the server. The place is optional, so a missing limit only means it has no
- * maximum here: the server still rejects a place that is too long.
+ * The fields shared by the public and the signed-in damage reports: the category must be chosen;
+ * the description and the place follow the limits of the server. The place is optional, so a
+ * missing limit only means it has no maximum here: the server still rejects a place that is too long.
  */
-export function damageReportFormSchema(
-  constraints: ConstraintsMap,
-  messages: ValidationMessageFactory,
-) {
+function damageFieldsSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
   const limits: ConstraintsMap =
     constraints[INCIDENT_LOCATION_CONSTRAINT] === undefined
       ? { ...constraints, [INCIDENT_LOCATION_CONSTRAINT]: { min: 0 } }
@@ -136,8 +133,30 @@ export function damageReportFormSchema(
     .build()
     .extend({
       [DAMAGE_REPORT_FIELD.categoryCode]: z.string().min(1, { message: messages('required', {}) }),
-      [DAMAGE_REPORT_FIELD.website]: z.string(),
     });
+}
+
+/** Public damage report (S05): the shared fields plus the honeypot, which must stay empty. */
+export function damageReportFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return damageFieldsSchema(constraints, messages).extend({
+    [DAMAGE_REPORT_FIELD.website]: z.string(),
+  });
+}
+
+/** Field of the signed-in damage report: the sector, optional (an empty text means "not known"). */
+export const OPERATOR_DAMAGE_SECTOR_FIELD = 'sector_id';
+
+/** Signed-in damage report (S11, API.md 12.2): the shared fields plus the optional sector. */
+export function operatorDamageFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return damageFieldsSchema(constraints, messages).extend({
+    [OPERATOR_DAMAGE_SECTOR_FIELD]: z.string(),
+  });
 }
 
 /** Note that explains a dismissal (API.md 12.3): required, with the server's "reason" limits. */

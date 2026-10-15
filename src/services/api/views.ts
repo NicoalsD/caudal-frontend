@@ -46,6 +46,14 @@ export interface ForecastEvaluationView {
 
 export interface HealthView {
   readonly isUp: boolean;
+  /** Components the server publishes (none today: the actuator hides them, API.md 19.1). */
+  readonly components: readonly HealthComponentView[];
+}
+
+/** One component of the service, as the server names it (for example "db"). */
+export interface HealthComponentView {
+  readonly name: string;
+  readonly isUp: boolean;
 }
 
 /** An instant ready for the screen. */
@@ -347,6 +355,14 @@ export interface DamageReportInput {
   readonly website: string;
   /** ISO instant when the form was opened (the server checks the minimum filling time). */
   readonly formStartedAt: string;
+}
+
+/** A damage report registered by a signed-in person (API.md 12.2). Empty fields are null. */
+export interface IncidentInput {
+  readonly categoryCode: string;
+  readonly description: string;
+  readonly sectorId: string | null;
+  readonly locationHint: string | null;
 }
 
 /** The status of a damage report for the person who has its code (API.md 15.5). No personal data. */
