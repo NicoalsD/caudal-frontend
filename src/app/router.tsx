@@ -18,7 +18,7 @@ import {
   ProposalListPage,
   ProposalPublicationPage,
 } from '../features/proposals';
-import { RuleDraftPage, RulesPage } from '../features/rules';
+import { RuleDraftPage, RuleHistoryPage, RulesPage } from '../features/rules';
 import { UsersPage } from '../features/users';
 import { PrivacyNoticePage } from '../features/privacy';
 import { EntitiesPage } from '../features/entities';
@@ -114,7 +114,7 @@ const boardRoutes: RouteObject = {
         { path: ROUTE_PATHS.board.publication, element: <ProposalPublicationPage /> },
         { path: ROUTE_PATHS.board.rules, element: <RulesPage /> },
         { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },
-        screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
+        { path: ROUTE_PATHS.board.ruleHistory, element: <RuleHistoryPage /> },
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         { path: ROUTE_PATHS.board.minutes, element: <MinutesPage /> },
         { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },

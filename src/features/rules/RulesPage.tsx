@@ -26,6 +26,10 @@ function readActivatedVersion(state: unknown): number | null {
   return typeof version === 'number' ? version : null;
 }
 
+function historyPath(id: string): string {
+  return ROUTE_PATHS.board.ruleHistory.replace(':id', encodeURIComponent(id));
+}
+
 function draftPath(id: string): string {
   return ROUTE_PATHS.board.ruleDetail.replace(':id', encodeURIComponent(id));
 }
@@ -73,6 +77,9 @@ export function RulesPage(): JSX.Element {
             : `. ${t('rules.activeSince', { date: current.data.validFrom.text })}`}
         </p>
         <RuleSetOverview rules={current.data} />
+        <p>
+          <Link to={historyPath(current.data.id)}>{t('rules.viewHistory')}</Link>
+        </p>
       </>
     );
   }

@@ -70,6 +70,9 @@ export function RuleDraftPage(): JSX.Element {
           <RuleSetOverview rules={rules} />
         </>
       )}
+      <Link to={ROUTE_PATHS.board.ruleHistory.replace(':id', encodeURIComponent(rules.id))}>
+        {t('rules.viewHistory')}
+      </Link>
       <Link to={ROUTE_PATHS.board.rules}>{t('rules.backToRules')}</Link>
     </div>
   );
