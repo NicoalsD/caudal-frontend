@@ -6,6 +6,7 @@ import { NetworkApi } from './endpoints/NetworkApi';
 import { ReadingsApi } from './endpoints/ReadingsApi';
 import { RulesApi } from './endpoints/RulesApi';
 import { SystemApi } from './endpoints/SystemApi';
+import { TankStatusApi } from './endpoints/TankStatusApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -21,6 +22,7 @@ export class CaudalApi {
   readonly readings: ReadingsApi;
   readonly rules: RulesApi;
   readonly system: SystemApi;
+  readonly tankStatus: TankStatusApi;
 
   constructor(http: HttpClient, adapter: ApiDtoAdapter) {
     this.auth = new AuthApi(http, adapter);
@@ -29,5 +31,6 @@ export class CaudalApi {
     this.readings = new ReadingsApi(http, adapter);
     this.rules = new RulesApi(http, adapter);
     this.system = new SystemApi(http, adapter);
+    this.tankStatus = new TankStatusApi(http, adapter);
   }
 }

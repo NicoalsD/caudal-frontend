@@ -199,3 +199,53 @@ export interface ReadingResultView {
   /** True when the server already had this reading (same id and content). */
   readonly isReplay: boolean;
 }
+
+export type TrendLabel = 'DOWN' | 'STABLE' | 'UP';
+
+/** One day of a forecast: the likely level (p50) and its range (p10 to p90). */
+export interface ForecastPointView {
+  /** Calendar day as YYYY-MM-DD. */
+  readonly targetDate: string;
+  readonly p10: number;
+  readonly p50: number;
+  readonly p90: number;
+}
+
+/** A forecast run: from the AI model or, when it fails, the simple estimate that replaces it. */
+export interface ForecastView {
+  readonly runId: string | null;
+  /** True when the simple estimate replaced the AI model (API.md 8.3). */
+  readonly isFallback: boolean;
+  /** IA_TIMEOUT, CIRCUIT_OPEN, IA_ERROR, INSUFFICIENT_HISTORY or null. */
+  readonly fallbackReason: string | null;
+  readonly modelName: string | null;
+  readonly createdAt: TimestampView | null;
+  readonly points: readonly ForecastPointView[];
+}
+
+/** The current state of a tank (GET /tanks/{id}/status). */
+export interface TankStatusView {
+  /** The last effective reading, or null when there is none yet. */
+  readonly level: {
+    readonly value: DecimalView;
+    readonly observedAt: TimestampView;
+    readonly hoursAgo: number;
+  } | null;
+  readonly trend: {
+    readonly slopePerDay: number;
+    /** A known label, or null when the server sent one this client does not know. */
+    readonly label: TrendLabel | null;
+    /** Server text, the fallback for an unknown label. */
+    readonly labelEs: string | null;
+  };
+  readonly stale: { readonly isStale: boolean; readonly staleAfterHours: number };
+  readonly band: {
+    readonly code: string;
+    /** Hours of service per day of that band, when the server sends them. */
+    readonly serviceHours: number | null;
+  } | null;
+  readonly forecast: ForecastView | null;
+  readonly openAnomalies: number;
+  /** True when the aqueduct is the demo one: its data is simulated. */
+  readonly isDemo: boolean;
+}

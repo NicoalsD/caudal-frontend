@@ -840,6 +840,46 @@
           }
         }
       }
+    },
+    "/api/v1/tanks/{id}/status": {
+      "get": {
+        "operationId": "getTankStatus",
+        "summary": "Estado del tanque: último nivel, tendencia, antigüedad y pronóstico",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado del tanque.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TankStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1965,6 +2005,185 @@
           },
           "effective_gauge_value": {
             "type": "number"
+          }
+        }
+      },
+      "TankStatusLevel": {
+        "type": "object",
+        "required": [
+          "value",
+          "observed_at",
+          "hours_ago"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Nivel en la regla, dos cifras."
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hours_ago": {
+            "type": "number"
+          }
+        }
+      },
+      "TankStatusTrend": {
+        "type": "object",
+        "required": [
+          "slope_per_day",
+          "label"
+        ],
+        "properties": {
+          "slope_per_day": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string",
+            "enum": [
+              "DOWN",
+              "STABLE",
+              "UP"
+            ]
+          },
+          "label_es": {
+            "type": "string"
+          }
+        }
+      },
+      "TankStatusForecastPoint": {
+        "type": "object",
+        "required": [
+          "target_date",
+          "p10",
+          "p50",
+          "p90"
+        ],
+        "properties": {
+          "target_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "p10": {
+            "type": "number"
+          },
+          "p50": {
+            "type": "number"
+          },
+          "p90": {
+            "type": "number"
+          }
+        }
+      },
+      "TankStatusForecast": {
+        "type": "object",
+        "required": [
+          "is_fallback",
+          "points"
+        ],
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_fallback": {
+            "type": "boolean"
+          },
+          "fallback_reason": {
+            "type": "string",
+            "enum": [
+              "IA_TIMEOUT",
+              "CIRCUIT_OPEN",
+              "IA_ERROR",
+              "INSUFFICIENT_HISTORY",
+              "SHADOW_BASELINE"
+            ]
+          },
+          "model_name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TankStatusForecastPoint"
+            }
+          }
+        }
+      },
+      "TankStatus": {
+        "type": "object",
+        "required": [
+          "trend",
+          "stale"
+        ],
+        "properties": {
+          "level": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TankStatusLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trend": {
+            "$ref": "#/components/schemas/TankStatusTrend"
+          },
+          "stale": {
+            "type": "object",
+            "required": [
+              "is_stale",
+              "stale_after_hours"
+            ],
+            "properties": {
+              "is_stale": {
+                "type": "boolean"
+              },
+              "stale_after_hours": {
+                "type": "number"
+              }
+            }
+          },
+          "band": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "daily_service_hours": {
+                    "type": "integer"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "forecast": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TankStatusForecast"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "open_anomalies": {
+            "type": "integer"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "description": "True when the aqueduct is the demo one: its data is simulated."
           }
         }
       }

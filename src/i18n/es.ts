@@ -583,6 +583,28 @@ export const strings = {
     signOutStay: 'Seguir aquí',
     signOutConfirm: 'Cerrar sesión',
   },
+  tankStatus: {
+    loading: 'Cargando el estado del tanque...',
+    noTank: 'Todavía no hay un tanque activo. Avisa a la Junta.',
+    noLevel: 'Todavía no hay lecturas de este tanque.',
+    trendDown: 'Viene bajando',
+    trendStable: 'Estable',
+    trendUp: 'Está subiendo',
+  },
+  home: {
+    greeting: 'Hola, {name}.',
+    tankTitle: 'Último nivel del tanque',
+    levelValue: '{value} m',
+    levelAge: 'Tomado hace {hours} h',
+    stale: 'Dato viejo: la última lectura tiene más de {hours} horas. Registra una lectura nueva.',
+    statusError:
+      'No pudimos cargar el estado del tanque. Lo que ya guardaste en este celular sigue disponible.',
+    quickLinks: 'Accesos rápidos',
+    newReading: 'Registrar lectura',
+    pending: 'Pendientes: {count}',
+    dayClosure: 'Cierre del día',
+    damage: 'Reportar daño',
+  },
   connection: {
     constraintsMissing:
       'No pudimos cargar los límites de los campos. Conéctate a internet para registrar datos.',
