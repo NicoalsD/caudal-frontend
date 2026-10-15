@@ -23,6 +23,7 @@ import { CryptoIdGenerator } from '../services/ids/CryptoIdGenerator';
 import { CommandQueue } from '../core/commands/CommandQueue';
 import { ReferenceFallback } from '../core/cache/ReferenceFallback';
 import { ConnectivityMonitor } from '../state/ConnectivityMonitor';
+import { SyncQueueStore } from '../state/SyncQueueStore';
 import { BrowserConnectivitySource } from '../services/connectivity/BrowserConnectivitySource';
 import { IndexedReferenceStore } from '../services/offline/IndexedReferenceStore';
 import { OutboxSync } from '../state/OutboxSync';
@@ -112,6 +113,7 @@ export function createAppServices(
     sync: new OutboxSync(outbox, api.readings),
     reference: new ReferenceFallback(new IndexedReferenceStore(OfflineDatabase.shared), clock),
     connectivity: new ConnectivityMonitor(new BrowserConnectivitySource()),
+    syncQueue: new SyncQueueStore(outbox),
   };
   return {
     api,

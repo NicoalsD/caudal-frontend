@@ -508,6 +508,15 @@ export const strings = {
     retry: 'Reintentar',
     serverError: 'No se pudo guardar la lectura.',
   },
+  sync: {
+    label: 'Estado de la sincronización',
+    online: 'En línea',
+    offline: 'Sin conexión. Las lecturas se guardan aquí.',
+    sending: 'Enviando lecturas pendientes',
+    pending: 'Pendientes: {count}',
+    needsReviewOne: '1 lectura necesita revisión',
+    needsReviewMany: '{count} lecturas necesitan revisión',
+  },
   connection: {
     constraintsMissing:
       'No pudimos cargar los límites de los campos. Conéctate a internet para registrar datos.',

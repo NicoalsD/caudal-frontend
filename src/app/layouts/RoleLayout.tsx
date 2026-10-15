@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { NavLink, Outlet } from 'react-router';
 
+import { SyncStatus } from '../../features/sync';
 import { t } from '../../i18n/t';
 import { cn } from '../../ui/styles/cn';
 import styles from './Layout.module.css';
@@ -37,6 +38,7 @@ export function RoleLayout({ navItems }: RoleLayoutProps): JSX.Element {
           </ul>
         </nav>
       </header>
+      <SyncStatus />
       <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
         <Outlet />
       </main>

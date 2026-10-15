@@ -20,10 +20,20 @@ export type SubmitOutcome =
  * the job of the sync service. Enqueuing the same `clientId` twice keeps one record.
  */
 export class CommandQueue {
+  private readonly listeners = new Set<() => void>();
+
   constructor(
     private readonly repository: OutboxRepository,
     private readonly clock: Clock,
   ) {}
+
+  /** Observer: `listener` runs after every change of the queue. Returns the unsubscribe function. */
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
 
   async enqueue(
     command: Command<unknown>,
@@ -50,6 +60,7 @@ export class CommandQueue {
       lastErrorAtMs: null,
     };
     await this.repository.put(record);
+    this.notify();
     return record;
   }
 
@@ -76,6 +87,7 @@ export class CommandQueue {
   async settle(clientId: string, outcome: SubmitOutcome): Promise<void> {
     if (outcome.type === 'SAVED') {
       await this.repository.delete(clientId);
+      this.notify();
       return;
     }
     const nowMs = this.clock.nowMs();
@@ -104,6 +116,13 @@ export class CommandQueue {
     const record = await this.repository.get(clientId);
     if (record !== null) {
       await this.repository.put(change(record));
+      this.notify();
+    }
+  }
+
+  private notify(): void {
+    for (const listener of [...this.listeners]) {
+      listener();
     }
   }
 }

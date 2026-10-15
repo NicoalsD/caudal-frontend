@@ -9,6 +9,7 @@ import type { OutboxOwner } from './OutboxRecord';
 
 const OWNER: OutboxOwner = { userId: 'u-1', aqueductId: 'a-1' };
 const OTHER_OWNER: OutboxOwner = { userId: 'u-2', aqueductId: 'a-1' };
+const CHANGES_AFTER_ENQUEUE_AND_SEND = 2;
 const START_MS = Date.parse('2026-10-14T13:00:00Z');
 
 const PAYLOAD: SubmitReadingPayload = {
@@ -103,5 +104,20 @@ describe('CommandQueue', () => {
     await queue.settle('missing', { type: 'RETRY', code: 'NETWORK' });
 
     expect(await repository.get('missing')).toBeNull();
+  });
+
+  it('tells the observers after each change, and not after they unsubscribe', async () => {
+    const { queue } = setup();
+    let changes = 0;
+    const unsubscribe = queue.subscribe(() => {
+      changes += 1;
+    });
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.markSending('c-1');
+    expect(changes).toBe(CHANGES_AFTER_ENQUEUE_AND_SEND);
+
+    unsubscribe();
+    await queue.settle('c-1', { type: 'SAVED' });
+    expect(changes).toBe(CHANGES_AFTER_ENQUEUE_AND_SEND);
   });
 });
