@@ -9,6 +9,9 @@ export const strings = {
     mainNavigation: 'Navegación principal',
     comingSoon: 'Esta pantalla se construye en una fase posterior.',
   },
+  common: {
+    simulatedData: 'Datos simulados',
+  },
   nav: {
     operatorHome: 'Inicio',
     newReading: 'Nueva lectura',
@@ -105,6 +108,243 @@ export const strings = {
     panelExplained: 'Turnos propuestos con su razón.',
     panelApproved: 'Nada se publica sin la Junta.',
     secureNote: 'Tu contraseña viaja cifrada y nunca se guarda en este dispositivo.',
+  },
+  landing: {
+    meta: {
+      title: 'CAUDAL: el cuaderno del acueducto, pero digital',
+    },
+    nav: {
+      label: 'Secciones',
+      home: 'CAUDAL, ir al inicio',
+      flow: 'Cómo funciona',
+      offline: 'Sin señal',
+      board: 'La Junta',
+      forecast: 'Pronóstico',
+      project: 'El proyecto',
+      signIn: 'Iniciar sesión',
+      demo: 'Entrar a la demo',
+    },
+    hero: {
+      title: 'CAUDAL',
+      tagline: 'El cuaderno del acueducto, pero digital.',
+      place:
+        'Lecturas del tanque, turnos de agua y decisiones de la Junta, para los acueductos de las veredas de Guaitarilla, Nariño.',
+      primary: 'Entrar a la demo',
+      secondary: 'Ver cómo funciona',
+      devicesLabel:
+        'Tres pantallas de CAUDAL: el celular del fontanero, el panel de la Junta y el horario que ven las familias.',
+    },
+    operator: {
+      caption: 'Fontanero',
+      title: 'Registrar lectura',
+      offline: 'Sin conexión',
+      gaugeLabel: 'Regla del tanque',
+      gauge: '2,1',
+      unit: 'm',
+      water: 'Agua normal',
+      damage: 'Sin daños',
+      saved: 'Guardada. Se enviará cuando vuelva la señal.',
+      pending: 'Pendientes: 1',
+      action: 'Guardar lectura',
+    },
+    board: {
+      caption: 'Junta',
+      title: 'Propuesta de turnos',
+      date: 'Hoy',
+      available: '11 horas de agua para repartir',
+      approve: 'Aprobar',
+      modify: 'Modificar',
+    },
+    family: {
+      caption: 'Familias',
+      title: 'Horario de hoy',
+      share: 'Copiar para WhatsApp',
+      report: 'Reportar un daño',
+    },
+    sectors: {
+      school: 'Escuela',
+      alto: 'El Alto',
+      loma: 'La Loma',
+      llano: 'El Llano',
+    },
+    hours: {
+      school: '6:00 a 9:00 a. m.',
+      alto: '9:00 a. m. a 1:00 p. m.',
+      loma: '1:00 a 4:00 p. m.',
+      llano: '4:00 a 5:00 p. m.',
+    },
+    durations: {
+      school: '3 h',
+      alto: '4 h',
+      loma: '3 h',
+      llano: '1 h',
+    },
+    reasons: {
+      school: 'Sector prioritario',
+      alto: 'Lleva 38 horas sin servicio',
+      loma: 'Lleva 26 horas sin servicio',
+      llano: 'Recibió agua ayer en la tarde',
+    },
+    flow: {
+      title: 'Del tanque al horario publicado, en un solo día.',
+      body: 'El fontanero anota lo que ve. CAUDAL revisa el dato, estima el nivel, propone los turnos y explica cada uno. La Junta decide y las familias se enteran.',
+      tabsLabel: 'Pasos del día',
+      pause: 'Pausar el recorrido',
+      play: 'Reanudar el recorrido',
+      steps: {
+        reading: {
+          tab: 'Lectura',
+          title: 'El fontanero anota la regla del tanque',
+          body: 'Número de la regla, cómo se ve el agua y si notó un daño. Sin señal, el celular lo guarda y lo envía después.',
+        },
+        status: {
+          title: 'CAUDAL muestra cómo está el tanque',
+          tab: 'Estado',
+          body: 'Último nivel, hace cuánto se tomó y si viene bajando. El dato raro se marca para revisar, nunca se borra.',
+          level: 'Nivel actual',
+          age: 'Tomado hace 2 h',
+          trend: 'Viene bajando',
+          check: 'Dato revisado: dentro del rango del tanque',
+        },
+        proposal: {
+          tab: 'Propuesta',
+          title: 'Los turnos llegan con su razón',
+          body: 'Primero los sectores prioritarios, después el que lleva más tiempo sin agua. Cada turno dice por qué.',
+        },
+        decision: {
+          tab: 'Decisión',
+          title: 'La Junta aprueba o cambia, y escribe por qué',
+          body: 'Sin aprobación no se publica nada. Si la Junta cambia la propuesta, el motivo queda en el registro.',
+          reasonLabel: 'Motivo del cambio',
+          reason: 'La Loma tiene una fuga reportada; se reparte su turno entre El Alto y El Llano.',
+          confirm: 'Guardar y aprobar',
+        },
+        publication: {
+          tab: 'Publicación',
+          title: 'Las familias se enteran sin datos personales',
+          body: 'Página pública, mensaje listo para WhatsApp y cartel para imprimir. Sin nombres ni teléfonos.',
+          poster: 'Cartel en PDF',
+          whatsapp: 'Mensaje para WhatsApp',
+          page: 'Página pública',
+          message: '{title}. {first}: {firstHours}. {second}: {secondHours}.',
+        },
+      },
+    },
+    offline: {
+      title: 'Funciona sin señal.',
+      body: 'En el tanque casi nunca hay internet. CAUDAL guarda la lectura en el celular, la envía cuando vuelve la señal y siempre muestra cuántas faltan por salir.',
+      states: {
+        offline: 'Sin conexión. Las lecturas se guardan aquí.',
+        sending: 'Enviando lecturas pendientes',
+        sent: '3 lecturas enviadas.',
+      },
+      pendingLabel: 'Pendientes',
+      statesLabel: 'Cómo cambia la barra de conexión',
+    },
+    decide: {
+      title: 'CAUDAL propone. La Junta decide.',
+      body: 'El sistema arma la propuesta con las reglas que la misma Junta puso: horario de operación, reserva mínima y horas de servicio según el nivel del tanque.',
+      points: {
+        versioned: {
+          title: 'Reglas con versiones',
+          body: 'Cada cambio de reglas es una versión nueva. Siempre se sabe cuáles estaban vigentes.',
+        },
+        explained: {
+          title: 'Turnos explicados',
+          body: 'Nadie tiene que adivinar por qué a un sector le tocó menos.',
+        },
+        traced: {
+          title: 'Decisiones trazables',
+          body: 'Quién aprobó, qué cambió y por qué, con fecha y hora.',
+        },
+      },
+      historyTitle: 'Historial de reglas',
+      reasonPrefix: 'Motivo:',
+      versions: {
+        third: {
+          label: 'Versión 3',
+          state: 'Vigente',
+          reason: 'Subimos la reserva mínima para la temporada seca.',
+        },
+        second: {
+          label: 'Versión 2',
+          state: 'Reemplazada',
+          reason: 'La escuela pasa a ser sector prioritario.',
+        },
+        first: {
+          label: 'Versión 1',
+          state: 'Reemplazada',
+          reason: 'Primeras reglas aprobadas por la Junta.',
+        },
+      },
+    },
+    forecast: {
+      title: 'Lo más probable es 2,1 m, pero podría estar entre 1,8 y 2,4.',
+      body: 'Un modelo de IA estima el nivel del tanque para los próximos días y dice cuánto puede variar. Si no responde, una estimación simple sigue funcionando, y el equipo compara las dos para saber si la IA de verdad ayuda.',
+      chartLabel:
+        'Gráfica de ejemplo: nivel observado en los últimos días, nivel más probable para los próximos tres días con su rango, y la estimación simple.',
+      legendObserved: 'Observado',
+      legendLikely: 'Lo más probable',
+      legendRange: 'Podría estar entre',
+      legendSimple: 'Estimación simple',
+      axisToday: 'Hoy',
+    },
+    honesty: {
+      title: 'Cada acta separa lo que se vio de lo que se calculó.',
+      body: 'Cuando la Junta saca un acta, cada dato dice de dónde viene.',
+      kinds: {
+        observed: { label: 'Observado', body: 'Lo que el fontanero vio en el tanque.' },
+        estimated: { label: 'Estimado', body: 'Lo que el sistema calculó.' },
+        inferred: { label: 'Inferido', body: 'Lo que se sospecha y falta confirmar.' },
+        confirmed: { label: 'Confirmado', body: 'Lo que se comprobó en campo.' },
+      },
+    },
+    project: {
+      title: 'Un proyecto de Patrones de Software.',
+      body: 'CAUDAL es un proyecto universitario construido como si fuera a usarse mañana: arquitectura hexagonal, seguridad especificada campo por campo y patrones de diseño implementados de forma explícita.',
+      patternsTitle: 'Patrones que puedes revisar en el código',
+      patterns: {
+        facade: { name: 'Facade', where: 'CaudalApi reúne todos los servicios de la API.' },
+        decorator: {
+          name: 'Decorator',
+          where: 'El cliente HTTP suma sesión, reintentos y registro.',
+        },
+        command: { name: 'Command', where: 'Cada lectura sin señal es un comando en cola.' },
+        observer: { name: 'Observer', where: 'La barra de conexión escucha la cola y la red.' },
+        builder: {
+          name: 'Builder',
+          where: 'Los formularios se arman con los límites del servidor.',
+        },
+        composite: { name: 'Composite', where: 'La red de tanques, sectores y válvulas.' },
+      },
+      reposTitle: 'Repositorios',
+      repos: {
+        backend: { name: 'caudal-backend', stack: 'Java 25 y Spring Boot' },
+        frontend: { name: 'caudal-frontend', stack: 'React, Vite y PWA' },
+        ia: { name: 'caudal-ia', stack: 'Python y Chronos' },
+        simulator: { name: 'caudal-simulador', stack: 'Python y FastAPI' },
+      },
+      teamTitle: 'Equipo',
+      team: {
+        diaz: { name: 'Nicolas Diaz', role: 'Frontend, UX y publicación' },
+        salazar: { name: 'Drako Salazar', role: 'Backend, base de datos y seguridad' },
+        mora: { name: 'Nicolas Mora', role: 'IA, datos simulados y simulador' },
+      },
+      opensInNewTab: '(se abre en otra pestaña)',
+    },
+    closing: {
+      title: 'Abre el cuaderno.',
+      body: 'Entra a la vereda demo y recorre el día completo: lectura, propuesta, decisión y publicación.',
+      primary: 'Entrar a la demo',
+      note: 'Las cuentas de la demo se entregan al equipo evaluador y a las Juntas interesadas.',
+    },
+    footer: {
+      simulated:
+        'Todos los datos de la demo son simulados. No hay datos reales de la región ni de las familias.',
+      signIn: 'Iniciar sesión',
+      docs: 'Documentación',
+      rights: 'Proyecto académico de Patrones de Software.',
+    },
   },
   network: {
     summary:

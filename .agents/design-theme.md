@@ -225,4 +225,14 @@ El modo oscuro no se implementa en la primera versión. Cuando se haga:
 - Revisión con celular real en exterior (prueba de brillo) antes de cada entrega a la Junta.
 - Revisión con `web-design-guidelines` y `ui-ux-pro-max` según las reglas del proyecto, y con `axe` en Playwright.
 
+## 12. Landing (`/`): excepción de movimiento y escala
+
+La página de presentación (`src/features/landing`) es la única superficie que se aparta de la sección 5. Lo aprobó el equipo para presentar CAUDAL al profesor, a los evaluadores y a las Juntas. Las demás pantallas de la app, el login y el cambio de contraseña siguen sobrios.
+
+- **Movimiento con propósito, una vez:** el wordmark se llena de agua hasta su nivel; la línea de nivel se dibuja bajo los dispositivos; los bloques suben al entrar en pantalla; el recorrido por pestañas avanza solo y se puede pausar; la banda "Funciona sin señal" recorre sus tres estados una vez; la gráfica de ejemplo se dibuja al verla. Nada rebota ni se repite sin fin.
+- **Siempre visible por defecto:** sin `IntersectionObserver` o con `prefers-reduced-motion: reduce`, todo aparece en su estado final y el recorrido no avanza solo.
+- **Escala de display:** tokens propios de la landing en `tokens.css` (`--font-size-hero`, `--font-size-statement`, `--font-size-lead`, `--tracking-*`, `--space-8`, `--space-9`, `--landing-max`, `--duration-reveal`, `--duration-fill`, `--duration-step`, `--ease-out-expo`). Ningún color nuevo: solo la paleta de la sección 2.
+- **Se mantiene todo lo demás:** sin degradados, sin sombras de elevación, sin fotos de stock, sin emojis, sin cards con borde izquierdo. Las pantallas de muestra son HTML con la marca "Datos simulados", no imágenes.
+- **Sin llamadas a la API:** la landing no depende del backend; los datos de muestra viven en `src/features/landing/demo*.json` y los textos en `es.ts`.
+
 Relacionados: [`ux-guidelines.md`](ux-guidelines.md), [`screens.md`](screens.md), [`forecast-visualization.md`](forecast-visualization.md), [`architecture.md`](architecture.md)

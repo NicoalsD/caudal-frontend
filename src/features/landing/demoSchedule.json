@@ -1,0 +1,11 @@
+{
+  "totalHours": 11,
+  "sectors": [
+    { "key": "school", "hours": 3, "priority": true },
+    { "key": "alto", "hours": 4, "priority": false },
+    { "key": "loma", "hours": 3, "priority": false },
+    { "key": "llano", "hours": 1, "priority": false }
+  ],
+  "gaugeLevel": 2.1,
+  "gaugeMax": 5
+}

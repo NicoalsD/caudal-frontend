@@ -79,6 +79,28 @@
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /*
+   * Landing only (design-theme.md section 12). Display type, wide measures and the authored
+   * motion of the presentation page; the app screens never read these.
+   */
+  --font-size-hero: clamp(4.5rem, 17vw, 13rem);
+  --font-size-statement: clamp(2.25rem, 5.6vw, 4.75rem);
+  --font-size-lead: clamp(1.25rem, 2.1vw, 1.625rem);
+  --line-height-tight: 1.04;
+  --tracking-display: -0.035em;
+  --tracking-hero: -0.05em;
+  --space-8: 4.5rem;
+  --space-9: 7.5rem;
+  --landing-max: 75rem;
+  --measure: 38rem;
+  --radius-device: 2.25rem;
+  --radius-window: 1rem;
+  --device-bezel: 0.625rem;
+  --duration-reveal: 900ms;
+  --duration-fill: 2200ms;
+  --duration-step: 7000ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Dark mode: follows the system unless the page forces a theme with data-theme. */
