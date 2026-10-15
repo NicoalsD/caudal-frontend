@@ -65,6 +65,49 @@ describe('BaseFetchHttpClient success', () => {
     expect(new Headers(fake.calls[1]?.init.headers).get('Accept')).toBe('application/json');
   });
 
+  it('returns the bytes of a PDF as a Blob when the caller asks for a blob', async () => {
+    const pdfBytes = '%PDF-1.4 acta';
+    server.use(
+      http.get(apiUrl('/minutes/acta-1/pdf'), () =>
+        HttpResponse.arrayBuffer(new TextEncoder().encode(pdfBytes).buffer, {
+          headers: { 'Content-Type': 'application/pdf' },
+        }),
+      ),
+    );
+
+    const response = await client.request<Blob>({
+      method: 'GET',
+      path: '/minutes/acta-1/pdf',
+      responseType: 'blob',
+    });
+
+    expect(response.body).toBeInstanceOf(Blob);
+    expect(response.body.type).toBe('application/pdf');
+    expect(await response.body.text()).toBe(pdfBytes);
+  });
+
+  it('asks for any type when the caller asks for a blob, and JSON otherwise', async () => {
+    const fake = recordingFetch();
+    const withFake = new BaseFetchHttpClient({ baseUrl: BASE_URL, fetchFn: fake.fetchFn });
+
+    await withFake.request({ method: 'GET', path: '/a', responseType: 'blob' });
+
+    expect(new Headers(fake.calls[0]?.init.headers).get('Accept')).toBe('*/*');
+  });
+
+  it('reads an error of a blob request as the JSON envelope, not as bytes', async () => {
+    server.use(
+      http.get(apiUrl('/minutes/acta-2/pdf'), () => errorResponse(STATUS.notFound, 'NOT_FOUND')),
+    );
+
+    const error = await failureOf(
+      client.request({ method: 'GET', path: '/minutes/acta-2/pdf', responseType: 'blob' }),
+    );
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).code).toBe('NOT_FOUND');
+  });
+
   it('returns the JSON body, the status and the request id', async () => {
     server.use(
       http.get(apiUrl('/things'), () =>

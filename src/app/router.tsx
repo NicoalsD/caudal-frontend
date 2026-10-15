@@ -5,6 +5,8 @@ import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
 import { ImportPage } from '../features/imports';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
+import { DayClosurePage } from '../features/closure';
+import { MinutesPage } from '../features/minutes';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
@@ -82,7 +84,7 @@ const operatorRoutes: RouteObject = {
         { path: ROUTE_PATHS.operator.home, element: <OperatorHomePage /> },
         { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
         { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
-        screen(ROUTE_PATHS.operator.dayClosure, t('screens.dayClosure')),
+        { path: ROUTE_PATHS.operator.dayClosure, element: <DayClosurePage /> },
         screen(ROUTE_PATHS.operator.damage, t('screens.operatorDamage')),
       ],
     },
@@ -112,7 +114,7 @@ const boardRoutes: RouteObject = {
         { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
-        screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
+        { path: ROUTE_PATHS.board.minutes, element: <MinutesPage /> },
         { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,

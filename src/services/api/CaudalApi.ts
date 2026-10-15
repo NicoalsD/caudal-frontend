@@ -11,6 +11,9 @@ import { ReadingsApi } from './endpoints/ReadingsApi';
 import { PublicApi } from './endpoints/PublicApi';
 import { RulesApi } from './endpoints/RulesApi';
 import { SystemApi } from './endpoints/SystemApi';
+import { ScheduleApi } from './endpoints/ScheduleApi';
+import { ClosureApi } from './endpoints/ClosureApi';
+import { MinutesApi } from './endpoints/MinutesApi';
 import { AnomaliesApi } from './endpoints/AnomaliesApi';
 import { TankStatusApi } from './endpoints/TankStatusApi';
 import { UsersApi } from './endpoints/UsersApi';
@@ -41,6 +44,12 @@ export class CaudalApi {
   readonly tankStatus: TankStatusApi;
   readonly anomalies: AnomaliesApi;
   readonly imports: ImportsApi;
+  /** Published shifts of a day and the executions of each one (API.md 10 and 11). */
+  readonly schedule: ScheduleApi;
+  /** The closure of a day (API.md 11.2 and 11.3). */
+  readonly closure: ClosureApi;
+  /** The Board's actas (API.md 13). */
+  readonly minutes: MinutesApi;
   /** Accounts, one-time codes and memberships (API.md section 3). */
   readonly users: UsersApi;
   /** The privacy notice in effect and its acceptance (API.md section 4). */
@@ -65,6 +74,9 @@ export class CaudalApi {
     this.tankStatus = new TankStatusApi(http, adapter);
     this.anomalies = new AnomaliesApi(http, adapter);
     this.imports = new ImportsApi(http);
+    this.schedule = new ScheduleApi(http, adapter);
+    this.closure = new ClosureApi(http, adapter);
+    this.minutes = new MinutesApi(http, adapter);
     this.users = new UsersApi(http, adapter);
     this.privacy = new PrivacyApi(http, adapter);
     this.summaries = new SummariesApi(http, adapter);

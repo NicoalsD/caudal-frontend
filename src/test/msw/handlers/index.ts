@@ -2,6 +2,7 @@ import { anomaliesHandlers } from './anomalies';
 import { authHandlers } from './auth';
 import { catalogHandlers } from './catalogs';
 import { incidentsHandlers } from './incidents';
+import { scheduleHandlers } from './schedule';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
 import { proposalsHandlers } from './proposals';
@@ -20,5 +21,6 @@ export const handlers = [
   ...publicHandlers,
   ...catalogHandlers,
   ...incidentsHandlers,
+  ...scheduleHandlers,
   ...proposalsHandlers,
 ];

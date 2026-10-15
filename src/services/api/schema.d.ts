@@ -983,6 +983,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schedule-items/{id}/execution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registra la ejecución de un turno
+         * @description Permiso DAY_CLOSE. Una ejecución nunca se edita: una corrección es una fila nueva con supersedes_id. API.md 11.1.
+         */
+        post: operations["recordShiftExecution"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/days/{date}/closure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cierre de un día con sus ejecuciones
+         * @description Permiso DAY_CLOSE (o EXECUTION_RECORD). API.md 11.2.
+         */
+        get: operations["getDayClosure"];
+        put?: never;
+        /**
+         * Cierra el día de servicio
+         * @description Permiso DAY_CLOSE. Pasa la propuesta del día a CLOSED. API.md 11.3.
+         */
+        post: operations["closeDay"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/minutes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Actas del acueducto, de la más reciente a la más antigua
+         * @description Permiso MINUTES_VIEW. Sin secciones (content): el detalle está en GET /minutes/{id}. API.md 13.8.
+         */
+        get: operations["listMinutes"];
+        put?: never;
+        /**
+         * Genera un acta del periodo en borrador
+         * @description Permiso MINUTES_GENERATE. API.md 13.1.
+         */
+        post: operations["generateMinutes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/minutes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Acta con sus cuatro secciones
+         * @description Permiso MINUTES_VIEW. API.md 13.2.
+         */
+        get: operations["getMinutes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/minutes/{id}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finaliza un acta en borrador
+         * @description Permiso MINUTES_GENERATE. Sin cuerpo. API.md 13.7.
+         */
+        post: operations["finalizeMinutes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/minutes/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PDF del acta (borrador o final)
+         * @description Permiso MINUTES_VIEW. El acta final trae X-Content-SHA256 igual a pdf_sha256. API.md 13.3.
+         */
+        get: operations["getMinutesPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/days/{date}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Horario publicado de un día
+         * @description Permiso SCHEDULE_VIEW (OPERATOR lo tiene). Los turnos llevan el mismo formato que los de GET /schedule-proposals/{id}.
+         */
+        get: operations["getDaySchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1939,6 +2087,116 @@ export interface components {
             items: components["schemas"]["SecurityEvent"][];
             next_cursor: string | null;
         };
+        ShiftExecutionRequest: {
+            /** @enum {string} */
+            status: "COMPLETED" | "PARTIAL" | "NOT_EXECUTED";
+            /** Format: date-time */
+            actual_start?: string | null;
+            /** Format: date-time */
+            actual_end?: string | null;
+            note?: string;
+            /** Format: uuid */
+            supersedes_id?: string | null;
+        };
+        ShiftExecution: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            schedule_item_id: string;
+            /** @enum {string} */
+            status: "COMPLETED" | "PARTIAL" | "NOT_EXECUTED";
+            /** Format: date-time */
+            actual_start?: string | null;
+            /** Format: date-time */
+            actual_end?: string | null;
+            note?: string | null;
+            /** Format: uuid */
+            supersedes_id?: string | null;
+        };
+        DayClosureRequest: {
+            notes: string;
+        };
+        DayClosure: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            notes?: string | null;
+            /** Format: uuid */
+            closed_by?: string;
+            /** Format: date-time */
+            closed_at: string;
+            executions: components["schemas"]["ShiftExecution"][];
+        };
+        MinutesRequest: {
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+        };
+        /** @description Un registro del acta, en palabras llanas. */
+        MinutesEntry: {
+            source: string;
+            source_id: string;
+            /** Format: date-time */
+            at: string;
+            summary: string;
+        };
+        MinutesContent: {
+            observed: components["schemas"]["MinutesEntry"][];
+            estimated: components["schemas"]["MinutesEntry"][];
+            inferred: components["schemas"]["MinutesEntry"][];
+            confirmed: components["schemas"]["MinutesEntry"][];
+        };
+        Minutes: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            /** @enum {string} */
+            status: "DRAFT" | "FINAL";
+            content: components["schemas"]["MinutesContent"];
+            /** Format: uuid */
+            generated_by?: string;
+            /** Format: date-time */
+            generated_at: string;
+            pdf_sha256?: string | null;
+            audit_head_hash?: string | null;
+            /** Format: uuid */
+            finalized_by?: string | null;
+            /** Format: date-time */
+            finalized_at?: string | null;
+        };
+        MinutesSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            /** @enum {string} */
+            status: "DRAFT" | "FINAL";
+            /** Format: date-time */
+            generated_at: string;
+            /** Format: date-time */
+            finalized_at?: string | null;
+            pdf_sha256?: string | null;
+        };
+        MinutesPage: {
+            items: components["schemas"]["MinutesSummary"][];
+            next_cursor: string | null;
+        };
+        PublishedSchedule: {
+            /** Format: date */
+            service_date: string;
+            /** Format: uuid */
+            proposal_id: string;
+            /** Format: date-time */
+            published_at: string;
+            items: components["schemas"]["ScheduleItem"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -2873,6 +3131,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScheduleProposalPage"];
+                };
+            };
+            /** @description FORBIDDEN: el rol no tiene PROPOSAL_VIEW. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -3955,6 +4222,315 @@ export interface operations {
             };
             /** @description VALIDATION_ERROR o CURSOR_INVALID. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    recordShiftExecution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShiftExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description Ejecución registrada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftExecution"];
+                };
+            };
+            /** @description VALIDATION_ERROR: actual_end <= actual_start. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (propuesta no publicada o día cerrado) o CONFLICT (ya reemplazada). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getDayClosure: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cierre del día. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayClosure"];
+                };
+            };
+            /** @description NOT_FOUND: el día no tiene cierre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    closeDay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DayClosureRequest"];
+            };
+        };
+        responses: {
+            /** @description Cierre creado. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayClosure"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (no hay propuesta publicada) o CONFLICT (día ya cerrado). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listMinutes: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de actas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MinutesPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    generateMinutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MinutesRequest"];
+            };
+        };
+        responses: {
+            /** @description Acta en borrador. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Minutes"];
+                };
+            };
+            /** @description VALIDATION_ERROR: periodo invertido o de más de 366 días. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getMinutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Acta. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Minutes"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    finalizeMinutes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Acta final, con pdf_sha256. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Minutes"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION: el acta no está en borrador. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getMinutesPdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description application/pdf. */
+            200: {
+                headers: {
+                    "X-Content-SHA256"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getDaySchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Horario publicado del día. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedSchedule"];
+                };
+            };
+            /** @description NOT_FOUND: el día no tiene horario publicado. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

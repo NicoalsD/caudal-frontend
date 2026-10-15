@@ -1,3 +1,6 @@
+import type { EpistemicSection } from '../../core/minutes/minutesPeriod';
+export type MinutesStatus = 'DRAFT' | 'FINAL';
+import type { ShiftStatus } from '../../core/execution/shiftExecution';
 import type { BatchItemAnswer } from '../../core/commands/batchOutcome';
 import type { ReadingImportRow } from '../../core/imports/readingImport';
 import type {
@@ -434,6 +437,82 @@ export interface AnomalyView {
 
 export interface AnomalyPageView {
   readonly items: readonly AnomalyView[];
+  readonly nextCursor: string | null;
+}
+
+/** One published shift of a day, as the operator reads it. The sector name comes from the network. */
+export interface DayShiftView {
+  readonly id: string;
+  readonly sectorId: string;
+  readonly sequence: number;
+  readonly startAt: TimestampView;
+  readonly endAt: TimestampView;
+}
+
+/**
+ * The published schedule of a service day, as the operator reads it (GET /days/{date}/schedule).
+ * The proposal it came from is only an id: the operator cannot read proposals.
+ */
+export interface PublishedScheduleView {
+  readonly serviceDate: string;
+  readonly proposalId: string;
+  readonly publishedAt: TimestampView;
+  readonly items: readonly DayShiftView[];
+}
+
+/** What the plumber registers for one shift (API.md 11.1). Times are instants or null. */
+export interface ShiftExecutionInput {
+  readonly scheduleItemId: string;
+  readonly status: ShiftStatus;
+  readonly actualStart: string | null;
+  readonly actualEnd: string | null;
+  readonly note: string;
+  /** The execution this one replaces, when the shift was already registered. */
+  readonly supersedesId: string | null;
+}
+
+export interface ShiftExecutionView {
+  readonly id: string;
+  readonly scheduleItemId: string;
+  readonly status: ShiftStatus;
+  readonly supersedesId: string | null;
+}
+
+/** The closure of a day: its note and the executions of its shifts (API.md 11.2). */
+export interface DayClosureView {
+  readonly id: string;
+  readonly serviceDate: string;
+  readonly notes: string | null;
+  readonly closedAt: TimestampView;
+  readonly executions: readonly ShiftExecutionView[];
+}
+
+/** An acta without its sections (API.md 13.8). `finalizedAt` and `pdfSha256` are null while it is a draft. */
+export interface MinutesSummaryView {
+  readonly id: string;
+  readonly periodFrom: string;
+  readonly periodTo: string;
+  readonly status: MinutesStatus;
+  readonly generatedAt: TimestampView;
+  readonly finalizedAt: TimestampView | null;
+  readonly pdfSha256: string | null;
+}
+
+/** One record of an acta section, already in plain words (the server writes the summary). */
+export interface MinutesEntryView {
+  readonly source: string;
+  readonly sourceId: string;
+  readonly at: TimestampView;
+  readonly summary: string;
+}
+
+/** An acta with its four sections (API.md 13.2). */
+export interface MinutesView extends MinutesSummaryView {
+  readonly content: Readonly<Record<EpistemicSection, readonly MinutesEntryView[]>>;
+}
+
+export interface MinutesPageView {
+  readonly items: readonly MinutesSummaryView[];
   readonly nextCursor: string | null;
 }
 

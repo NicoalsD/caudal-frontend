@@ -1171,6 +1171,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "FORBIDDEN: el rol no tiene PROPOSAL_VIEW.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -2719,6 +2729,418 @@
           }
         }
       }
+    },
+    "/api/v1/schedule-items/{id}/execution": {
+      "post": {
+        "operationId": "recordShiftExecution",
+        "summary": "Registra la ejecución de un turno",
+        "description": "Permiso DAY_CLOSE. Una ejecución nunca se edita: una corrección es una fila nueva con supersedes_id. API.md 11.1.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShiftExecutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ejecución registrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShiftExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: actual_end <= actual_start.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION (propuesta no publicada o día cerrado) o CONFLICT (ya reemplazada).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/days/{date}/closure": {
+      "get": {
+        "operationId": "getDayClosure",
+        "summary": "Cierre de un día con sus ejecuciones",
+        "description": "Permiso DAY_CLOSE (o EXECUTION_RECORD). API.md 11.2.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cierre del día.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayClosure"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el día no tiene cierre.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "closeDay",
+        "summary": "Cierra el día de servicio",
+        "description": "Permiso DAY_CLOSE. Pasa la propuesta del día a CLOSED. API.md 11.3.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DayClosureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cierre creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayClosure"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION (no hay propuesta publicada) o CONFLICT (día ya cerrado).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/minutes": {
+      "get": {
+        "operationId": "listMinutes",
+        "summary": "Actas del acueducto, de la más reciente a la más antigua",
+        "description": "Permiso MINUTES_VIEW. Sin secciones (content): el detalle está en GET /minutes/{id}. API.md 13.8.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de actas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinutesPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "generateMinutes",
+        "summary": "Genera un acta del periodo en borrador",
+        "description": "Permiso MINUTES_GENERATE. API.md 13.1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MinutesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Acta en borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Minutes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: periodo invertido o de más de 366 días.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/minutes/{id}": {
+      "get": {
+        "operationId": "getMinutes",
+        "summary": "Acta con sus cuatro secciones",
+        "description": "Permiso MINUTES_VIEW. API.md 13.2.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Minutes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/minutes/{id}/finalize": {
+      "post": {
+        "operationId": "finalizeMinutes",
+        "summary": "Finaliza un acta en borrador",
+        "description": "Permiso MINUTES_GENERATE. Sin cuerpo. API.md 13.7.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acta final, con pdf_sha256.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Minutes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION: el acta no está en borrador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/minutes/{id}/pdf": {
+      "get": {
+        "operationId": "getMinutesPdf",
+        "summary": "PDF del acta (borrador o final)",
+        "description": "Permiso MINUTES_VIEW. El acta final trae X-Content-SHA256 igual a pdf_sha256. API.md 13.3.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf.",
+            "headers": {
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/days/{date}/schedule": {
+      "get": {
+        "operationId": "getDaySchedule",
+        "summary": "Horario publicado de un día",
+        "description": "Permiso SCHEDULE_VIEW (OPERATOR lo tiene). Los turnos llevan el mismo formato que los de GET /schedule-proposals/{id}.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horario publicado del día.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedSchedule"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el día no tiene horario publicado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4114,7 +4536,25 @@
           "reasons": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ScheduleReason"
+              "$ref": "#/components/schemas/ScheduleReason",
+              "type": "object",
+              "required": [
+                "code",
+                "params",
+                "text"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
@@ -5787,6 +6227,365 @@
           "next_cursor": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ShiftExecutionRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "PARTIAL",
+              "NOT_EXECUTED"
+            ]
+          },
+          "actual_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "actual_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "supersedes_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "ShiftExecution": {
+        "type": "object",
+        "required": [
+          "id",
+          "schedule_item_id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "schedule_item_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "PARTIAL",
+              "NOT_EXECUTED"
+            ]
+          },
+          "actual_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "actual_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "supersedes_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DayClosureRequest": {
+        "type": "object",
+        "required": [
+          "notes"
+        ],
+        "properties": {
+          "notes": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "DayClosure": {
+        "type": "object",
+        "required": [
+          "id",
+          "service_date",
+          "closed_at",
+          "executions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "closed_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "executions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShiftExecution"
+            }
+          }
+        }
+      },
+      "MinutesRequest": {
+        "type": "object",
+        "required": [
+          "period_from",
+          "period_to"
+        ],
+        "properties": {
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "MinutesEntry": {
+        "type": "object",
+        "description": "Un registro del acta, en palabras llanas.",
+        "required": [
+          "source",
+          "source_id",
+          "at",
+          "summary"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      },
+      "MinutesContent": {
+        "type": "object",
+        "required": [
+          "observed",
+          "estimated",
+          "inferred",
+          "confirmed"
+        ],
+        "properties": {
+          "observed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          },
+          "estimated": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          },
+          "inferred": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          },
+          "confirmed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesEntry"
+            }
+          }
+        }
+      },
+      "Minutes": {
+        "type": "object",
+        "required": [
+          "id",
+          "period_from",
+          "period_to",
+          "status",
+          "content",
+          "generated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "FINAL"
+            ]
+          },
+          "content": {
+            "$ref": "#/components/schemas/MinutesContent"
+          },
+          "generated_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pdf_sha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "audit_head_hash": {
+            "type": "string",
+            "nullable": true
+          },
+          "finalized_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "finalized_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MinutesSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "period_from",
+          "period_to",
+          "status",
+          "generated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "FINAL"
+            ]
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finalized_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "pdf_sha256": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MinutesPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MinutesSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PublishedSchedule": {
+        "type": "object",
+        "required": [
+          "service_date",
+          "proposal_id",
+          "published_at",
+          "items"
+        ],
+        "properties": {
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItem"
+            }
           }
         }
       }
