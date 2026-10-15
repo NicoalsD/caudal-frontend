@@ -13,6 +13,7 @@ import type {
 } from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
 import type { ReportStatus } from '../../core/incidents/reportStatus';
+import type { ProposalStatus } from '../../core/proposal/proposalDay';
 import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
@@ -346,6 +347,77 @@ export interface IncidentPageView {
   readonly nextCursor: string | null;
 }
 
+/** A proposal without its shifts, as the Board's list shows it (API.md 10.2). */
+export interface ScheduleProposalSummaryView {
+  readonly id: string;
+  /** Calendar day of service as YYYY-MM-DD (no zone). */
+  readonly serviceDate: string;
+  readonly status: ProposalStatus;
+  readonly generatedAt: TimestampView;
+  readonly availableHours: DecimalView;
+  readonly tankBand: string | null;
+  readonly tankLevel: DecimalView | null;
+  readonly lockVersion: number;
+}
+
+/** One page of proposals; `nextCursor` is null when there are no more (API.md 1.5). */
+export interface ScheduleProposalPageView {
+  readonly items: readonly ScheduleProposalSummaryView[];
+  readonly nextCursor: string | null;
+}
+
+/** A reason of a shift, with the sentence the server wrote for it (API.md 10.3). */
+export interface ScheduleReasonView {
+  readonly code: string;
+  readonly text: string;
+}
+
+/** A shift of a proposal, with its times in America/Bogota and its reasons. */
+export interface ScheduleItemView {
+  readonly id: string;
+  readonly sectorId: string;
+  readonly sequence: number;
+  /** Start in minutes from midnight of America/Bogota (the editor lays the shifts out from it). */
+  readonly startMinutes: number;
+  readonly startTime: string;
+  readonly endTime: string;
+  /** Length of the shift in hours (end minus start). */
+  readonly hours: number;
+  readonly origin: 'PROPOSED' | 'MODIFIED' | 'ADDED';
+  readonly reasons: readonly ScheduleReasonView[];
+}
+
+/** A sector that got no shift, and why (code from the server). */
+export interface UnservedSectorView {
+  readonly sectorId: string;
+  readonly reason: string;
+}
+
+/** A decision of the Board in the history of a proposal. */
+export interface ScheduleDecisionView {
+  readonly decision: 'APPROVED' | 'APPROVED_WITH_CHANGES' | 'REJECTED';
+  readonly reason: string | null;
+  readonly decidedAt: TimestampView;
+}
+
+/** A full proposal (API.md 10.3): the list fields plus its shifts and history. */
+export interface ScheduleProposalView extends ScheduleProposalSummaryView {
+  readonly ruleSetId: string;
+  readonly strategyCode: string;
+  readonly items: readonly ScheduleItemView[];
+  readonly unservedSectors: readonly UnservedSectorView[];
+  readonly decisions: readonly ScheduleDecisionView[];
+  readonly snapshotTaken: boolean;
+}
+
+/** The publication of an approved proposal (API.md 10.7). Its text has no personal data. */
+export interface SchedulePublicationView {
+  readonly id: string;
+  readonly proposalId: string;
+  readonly publishedAt: TimestampView;
+  readonly whatsappText: string;
+  readonly posterSha256: string | null;
+}
 /** The kinds of anomaly the server detects (API.md 9). They are suspicions until someone confirms. */
 export type AnomalyKind =
   'POSSIBLE_LEAK' | 'SENSOR_FAULT' | 'STALE_DATA' | 'SUSPECTED_DUPLICATE' | 'ABNORMAL_DROP';
@@ -368,8 +440,8 @@ export interface AnomalyPageView {
   readonly nextCursor: string | null;
 }
 
-/** One shift of a proposal (API.md 10.3). The sector name is joined from the network. */
-export interface ScheduleItemView {
+/** One published shift of a day, as the operator reads it. The sector name comes from the network. */
+export interface DayShiftView {
   readonly id: string;
   readonly sectorId: string;
   readonly sequence: number;
@@ -385,7 +457,7 @@ export interface PublishedScheduleView {
   readonly serviceDate: string;
   readonly proposalId: string;
   readonly publishedAt: TimestampView;
-  readonly items: readonly ScheduleItemView[];
+  readonly items: readonly DayShiftView[];
 }
 
 /** What the plumber registers for one shift (API.md 11.1). Times are instants or null. */
@@ -441,5 +513,151 @@ export interface MinutesView extends MinutesSummaryView {
 
 export interface MinutesPageView {
   readonly items: readonly MinutesSummaryView[];
+  readonly nextCursor: string | null;
+}
+
+/** What a summary covers: a monthly summary or the minutes of the period (API.md 13.4). */
+export type SummaryScope = 'MONTHLY_SUMMARY' | 'MINUTES';
+
+/** Quantities of a summary per section of the minutes (API.md 13.6): counts only, no text. */
+export interface SummarySectionsView {
+  readonly observed: number;
+  readonly estimated: number;
+  readonly inferred: number;
+  readonly confirmed: number;
+}
+
+/** A summary the Board shared, or an entity can read (API.md 13.6). */
+export interface SummaryView {
+  readonly summaryShareId: string;
+  readonly scope: SummaryScope;
+  /** Calendar days as YYYY-MM-DD, no zone. */
+  readonly periodFrom: string;
+  readonly periodTo: string;
+  readonly content: SummarySectionsView;
+}
+
+/** One page of summaries; `nextCursor` is null when there are no more. */
+export interface SummaryPageView {
+  readonly items: readonly SummaryView[];
+  readonly nextCursor: string | null;
+}
+
+/** An authorization the Board created (API.md 13.4). */
+export interface SummaryShareView {
+  readonly id: string;
+  readonly granteeUserId: string;
+  readonly scope: SummaryScope;
+  readonly periodFrom: string;
+  readonly periodTo: string;
+  readonly expiresAt: TimestampView;
+}
+
+/** The privacy notice in effect (API.md 4.3). `text` is plain text: it is never rendered as HTML. */
+export interface PrivacyNoticeView {
+  readonly version: number;
+  readonly text: string;
+  readonly textSha256: string;
+  readonly effectiveAt: TimestampView;
+}
+
+/** The acceptance of a version of the notice (API.md 4.4). */
+export interface PrivacyAcceptanceView {
+  readonly userId: string;
+  readonly version: number;
+  readonly acceptedAt: TimestampView;
+}
+
+/** Account status as the Board sees it (API.md 3.1). */
+export type ManagedUserStatus = 'ACTIVE' | 'LOCKED' | 'DISABLED';
+
+/** An account of the aqueduct, as the Board administers it. `fullName` is confidential. */
+export interface ManagedUserView {
+  readonly id: string;
+  readonly username: string;
+  readonly fullName: string;
+  readonly status: ManagedUserStatus;
+  readonly lockedUntil: TimestampView | null;
+  readonly mustChangePassword: boolean;
+  readonly lastLoginAt: TimestampView | null;
+}
+
+/** One page of accounts; `nextCursor` is null when there are no more (API.md 1.5). */
+export interface ManagedUserPageView {
+  readonly items: readonly ManagedUserView[];
+  readonly nextCursor: string | null;
+}
+
+/**
+ * A new account. `activationCode` is the one-time code of the account (API.md 3.2): it is shown
+ * once, in the dialog that created it, and never stored.
+ */
+export interface CreatedUserView {
+  readonly id: string;
+  readonly username: string;
+  readonly fullName: string;
+  readonly status: ManagedUserStatus;
+  readonly mustChangePassword: boolean;
+  readonly membership: { readonly id: string; readonly aqueductId: string; readonly role: Role };
+  readonly activationCode: string;
+  readonly expiresAt: TimestampView;
+}
+
+/** A one-time code to set a password (API.md 3.4). Shown once, never stored. */
+export interface ResetGrantView {
+  readonly id: string;
+  readonly code: string;
+  readonly expiresAt: TimestampView;
+}
+
+/** A role of an account in the aqueduct, with its period (API.md 3.5). */
+export interface ManagedMembershipView {
+  readonly id: string;
+  readonly userId: string;
+  readonly aqueductId: string;
+  readonly roleCode: Role;
+  readonly validFrom: TimestampView;
+  readonly validTo: TimestampView | null;
+  readonly grantedBy: string;
+}
+
+/** One page of memberships; `nextCursor` is null when there are no more. */
+export interface ManagedMembershipPageView {
+  readonly items: readonly ManagedMembershipView[];
+  readonly nextCursor: string | null;
+}
+
+/** One line of the audit log (API.md 18.1). The states are redacted and carry no personal data. */
+export interface AuditLogEntryView {
+  readonly id: number;
+  readonly occurredAt: TimestampView;
+  /** USER, DEVICE, SYSTEM or API_KEY. */
+  readonly actorType: string;
+  readonly actorId: string | null;
+  /** Upper-case code, for example RULESET_ACTIVATED. */
+  readonly action: string;
+  readonly entityType: string;
+  readonly entityId: string;
+}
+
+/** One page of the audit log; `nextCursor` is null when there are no more. */
+export interface AuditLogPageView {
+  readonly items: readonly AuditLogEntryView[];
+  readonly nextCursor: string | null;
+}
+
+/** A security event of the aqueduct (API.md 18.2). Its details are already redacted. */
+export interface SecurityEventView {
+  readonly id: number;
+  /** Upper-case code, for example PERMISSION_DENIED. */
+  readonly type: string;
+  readonly severity: string;
+  readonly actorUserId: string | null;
+  readonly createdAt: TimestampView;
+}
+
+/** One page of security events; `nextCursor` is null when there are no more. */
+export interface SecurityEventPageView {
+  readonly items: readonly SecurityEventView[];
   readonly nextCursor: string | null;
 }

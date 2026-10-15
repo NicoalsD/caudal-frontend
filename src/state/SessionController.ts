@@ -21,6 +21,7 @@ const MS_PER_SECOND = 1000;
 /** The only role that keeps working screens without connection (architecture.md 5.5). */
 const LOCAL_MODE_ROLE = 'OPERATOR';
 const PASSWORD_CHANGE_REQUIRED_CODE = 'PASSWORD_CHANGE_REQUIRED';
+const PRIVACY_NOTICE_PENDING_CODE = 'PRIVACY_NOTICE_PENDING';
 
 export interface SessionControllerDependencies {
   readonly api: CaudalApi;
@@ -134,9 +135,25 @@ export class SessionController {
    * must change its password first, whatever screen noticed it (API.md section 1.4).
    */
   handleError(error: unknown): void {
-    if (error instanceof DomainError && error.code === PASSWORD_CHANGE_REQUIRED_CODE) {
-      this.deps.store.requirePasswordChange();
+    if (!(error instanceof DomainError)) {
+      return;
     }
+    if (error.code === PASSWORD_CHANGE_REQUIRED_CODE) {
+      this.deps.store.requirePasswordChange();
+    } else if (error.code === PRIVACY_NOTICE_PENDING_CODE) {
+      this.deps.store.requirePrivacyNotice();
+    }
+  }
+
+  /**
+   * Accepts the notice version on the server. Only a successful answer opens the app: a failed or
+   * offline acceptance keeps the person on the notice screen. Every cached query is read again,
+   * because the ones that failed with PRIVACY_NOTICE_PENDING hold that error.
+   */
+  async acceptPrivacyNotice(version: number): Promise<void> {
+    await this.deps.api.privacy.accept(version);
+    this.deps.store.acceptPrivacyNotice();
+    await this.deps.queryClient.invalidateQueries();
   }
 
   /** The session ended on the server side (refresh refused): show the login with a notice. */

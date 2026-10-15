@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 import { formatTime } from '../../core/format/time';
 import type { ShiftStatus } from '../../core/execution/shiftExecution';
 import { t } from '../../i18n/t';
-import type { DayClosureView, ScheduleItemView } from '../../services/api/views';
+import type { DayClosureView, DayShiftView } from '../../services/api/views';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import styles from './DayClosure.module.css';
@@ -17,7 +17,7 @@ const STATUS_TEXT = {
 
 interface ClosedDayViewProps {
   readonly closure: DayClosureView;
-  readonly items: readonly ScheduleItemView[];
+  readonly items: readonly DayShiftView[];
   readonly sectorNames: ReadonlyMap<string, string>;
 }
 

@@ -11,10 +11,24 @@ import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
+import { BoardDayGuide } from '../features/board/BoardDayGuide';
+import {
+  ProposalDetailPage,
+  ProposalEditorPage,
+  ProposalListPage,
+  ProposalPublicationPage,
+} from '../features/proposals';
 import { RuleDraftPage, RulesPage } from '../features/rules';
+import { UsersPage } from '../features/users';
+import { PrivacyNoticePage } from '../features/privacy';
+import { EntitiesPage } from '../features/entities';
+import { EntitySummariesPage } from '../features/entity-summaries';
+import { AuditPage } from '../features/audit';
+import { AuditLayout } from './layouts/AuditLayout';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
+import { RequirePrivacyAccepted } from './guards/RequirePrivacyAccepted';
 import { RequireRole } from './guards/RequireRole';
 import { AuthLayout } from './layouts/AuthLayout';
 import { BoardLayout } from './layouts/BoardLayout';
@@ -56,7 +70,7 @@ const sessionRoutes: RouteObject = {
     },
     {
       element: <PublicLayout />,
-      children: [screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice'))],
+      children: [{ path: ROUTE_PATHS.privacyNotice, element: <PrivacyNoticePage /> }],
     },
   ],
 };
@@ -83,20 +97,31 @@ const boardRoutes: RouteObject = {
     {
       element: <BoardLayout />,
       children: [
-        { path: ROUTE_PATHS.board.tank, element: <TankStatusPage /> },
-        screen(ROUTE_PATHS.board.proposals, t('screens.proposals')),
-        screen(ROUTE_PATHS.board.proposalDetail, t('screens.proposalDetail')),
-        screen(ROUTE_PATHS.board.publication, t('screens.publication')),
+        {
+          path: ROUTE_PATHS.board.tank,
+          element: (
+            <>
+              <BoardDayGuide />
+              <TankStatusPage />
+            </>
+          ),
+        },
+        { path: ROUTE_PATHS.board.proposals, element: <ProposalListPage /> },
+        { path: ROUTE_PATHS.board.proposalDetail, element: <ProposalDetailPage /> },
+        { path: ROUTE_PATHS.board.proposalEdit, element: <ProposalEditorPage /> },
+        { path: ROUTE_PATHS.board.publication, element: <ProposalPublicationPage /> },
         { path: ROUTE_PATHS.board.rules, element: <RulesPage /> },
         { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         { path: ROUTE_PATHS.board.minutes, element: <MinutesPage /> },
         { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
-        screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,
-          children: [screen(ROUTE_PATHS.board.users, t('screens.users'))],
+          children: [
+            { path: ROUTE_PATHS.board.users, element: <UsersPage /> },
+            { path: ROUTE_PATHS.board.entities, element: <EntitiesPage /> },
+          ],
         },
       ],
     },
@@ -112,9 +137,18 @@ const teamRoutes: RouteObject = {
         screen(ROUTE_PATHS.team.evaluation, t('screens.evaluation')),
         screen(ROUTE_PATHS.team.health, t('screens.health')),
         screen(ROUTE_PATHS.team.devices, t('screens.devices')),
-        screen(ROUTE_PATHS.team.audit, t('screens.audit')),
         { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
+    },
+  ],
+};
+
+const auditRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.audit} />,
+  children: [
+    {
+      element: <AuditLayout />,
+      children: [{ path: ROUTE_PATHS.team.audit, element: <AuditPage /> }],
     },
   ],
 };
@@ -124,7 +158,7 @@ const entityRoutes: RouteObject = {
   children: [
     {
       element: <EntityLayout />,
-      children: [screen(ROUTE_PATHS.entity.summaries, t('screens.summaries'))],
+      children: [{ path: ROUTE_PATHS.entity.summaries, element: <EntitySummariesPage /> }],
     },
   ],
 };
@@ -154,7 +188,19 @@ export function buildRoutes(): RouteObject[] {
             sessionRoutes,
             {
               element: <RequirePasswordChanged />,
-              children: [operatorRoutes, boardRoutes, teamRoutes, entityRoutes, sharedRoutes],
+              children: [
+                {
+                  element: <RequirePrivacyAccepted />,
+                  children: [
+                    operatorRoutes,
+                    boardRoutes,
+                    teamRoutes,
+                    auditRoutes,
+                    entityRoutes,
+                    sharedRoutes,
+                  ],
+                },
+              ],
             },
           ],
         },

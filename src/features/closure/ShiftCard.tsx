@@ -9,7 +9,7 @@ import { toExecutionTimes } from '../../core/execution/shiftExecution';
 import type { ExecutionTimesError, ShiftStatus } from '../../core/execution/shiftExecution';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
-import type { ScheduleItemView } from '../../services/api/views';
+import type { DayShiftView } from '../../services/api/views';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { Button } from '../../ui/primitives/Button';
 import { FormFields } from '../../ui/primitives/FormFields';
@@ -42,7 +42,7 @@ const STATUS_OPTIONS: readonly { readonly value: ShiftStatus; readonly label: st
 ];
 
 interface ShiftCardProps {
-  readonly item: ScheduleItemView;
+  readonly item: DayShiftView;
   readonly sectorName: string;
   readonly serviceDate: string;
   readonly schema: ReturnType<typeof shiftExecutionFormSchema>;

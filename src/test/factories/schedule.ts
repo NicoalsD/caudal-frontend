@@ -20,7 +20,8 @@ export function buildScheduleItem(overrides: Partial<ScheduleItemDto> = {}): Sch
     sequence: 1,
     start_at: `${SERVICE_DAY}T06:00:00-05:00`,
     end_at: `${SERVICE_DAY}T14:00:00-05:00`,
-    origin: 'GENERATED',
+    origin: 'PROPOSED',
+    reasons: [],
     ...overrides,
   };
 }
@@ -33,6 +34,14 @@ export function buildScheduleProposal(
     id: PROPOSAL_ID,
     service_date: SERVICE_DAY,
     status: 'PUBLISHED',
+    rule_set_id: '0190f3a2-7777-7000-8000-000000000001',
+    tank_band: 'MEDIUM',
+    available_hours: 16,
+    strategy_code: 'PRIORITY_THEN_WAIT',
+    generated_at: `${SERVICE_DAY}T05:00:00-05:00`,
+    unserved_sectors: [],
+    decisions: [],
+    snapshot_taken: false,
     lock_version: 2,
     items: [
       buildScheduleItem(),

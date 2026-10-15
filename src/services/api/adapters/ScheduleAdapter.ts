@@ -4,7 +4,7 @@ import type { components } from '../schema';
 import type {
   DayClosureView,
   PublishedScheduleView,
-  ScheduleItemView,
+  DayShiftView,
   ShiftExecutionView,
 } from '../views';
 import type { ApiDtoAdapter } from './ApiDtoAdapter';
@@ -24,7 +24,7 @@ function toShiftStatus(value: string): ShiftStatus {
 }
 
 /** Shifts of a proposal (API.md 10.3). Times are shown in Bogota time by the screens. */
-export function toScheduleItem(adapter: ApiDtoAdapter, dto: ScheduleItemDto): ScheduleItemView {
+export function toScheduleItem(adapter: ApiDtoAdapter, dto: ScheduleItemDto): DayShiftView {
   return {
     id: dto.id,
     sectorId: dto.sector_id,

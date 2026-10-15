@@ -5,6 +5,7 @@ import { incidentsHandlers } from './incidents';
 import { scheduleHandlers } from './schedule';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
+import { proposalsHandlers } from './proposals';
 import { publicHandlers } from './public';
 import { rulesHandlers } from './rules';
 import { statusHandlers } from './status';
@@ -21,4 +22,5 @@ export const handlers = [
   ...catalogHandlers,
   ...incidentsHandlers,
   ...scheduleHandlers,
+  ...proposalsHandlers,
 ];

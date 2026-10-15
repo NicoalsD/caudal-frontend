@@ -7,6 +7,8 @@ import {
   toBogotaDateKey,
 } from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
+
+const MS_PER_HOUR = 3_600_000;
 import type { components } from '../schema';
 import type { Membership } from '../../../core/session/memberships';
 import { isBandCode } from '../../../core/rules/ruleSetParts';
@@ -18,6 +20,8 @@ import type {
   ValveOrder,
 } from '../../../core/rules/ruleSetParts';
 import { isReportStatus } from '../../../core/incidents/reportStatus';
+import { isProposalStatus } from '../../../core/proposal/proposalStatus';
+import { bogotaMinutesOf } from '../../../core/proposal/proposalTime';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -29,6 +33,27 @@ import type {
   DamageReportReceiptView,
   IncidentPageView,
   IncidentView,
+  ManagedMembershipPageView,
+  PrivacyAcceptanceView,
+  AuditLogEntryView,
+  AuditLogPageView,
+  SecurityEventPageView,
+  SecurityEventView,
+  SummaryPageView,
+  SummaryShareView,
+  SummaryView,
+  PrivacyNoticeView,
+  ManagedMembershipView,
+  ManagedUserPageView,
+  ManagedUserStatus,
+  ManagedUserView,
+  CreatedUserView,
+  ResetGrantView,
+  ScheduleItemView,
+  ScheduleProposalPageView,
+  ScheduleProposalSummaryView,
+  ScheduleProposalView,
+  SchedulePublicationView,
   PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
@@ -62,6 +87,26 @@ type CatalogItemDto = components['schemas']['CatalogItem'];
 type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
+type ManagedUserDto = components['schemas']['ManagedUser'];
+type PrivacyNoticeDto = components['schemas']['PrivacyNotice'];
+type AuditLogEntryDto = components['schemas']['AuditLogEntry'];
+type AuditLogPageDto = components['schemas']['AuditLogPage'];
+type SecurityEventDto = components['schemas']['SecurityEvent'];
+type SecurityEventPageDto = components['schemas']['SecurityEventPage'];
+type SummaryDto = components['schemas']['Summary'];
+type SummaryPageDto = components['schemas']['SummaryPage'];
+type SummaryShareDto = components['schemas']['SummaryShare'];
+type PrivacyAcceptanceDto = components['schemas']['PrivacyAcceptance'];
+type ManagedUserPageDto = components['schemas']['ManagedUserPage'];
+type CreatedUserDto = components['schemas']['CreatedUser'];
+type ResetGrantDto = components['schemas']['ResetGrant'];
+type ManagedMembershipDto = components['schemas']['ManagedMembership'];
+type ManagedMembershipPageDto = components['schemas']['ManagedMembershipPage'];
+type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
+type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
+type ProposalDto = components['schemas']['ScheduleProposal'];
+type ProposalItemDto = components['schemas']['ScheduleItem'];
+type PublicationDto = components['schemas']['SchedulePublication'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -78,6 +123,12 @@ const TIME_OF_DAY = /^(?<hours>\d{2}):(?<minutes>\d{2})(?::\d{2})?$/;
  *
  * @pattern P06 Adapter
  */
+const MANAGED_USER_STATUSES: readonly string[] = ['ACTIVE', 'LOCKED', 'DISABLED'];
+
+function isManagedUserStatus(value: string): value is ManagedUserStatus {
+  return MANAGED_USER_STATUSES.includes(value);
+}
+
 export class ApiDtoAdapter {
   toHealth(dto: HealthDto): HealthView {
     return { isUp: dto.status === 'UP' };
@@ -178,9 +229,242 @@ export class ApiDtoAdapter {
     };
   }
 
+  toAuditLogEntry(dto: AuditLogEntryDto): AuditLogEntryView {
+    return {
+      id: dto.id,
+      occurredAt: this.toTimestamp('occurred_at', dto.occurred_at),
+      actorType: dto.actor_type,
+      actorId: dto.actor_id ?? null,
+      action: dto.action,
+      entityType: dto.entity_type,
+      entityId: dto.entity_id,
+    };
+  }
+
+  toAuditLogPage(dto: AuditLogPageDto): AuditLogPageView {
+    return {
+      items: dto.items.map((item) => this.toAuditLogEntry(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toSecurityEvent(dto: SecurityEventDto): SecurityEventView {
+    return {
+      id: dto.id,
+      type: dto.type,
+      severity: dto.severity,
+      actorUserId: dto.actor_user_id ?? null,
+      createdAt: this.toTimestamp('created_at', dto.created_at),
+    };
+  }
+
+  toSecurityEventPage(dto: SecurityEventPageDto): SecurityEventPageView {
+    return {
+      items: dto.items.map((item) => this.toSecurityEvent(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toSummary(dto: SummaryDto): SummaryView {
+    return {
+      summaryShareId: dto.summary_share_id,
+      scope: dto.scope,
+      periodFrom: dto.period_from,
+      periodTo: dto.period_to,
+      content: {
+        observed: dto.content.observed,
+        estimated: dto.content.estimated,
+        inferred: dto.content.inferred,
+        confirmed: dto.content.confirmed,
+      },
+    };
+  }
+
+  toSummaryPage(dto: SummaryPageDto): SummaryPageView {
+    return {
+      items: dto.items.map((item) => this.toSummary(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toSummaryShare(dto: SummaryShareDto): SummaryShareView {
+    return {
+      id: dto.id,
+      granteeUserId: dto.grantee_user_id,
+      scope: dto.scope,
+      periodFrom: dto.period_from,
+      periodTo: dto.period_to,
+      expiresAt: this.toTimestamp('expires_at', dto.expires_at),
+    };
+  }
+
+  toPrivacyNotice(dto: PrivacyNoticeDto): PrivacyNoticeView {
+    return {
+      version: dto.version,
+      text: dto.text_es,
+      textSha256: dto.text_sha256,
+      effectiveAt: this.toTimestamp('effective_at', dto.effective_at),
+    };
+  }
+
+  toPrivacyAcceptance(dto: PrivacyAcceptanceDto): PrivacyAcceptanceView {
+    return {
+      userId: dto.user_id,
+      version: dto.version,
+      acceptedAt: this.toTimestamp('accepted_at', dto.accepted_at),
+    };
+  }
+
+  /** Accounts of the Board's list. The status is trusted only after the value is known. */
+  toManagedUser(dto: ManagedUserDto): ManagedUserView {
+    if (!isManagedUserStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      status: dto.status,
+      lockedUntil: dto.locked_until ? this.toTimestamp('locked_until', dto.locked_until) : null,
+      mustChangePassword: dto.must_change_password,
+      lastLoginAt: dto.last_login_at ? this.toTimestamp('last_login_at', dto.last_login_at) : null,
+    };
+  }
+
+  toManagedUserPage(dto: ManagedUserPageDto): ManagedUserPageView {
+    return {
+      items: dto.items.map((item) => this.toManagedUser(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toCreatedUser(dto: CreatedUserDto): CreatedUserView {
+    if (!isManagedUserStatus(dto.status) || !isRole(dto.membership.role)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      status: dto.status,
+      mustChangePassword: dto.must_change_password,
+      membership: {
+        id: dto.membership.id,
+        aqueductId: dto.membership.aqueduct_id,
+        role: dto.membership.role,
+      },
+      activationCode: dto.activation_code,
+      expiresAt: this.toTimestamp('expires_at', dto.expires_at),
+    };
+  }
+
+  toResetGrant(dto: ResetGrantDto): ResetGrantView {
+    return {
+      id: dto.id,
+      code: dto.code,
+      expiresAt: this.toTimestamp('expires_at', dto.expires_at),
+    };
+  }
+
+  toManagedMembership(dto: ManagedMembershipDto): ManagedMembershipView {
+    if (!isRole(dto.role_code)) {
+      throw new InvalidDtoError('role_code');
+    }
+    return {
+      id: dto.id,
+      userId: dto.user_id,
+      aqueductId: dto.aqueduct_id,
+      roleCode: dto.role_code,
+      validFrom: this.toTimestamp('valid_from', dto.valid_from),
+      validTo: dto.valid_to ? this.toTimestamp('valid_to', dto.valid_to) : null,
+      grantedBy: dto.granted_by,
+    };
+  }
+
+  toManagedMembershipPage(dto: ManagedMembershipPageDto): ManagedMembershipPageView {
+    return {
+      items: dto.items.map((item) => this.toManagedMembership(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
   toIncidentPage(dto: IncidentPageDto): IncidentPageView {
     return {
       items: dto.items.map((item) => this.toIncident(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toProposalSummary(dto: ProposalSummaryDto): ScheduleProposalSummaryView {
+    if (!isProposalStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      serviceDate: dto.service_date,
+      status: dto.status,
+      generatedAt: this.toTimestamp('generated_at', dto.generated_at),
+      availableHours: this.toDecimal('available_hours', dto.available_hours),
+      tankBand: dto.tank_band ?? null,
+      tankLevel:
+        dto.tank_level_snapshot === undefined || dto.tank_level_snapshot === null
+          ? null
+          : this.toDecimal('tank_level_snapshot', dto.tank_level_snapshot),
+      lockVersion: dto.lock_version,
+    };
+  }
+
+  toProposal(dto: ProposalDto): ScheduleProposalView {
+    const summary = this.toProposalSummary(dto);
+    return {
+      ...summary,
+      ruleSetId: dto.rule_set_id,
+      strategyCode: dto.strategy_code,
+      items: dto.items
+        .map((item) => this.toScheduleItem(item))
+        .sort((a, b) => a.sequence - b.sequence),
+      unservedSectors: dto.unserved_sectors.map((sector) => ({
+        sectorId: sector.sector_id,
+        reason: sector.reason,
+      })),
+      decisions: dto.decisions.map((decision) => ({
+        decision: decision.decision,
+        reason: decision.reason ?? null,
+        decidedAt: this.toTimestamp('decided_at', decision.decided_at),
+      })),
+      snapshotTaken: dto.snapshot_taken,
+    };
+  }
+
+  private toScheduleItem(dto: ProposalItemDto): ScheduleItemView {
+    const start = parseInstant(dto.start_at);
+    const end = parseInstant(dto.end_at);
+    return {
+      id: dto.id,
+      sectorId: dto.sector_id,
+      sequence: dto.sequence,
+      startMinutes: bogotaMinutesOf(dto.start_at),
+      startTime: formatTime(dto.start_at),
+      endTime: formatTime(dto.end_at),
+      hours: (end.getTime() - start.getTime()) / MS_PER_HOUR,
+      origin: dto.origin,
+      reasons: dto.reasons.map((reason) => ({ code: reason.code, text: reason.text })),
+    };
+  }
+
+  toPublication(dto: PublicationDto): SchedulePublicationView {
+    return {
+      id: dto.id,
+      proposalId: dto.proposal_id,
+      publishedAt: this.toTimestamp('published_at', dto.published_at),
+      whatsappText: dto.whatsapp_text,
+      posterSha256: dto.poster_sha256 ?? null,
+    };
+  }
+
+  toProposalPage(dto: ProposalPageDto): ScheduleProposalPageView {
+    return {
+      items: dto.items.map((item) => this.toProposalSummary(item)),
       nextCursor: dto.next_cursor ?? null,
     };
   }

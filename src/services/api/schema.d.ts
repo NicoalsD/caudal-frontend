@@ -311,86 +311,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/readings/batch": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Sincroniza la cola offline de lecturas
-         * @description Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.
-         */
-        post: operations["submitReadingBatch"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/readings/{id}/corrections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Corrige una lectura ya guardada, con motivo
-         * @description Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.
-         */
-        post: operations["correctReading"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/tanks/{id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Estado del tanque: último nivel, tendencia, antigüedad y pronóstico
-         * @description Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.
-         */
-        get: operations["getTankStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/imports/readings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Importa historial simulado de lecturas (acueducto demo)
-         * @description Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.
-         */
-        post: operations["importSimulatedReadings"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/public/{aqueductSlug}/schedule": {
         parameters: {
             query?: never;
@@ -551,6 +471,210 @@ export interface paths {
         patch: operations["changeIncidentStatus"];
         trace?: never;
     };
+    "/api/v1/schedule-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Propuestas de turnos
+         * @description Permiso PROPOSAL_VIEW. API.md sección 10.2. Sin turnos: el detalle está en GET /{id}.
+         */
+        get: operations["listScheduleProposals"];
+        put?: never;
+        /**
+         * Genera la propuesta de un día
+         * @description Permiso PROPOSAL_GENERATE. Estado inicial PENDING_REVIEW. API.md sección 10.1.
+         */
+        post: operations["generateScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una propuesta
+         * @description Permiso PROPOSAL_VIEW. Incluye turnos, sectores sin turno y decisiones (API.md 10.3).
+         */
+        get: operations["getScheduleProposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aprueba la propuesta
+         * @description Permiso PROPOSAL_DECIDE. API.md 10.4.
+         */
+        post: operations["approveScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/modify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Modifica los turnos con motivo
+         * @description Permiso PROPOSAL_DECIDE. Guarda un snapshot antes del cambio. API.md 10.5.
+         */
+        post: operations["modifyScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rechaza la propuesta con motivo
+         * @description Permiso PROPOSAL_DECIDE. Estado final REJECTED. API.md 10.6.
+         */
+        post: operations["rejectScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publica el horario aprobado
+         * @description Permiso SCHEDULE_PUBLISH. La propuesta pasa a PUBLISHED. API.md 10.7.
+         */
+        post: operations["publishScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/readings/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sincroniza la cola offline de lecturas
+         * @description Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.
+         */
+        post: operations["submitReadingBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/readings/{id}/corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corrige una lectura ya guardada, con motivo
+         * @description Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.
+         */
+        post: operations["correctReading"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tanks/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado del tanque: último nivel, tendencia, antigüedad y pronóstico
+         * @description Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.
+         */
+        get: operations["getTankStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Importa historial simulado de lecturas (acueducto demo)
+         * @description Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.
+         */
+        post: operations["importSimulatedReadings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tanks/{id}/forecasts/latest": {
         parameters: {
             query?: never;
@@ -611,7 +735,7 @@ export interface paths {
         patch: operations["resolveAnomaly"];
         trace?: never;
     };
-    "/api/v1/schedule-proposals": {
+    "/api/v1/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -619,10 +743,118 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Propuestas de turnos, paginadas por cursor
-         * @description Permiso PROPOSAL_VIEW. Sin items: el detalle está en GET /schedule-proposals/{id}. API.md 10.2.
+         * Cuentas del acueducto, paginadas por cursor
+         * @description Permiso USER_MANAGE. Orden por username.
          */
-        get: operations["listScheduleProposals"];
+        get: operations["listUsers"];
+        put?: never;
+        /**
+         * Crea una cuenta con su primera membresía
+         * @description Permiso USER_MANAGE. Devuelve el código de activación una sola vez.
+         */
+        post: operations["createUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cambia el nombre o el estado de una cuenta
+         * @description Permiso USER_MANAGE. Bloquear o desactivar cierra sus sesiones. DISABLED es definitivo.
+         */
+        patch: operations["updateUser"];
+        trace?: never;
+    };
+    "/api/v1/users/{id}/reset-grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Emite un código para fijar una contraseña
+         * @description Permiso USER_MANAGE. Los códigos anteriores no usados quedan revocados.
+         */
+        post: operations["issueResetGrant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Membresías del acueducto, paginadas por cursor
+         * @description Permiso USER_MANAGE.
+         */
+        get: operations["listMemberships"];
+        put?: never;
+        /**
+         * Otorga un rol a una cuenta
+         * @description Permiso USER_MANAGE. Una cuenta tiene un solo rol a la vez en el acueducto.
+         */
+        post: operations["grantMembership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/memberships/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Termina una membresía vigente
+         * @description Permiso USER_MANAGE. No borra la fila: pone valid_to ahora.
+         */
+        delete: operations["revokeMembership"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-notice/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Aviso de privacidad vigente
+         * @description Permiso: autenticado. Devuelve la versión más alta con effective_at cumplido.
+         */
+        get: operations["getCurrentPrivacyNotice"];
         put?: never;
         post?: never;
         delete?: never;
@@ -631,7 +863,67 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/schedule-proposals/{id}": {
+    "/api/v1/privacy-notice/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acepta la versión vigente del aviso
+         * @description Permiso: autenticado. Aceptar otra vez la misma versión devuelve la primera aceptación.
+         */
+        post: operations["acceptPrivacyNotice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summary-shares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Autoriza un resumen para una entidad
+         * @description Permiso SUMMARY_SHARE_MANAGE (solo BOARD_ADMIN). El motivo es obligatorio y expires_at debe ser futuro.
+         */
+        post: operations["createSummaryShare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summary-shares/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoca una autorización
+         * @description Permiso SUMMARY_SHARE_MANAGE. Marca revoked_at; no borra la fila.
+         */
+        delete: operations["revokeSummaryShare"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries": {
         parameters: {
             query?: never;
             header?: never;
@@ -639,10 +931,50 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Propuesta de turnos con sus turnos
-         * @description Permiso PROPOSAL_VIEW. API.md 10.3.
+         * Resúmenes autorizados vigentes
+         * @description Permiso SUMMARY_VIEW. La Junta ve las autorizaciones vigentes del acueducto; una entidad solo las suyas.
          */
-        get: operations["getScheduleProposal"];
+        get: operations["listSummaries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bitácora de auditoría, de la más reciente a la más antigua
+         * @description Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM). Filtros opcionales from, to (instantes), action, entity_type y actor_id.
+         */
+        get: operations["listAuditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/security-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Eventos de seguridad del acueducto
+         * @description Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM).
+         */
+        get: operations["listSecurityEvents"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1108,6 +1440,237 @@ export interface components {
         ValveList: {
             items: components["schemas"]["Valve"][];
         };
+        /** @description Acueducto del horario público. Sin datos personales. */
+        PublicScheduleAqueduct: {
+            name: string;
+            is_demo: boolean;
+        };
+        PublicSchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        /** @description Turno de un sector. Solo nombre del sector y horas. */
+        PublicScheduleItem: {
+            sector_name: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+        };
+        PublicSchedule: {
+            aqueduct: components["schemas"]["PublicScheduleAqueduct"];
+            /**
+             * Format: date
+             * @description Día de servicio en America/Bogota.
+             */
+            service_date: string;
+            publication: components["schemas"]["PublicSchedulePublication"];
+            items: components["schemas"]["PublicScheduleItem"][];
+        };
+        /** @description Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan. */
+        CreateDamageReportRequest: {
+            /** @description Código de DAMAGE_CATEGORY. */
+            category_code: string;
+            /** @description 10 a 500 caracteres (incident.description). */
+            description: string;
+            /** @description 0 a 120 caracteres. */
+            location_hint?: string;
+            /** @description Campo trampa oculto. Debe llegar vacío. */
+            website: string;
+            /**
+             * Format: date-time
+             * @description Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío.
+             */
+            form_started_at: string;
+        };
+        DamageReportCreated: {
+            /** @description 8 caracteres Crockford base32. Se muestra una sola vez. */
+            tracking_code: string;
+            /** @enum {string} */
+            status: "REPORTED";
+            message: string;
+        };
+        CatalogItem: {
+            code: string;
+            label_es: string;
+            sort_order: number;
+        };
+        CatalogList: {
+            items: components["schemas"]["CatalogItem"][];
+        };
+        /** @description Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante. */
+        PublicDamageReportStatus: {
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            status_label_es: string;
+            category_label_es: string;
+            /** Format: date-time */
+            reported_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        /** @description Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante. */
+        Incident: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            source: "PUBLIC_FORM" | "OPERATOR" | "ANOMALY" | "IMPORT";
+            category_code: string;
+            /** Format: uuid */
+            sector_id?: string | null;
+            description: string;
+            location_hint?: string | null;
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            /** Format: date-time */
+            reported_at: string;
+        };
+        IncidentPage: {
+            items: components["schemas"]["Incident"][];
+            next_cursor: string | null;
+        };
+        /** @description Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500). */
+        UpdateIncidentStatusRequest: {
+            /** @enum {string} */
+            status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            note?: string;
+        };
+        /** @description Propuesta de turnos sin sus turnos (API.md 10.2). */
+        ScheduleProposalSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            /** @enum {string} */
+            status: "PENDING_REVIEW" | "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED" | "PUBLISHED" | "CLOSED";
+            /** Format: uuid */
+            rule_set_id: string;
+            /** Format: double */
+            tank_level_snapshot?: number | null;
+            tank_band: string | null;
+            /** Format: double */
+            available_hours: number;
+            /** Format: uuid */
+            forecast_run_id?: string | null;
+            strategy_code: string;
+            /** Format: date-time */
+            generated_at: string;
+            lock_version: number;
+        };
+        ScheduleProposalPage: {
+            items: components["schemas"]["ScheduleProposalSummary"][];
+            next_cursor: string | null;
+        };
+        GenerateScheduleProposalRequest: {
+            /** Format: date */
+            service_date: string;
+        };
+        /** @description Motivo de un turno (API.md 10.3). El texto lo arma el servidor. */
+        ScheduleReason: {
+            /** @example PRIORITY_SECTOR */
+            code: string;
+            params: {
+                [key: string]: unknown;
+            };
+            text: string;
+        };
+        ScheduleItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sector_id: string;
+            sequence: number;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            /** @enum {string} */
+            origin: "PROPOSED" | "MODIFIED" | "ADDED";
+            reasons: components["schemas"]["ScheduleReason"][];
+        };
+        /** @description Sector sin turno y su motivo (API.md 10.3). */
+        UnservedSector: {
+            /** Format: uuid */
+            sector_id: string;
+            /** @example NO_BUDGET */
+            reason: string;
+        };
+        /** @description Decisión de la Junta (historial de la propuesta). */
+        ScheduleDecision: {
+            /** @enum {string} */
+            decision: "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED";
+            reason?: string | null;
+            /** Format: uuid */
+            decided_by: string;
+            /** Format: date-time */
+            decided_at: string;
+        };
+        /** @description Propuesta completa de turnos con sus explicaciones (API.md 10.1 y 10.3). */
+        ScheduleProposal: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            /** @enum {string} */
+            status: "PENDING_REVIEW" | "APPROVED" | "APPROVED_WITH_CHANGES" | "REJECTED" | "PUBLISHED" | "CLOSED";
+            /** Format: uuid */
+            rule_set_id: string;
+            /** Format: double */
+            tank_level_snapshot?: number | null;
+            tank_band: string | null;
+            /** Format: double */
+            available_hours: number;
+            /** Format: uuid */
+            forecast_run_id?: string | null;
+            strategy_code: string;
+            /** Format: date-time */
+            generated_at: string;
+            lock_version: number;
+            items: components["schemas"]["ScheduleItem"][];
+            unserved_sectors: components["schemas"]["UnservedSector"][];
+            decisions: components["schemas"]["ScheduleDecision"][];
+            snapshot_taken: boolean;
+        };
+        /** @description Versión que vio la Junta (lock_version, API.md 10.4 y 10.7). */
+        DecideScheduleProposalRequest: {
+            lock_version: number;
+        };
+        /** @description Rechazo con motivo de 10 a 500 caracteres (API.md 10.6). */
+        RejectScheduleProposalRequest: {
+            lock_version: number;
+            reason: string;
+        };
+        /** @description Turno que deja la Junta (API.md 10.5). */
+        ScheduleItemInput: {
+            /** Format: uuid */
+            id?: string | null;
+            /** Format: uuid */
+            sector_id: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            sequence: number;
+        };
+        /** @description Cambios de la Junta con motivo (API.md 10.5). */
+        ModifyScheduleProposalRequest: {
+            lock_version: number;
+            reason: string;
+            items: components["schemas"]["ScheduleItemInput"][];
+        };
+        /** @description Publicación del horario, sin datos personales (API.md 10.7). */
+        SchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            proposal_id: string;
+            /** Format: date-time */
+            published_at: string;
+            whatsapp_text: string;
+            poster_sha256?: string | null;
+        };
         ReadingBatchItem: {
             /**
              * Format: uuid
@@ -1247,103 +1810,6 @@ export interface components {
             rows_rejected: number;
             rejections: components["schemas"]["ImportRejection"][];
         };
-        /** @description Acueducto del horario público. Sin datos personales. */
-        PublicScheduleAqueduct: {
-            name: string;
-            is_demo: boolean;
-        };
-        PublicSchedulePublication: {
-            /** Format: uuid */
-            id: string;
-            /** Format: date-time */
-            published_at: string;
-        };
-        /** @description Turno de un sector. Solo nombre del sector y horas. */
-        PublicScheduleItem: {
-            sector_name: string;
-            /** Format: date-time */
-            start_at: string;
-            /** Format: date-time */
-            end_at: string;
-        };
-        PublicSchedule: {
-            aqueduct: components["schemas"]["PublicScheduleAqueduct"];
-            /**
-             * Format: date
-             * @description Día de servicio en America/Bogota.
-             */
-            service_date: string;
-            publication: components["schemas"]["PublicSchedulePublication"];
-            items: components["schemas"]["PublicScheduleItem"][];
-        };
-        /** @description Reporte de daño público (API.md 15.4). Campos desconocidos se rechazan. */
-        CreateDamageReportRequest: {
-            /** @description Código de DAMAGE_CATEGORY. */
-            category_code: string;
-            /** @description 10 a 500 caracteres (incident.description). */
-            description: string;
-            /** @description 0 a 120 caracteres. */
-            location_hint?: string;
-            /** @description Campo trampa oculto. Debe llegar vacío. */
-            website: string;
-            /**
-             * Format: date-time
-             * @description Inicio del llenado; al menos PUBLIC_FORM_MIN_SECONDS antes del envío.
-             */
-            form_started_at: string;
-        };
-        DamageReportCreated: {
-            /** @description 8 caracteres Crockford base32. Se muestra una sola vez. */
-            tracking_code: string;
-            /** @enum {string} */
-            status: "REPORTED";
-            message: string;
-        };
-        CatalogItem: {
-            code: string;
-            label_es: string;
-            sort_order: number;
-        };
-        CatalogList: {
-            items: components["schemas"]["CatalogItem"][];
-        };
-        /** @description Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante. */
-        PublicDamageReportStatus: {
-            /** @enum {string} */
-            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
-            status_label_es: string;
-            category_label_es: string;
-            /** Format: date-time */
-            reported_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        /** @description Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante. */
-        Incident: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            source: "PUBLIC_FORM" | "OPERATOR" | "ANOMALY" | "IMPORT";
-            category_code: string;
-            /** Format: uuid */
-            sector_id?: string | null;
-            description: string;
-            location_hint?: string | null;
-            /** @enum {string} */
-            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
-            /** Format: date-time */
-            reported_at: string;
-        };
-        IncidentPage: {
-            items: components["schemas"]["Incident"][];
-            next_cursor: string | null;
-        };
-        /** @description Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500). */
-        UpdateIncidentStatusRequest: {
-            /** @enum {string} */
-            status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
-            note?: string;
-        };
         ForecastRun: {
             /** Format: uuid */
             run_id?: string;
@@ -1397,45 +1863,228 @@ export interface components {
             /** Format: uuid */
             related_incident_id?: string | null;
         };
-        ScheduleItem: {
+        /** @description Cuenta del acueducto vista por la Junta (API.md 3.1). full_name es dato confidencial. */
+        ManagedUser: {
             /** Format: uuid */
             id: string;
-            /** Format: uuid */
-            sector_id: string;
-            sequence: number;
-            /** Format: date-time */
-            start_at: string;
-            /** Format: date-time */
-            end_at: string;
+            username: string;
+            full_name: string;
             /** @enum {string} */
-            origin: "GENERATED" | "MODIFIED" | "ADDED";
-            reasons?: {
-                code: string;
-                params: {
-                    [key: string]: unknown;
-                };
-                text: string;
-            }[];
+            status: "ACTIVE" | "LOCKED" | "DISABLED";
+            /** Format: date-time */
+            locked_until?: string | null;
+            must_change_password: boolean;
+            /** Format: date-time */
+            last_login_at?: string | null;
         };
-        ScheduleProposal: {
+        ManagedUserPage: {
+            items: components["schemas"]["ManagedUser"][];
+            next_cursor: string | null;
+        };
+        /** @description Alta de una persona con su primera membresía (API.md 3.2). Campos desconocidos responden 400. */
+        CreateUserRequest: {
+            username: string;
+            full_name: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+        };
+        CreatedUserMembership: {
             /** Format: uuid */
             id: string;
-            /** Format: date */
-            service_date: string;
-            status: string;
-            lock_version: number;
-            items: components["schemas"]["ScheduleItem"][];
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
         };
-        ScheduleProposalSummary: {
+        /** @description Cuenta creada y su código de activación, que se muestra una sola vez (API.md 3.2). */
+        CreatedUser: {
             /** Format: uuid */
             id: string;
-            /** Format: date */
-            service_date: string;
-            status: string;
-            lock_version: number;
+            username: string;
+            full_name: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "LOCKED" | "DISABLED";
+            must_change_password: boolean;
+            membership: components["schemas"]["CreatedUserMembership"];
+            /** @description Código de un solo uso, por ejemplo ABCD-EFGH-JKMN. Solo en esta respuesta. */
+            activation_code: string;
+            /** Format: date-time */
+            expires_at: string;
         };
-        ScheduleProposalPage: {
-            items: components["schemas"]["ScheduleProposalSummary"][];
+        /** @description Cambio de nombre o estado (API.md 3.3). Ningún rol: el rol se cambia con membresías. */
+        UpdateUserRequest: {
+            full_name?: string | null;
+            /** @enum {string|null} */
+            status?: "ACTIVE" | "LOCKED" | "DISABLED" | null;
+        };
+        ResetGrantRequest: {
+            reason: string;
+        };
+        /** @description Código de un solo uso para fijar una contraseña (API.md 3.4). Se muestra una sola vez. */
+        ResetGrant: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Membresía de una cuenta en un acueducto (API.md 3.5). */
+        ManagedMembership: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role_code: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: date-time */
+            valid_from: string;
+            /** Format: date-time */
+            valid_to?: string | null;
+            /** Format: uuid */
+            granted_by: string;
+        };
+        ManagedMembershipPage: {
+            items: components["schemas"]["ManagedMembership"][];
+            next_cursor: string | null;
+        };
+        /** @description Membresía nueva de una cuenta existente (API.md 3.6). */
+        GrantMembershipRequest: {
+            /** Format: uuid */
+            user_id: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role_code: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: date-time */
+            valid_from?: string;
+            /** Format: date-time */
+            valid_to?: string;
+        };
+        /** @description Aviso de privacidad vigente (API.md 4.3). */
+        PrivacyNotice: {
+            version: number;
+            text_es: string;
+            text_sha256: string;
+            /** Format: date-time */
+            effective_at: string;
+        };
+        /** @description Versión vigente que la persona leyó (API.md 4.4). */
+        AcceptPrivacyNoticeRequest: {
+            version: number;
+        };
+        /** @description Aceptación del aviso (API.md 4.4). */
+        PrivacyAcceptance: {
+            /** Format: uuid */
+            user_id: string;
+            version: number;
+            /** Format: date-time */
+            accepted_at: string;
+        };
+        /** @description Autorización de la Junta para que una entidad vea un resumen (API.md 13.4). Campos desconocidos responden 400. */
+        CreateSummaryShareRequest: {
+            /** Format: uuid */
+            grantee_user_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            reason: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Autorización de resumen para una entidad (API.md 13.4). */
+        SummaryShare: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            grantee_user_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            reason: string;
+            /** Format: uuid */
+            authorized_by: string;
+            /** Format: date-time */
+            authorized_at: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            revoked_at?: string | null;
+            /** Format: uuid */
+            revoked_by?: string | null;
+        };
+        /** @description Cantidad de registros por sección del acta. Solo cifras (API.md 13.6). */
+        SummarySections: {
+            observed: number;
+            estimated: number;
+            inferred: number;
+            confirmed: number;
+        };
+        /** @description Resumen agregado de un periodo, autorizado por la Junta (API.md 13.6). */
+        Summary: {
+            /** Format: uuid */
+            summary_share_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            content: components["schemas"]["SummarySections"];
+        };
+        SummaryPage: {
+            items: components["schemas"]["Summary"][];
+            next_cursor: string | null;
+        };
+        /** @description Entrada de la bitácora. Estados redactados (API.md 18.1). */
+        AuditLogEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            occurred_at: string;
+            /** @enum {string} */
+            actor_type: "USER" | "DEVICE" | "SYSTEM" | "API_KEY";
+            /** Format: uuid */
+            actor_id?: string | null;
+            action: string;
+            entity_type: string;
+            entity_id: string;
+            before_state?: Record<string, never> | null;
+            after_state?: Record<string, never> | null;
+            prev_hash: string;
+            row_hash: string;
+        };
+        AuditLogPage: {
+            items: components["schemas"]["AuditLogEntry"][];
+            next_cursor: string | null;
+        };
+        /** @description Evento de seguridad del acueducto. Sin HMAC de la IP ni secretos (API.md 18.2). */
+        SecurityEvent: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            type: "ACCOUNT_LOCKED" | "TOKEN_REUSE_DETECTED" | "PERMISSION_DENIED" | "RATE_LIMITED" | "INVALID_SIGNATURE" | "NONCE_REPLAY" | "HONEYPOT_TRIGGERED" | "IMPORT_REJECTED" | "MFA_FAILED";
+            severity: string;
+            /** Format: uuid */
+            actor_user_id?: string | null;
+            /** Format: uuid */
+            device_id?: string | null;
+            request_id?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            details: Record<string, never>;
+        };
+        SecurityEventPage: {
+            items: components["schemas"]["SecurityEvent"][];
             next_cursor: string | null;
         };
         ShiftExecutionRequest: {
@@ -2163,201 +2812,6 @@ export interface operations {
             };
         };
     };
-    submitReadingBatch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadingBatchRequest"];
-            };
-        };
-        responses: {
-            /** @description Resultado por lectura, en el orden del envío. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReadingBatchResponse"];
-                };
-            };
-            /** @description VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    correctReading: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadingCorrectionRequest"];
-            };
-        };
-        responses: {
-            /** @description Corrección creada y valor efectivo de la lectura. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReadingCorrectionResponse"];
-                };
-            };
-            /** @description FORBIDDEN: un OPERATOR solo corrige sus propias lecturas. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description NOT_FOUND: la lectura no existe o es de otro acueducto. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres). */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    getTankStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Estado del tanque. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TankStatus"];
-                };
-            };
-            /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    importSimulatedReadings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ImportReadingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Lote importado con sus conteos y los rechazos por fila. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ImportReadingsResponse"];
-                };
-            };
-            /** @description DEMO_ONLY: el acueducto no es el de demostración. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description CONFLICT: este file_sha256 ya se importó. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     getPublicSchedule: {
         parameters: {
             query?: {
@@ -2655,6 +3109,467 @@ export interface operations {
             };
         };
     };
+    listScheduleProposals: {
+        parameters: {
+            query?: {
+                service_date_from?: string;
+                service_date_to?: string;
+                status?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de propuestas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposalPage"];
+                };
+            };
+            /** @description FORBIDDEN: el rol no tiene PROPOSAL_VIEW. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    generateScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta generada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT: ya existe una propuesta no rechazada para la fecha. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NO_LEVEL_DATA, OUTSIDE_OPERATING_WINDOW. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Propuesta completa. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approveScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    modifyScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModifyScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    rejectScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    publishScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Publicación creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulePublication"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (no está aprobada) o CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitReadingBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Resultado por lectura, en el orden del envío. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingBatchResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    correctReading: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingCorrectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Corrección creada y valor efectivo de la lectura. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingCorrectionResponse"];
+                };
+            };
+            /** @description FORBIDDEN: un OPERATOR solo corrige sus propias lecturas. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND: la lectura no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getTankStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estado del tanque. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TankStatus"];
+                };
+            };
+            /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    importSimulatedReadings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportReadingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Lote importado con sus conteos y los rechazos por fila. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReadingsResponse"];
+                };
+            };
+            /** @description DEMO_ONLY: el acueducto no es el de demostración. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: este file_sha256 ya se importó. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     getLatestForecast: {
         parameters: {
             query?: never;
@@ -2764,14 +3679,12 @@ export interface operations {
             };
         };
     };
-    listScheduleProposals: {
+    listUsers: {
         parameters: {
             query?: {
-                service_date_from?: string;
-                service_date_to?: string;
-                status?: string;
-                cursor?: string;
+                status?: "ACTIVE" | "LOCKED" | "DISABLED";
                 limit?: number;
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -2779,17 +3692,17 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Página de propuestas. */
+            /** @description Página de cuentas. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ScheduleProposalPage"];
+                    "application/json": components["schemas"]["ManagedUserPage"];
                 };
             };
-            /** @description FORBIDDEN: el rol no tiene PROPOSAL_VIEW. */
-            403: {
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2799,7 +3712,240 @@ export interface operations {
             };
         };
     };
-    getScheduleProposal: {
+    createUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description Cuenta creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedUser"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: el usuario ya existe. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description Cuenta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedUser"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION o CONFLICT con reason SELF_LOCKOUT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    issueResetGrant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetGrantRequest"];
+            };
+        };
+        responses: {
+            /** @description Código emitido. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResetGrant"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION: cuenta desactivada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listMemberships: {
+        parameters: {
+            query?: {
+                user_id?: string;
+                aqueduct_id?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de membresías. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedMembershipPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    grantMembership: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantMembershipRequest"];
+            };
+        };
+        responses: {
+            /** @description Membresía creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedMembership"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: otro acueducto. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con reason MEMBERSHIP_OVERLAP. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revokeMembership: {
         parameters: {
             query?: never;
             header?: never;
@@ -2810,17 +3956,272 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Propuesta completa. */
+            /** @description Membresía terminada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con reason SELF_LOCKOUT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCurrentPrivacyNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Aviso vigente. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ScheduleProposal"];
+                    "application/json": components["schemas"]["PrivacyNotice"];
                 };
             };
-            /** @description NOT_FOUND. */
+            /** @description NOT_FOUND: no hay aviso vigente. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    acceptPrivacyNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptPrivacyNoticeRequest"];
+            };
+        };
+        responses: {
+            /** @description Aceptación registrada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyAcceptance"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.current_version: la versión ya no es la vigente. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createSummaryShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSummaryShareRequest"];
+            };
+        };
+        responses: {
+            /** @description Autorización creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryShare"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revokeSummaryShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revocada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CONFLICT: ya estaba revocada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSummaries: {
+        parameters: {
+            query?: {
+                period_from?: string;
+                period_to?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de resúmenes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listAuditLog: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                action?: string;
+                entity_type?: string;
+                actor_id?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de la bitácora. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSecurityEvents: {
+        parameters: {
+            query?: {
+                type?: "ACCOUNT_LOCKED" | "TOKEN_REUSE_DETECTED" | "PERMISSION_DENIED" | "RATE_LIMITED" | "INVALID_SIGNATURE" | "NONCE_REPLAY" | "HONEYPOT_TRIGGERED" | "IMPORT_REJECTED" | "MFA_FAILED";
+                from?: string;
+                to?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de eventos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityEventPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
