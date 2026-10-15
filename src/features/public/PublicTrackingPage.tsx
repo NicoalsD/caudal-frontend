@@ -64,9 +64,12 @@ export function PublicTrackingPage(): JSX.Element {
         initialCode={trackingCode ?? ''}
         onSearch={search}
       />
-      {trackingCode === undefined || trackingCode === '' ? null : (
-        <TrackingResult code={trackingCode} />
-      )}
+      {/* Announces the result when a new search runs on the same screen. */}
+      <div aria-live="polite">
+        {trackingCode === undefined || trackingCode === '' ? null : (
+          <TrackingResult code={trackingCode} />
+        )}
+      </div>
     </>
   );
 }
