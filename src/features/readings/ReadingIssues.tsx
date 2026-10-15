@@ -88,6 +88,9 @@ export function ReadingIssueCard({ item }: ReadingIssueCardProps): JSX.Element {
         <TriangleAlert aria-hidden="true" size={ICON_SIZE} />
         <span>{t('readings.review.needsReview')}</span>
       </p>
+      {item.gaugeValue === null ? null : (
+        <p>{t('pending.value', { value: formatDecimal(item.gaugeValue) })}</p>
+      )}
       <p>{refusalMessage(item.lastErrorCode ?? '', item.lastErrorDetails ?? {}, gauge)}</p>
       <div className={cn(styles.actions)}>
         <ResendDialog

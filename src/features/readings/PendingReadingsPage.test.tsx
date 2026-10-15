@@ -101,6 +101,9 @@ describe('PendingReadingsPage (S09)', () => {
     const correct = await screen.findByRole('button', { name: t('readings.review.correct') });
     const card = correct.closest('article')!;
     expect(within(card).getByText(t('readings.review.needsReview'))).toBeVisible();
+    expect(
+      within(card).getByText(t('pending.value', { value: String(REFUSED_VALUE) })),
+    ).toBeVisible();
     expect(within(card).getByRole('button', { name: t('readings.review.discard') })).toBeVisible();
   });
 
