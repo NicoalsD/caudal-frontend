@@ -1,3 +1,5 @@
+import 'fake-indexeddb/auto';
+
 import '@testing-library/jest-dom/vitest';
 
 import { cleanup, configure } from '@testing-library/react';

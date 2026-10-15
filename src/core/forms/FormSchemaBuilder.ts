@@ -50,7 +50,10 @@ export interface TextOptions {
   readonly lowercase?: boolean;
   /** Upper case before checking, for example a tracking code (Crockford base32 is case-blind). */
   readonly uppercase?: boolean;
-  /** Name of the constraint that holds the limits, when it differs from the field name. */
+  /**
+   * Constraint to read when it is not the field name. A dotted constraint such as "reading.note"
+   * cannot be a form field name (React Hook Form would nest it), so the field gets a plain name.
+   */
   readonly constraint?: string;
 }
 
@@ -108,8 +111,20 @@ export class FormSchemaBuilder {
 
   /** Text limited by the min, max, pattern and max lines the server sent for `field`. */
   text(field: string, options: TextOptions = {}): this {
-    const minimum = this.require(options.constraint ?? field).min ?? 0;
-    this.shape[field] = this.textSchema(field, minimum, options);
+    const limits = this.require(options.constraint ?? field);
+    this.shape[field] = this.textSchema(field, limits.min ?? 0, options);
+    return this;
+  }
+
+  /** A choice that must be made (a select or radio group): any non-empty value. */
+  requiredChoice(field: string): this {
+    this.shape[field] = z.string().min(MINIMUM_REQUIRED_LENGTH, this.messages('required', {}));
+    return this;
+  }
+
+  /** A yes/no box. */
+  flag(field: string): this {
+    this.shape[field] = z.boolean();
     return this;
   }
 
@@ -142,10 +157,16 @@ export class FormSchemaBuilder {
     return this;
   }
 
-  /** Text that must not be empty, with the range the backend defines (for example a reason). */
-  requiredReason(field: string): this {
-    const minimum = Math.max(this.require(field).min ?? 0, MINIMUM_REQUIRED_LENGTH);
-    this.shape[field] = this.textSchema(field, minimum, {});
+  /**
+   * Text that must not be empty, with the range the backend defines (for example a reason). The
+   * range is read from `options.constraint` when the field has another name in /meta/constraints.
+   */
+  requiredReason(field: string, options: TextOptions = {}): this {
+    const minimum = Math.max(
+      this.require(options.constraint ?? field).min ?? 0,
+      MINIMUM_REQUIRED_LENGTH,
+    );
+    this.shape[field] = this.textSchema(field, minimum, options);
     return this;
   }
 

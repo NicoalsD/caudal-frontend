@@ -2,8 +2,8 @@ import type { JSX } from 'react';
 
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
-import { ErrorState } from '../../ui/feedback/ErrorState';
-import { Button } from '../../ui/primitives/Button';
+import { ErrorState } from './ErrorState';
+import { Button } from '../primitives/Button';
 
 interface QueryErrorProps {
   readonly title: string;
@@ -18,7 +18,7 @@ export function QueryError({ title, error, onRetry }: QueryErrorProps): JSX.Elem
     <ErrorState
       title={title}
       message={text.supportCode === null ? text.message : `${text.message} ${text.supportCode}`}
-      action={<Button onClick={onRetry}>{t('rules.retry')}</Button>}
+      action={<Button onClick={onRetry}>{t('common.retry')}</Button>}
     />
   );
 }

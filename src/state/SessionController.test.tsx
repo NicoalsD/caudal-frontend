@@ -3,10 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
+import { SubmitReadingCommand } from '../core/commands/SubmitReadingCommand';
 import { ROUTE_PATHS } from '../core/session/routes';
 import type { Scheduler } from '../core/time/Scheduler';
 import { t } from '../i18n/t';
 import { createAppServices } from '../app/createAppServices';
+import { OfflineDatabase } from '../services/offline/OfflineDatabase';
 import { FakeClock } from '../test/fakes/FakeClock';
 import { ACCESS_TOKEN_SECONDS, TEST_PASSWORD, TEST_USERS } from '../test/factories/auth';
 import { apiUrl } from '../test/msw/apiUrl';
@@ -236,6 +238,41 @@ describe('sign out', () => {
     expect(services.queryClient.getQueryData(['datos'])).toBeUndefined();
   });
 
+  it('keeps the queued readings and clears the reference copies', async () => {
+    const backend = createSessionBackend(TEST_USERS.operator);
+    server.use(...backend.handlers);
+    const services = createAppServices(ENV);
+    const user = await services.session.signIn({
+      username: TEST_USERS.operator.username,
+      password: TEST_PASSWORD,
+    });
+    const clientId = `queued-${crypto.randomUUID()}`;
+    const cacheKey = `${user.aqueductId}|tanks-${clientId}`;
+    await services.offline.outbox.enqueue(
+      new SubmitReadingCommand(clientId, {
+        tankId: 't-1',
+        gaugeValue: 2.1,
+        waterAppearanceCode: 'NORMAL',
+        damageNoticed: false,
+        note: '',
+        observedAt: '2026-10-14T08:00:00.000Z',
+      }),
+      { userId: user.userId, aqueductId: user.aqueductId },
+      null,
+    );
+    await OfflineDatabase.shared.referenceCache.put({
+      key: cacheKey,
+      aqueductId: user.aqueductId,
+      fetchedAtMs: 1,
+      payload: [],
+    });
+
+    await services.session.logout();
+
+    expect(await OfflineDatabase.shared.outbox.get(clientId)).toBeDefined();
+    expect(await OfflineDatabase.shared.referenceCache.get(cacheKey)).toBeUndefined();
+  });
+
   it('closes the local session even if the server is unreachable', async () => {
     const backend = createSessionBackend(TEST_USERS.operator);
     server.use(...backend.handlers);
@@ -264,8 +301,16 @@ describe('storage and cookie rules', () => {
     backend.expireAccessTokens();
     await services.api.auth.me();
 
+    const token = services.tokens.get();
+    expect(token).not.toBeNull();
     expect(setItem).not.toHaveBeenCalled();
-    expect('indexedDB' in globalThis).toBe(false);
+    // The hint is stored in IndexedDB (the aqueduct's operator), but never the access token.
+    await vi.waitFor(async () => {
+      expect(await OfflineDatabase.shared.sessionHints.count()).toBe(1);
+    });
+    expect(JSON.stringify(await OfflineDatabase.shared.sessionHints.toArray())).not.toContain(
+      token ?? '',
+    );
   });
 
   it('is refused by the server when X-Requested-With is missing, and the client always sends it', async () => {

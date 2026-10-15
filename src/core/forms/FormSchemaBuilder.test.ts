@@ -162,6 +162,18 @@ describe('text fields', () => {
 });
 
 describe('requiredReason', () => {
+  it('reads the limits of the constraint named in the options', () => {
+    const named: ConstraintsMap = { reason: { min: REASON_MIN, max: REASON_MAX } };
+    const schema = new FormSchemaBuilder(named, keyMessages)
+      .requiredReason('change_reason', { constraint: 'reason' })
+      .build();
+
+    expect(messagesOf(schema.safeParse({ change_reason: 'x'.repeat(REASON_MIN - 1) }))).toEqual([
+      'validation.min',
+    ]);
+    expect(schema.safeParse({ change_reason: 'x'.repeat(REASON_MIN) }).success).toBe(true);
+  });
+
   const schema = new FormSchemaBuilder(constraints, keyMessages)
     .requiredReason('change_reason')
     .build();

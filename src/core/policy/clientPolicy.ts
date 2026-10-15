@@ -70,3 +70,18 @@ export const REFERENCE_STALE_TIME_MS = 3_600_000;
 
 /** Client policy: retries of a failed query before showing the error (architecture.md 6.1). */
 export const QUERY_RETRY_COUNT = 1;
+
+/** Offline queue (offline-sync.md section 5 and 6): first retry, ceiling and jitter of the backoff. */
+export const INITIAL_RETRY_DELAY_MS = 2_000;
+export const MAX_RETRY_DELAY_MS = 300_000;
+export const RETRY_JITTER_RATIO = 0.2;
+/** Readings per POST /readings/batch (the API takes up to 100 and 64 KiB per body). */
+export const OUTBOX_BATCH_SIZE = 50;
+/** While the page is visible and the phone is online, the queue is tried again this often. */
+export const FLUSH_INTERVAL_MS = 30_000;
+
+/** Simulated history import (API.md 17): at most 5.000 rows and 1 MiB per request. */
+export const IMPORT_BATCH_MAX_ROWS = 5_000;
+export const IMPORT_BATCH_MAX_BYTES = 1_048_576;
+/** Rows shown from the file before anything is sent. */
+export const IMPORT_PREVIEW_ROWS = 5;

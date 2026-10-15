@@ -1,6 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
 
-import { InMemorySessionHintRepository } from '../core/session/SessionHint';
 import type { SessionHintRepository } from '../core/session/SessionHint';
 import type { Clock } from '../core/time/Clock';
 import { SystemClock } from '../core/time/SystemClock';
@@ -17,6 +16,27 @@ import type { Scheduler } from '../core/time/Scheduler';
 import { TimeoutScheduler } from '../core/time/Scheduler';
 import { SessionController } from '../state/SessionController';
 import { SessionStore } from '../state/SessionStore';
+import { OfflineDatabase } from '../services/offline/OfflineDatabase';
+import { IndexedSessionHintRepository } from '../services/offline/IndexedSessionHintRepository';
+import { IndexedOutboxRepository } from '../services/offline/IndexedOutboxRepository';
+import { CryptoIdGenerator } from '../services/ids/CryptoIdGenerator';
+import { CommandQueue } from '../core/commands/CommandQueue';
+import type { OutboxOwner } from '../core/commands/OutboxRecord';
+import { ExponentialBackoff } from '../core/policy/Backoff';
+import {
+  FLUSH_INTERVAL_MS,
+  INITIAL_RETRY_DELAY_MS,
+  MAX_RETRY_DELAY_MS,
+  RETRY_JITTER_RATIO,
+} from '../core/policy/clientPolicy';
+import { SyncTrigger } from '../state/SyncTrigger';
+import { ReferenceFallback } from '../core/cache/ReferenceFallback';
+import { ConnectivityMonitor } from '../state/ConnectivityMonitor';
+import { SyncQueueStore } from '../state/SyncQueueStore';
+import { BrowserConnectivitySource } from '../services/connectivity/BrowserConnectivitySource';
+import { IndexedReferenceStore } from '../services/offline/IndexedReferenceStore';
+import { OutboxSync } from '../state/OutboxSync';
+import type { OfflineServices } from '../state/hooks/offlineContext';
 import { createQueryClient } from './providers/queryClient';
 
 export interface AppEnvironment {
@@ -33,6 +53,10 @@ export interface AppServices {
   readonly queryClient: QueryClient;
   /** Session hints per aqueduct (no secrets). Exposed for the local mode and for tests. */
   readonly hints: SessionHintRepository;
+  /** Loads the stored hints into memory; await it before reading hints at boot. */
+  readonly hintsReady: Promise<void>;
+  /** Reading queue and its sender (offline-sync.md). */
+  readonly offline: OfflineServices;
 }
 
 /**
@@ -43,10 +67,17 @@ export function createAppServices(
   env: AppEnvironment,
   clock: Clock = new SystemClock(),
   scheduler: Scheduler = new TimeoutScheduler(),
+  hints?: IndexedSessionHintRepository,
 ): AppServices {
   const baseUrl = readApiBaseUrl(env);
   const adapter = new ApiDtoAdapter();
   const logger = env.DEV === true ? new ConsoleLogger() : new NoopLogger();
+  // Hints live in IndexedDB; a failed write is logged and never blocks the sign-in.
+  const hintStore =
+    hints ??
+    new IndexedSessionHintRepository(OfflineDatabase.shared, (error) => {
+      logger.warn('hints.write_failed', { error: String(error) });
+    });
   const tokens = new TokenStore();
   // The refresh call goes straight to the transport: it must not pass through AuthHttpClient.
   const refreshApi = new AuthApi(new BaseFetchHttpClient({ baseUrl }), adapter);
@@ -59,7 +90,6 @@ export function createAppServices(
     random: () => Math.random(),
   });
   const api = new CaudalApi(http, adapter, baseUrl);
-  const hints: SessionHintRepository = new InMemorySessionHintRepository();
   const sessionStore = new SessionStore((event, phase) => {
     logger.warn('session.event_ignored', { event, phase });
   });
@@ -68,6 +98,7 @@ export function createAppServices(
   const queryClient = createQueryClient((error) => {
     errorSink.handle(error);
   });
+  const referenceStore = new IndexedReferenceStore(OfflineDatabase.shared);
   const session = new SessionController({
     api,
     tokens,
@@ -76,10 +107,54 @@ export function createAppServices(
     queryClient,
     clock,
     scheduler,
-    hints,
+    hints: hintStore,
+    references: referenceStore,
   });
   errorSink.handle = (error) => {
     session.handleError(error);
   };
-  return { api, tokens, sessionStore, session, queryClient, hints };
+  const hintsReady = hintStore.load().catch((error: unknown) => {
+    logger.warn('hints.load_failed', { error: String(error) });
+  });
+  const ids = new CryptoIdGenerator();
+  const backoff = new ExponentialBackoff(
+    INITIAL_RETRY_DELAY_MS,
+    MAX_RETRY_DELAY_MS,
+    RETRY_JITTER_RATIO,
+    () => Math.random(),
+  );
+  const outbox = new CommandQueue(
+    new IndexedOutboxRepository(OfflineDatabase.shared),
+    clock,
+    backoff,
+  );
+  // The queue belongs to whoever is signed in: nothing is sent or shown for anybody else.
+  const currentOwner = (): OutboxOwner | null => {
+    const state = sessionStore.getSnapshot();
+    return state.status === 'authenticated'
+      ? { userId: state.user.userId, aqueductId: state.user.aqueductId }
+      : null;
+  };
+  const sync = new OutboxSync(outbox, api.readings, ids, clock, currentOwner);
+  const connectivity = new ConnectivityMonitor(new BrowserConnectivitySource());
+  const offline: OfflineServices = {
+    clock,
+    ids,
+    outbox,
+    sync,
+    reference: new ReferenceFallback(referenceStore, clock),
+    connectivity,
+    syncQueue: new SyncQueueStore(outbox),
+    syncTrigger: new SyncTrigger(sync, connectivity, scheduler, FLUSH_INTERVAL_MS),
+  };
+  return {
+    api,
+    tokens,
+    sessionStore,
+    session,
+    queryClient,
+    hints: hintStore,
+    hintsReady,
+    offline,
+  };
 }

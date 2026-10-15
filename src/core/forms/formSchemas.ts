@@ -10,8 +10,12 @@ import type { ValidationMessageFactory } from './validationMessages';
 /** Field names shared with the API (snake_case in the JSON, as the constraints endpoint names them). */
 export const FIELD = {
   readingNote: 'reading.note',
+  note: 'note',
+  waterAppearance: 'water_appearance_code',
+  damageNoticed: 'damage_noticed',
   changeReason: 'change_reason',
   gaugeValue: 'gauge_value',
+  correctedGaugeValue: 'corrected_gauge_value',
   username: 'username',
   password: 'password',
   currentPassword: 'current_password',
@@ -28,6 +32,61 @@ export function readingFormSchema(
   return new FormSchemaBuilder(constraints, messages)
     .decimal(FIELD.gaugeValue, gauge)
     .text(FIELD.readingNote)
+    .build();
+}
+
+/**
+ * The reading entry form of the plumber: gauge value (range from the active rule set), water
+ * appearance (a catalog code), damage flag and an optional note. The note keeps the limits of the
+ * `reading.note` constraint but the field is called `note`.
+ */
+export function readingEntrySchema(
+  constraints: ConstraintsMap,
+  gauge: DecimalRule,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .decimal(FIELD.gaugeValue, gauge)
+    .requiredChoice(FIELD.waterAppearance)
+    .flag(FIELD.damageNoticed)
+    .text(FIELD.note, { constraint: FIELD.readingNote })
+    .build();
+}
+
+/**
+ * The key of the reason limits in /meta/constraints (API.md 4.1 and the backend's MetaController).
+ * Corrections and discards read it; rule activation still reads `change_reason` (see the report).
+ */
+export const READING_REASON_CONSTRAINT = 'reason';
+
+/** The gauge value alone, for correcting a refused reading: same range rules as the reading form. */
+export function gaugeValueSchema(
+  constraints: ConstraintsMap,
+  gauge: DecimalRule,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages).decimal(FIELD.gaugeValue, gauge).build();
+}
+
+/** A correction of a saved reading: the new value in the range, and the mandatory reason. */
+export function correctionFormSchema(
+  constraints: ConstraintsMap,
+  gauge: DecimalRule,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .decimal(FIELD.correctedGaugeValue, gauge)
+    .requiredReason(FIELD.changeReason, { constraint: READING_REASON_CONSTRAINT })
+    .build();
+}
+
+/** The mandatory reason of a reading (a correction or a discard): limits under `reason`. */
+export function readingReasonSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .requiredReason(FIELD.changeReason, { constraint: READING_REASON_CONSTRAINT })
     .build();
 }
 

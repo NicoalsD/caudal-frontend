@@ -5,8 +5,10 @@ import type { createBrowserRouter } from 'react-router';
 
 import type { CaudalApi } from '../services/api/CaudalApi';
 import type { SessionController } from '../state/SessionController';
+import type { OfflineServices } from '../state/hooks/offlineContext';
 import type { SessionStore } from '../state/SessionStore';
 import { ApiProvider } from './providers/ApiProvider';
+import { OfflineProvider } from './providers/OfflineProvider';
 import { QueryProvider } from './providers/QueryProvider';
 import { SessionProvider } from './providers/SessionProvider';
 
@@ -16,6 +18,7 @@ interface AppProps {
   readonly router: ReturnType<typeof createBrowserRouter>;
   readonly api: CaudalApi;
   readonly queryClient: QueryClient;
+  readonly offline?: OfflineServices;
 }
 
 export function App({
@@ -24,6 +27,7 @@ export function App({
   router,
   api,
   queryClient,
+  offline,
 }: AppProps): JSX.Element {
   return (
     <ApiProvider api={api}>
@@ -32,7 +36,13 @@ export function App({
           store={sessionStore}
           {...(sessionController === undefined ? {} : { controller: sessionController })}
         >
-          <RouterProvider router={router} />
+          {offline === undefined ? (
+            <RouterProvider router={router} />
+          ) : (
+            <OfflineProvider services={offline}>
+              <RouterProvider router={router} />
+            </OfflineProvider>
+          )}
         </SessionProvider>
       </QueryProvider>
     </ApiProvider>

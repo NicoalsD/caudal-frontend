@@ -311,6 +311,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/readings/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sincroniza la cola offline de lecturas
+         * @description Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.
+         */
+        post: operations["submitReadingBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/readings/{id}/corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corrige una lectura ya guardada, con motivo
+         * @description Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.
+         */
+        post: operations["correctReading"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tanks/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado del tanque: último nivel, tendencia, antigüedad y pronóstico
+         * @description Autenticado, permiso STATUS_VIEW. API.md sección 8.1. Nivel, tendencia, banda y pronóstico son nulos si no hay datos.
+         */
+        get: operations["getTankStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Importa historial simulado de lecturas (acueducto demo)
+         * @description Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.
+         */
+        post: operations["importSimulatedReadings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/{aqueductSlug}/schedule": {
         parameters: {
             query?: never;
@@ -779,6 +859,145 @@ export interface components {
         /** @description Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend. */
         ValveList: {
             items: components["schemas"]["Valve"][];
+        };
+        ReadingBatchItem: {
+            /**
+             * Format: uuid
+             * @description UUID del cliente: clave de idempotencia de la lectura.
+             */
+            id: string;
+            /** Format: uuid */
+            tank_id: string;
+            gauge_value: number;
+            water_appearance_code: string;
+            damage_noticed: boolean;
+            note?: string;
+            /** Format: date-time */
+            observed_at: string;
+        };
+        ReadingBatchRequest: {
+            /** Format: uuid */
+            sync_batch_id: string;
+            readings: components["schemas"]["ReadingBatchItem"][];
+        };
+        ReadingBatchResult: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "ACCEPTED" | "FLAGGED" | "REPLAYED" | "REJECTED";
+            error?: {
+                code: string;
+                message: string;
+                details?: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        ReadingBatchResponse: {
+            /** Format: uuid */
+            sync_batch_id: string;
+            items_received: number;
+            items_accepted: number;
+            items_rejected: number;
+            idempotent_replay: boolean;
+            results: components["schemas"]["ReadingBatchResult"][];
+        };
+        ReadingCorrectionRequest: {
+            /** @description Decimal con 2 cifras, dentro del rango del tanque. */
+            corrected_gauge_value: number;
+            reason: string;
+        };
+        /** @description Corrección creada y el valor efectivo nuevo de la lectura. El dato original no cambia. */
+        ReadingCorrectionResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            reading_id: string;
+            corrected_gauge_value: number;
+            reason: string;
+            /** Format: uuid */
+            corrected_by: string;
+            /** Format: date-time */
+            created_at: string;
+            effective_gauge_value: number;
+        };
+        TankStatusLevel: {
+            /** @description Nivel en la regla, dos cifras. */
+            value: number;
+            /** Format: date-time */
+            observed_at: string;
+            hours_ago: number;
+        };
+        TankStatusTrend: {
+            slope_per_day: number;
+            /** @enum {string} */
+            label: "DOWN" | "STABLE" | "UP";
+            label_es?: string;
+        };
+        TankStatusForecastPoint: {
+            /** Format: date */
+            target_date: string;
+            p10: number;
+            p50: number;
+            p90: number;
+        };
+        TankStatusForecast: {
+            /** Format: uuid */
+            run_id?: string;
+            is_fallback: boolean;
+            /** @enum {string} */
+            fallback_reason?: "IA_TIMEOUT" | "CIRCUIT_OPEN" | "IA_ERROR" | "INSUFFICIENT_HISTORY" | "SHADOW_BASELINE";
+            model_name?: string;
+            /** Format: date-time */
+            created_at?: string;
+            points: components["schemas"]["TankStatusForecastPoint"][];
+        };
+        TankStatus: {
+            level?: components["schemas"]["TankStatusLevel"] | null;
+            trend: components["schemas"]["TankStatusTrend"];
+            stale: {
+                is_stale: boolean;
+                stale_after_hours: number;
+            };
+            /** @description Banda del nivel actual. */
+            band?: ("HIGH" | "LOW" | "CRITICAL") | null;
+            forecast?: components["schemas"]["TankStatusForecast"] | null;
+            open_anomalies?: number;
+        };
+        ImportReadingRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tank_id: string;
+            gauge_value: number;
+            water_appearance_code: string;
+            damage_noticed: boolean;
+            note?: string;
+            /** Format: date-time */
+            observed_at: string;
+        };
+        ImportReadingsRequest: {
+            /** Format: uuid */
+            aqueduct_id: string;
+            scenario_name: string;
+            /** Format: int64 */
+            seed: number;
+            simulator_version: string;
+            file_sha256: string;
+            rows: components["schemas"]["ImportReadingRow"][];
+        };
+        ImportRejection: {
+            /** @description Posición de la fila en el lote, desde 1. */
+            row: number;
+            code: string;
+        };
+        ImportReadingsResponse: {
+            /** Format: uuid */
+            import_batch_id: string;
+            rows_received: number;
+            rows_accepted: number;
+            rows_rejected: number;
+            rejections: components["schemas"]["ImportRejection"][];
         };
         /** @description Acueducto del horario público. Sin datos personales. */
         PublicScheduleAqueduct: {
@@ -1483,6 +1702,201 @@ export interface operations {
             };
             /** @description El sector no existe (NOT_FOUND). */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitReadingBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Resultado por lectura, en el orden del envío. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingBatchResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    correctReading: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingCorrectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Corrección creada y valor efectivo de la lectura. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingCorrectionResponse"];
+                };
+            };
+            /** @description FORBIDDEN: un OPERATOR solo corrige sus propias lecturas. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND: la lectura no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getTankStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estado del tanque. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TankStatus"];
+                };
+            };
+            /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    importSimulatedReadings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportReadingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Lote importado con sus conteos y los rechazos por fila. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReadingsResponse"];
+                };
+            };
+            /** @description DEMO_ONLY: el acueducto no es el de demostración. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: este file_sha256 ya se importó. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
