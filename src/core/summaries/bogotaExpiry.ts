@@ -1,5 +1,5 @@
-/** Colombia has no daylight saving time: America/Bogota is always UTC-5. */
-const BOGOTA_OFFSET = '-05:00';
+import { BOGOTA_OFFSET } from '../format/bogotaDay';
+
 const LOCAL_DATE_TIME = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/;
 
 /**

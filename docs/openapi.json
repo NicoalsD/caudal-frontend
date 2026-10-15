@@ -2539,6 +2539,186 @@
           }
         }
       }
+    },
+    "/api/v1/audit-log": {
+      "get": {
+        "operationId": "listAuditLog",
+        "summary": "Bitácora de auditoría, de la más reciente a la más antigua",
+        "description": "Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM). Filtros opcionales from, to (instantes), action, entity_type y actor_id.",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,59}$"
+            }
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,59}$"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de la bitácora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/security-events": {
+      "get": {
+        "operationId": "listSecurityEvents",
+        "summary": "Eventos de seguridad del acueducto",
+        "description": "Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM).",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACCOUNT_LOCKED",
+                "TOKEN_REUSE_DETECTED",
+                "PERMISSION_DENIED",
+                "RATE_LIMITED",
+                "INVALID_SIGNATURE",
+                "NONCE_REPLAY",
+                "HONEYPOT_TRIGGERED",
+                "IMPORT_REJECTED",
+                "MFA_FAILED"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de eventos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityEventPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5448,6 +5628,160 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Summary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AuditLogEntry": {
+        "type": "object",
+        "description": "Entrada de la bitácora. Estados redactados (API.md 18.1).",
+        "required": [
+          "id",
+          "occurred_at",
+          "actor_type",
+          "action",
+          "entity_type",
+          "entity_id",
+          "prev_hash",
+          "row_hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor_type": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "DEVICE",
+              "SYSTEM",
+              "API_KEY"
+            ]
+          },
+          "actor_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "before_state": {
+            "type": "object",
+            "nullable": true
+          },
+          "after_state": {
+            "type": "object",
+            "nullable": true
+          },
+          "prev_hash": {
+            "type": "string"
+          },
+          "row_hash": {
+            "type": "string"
+          }
+        }
+      },
+      "AuditLogPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogEntry"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SecurityEvent": {
+        "type": "object",
+        "description": "Evento de seguridad del acueducto. Sin HMAC de la IP ni secretos (API.md 18.2).",
+        "required": [
+          "id",
+          "type",
+          "severity",
+          "created_at",
+          "details"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_LOCKED",
+              "TOKEN_REUSE_DETECTED",
+              "PERMISSION_DENIED",
+              "RATE_LIMITED",
+              "INVALID_SIGNATURE",
+              "NONCE_REPLAY",
+              "HONEYPOT_TRIGGERED",
+              "IMPORT_REJECTED",
+              "MFA_FAILED"
+            ]
+          },
+          "severity": {
+            "type": "string"
+          },
+          "actor_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "request_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      },
+      "SecurityEventPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityEvent"
             }
           },
           "next_cursor": {

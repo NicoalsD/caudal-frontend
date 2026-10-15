@@ -35,6 +35,10 @@ import type {
   IncidentView,
   ManagedMembershipPageView,
   PrivacyAcceptanceView,
+  AuditLogEntryView,
+  AuditLogPageView,
+  SecurityEventPageView,
+  SecurityEventView,
   SummaryPageView,
   SummaryShareView,
   SummaryView,
@@ -85,6 +89,10 @@ type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
 type ManagedUserDto = components['schemas']['ManagedUser'];
 type PrivacyNoticeDto = components['schemas']['PrivacyNotice'];
+type AuditLogEntryDto = components['schemas']['AuditLogEntry'];
+type AuditLogPageDto = components['schemas']['AuditLogPage'];
+type SecurityEventDto = components['schemas']['SecurityEvent'];
+type SecurityEventPageDto = components['schemas']['SecurityEventPage'];
 type SummaryDto = components['schemas']['Summary'];
 type SummaryPageDto = components['schemas']['SummaryPage'];
 type SummaryShareDto = components['schemas']['SummaryShare'];
@@ -218,6 +226,42 @@ export class ApiDtoAdapter {
       locationHint: dto.location_hint ?? null,
       status: dto.status,
       reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+    };
+  }
+
+  toAuditLogEntry(dto: AuditLogEntryDto): AuditLogEntryView {
+    return {
+      id: dto.id,
+      occurredAt: this.toTimestamp('occurred_at', dto.occurred_at),
+      actorType: dto.actor_type,
+      actorId: dto.actor_id ?? null,
+      action: dto.action,
+      entityType: dto.entity_type,
+      entityId: dto.entity_id,
+    };
+  }
+
+  toAuditLogPage(dto: AuditLogPageDto): AuditLogPageView {
+    return {
+      items: dto.items.map((item) => this.toAuditLogEntry(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toSecurityEvent(dto: SecurityEventDto): SecurityEventView {
+    return {
+      id: dto.id,
+      type: dto.type,
+      severity: dto.severity,
+      actorUserId: dto.actor_user_id ?? null,
+      createdAt: this.toTimestamp('created_at', dto.created_at),
+    };
+  }
+
+  toSecurityEventPage(dto: SecurityEventPageDto): SecurityEventPageView {
+    return {
+      items: dto.items.map((item) => this.toSecurityEvent(item)),
+      nextCursor: dto.next_cursor ?? null,
     };
   }
 

@@ -21,6 +21,8 @@ import { UsersPage } from '../features/users';
 import { PrivacyNoticePage } from '../features/privacy';
 import { EntitiesPage } from '../features/entities';
 import { EntitySummariesPage } from '../features/entity-summaries';
+import { AuditPage } from '../features/audit';
+import { AuditLayout } from './layouts/AuditLayout';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
@@ -133,9 +135,18 @@ const teamRoutes: RouteObject = {
         screen(ROUTE_PATHS.team.evaluation, t('screens.evaluation')),
         screen(ROUTE_PATHS.team.health, t('screens.health')),
         screen(ROUTE_PATHS.team.devices, t('screens.devices')),
-        screen(ROUTE_PATHS.team.audit, t('screens.audit')),
         { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
+    },
+  ],
+};
+
+const auditRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.audit} />,
+  children: [
+    {
+      element: <AuditLayout />,
+      children: [{ path: ROUTE_PATHS.team.audit, element: <AuditPage /> }],
     },
   ],
 };
@@ -178,7 +189,14 @@ export function buildRoutes(): RouteObject[] {
               children: [
                 {
                   element: <RequirePrivacyAccepted />,
-                  children: [operatorRoutes, boardRoutes, teamRoutes, entityRoutes, sharedRoutes],
+                  children: [
+                    operatorRoutes,
+                    boardRoutes,
+                    teamRoutes,
+                    auditRoutes,
+                    entityRoutes,
+                    sharedRoutes,
+                  ],
                 },
               ],
             },

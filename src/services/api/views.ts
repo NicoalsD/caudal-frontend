@@ -547,3 +547,38 @@ export interface ManagedMembershipPageView {
   readonly items: readonly ManagedMembershipView[];
   readonly nextCursor: string | null;
 }
+
+/** One line of the audit log (API.md 18.1). The states are redacted and carry no personal data. */
+export interface AuditLogEntryView {
+  readonly id: number;
+  readonly occurredAt: TimestampView;
+  /** USER, DEVICE, SYSTEM or API_KEY. */
+  readonly actorType: string;
+  readonly actorId: string | null;
+  /** Upper-case code, for example RULESET_ACTIVATED. */
+  readonly action: string;
+  readonly entityType: string;
+  readonly entityId: string;
+}
+
+/** One page of the audit log; `nextCursor` is null when there are no more. */
+export interface AuditLogPageView {
+  readonly items: readonly AuditLogEntryView[];
+  readonly nextCursor: string | null;
+}
+
+/** A security event of the aqueduct (API.md 18.2). Its details are already redacted. */
+export interface SecurityEventView {
+  readonly id: number;
+  /** Upper-case code, for example PERMISSION_DENIED. */
+  readonly type: string;
+  readonly severity: string;
+  readonly actorUserId: string | null;
+  readonly createdAt: TimestampView;
+}
+
+/** One page of security events; `nextCursor` is null when there are no more. */
+export interface SecurityEventPageView {
+  readonly items: readonly SecurityEventView[];
+  readonly nextCursor: string | null;
+}

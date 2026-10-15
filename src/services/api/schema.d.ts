@@ -943,6 +943,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bitácora de auditoría, de la más reciente a la más antigua
+         * @description Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM). Filtros opcionales from, to (instantes), action, entity_type y actor_id.
+         */
+        get: operations["listAuditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/security-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Eventos de seguridad del acueducto
+         * @description Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM).
+         */
+        get: operations["listSecurityEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1855,6 +1895,48 @@ export interface components {
         };
         SummaryPage: {
             items: components["schemas"]["Summary"][];
+            next_cursor: string | null;
+        };
+        /** @description Entrada de la bitácora. Estados redactados (API.md 18.1). */
+        AuditLogEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            occurred_at: string;
+            /** @enum {string} */
+            actor_type: "USER" | "DEVICE" | "SYSTEM" | "API_KEY";
+            /** Format: uuid */
+            actor_id?: string | null;
+            action: string;
+            entity_type: string;
+            entity_id: string;
+            before_state?: Record<string, never> | null;
+            after_state?: Record<string, never> | null;
+            prev_hash: string;
+            row_hash: string;
+        };
+        AuditLogPage: {
+            items: components["schemas"]["AuditLogEntry"][];
+            next_cursor: string | null;
+        };
+        /** @description Evento de seguridad del acueducto. Sin HMAC de la IP ni secretos (API.md 18.2). */
+        SecurityEvent: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            type: "ACCOUNT_LOCKED" | "TOKEN_REUSE_DETECTED" | "PERMISSION_DENIED" | "RATE_LIMITED" | "INVALID_SIGNATURE" | "NONCE_REPLAY" | "HONEYPOT_TRIGGERED" | "IMPORT_REJECTED" | "MFA_FAILED";
+            severity: string;
+            /** Format: uuid */
+            actor_user_id?: string | null;
+            /** Format: uuid */
+            device_id?: string | null;
+            request_id?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            details: Record<string, never>;
+        };
+        SecurityEventPage: {
+            items: components["schemas"]["SecurityEvent"][];
             next_cursor: string | null;
         };
     };
@@ -3797,6 +3879,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SummaryPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listAuditLog: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                action?: string;
+                entity_type?: string;
+                actor_id?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de la bitácora. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSecurityEvents: {
+        parameters: {
+            query?: {
+                type?: "ACCOUNT_LOCKED" | "TOKEN_REUSE_DETECTED" | "PERMISSION_DENIED" | "RATE_LIMITED" | "INVALID_SIGNATURE" | "NONCE_REPLAY" | "HONEYPOT_TRIGGERED" | "IMPORT_REJECTED" | "MFA_FAILED";
+                from?: string;
+                to?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de eventos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityEventPage"];
                 };
             };
             /** @description VALIDATION_ERROR o CURSOR_INVALID. */

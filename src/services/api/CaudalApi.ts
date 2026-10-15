@@ -16,6 +16,7 @@ import { TankStatusApi } from './endpoints/TankStatusApi';
 import { UsersApi } from './endpoints/UsersApi';
 import { PrivacyApi } from './endpoints/PrivacyApi';
 import { SummariesApi } from './endpoints/SummariesApi';
+import { AuditApi } from './endpoints/AuditApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -46,6 +47,8 @@ export class CaudalApi {
   readonly privacy: PrivacyApi;
   /** Summaries and their authorizations (API.md section 13). */
   readonly summaries: SummariesApi;
+  /** The audit log and the security events (API.md section 18). */
+  readonly audit: AuditApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -65,5 +68,6 @@ export class CaudalApi {
     this.users = new UsersApi(http, adapter);
     this.privacy = new PrivacyApi(http, adapter);
     this.summaries = new SummariesApi(http, adapter);
+    this.audit = new AuditApi(http, adapter);
   }
 }
