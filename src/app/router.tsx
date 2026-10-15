@@ -20,6 +20,7 @@ import { RuleDraftPage, RulesPage } from '../features/rules';
 import { UsersPage } from '../features/users';
 import { PrivacyNoticePage } from '../features/privacy';
 import { EntitiesPage } from '../features/entities';
+import { EntitySummariesPage } from '../features/entity-summaries';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
@@ -144,7 +145,7 @@ const entityRoutes: RouteObject = {
   children: [
     {
       element: <EntityLayout />,
-      children: [screen(ROUTE_PATHS.entity.summaries, t('screens.summaries'))],
+      children: [{ path: ROUTE_PATHS.entity.summaries, element: <EntitySummariesPage /> }],
     },
   ],
 };

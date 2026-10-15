@@ -679,6 +679,18 @@ export const strings = {
     submitting: 'Guardando...',
     changed: 'El aviso cambió mientras lo leías. Revísalo y acéptalo de nuevo.',
   },
+  entitySummaries: {
+    loading: 'Cargando tus resúmenes...',
+    empty: 'Aún no tienes resúmenes autorizados.',
+    loadMore: 'Ver más',
+    sectionsLabel: 'Tipo de información',
+    sections: {
+      observed: 'Observado',
+      estimated: 'Estimado',
+      inferred: 'Inferido',
+      confirmed: 'Confirmado',
+    },
+  },
   entities: {
     loading: 'Cargando las autorizaciones...',
     empty: 'Ninguna entidad tiene un resumen autorizado.',

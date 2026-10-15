@@ -12,6 +12,7 @@ import { cn } from '../../ui/styles/cn';
 import styles from './Entities.module.css';
 import { CreateShareDialog, RevokeShareDialog } from './EntityShareDialogs';
 import { useSummaryAuthorizations } from './entityQueries';
+import { summaryScopeText } from './summaryScope';
 
 /**
  * Screen S22: the summaries the Board has authorized for entities. Authorizing and revoking are
@@ -96,7 +97,7 @@ function ShareItem({ summary, onRevoked }: ShareItemProps): JSX.Element {
   const [revoking, setRevoking] = useState(false);
   return (
     <li className={styles.item}>
-      <h3 className={styles.name}>{scopeLabel(summary)}</h3>
+      <h3 className={styles.name}>{summaryScopeText(summary.scope)}</h3>
       <p className={styles.meta}>
         {t('entities.period', {
           from: formatDayKey(summary.periodFrom),
@@ -115,10 +116,4 @@ function ShareItem({ summary, onRevoked }: ShareItemProps): JSX.Element {
       </div>
     </li>
   );
-}
-
-function scopeLabel(summary: SummaryView): string {
-  return summary.scope === 'MONTHLY_SUMMARY'
-    ? t('entities.scopes.monthly')
-    : t('entities.scopes.minutes');
 }

@@ -31,6 +31,7 @@ import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { useAllMemberships, useAllUsers } from '../users/userQueries';
 import styles from './Entities.module.css';
+import { summaryScopeText } from './summaryScope';
 import { useCreateSummaryShare, useRevokeSummaryShare } from './entityQueries';
 
 const SCOPES: readonly SummaryScope[] = ['MONTHLY_SUMMARY', 'MINUTES'];
@@ -43,10 +44,6 @@ const FIELDS = {
   periodTo: 'period_to',
   expiresAt: 'expires_at',
 } as const;
-
-function scopeText(scope: SummaryScope): string {
-  return scope === 'MONTHLY_SUMMARY' ? t('entities.scopes.monthly') : t('entities.scopes.minutes');
-}
 
 const createFormBuild = (constraints: ConstraintsMap, messages: ValidationMessageFactory) => ({
   schema: new FormSchemaBuilder(constraints, messages)
@@ -210,7 +207,7 @@ function CreateShareForm({
         />
         <RadioGroupField
           legend={t('entities.scopeLegend')}
-          options={SCOPES.map((scope) => ({ value: scope, label: scopeText(scope) }))}
+          options={SCOPES.map((scope) => ({ value: scope, label: summaryScopeText(scope) }))}
           error={errors.scope?.message}
           {...register(FIELDS.scope)}
         />
