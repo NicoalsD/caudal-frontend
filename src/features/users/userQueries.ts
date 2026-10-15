@@ -128,6 +128,14 @@ export function useUpdateUser(): UseMutationResult<ManagedUserView, Error, UserC
   });
 }
 
+/** The old role already ended but the new one could not start: the account has no role now. */
+export class RoleGrantFailedError extends Error {
+  constructor(override readonly cause: unknown) {
+    super('The previous membership ended but the new one was not granted');
+    this.name = 'RoleGrantFailedError';
+  }
+}
+
 export interface RoleChange {
   readonly userId: string;
   /** The role in effect now, which ends first. Null when the account has none. */
@@ -148,14 +156,19 @@ export function useChangeRole(): UseMutationResult<void, Error, RoleChange> {
   const membershipsKey = useMembershipsKey();
   return useMutation({
     mutationFn: async (change) => {
+      const revoked = change.currentMembershipId !== null;
       if (change.currentMembershipId !== null) {
         await api.users.revokeMembership(change.currentMembershipId);
       }
-      await api.users.grantMembership({
-        userId: change.userId,
-        aqueductId,
-        roleCode: change.role,
-      });
+      try {
+        await api.users.grantMembership({
+          userId: change.userId,
+          aqueductId,
+          roleCode: change.role,
+        });
+      } catch (error) {
+        throw revoked ? new RoleGrantFailedError(error) : error;
+      }
     },
     onSettled: async () => {
       await client.invalidateQueries({ queryKey: membershipsKey });

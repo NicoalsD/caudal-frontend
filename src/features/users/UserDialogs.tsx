@@ -26,7 +26,13 @@ import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import styles from './Users.module.css';
 import { roleText } from './roleText';
-import { useChangeRole, useCreateUser, useIssueResetGrant, useUpdateUser } from './userQueries';
+import {
+  RoleGrantFailedError,
+  useChangeRole,
+  useCreateUser,
+  useIssueResetGrant,
+  useUpdateUser,
+} from './userQueries';
 import { userErrorMessage } from './userErrors';
 
 const USERNAME_FIELD = 'username';
@@ -199,7 +205,11 @@ export function ChangeRoleDialog({
       onDone();
       onOpenChange(false);
     } catch (error) {
-      setFailure(userErrorMessage(error, t('users.errors.generic')));
+      setFailure(
+        error instanceof RoleGrantFailedError
+          ? t('users.errors.roleEndedNotGranted')
+          : userErrorMessage(error, t('users.errors.generic')),
+      );
     }
   });
   return (

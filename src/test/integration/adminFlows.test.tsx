@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { formatDayKey } from '../../core/format/time';
@@ -8,6 +9,8 @@ import { t } from '../../i18n/t';
 import { PERMISSIONS_BY_ROLE, TEST_AQUEDUCT_ID } from '../factories/auth';
 import { buildSessionUser } from '../factories/session';
 import { createAdminBackend } from '../msw/adminBackend';
+import { errorResponse } from '../msw/errorResponse';
+import { apiUrl } from '../msw/apiUrl';
 import { server } from '../msw/server';
 import { renderApp } from '../renderApp';
 
@@ -22,6 +25,7 @@ const FIRST_PAGE_SIZE = 2;
 const SECOND_PAGE_SIZE = 4;
 const LAST_QUERY = -1;
 const SUPPORT_ENTITY_ID = 'user-entity';
+const SERVER_ERROR_STATUS = 500;
 
 const admin = () =>
   buildSessionUser({
@@ -61,6 +65,32 @@ const entityUser = () => ({
 });
 
 describe('user administration (F089)', () => {
+  it('says the old role ended when the new one cannot be granted', async () => {
+    const backend = createAdminBackend({
+      aqueductId: TEST_AQUEDUCT_ID,
+      users: [entityUser()],
+      memberships: [entityMembership()],
+    });
+    // The first matching handler wins, so the failing grant goes before the fake backend.
+    server.use(
+      http.post(apiUrl('/memberships'), () => errorResponse(SERVER_ERROR_STATUS, 'INTERNAL_ERROR')),
+      ...backend.handlers,
+    );
+    const user = userEvent.setup();
+    renderApp(ROUTE_PATHS.board.users, { user: admin() });
+
+    const row = (await screen.findByText('Entidad Prueba')).closest('li');
+    if (row === null) {
+      throw new Error('The account row is missing');
+    }
+    await user.click(within(row).getByRole('button', { name: t('users.changeRole') }));
+    const dialog = await screen.findByRole('dialog', { name: t('users.changeRoleTitle') });
+    await user.click(within(dialog).getByRole('radio', { name: t('users.roles.operator') }));
+    await user.click(within(dialog).getByRole('button', { name: t('users.submitRole') }));
+
+    expect(await within(dialog).findByText(t('users.errors.roleEndedNotGranted'))).toBeVisible();
+  });
+
   it('creates an account and shows its activation code exactly once', async () => {
     const backend = createAdminBackend({ aqueductId: TEST_AQUEDUCT_ID });
     server.use(...backend.handlers);
