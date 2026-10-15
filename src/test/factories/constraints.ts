@@ -8,7 +8,6 @@ export function buildConstraints(overrides: ConstraintsDto = {}): ConstraintsDto
     username: { min: 3, max: 32 },
     password: { min: 12, max: 128 },
     'reading.note': { min: 0, max: 500, max_lines: 10 },
-    change_reason: { min: 10, max: 500 },
     reason: { min: 10, max: 500 },
     'sector.code': { min: 2, max: 20, pattern: '^[A-Z0-9-]+$' },
     'incident.description': { min: 10, max: 500 },
