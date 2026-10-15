@@ -103,7 +103,11 @@ export function ProposalEditorForm({
           available: formatDecimal(state.availableHours, 1),
         })}
       </p>
-      {totalProblem === null ? null : <p className={cn(styles.error)}>{totalProblem}</p>}
+      {totalProblem === null ? null : (
+        <p role="alert" className={cn(styles.error)}>
+          {totalProblem}
+        </p>
+      )}
       {state.shifts.map((shift) => (
         <ShiftHoursField
           key={shift.sectorId}

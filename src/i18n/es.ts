@@ -594,7 +594,7 @@ export const strings = {
     prioritySector: 'Sector prioritario',
     originModified: 'Cambiado por la Junta',
     originAdded: 'Agregado por la Junta',
-    bandName: { HIGH: 'alta', LOW: 'baja', CRITICAL: 'crítica' },
+    bandName: { high: 'alta', low: 'baja', critical: 'crítica' },
     guide: {
       heading: 'Siguiente paso de hoy',
       review: 'Revisar la propuesta',
@@ -637,12 +637,12 @@ export const strings = {
     generatedOn: 'Generada el {date}',
     offline: 'Las decisiones necesitan conexión.',
     status: {
-      PENDING_REVIEW: 'Pendiente de revisión',
-      APPROVED: 'Aprobada',
-      APPROVED_WITH_CHANGES: 'Aprobada con cambios',
-      REJECTED: 'Rechazada',
-      PUBLISHED: 'Publicada',
-      CLOSED: 'Cerrada',
+      pendingReview: 'Pendiente de revisión',
+      approved: 'Aprobada',
+      approvedWithChanges: 'Aprobada con cambios',
+      rejected: 'Rechazada',
+      published: 'Publicada',
+      closed: 'Cerrada',
     },
   },
   incidents: {

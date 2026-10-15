@@ -41,7 +41,7 @@ describe('proposal decision flow (F057)', () => {
     await userEvent.click(screen.getByRole('button', { name: t('proposals.editor.save') }));
 
     expect(
-      await screen.findByText(t('proposals.status.APPROVED_WITH_CHANGES')),
+      await screen.findByText(t('proposals.status.approvedWithChanges')),
     ).toBeInTheDocument();
     await userEvent.click(
       await screen.findByRole('button', { name: t('proposals.actions.publish') }),

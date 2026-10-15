@@ -49,12 +49,12 @@ describe('ProposalListPage (S13 list)', () => {
     renderApp(ROUTE_PATHS.board.proposals, { user: board() });
 
     const today = await screen.findByRole('region', { name: t('proposals.today') });
-    expect(within(today).getByText(t('proposals.status.PENDING_REVIEW'))).toBeInTheDocument();
+    expect(within(today).getByText(t('proposals.status.pendingReview'))).toBeInTheDocument();
     const others = screen.getByRole('region', { name: t('proposals.others') });
     const items = within(others).getAllByRole('listitem');
     expect(items).toHaveLength(OTHERS_COUNT);
-    expect(items[0]).toHaveTextContent(t('proposals.status.PUBLISHED'));
-    expect(items[1]).toHaveTextContent(t('proposals.status.CLOSED'));
+    expect(items[0]).toHaveTextContent(t('proposals.status.published'));
+    expect(items[1]).toHaveTextContent(t('proposals.status.closed'));
     expect(screen.queryByRole('button', { name: t('proposals.generate') })).not.toBeInTheDocument();
   });
 
@@ -68,7 +68,7 @@ describe('ProposalListPage (S13 list)', () => {
 
     expect(await screen.findByText(t('proposals.generated'))).toBeInTheDocument();
     const today = screen.getByRole('region', { name: t('proposals.today') });
-    expect(within(today).getByText(t('proposals.status.PENDING_REVIEW'))).toBeInTheDocument();
+    expect(within(today).getByText(t('proposals.status.pendingReview'))).toBeInTheDocument();
   });
 
   it('explains an empty list in plain words', async () => {

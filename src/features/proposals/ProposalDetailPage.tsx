@@ -230,10 +230,12 @@ function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProp
   );
 }
 
+const BAND_KEY = { HIGH: 'high', LOW: 'low', CRITICAL: 'critical' } as const;
+
 function ProposalHeader({ proposal }: { readonly proposal: ScheduleProposalView }): JSX.Element {
   const band = proposal.tankBand;
   const bandText =
-    band !== null && isBandCode(band) ? t(`proposals.bandName.${band}`) : (band ?? '');
+    band !== null && isBandCode(band) ? t(`proposals.bandName.${BAND_KEY[band]}`) : (band ?? '');
   return (
     <section className={cn(styles.section)} aria-labelledby="proposal-day-title">
       <h2 id="proposal-day-title" className={cn(styles.heading)}>
