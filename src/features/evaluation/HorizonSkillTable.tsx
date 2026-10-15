@@ -13,6 +13,8 @@ const METRIC_FRACTION_DIGITS = 2;
 const HALF_TRACK_PERCENT = 50;
 /** A skill of this size fills a whole side; bigger values are capped to it. */
 const FULL_SKILL = 1;
+/** Skill, and the two errors: the cells a horizon without evidence does not fill. */
+const COLUMNS_WITH_EVIDENCE = 3;
 
 interface HorizonSkillTableProps {
   readonly evaluations: readonly ForecastEvaluationView[];
@@ -38,15 +40,23 @@ export function HorizonSkillTable({ evaluations }: HorizonSkillTableProps): JSX.
         {evaluations.map((evaluation) => (
           <tr key={evaluation.horizonDays}>
             <th scope="row">{horizonLabel(evaluation.horizonDays)}</th>
-            <td>
-              {evaluation.skill === null ? (
-                t('evaluation.noValue')
-              ) : (
-                <SkillBar skill={evaluation.skill} />
-              )}
-            </td>
-            <td>{meters(evaluation.maeIa)}</td>
-            <td>{meters(evaluation.maeSimple)}</td>
+            {evaluation.helps === null ? (
+              <td colSpan={COLUMNS_WITH_EVIDENCE}>
+                {t('evaluation.evaluatedCount', { count: evaluation.n })}
+              </td>
+            ) : (
+              <>
+                <td>
+                  {evaluation.skill === null ? (
+                    t('evaluation.noValue')
+                  ) : (
+                    <SkillBar skill={evaluation.skill} />
+                  )}
+                </td>
+                <td>{meters(evaluation.maeIa)}</td>
+                <td>{meters(evaluation.maeSimple)}</td>
+              </>
+            )}
           </tr>
         ))}
       </tbody>

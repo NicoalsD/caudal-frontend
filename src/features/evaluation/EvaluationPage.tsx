@@ -99,7 +99,7 @@ function EvaluationResult({
 }: EvaluationResultProps): JSX.Element {
   const verdict: AiVerdict = aiVerdict(evaluations.map((item) => ({ helps: item.helps })));
   const current = evaluations.find((item) => item.horizonDays === selected) ?? evaluations[0];
-  if (current === undefined) {
+  if (current === undefined || evaluations.every((item) => item.n === 0)) {
     return <p>{t('evaluation.empty')}</p>;
   }
   return (
@@ -107,8 +107,14 @@ function EvaluationResult({
       <HorizonPicker horizons={horizons} selected={current.horizonDays} onSelect={onSelect} />
       <h2 className={cn(styles.headline)}>{headlineText(verdict)}</h2>
       <HorizonSkillTable evaluations={evaluations} />
-      <p className={cn(styles.count)}>{t('evaluation.evaluatedCount', { count: current.n })}</p>
-      <EvaluationMetrics evaluation={current} />
+      {current.helps === null ? (
+        <p>{t('evaluation.insufficient', { count: current.n })}</p>
+      ) : (
+        <>
+          <p className={cn(styles.count)}>{t('evaluation.evaluatedCount', { count: current.n })}</p>
+          <EvaluationMetrics evaluation={current} />
+        </>
+      )}
     </>
   );
 }

@@ -52,4 +52,25 @@ describe('EvaluationPage (S23)', () => {
     expect(within(table).getByText('+20 %')).toBeVisible();
     expect(within(table).getAllByText('-10 %')).toHaveLength(WORSE_HORIZONS);
   });
+
+  it('says there is not enough data yet, without a verdict or a skill, when the sample is short', async () => {
+    const SAMPLE_SO_FAR = 12;
+    server.use(
+      http.get(apiUrl('/forecast-evaluation'), () =>
+        HttpResponse.json(buildForecastEvaluation({ n: SAMPLE_SO_FAR, helps: null, skill: null })),
+      ),
+    );
+    renderApp(ROUTE_PATHS.team.evaluation, { user: TEAM });
+
+    expect(
+      await screen.findByText(t('evaluation.insufficient', { count: SAMPLE_SO_FAR })),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('heading', { level: 2, name: t('evaluation.headlineUnknown') }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('heading', { level: 3, name: t('evaluation.maeTitle') }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('+20 %')).not.toBeInTheDocument();
+  });
 });

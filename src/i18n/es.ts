@@ -1133,6 +1133,8 @@ export const strings = {
     headlineDoesNotHelp: 'Con los datos de hasta hoy, la IA no ayuda.',
     headlineUnknown: 'Con los datos de hasta hoy, la IA aún no se sabe.',
     evaluatedCount: 'Pronósticos evaluados: {count}',
+    insufficient:
+      'Todavía no hay suficientes datos para saber si la IA ayuda ({count} pronósticos evaluados).',
     skillCaption:
       'Mejora frente a la estimación simple por horizonte. Un valor positivo quiere decir que la IA se equivoca menos.',
     horizonColumn: 'Horizonte',
