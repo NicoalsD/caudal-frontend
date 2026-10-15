@@ -61,6 +61,20 @@ describe('SessionController.restore (boot)', () => {
     expect(services.tokens.get()).not.toBeNull();
   });
 
+  it('keeps the public data in the cache when there was no session to restore', async () => {
+    server.use(
+      http.post(apiUrl('/auth/refresh'), () => errorResponse(STATUS.unauthorized, 'UNAUTHORIZED')),
+    );
+    const services = createAppServices(ENV);
+    const publicKey = ['public', 'schedule', 'vereda'];
+    services.queryClient.setQueryData(publicKey, { loaded: true });
+
+    await services.session.restore();
+
+    expect(services.sessionStore.getSnapshot().status).toBe('anonymous');
+    expect(services.queryClient.getQueryData(publicKey)).toEqual({ loaded: true });
+  });
+
   it('refreshes only once even if restore is called twice (StrictMode)', async () => {
     const backend = createSessionBackend(TEST_USERS.operator);
     server.use(...backend.handlers);
