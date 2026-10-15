@@ -5,6 +5,7 @@ import type { IdGenerator } from '../../core/ids/IdGenerator';
 import type { CommandQueue } from '../../core/commands/CommandQueue';
 import type { ReferenceFallback } from '../../core/cache/ReferenceFallback';
 import type { OutboxSync } from '../OutboxSync';
+import type { ConnectivityMonitor } from '../ConnectivityMonitor';
 
 /** What the offline features need: the queue, its sender, the clock and the client ids. */
 export interface OfflineServices {
@@ -14,6 +15,8 @@ export interface OfflineServices {
   readonly sync: OutboxSync;
   /** Reference data read from the API and kept for offline use (offline-sync.md section 10). */
   readonly reference: ReferenceFallback;
+  /** Online or offline, from the browser's events. */
+  readonly connectivity: ConnectivityMonitor;
 }
 
 export const OfflineContext = createContext<OfflineServices | null>(null);

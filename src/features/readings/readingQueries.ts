@@ -60,7 +60,7 @@ export function useSaveReading(): UseMutationResult<SavedReading, Error, SaveRea
         observedAt: new Date(offline.clock.nowMs()).toISOString(),
       });
       await offline.outbox.enqueue(command, owner, draft.ruleSetVersionId);
-      const sendingNow = navigator.onLine;
+      const sendingNow = offline.connectivity.isOnline();
       if (sendingNow) {
         void offline.sync.flush(owner);
       }
