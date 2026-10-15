@@ -1,8 +1,10 @@
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
 import { apiUrl } from '../../test/msw/apiUrl';
+import { errorResponse } from '../../test/msw/errorResponse';
 import { PDF_SHA256 } from '../../test/msw/minutesBackend';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
@@ -23,6 +25,8 @@ const PAGE_PATH = ROUTE_PATHS.board.minutes;
 const FIRST_PAGE_ROWS = 2;
 const ALL_ROWS = 3;
 const SHORT_HASH_LENGTH = 12;
+const NOT_FOUND_STATUS = 404;
+const FINALIZED_AT = '2026-10-08T15:00:00Z';
 
 describe('MinutesPage (S20, board)', () => {
   it('shows the empty state when there are no actas', async () => {
@@ -122,11 +126,62 @@ describe('MinutesPage (S20, board)', () => {
       await screen.findByRole('button', { name: t('minutes.finalizeConfirm') }),
     );
 
-    const link = await screen.findByRole('link', { name: t('minutes.downloadPdf') });
-    expect(link).toHaveAttribute('href', apiUrl(`/minutes/${MINUTES_ID_A}/pdf`));
+    expect(await screen.findByRole('button', { name: t('minutes.downloadPdf') })).toBeEnabled();
     expect(screen.getByText(`${PDF_SHA256.slice(0, SHORT_HASH_LENGTH)}…`)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: t('minutes.finalize') })).not.toBeInTheDocument();
     expect(backend.actas[0]?.status).toBe('FINAL');
+  });
+
+  it('downloads the PDF with the session and saves it as acta-<from>-<to>.pdf', async () => {
+    const backend = createMinutesBackend([
+      buildMinutes({ status: 'FINAL', pdf_sha256: PDF_SHA256, finalized_at: FINALIZED_AT }),
+    ]);
+    const saved: { readonly blob: Blob; readonly fileName: string }[] = [];
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      saved.push({ blob: pdfBlobs.get(this.href) ?? new Blob(), fileName: this.download });
+    });
+    const pdfBlobs = new Map<string, Blob>();
+    const createObjectURL = vi.fn((blob: Blob) => {
+      const url = `blob:acta-${String(pdfBlobs.size)}`;
+      pdfBlobs.set(url, blob);
+      return url;
+    });
+    const revokeObjectURL = vi.fn();
+    URL.createObjectURL = createObjectURL;
+    URL.revokeObjectURL = revokeObjectURL;
+    server.use(...backend.handlers);
+    renderApp(PAGE_PATH, { user: board() });
+
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.view') }));
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.downloadPdf') }));
+
+    await waitFor(() => expect(saved).toHaveLength(1));
+    expect(backend.pdfServed).toEqual([MINUTES_ID_A]);
+    expect(saved[0]?.fileName).toBe('acta-2026-10-01-2026-10-07.pdf');
+    expect(await saved[0]?.blob.text()).toContain('%PDF');
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(revokeObjectURL).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    vi.restoreAllMocks();
+  });
+
+  it('shows an error when the PDF cannot be downloaded', async () => {
+    server.use(
+      http.get(apiUrl(`/minutes/${MINUTES_ID_A}/pdf`), () =>
+        errorResponse(NOT_FOUND_STATUS, 'NOT_FOUND'),
+      ),
+      ...createMinutesBackend([
+        buildMinutes({ status: 'FINAL', pdf_sha256: PDF_SHA256, finalized_at: FINALIZED_AT }),
+      ]).handlers,
+    );
+    renderApp(PAGE_PATH, { user: board() });
+
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.view') }));
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.downloadPdf') }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: t('minutes.downloadPdf') })).toBeEnabled();
   });
 
   it('copies the whole hash of a final acta', async () => {

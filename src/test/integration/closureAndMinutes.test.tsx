@@ -7,7 +7,6 @@ import { t } from '../../i18n/t';
 import { buildMinutes } from '../factories/minutes';
 import { buildScheduleProposal, ITEM_ID_A, SERVICE_DAY } from '../factories/schedule';
 import { buildSessionUser } from '../factories/session';
-import { apiUrl } from '../msw/apiUrl';
 import { createMinutesBackend } from '../msw/minutesBackend';
 import { createScheduleBackend } from '../msw/scheduleBackend';
 import { server } from '../msw/server';
@@ -116,10 +115,7 @@ describe('actas (S20) de principio a fin', () => {
     await userEvent.click(
       await screen.findByRole('button', { name: t('minutes.finalizeConfirm') }),
     );
-    expect(await screen.findByRole('link', { name: t('minutes.downloadPdf') })).toHaveAttribute(
-      'href',
-      apiUrl(`/minutes/${backend.actas[0]?.id ?? ''}/pdf`),
-    );
+    expect(await screen.findByRole('button', { name: t('minutes.downloadPdf') })).toBeEnabled();
     expect(backend.actas[0]?.status).toBe('FINAL');
   });
 

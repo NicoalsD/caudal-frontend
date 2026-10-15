@@ -9,6 +9,7 @@ import type { MinutesPageView, MinutesView } from '../../services/api/views';
 import { useAqueductId } from '../../state/hooks/useAqueductId';
 import { useCaudalApi } from '../../state/hooks/apiContext';
 import { aqueductKey } from '../../state/queryKeys';
+import { saveBlob } from './saveBlob';
 
 const MINUTES_SCOPE = 'minutes';
 
@@ -73,6 +74,25 @@ export function useFinalizeMinutes(id: string): UseMutationResult<MinutesView, E
     onSuccess: async (view) => {
       client.setQueryData([...key, id], view);
       await client.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+export interface PdfDownloadInput {
+  readonly id: string;
+  readonly fileName: string;
+}
+
+/**
+ * GET /minutes/{id}/pdf through the HTTP client (the token is sent), then the file is saved with
+ * the given name. Nothing is cached: each download asks the server again.
+ */
+export function useDownloadMinutesPdf(): UseMutationResult<void, Error, PdfDownloadInput> {
+  const api = useCaudalApi();
+  return useMutation({
+    mutationFn: async ({ id, fileName }) => {
+      const pdf = await api.minutes.downloadPdf(id);
+      saveBlob(pdf, fileName);
     },
   });
 }

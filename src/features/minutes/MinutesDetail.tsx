@@ -4,11 +4,11 @@ import type { JSX } from 'react';
 import { formatDayKey } from '../../core/format/time';
 import { EPISTEMIC_SECTIONS } from '../../core/minutes/minutesPeriod';
 import type { EpistemicSection } from '../../core/minutes/minutesPeriod';
+import { minutesPdfFileName } from '../../core/minutes/pdfFileName';
 import { shortSha } from '../../core/minutes/shortSha';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
 import type { MinutesView } from '../../services/api/views';
-import { useCaudalApi } from '../../state/hooks/apiContext';
 import { useConnection } from '../../state/hooks/useConnection';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
@@ -17,7 +17,7 @@ import { Dialog } from '../../ui/primitives/Dialog';
 import { cn } from '../../ui/styles/cn';
 import { EpistemicChip } from './EpistemicChip';
 import styles from './Minutes.module.css';
-import { useFinalizeMinutes, useMinutes } from './minutesQueries';
+import { useDownloadMinutesPdf, useFinalizeMinutes, useMinutes } from './minutesQueries';
 
 /** What each section means, in plain words (screens.md S20). */
 const SECTION_HINT = {
@@ -89,7 +89,6 @@ export function MinutesDetail({ id }: { readonly id: string }): JSX.Element {
  * and the SHA-256 of that PDF, shortened, with a button that copies the whole hash.
  */
 function MinutesFinal({ view }: { readonly view: MinutesView }): JSX.Element {
-  const api = useCaudalApi();
   const connection = useConnection();
   const online = connection === 'ONLINE';
   const finalize = useFinalizeMinutes(view.id);
@@ -143,14 +142,33 @@ function MinutesFinal({ view }: { readonly view: MinutesView }): JSX.Element {
   const hash = view.pdfSha256 ?? '';
   return (
     <div className={cn(styles.actions)}>
-      {online ? (
-        <a href={api.minutes.pdfUrl(view.id)} download>
-          {t('minutes.downloadPdf')}
-        </a>
-      ) : (
-        <p role="status">{t('minutes.offline')}</p>
-      )}
+      {online ? <DownloadPdf view={view} /> : <p role="status">{t('minutes.offline')}</p>}
       <HashCopy hash={hash} />
+    </div>
+  );
+}
+
+/**
+ * The PDF button. The download carries the token, so it is a request, not a link: the status line
+ * tells that it is running, and an error is shown in the same way as the other actions.
+ */
+function DownloadPdf({ view }: { readonly view: MinutesView }): JSX.Element {
+  const download = useDownloadMinutesPdf();
+  return (
+    <div className={cn(styles.actions)}>
+      <Button
+        disabled={download.isPending}
+        onClick={() => {
+          download.mutate({
+            id: view.id,
+            fileName: minutesPdfFileName(view.periodFrom, view.periodTo),
+          });
+        }}
+      >
+        {t('minutes.downloadPdf')}
+      </Button>
+      <p role="status">{download.isPending ? t('minutes.downloadingPdf') : ''}</p>
+      {download.isError ? <FormAlert message={errorText(download.error).message} /> : null}
     </div>
   );
 }

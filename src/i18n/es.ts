@@ -850,6 +850,7 @@ export const strings = {
     finalizing: 'Finalizando...',
     finalizedOn: 'Finalizada el {date}',
     downloadPdf: 'Descargar PDF',
+    downloadingPdf: 'Descargando el PDF...',
     hashLabel: 'Huella SHA-256',
     copyHash: 'Copiar',
     copiedHash: 'Huella copiada.',

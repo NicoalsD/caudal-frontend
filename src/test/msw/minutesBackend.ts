@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw';
 import type { components } from '../../services/api/schema';
 import { buildMinutes, summaryOf } from '../factories/minutes';
 import type { MinutesDto } from '../factories/minutes';
+import { bearerOf } from './handlers/auth';
 import { apiUrl } from './apiUrl';
 import { errorResponse } from './errorResponse';
 
@@ -16,6 +17,8 @@ const MS_PER_DAY = 86_400_000;
 const MAX_PERIOD_DAYS = 366;
 const ID_DIGITS = 12;
 const CONFLICT_STATUS = 409;
+const UNAUTHORIZED_STATUS = 401;
+const PDF_CONTENT = '%PDF-1.4 acta de prueba';
 const FINALIZED_AT = '2026-10-08T15:00:00Z';
 /** A neutral 64-character hex value, the shape of a SHA-256. */
 const SHA256_LENGTH = 64;
@@ -28,7 +31,19 @@ export const PDF_SHA256 = 'a'.repeat(SHA256_LENGTH);
  */
 export function createMinutesBackend(initial: readonly MinutesDto[]) {
   const actas: MinutesDto[] = [...initial];
+  /** The ids whose PDF was served: the PDF needs the token, so only a signed-in call gets one. */
+  const pdfServed: string[] = [];
   const handlers = [
+    http.get(apiUrl('/minutes/:id/pdf'), ({ params, request }) => {
+      if (bearerOf(request) === null) {
+        return errorResponse(UNAUTHORIZED_STATUS, 'UNAUTHORIZED');
+      }
+      if (!actas.some((item) => item.id === params.id)) {
+        return errorResponse(NOT_FOUND_STATUS, 'NOT_FOUND');
+      }
+      pdfServed.push(String(params.id));
+      return new HttpResponse(PDF_CONTENT, { headers: { 'Content-Type': 'application/pdf' } });
+    }),
     http.get(apiUrl('/minutes'), ({ request }) => {
       const cursor = new URL(request.url).searchParams.get('cursor');
       const start = cursor === null ? 0 : Number(cursor);
@@ -75,5 +90,5 @@ export function createMinutesBackend(initial: readonly MinutesDto[]) {
       return HttpResponse.json(final);
     }),
   ];
-  return { actas, handlers };
+  return { actas, pdfServed, handlers };
 }

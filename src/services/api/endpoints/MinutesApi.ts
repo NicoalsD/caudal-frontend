@@ -9,11 +9,9 @@ type MinutesDto = components['schemas']['Minutes'];
 
 /** The Board's actas (API.md section 13). */
 export class MinutesApi {
-  /** `apiBaseUrl` is the absolute API base (with /api/v1): the PDF link is built from it. */
   constructor(
     private readonly http: HttpClient,
     private readonly adapter: ApiDtoAdapter,
-    private readonly apiBaseUrl: string,
   ) {}
 
   /** GET /minutes: one page, newest first. Pass the previous `nextCursor` for the next one. */
@@ -58,10 +56,15 @@ export class MinutesApi {
   }
 
   /**
-   * URL of the acta PDF (API.md 13.3). A link, not a request: the browser downloads it. The
-   * endpoint needs the access token, which a plain link does not send (see the report).
+   * GET /minutes/{id}/pdf (API.md 13.3), a draft or a final acta. It goes through the HTTP client
+   * so the access token is sent; a plain link would get 401. The caller saves the Blob.
    */
-  pdfUrl(id: string): string {
-    return `${this.apiBaseUrl}/minutes/${encodeURIComponent(id)}/pdf`;
+  async downloadPdf(id: string): Promise<Blob> {
+    const response = await this.http.request<Blob>({
+      method: 'GET',
+      path: `/minutes/${encodeURIComponent(id)}/pdf`,
+      responseType: 'blob',
+    });
+    return response.body;
   }
 }

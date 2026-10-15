@@ -60,6 +60,6 @@ export class CaudalApi {
     this.imports = new ImportsApi(http);
     this.schedule = new ScheduleApi(http, adapter);
     this.closure = new ClosureApi(http, adapter);
-    this.minutes = new MinutesApi(http, adapter, apiBaseUrl);
+    this.minutes = new MinutesApi(http, adapter);
   }
 }
