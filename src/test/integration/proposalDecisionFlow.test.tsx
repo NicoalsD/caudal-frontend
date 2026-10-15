@@ -40,9 +40,7 @@ describe('proposal decision flow (F057)', () => {
     await userEvent.type(screen.getByRole('textbox', { name: /Motivo del cambio/ }), REASON);
     await userEvent.click(screen.getByRole('button', { name: t('proposals.editor.save') }));
 
-    expect(
-      await screen.findByText(t('proposals.status.approvedWithChanges')),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(t('proposals.status.approvedWithChanges'))).toBeInTheDocument();
     await userEvent.click(
       await screen.findByRole('button', { name: t('proposals.actions.publish') }),
     );
