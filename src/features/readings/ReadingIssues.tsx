@@ -33,7 +33,6 @@ import { gaugeDecimalRule, resolveGauge } from './gaugeRule';
 import { useDiscardRejectedReading, useResendRejectedReading } from './readingQueries';
 
 const ICON_SIZE = 20;
-const GAUGE_MESSAGE_FALLBACK_KEY = 'errors.generic';
 
 /**
  * The plain-language text of a refusal: the server code is mapped in es.ts (errors.api). The gauge
@@ -48,9 +47,7 @@ export function refusalMessage(
     gauge === null
       ? {}
       : { gauge_min: formatDecimal(gauge.min), gauge_max: formatDecimal(gauge.max) };
-  const text = errorText(new DomainError(code, '', { ...range, ...details })).message;
-  // A template value with no data behind it is never shown: the generic text takes its place.
-  return text.includes('{') ? t(GAUGE_MESSAGE_FALLBACK_KEY) : text;
+  return errorText(new DomainError(code, '', { ...range, ...details })).message;
 }
 
 /** The gauge range that applies to a reading of this tank (rule set first, then the tank). */

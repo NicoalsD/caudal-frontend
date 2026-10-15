@@ -880,6 +880,75 @@
           }
         }
       }
+    },
+    "/api/v1/imports/readings": {
+      "post": {
+        "operationId": "importSimulatedReadings",
+        "summary": "Importa historial simulado de lecturas (acueducto demo)",
+        "description": "Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportReadingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lote importado con sus conteos y los rechazos por fila.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReadingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "DEMO_ONLY: el acueducto no es el de demostración.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: este file_sha256 ya se importó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "IMPORT_LIMIT_EXCEEDED: más de 5.000 filas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2184,6 +2253,134 @@
           "is_demo": {
             "type": "boolean",
             "description": "True when the aqueduct is the demo one: its data is simulated."
+          }
+        }
+      },
+      "ImportReadingRow": {
+        "type": "object",
+        "required": [
+          "id",
+          "tank_id",
+          "gauge_value",
+          "water_appearance_code",
+          "damage_noticed",
+          "observed_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gauge_value": {
+            "type": "number"
+          },
+          "water_appearance_code": {
+            "type": "string"
+          },
+          "damage_noticed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ImportReadingsRequest": {
+        "type": "object",
+        "required": [
+          "aqueduct_id",
+          "scenario_name",
+          "seed",
+          "simulator_version",
+          "file_sha256",
+          "rows"
+        ],
+        "properties": {
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scenario_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "simulator_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "file_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "rows": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5000,
+            "items": {
+              "$ref": "#/components/schemas/ImportReadingRow"
+            }
+          }
+        }
+      },
+      "ImportRejection": {
+        "type": "object",
+        "required": [
+          "row",
+          "code"
+        ],
+        "properties": {
+          "row": {
+            "type": "integer",
+            "description": "Posición de la fila en el lote, desde 1."
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "ImportReadingsResponse": {
+        "type": "object",
+        "required": [
+          "import_batch_id",
+          "rows_received",
+          "rows_accepted",
+          "rows_rejected",
+          "rejections"
+        ],
+        "properties": {
+          "import_batch_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows_received": {
+            "type": "integer"
+          },
+          "rows_accepted": {
+            "type": "integer"
+          },
+          "rows_rejected": {
+            "type": "integer"
+          },
+          "rejections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportRejection"
+            }
           }
         }
       }

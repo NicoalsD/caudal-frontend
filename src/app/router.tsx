@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router';
 
 import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
+import { ImportPage } from '../features/imports';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { RuleDraftPage, RulesPage } from '../features/rules';
@@ -107,7 +108,7 @@ const teamRoutes: RouteObject = {
         screen(ROUTE_PATHS.team.health, t('screens.health')),
         screen(ROUTE_PATHS.team.devices, t('screens.devices')),
         screen(ROUTE_PATHS.team.audit, t('screens.audit')),
-        screen(ROUTE_PATHS.team.imports, t('screens.imports')),
+        { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
     },
   ],

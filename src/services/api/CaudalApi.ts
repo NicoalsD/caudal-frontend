@@ -3,6 +3,7 @@ import type { ApiDtoAdapter } from './adapters/ApiDtoAdapter';
 import { AuthApi } from './endpoints/AuthApi';
 import { MetaApi } from './endpoints/MetaApi';
 import { NetworkApi } from './endpoints/NetworkApi';
+import { ImportsApi } from './endpoints/ImportsApi';
 import { ReadingsApi } from './endpoints/ReadingsApi';
 import { RulesApi } from './endpoints/RulesApi';
 import { SystemApi } from './endpoints/SystemApi';
@@ -23,6 +24,7 @@ export class CaudalApi {
   readonly rules: RulesApi;
   readonly system: SystemApi;
   readonly tankStatus: TankStatusApi;
+  readonly imports: ImportsApi;
 
   constructor(http: HttpClient, adapter: ApiDtoAdapter) {
     this.auth = new AuthApi(http, adapter);
@@ -32,5 +34,6 @@ export class CaudalApi {
     this.rules = new RulesApi(http, adapter);
     this.system = new SystemApi(http, adapter);
     this.tankStatus = new TankStatusApi(http, adapter);
+    this.imports = new ImportsApi(http);
   }
 }

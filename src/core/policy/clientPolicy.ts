@@ -79,3 +79,9 @@ export const RETRY_JITTER_RATIO = 0.2;
 export const OUTBOX_BATCH_SIZE = 50;
 /** While the page is visible and the phone is online, the queue is tried again this often. */
 export const FLUSH_INTERVAL_MS = 30_000;
+
+/** Simulated history import (API.md 17): at most 5.000 rows and 1 MiB per request. */
+export const IMPORT_BATCH_MAX_ROWS = 5_000;
+export const IMPORT_BATCH_MAX_BYTES = 1_048_576;
+/** Rows shown from the file before anything is sent. */
+export const IMPORT_PREVIEW_ROWS = 5;

@@ -1,4 +1,5 @@
 import type { BatchItemAnswer } from '../../core/commands/batchOutcome';
+import type { ReadingImportRow } from '../../core/imports/readingImport';
 import type {
   Gauge,
   OperatingWindow,
@@ -248,4 +249,30 @@ export interface TankStatusView {
   readonly openAnomalies: number;
   /** True when the aqueduct is the demo one: its data is simulated. */
   readonly isDemo: boolean;
+}
+
+/** One batch of simulated readings (API.md 17.1). The file hash lets the server spot a repeat. */
+export interface ReadingImportInput {
+  readonly aqueductId: string;
+  readonly scenarioName: string;
+  readonly seed: number;
+  readonly simulatorVersion: string;
+  /** 64 lowercase hexadecimal characters. */
+  readonly fileSha256: string;
+  readonly rows: readonly ReadingImportRow[];
+}
+
+export interface ReadingImportRejectionView {
+  /** Position in the batch sent, from 1. */
+  readonly row: number;
+  readonly code: string;
+}
+
+/** What the server kept from one batch. */
+export interface ReadingImportResultView {
+  readonly importBatchId: string;
+  readonly rowsReceived: number;
+  readonly rowsAccepted: number;
+  readonly rowsRejected: number;
+  readonly rejections: readonly ReadingImportRejectionView[];
 }

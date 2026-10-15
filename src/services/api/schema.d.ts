@@ -371,6 +371,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/imports/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Importa historial simulado de lecturas (acueducto demo)
+         * @description Solo PROJECT_TEAM y acueductos con is_demo. API.md sección 17.1. Cada lote tiene como máximo 5.000 filas y 1 MiB. Un file_sha256 repetido responde 409 CONFLICT.
+         */
+        post: operations["importSimulatedReadings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -789,6 +809,41 @@ export interface components {
             open_anomalies?: number;
             /** @description True when the aqueduct is the demo one: its data is simulated. */
             is_demo?: boolean;
+        };
+        ImportReadingRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tank_id: string;
+            gauge_value: number;
+            water_appearance_code: string;
+            damage_noticed: boolean;
+            note?: string;
+            /** Format: date-time */
+            observed_at: string;
+        };
+        ImportReadingsRequest: {
+            /** Format: uuid */
+            aqueduct_id: string;
+            scenario_name: string;
+            /** Format: int64 */
+            seed: number;
+            simulator_version: string;
+            file_sha256: string;
+            rows: components["schemas"]["ImportReadingRow"][];
+        };
+        ImportRejection: {
+            /** @description Posición de la fila en el lote, desde 1. */
+            row: number;
+            code: string;
+        };
+        ImportReadingsResponse: {
+            /** Format: uuid */
+            import_batch_id: string;
+            rows_received: number;
+            rows_accepted: number;
+            rows_rejected: number;
+            rejections: components["schemas"]["ImportRejection"][];
         };
     };
     responses: never;
@@ -1531,6 +1586,66 @@ export interface operations {
             };
             /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    importSimulatedReadings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportReadingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Lote importado con sus conteos y los rechazos por fila. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReadingsResponse"];
+                };
+            };
+            /** @description DEMO_ONLY: el acueducto no es el de demostración. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: este file_sha256 ya se importó. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: el cuerpo supera 1 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
