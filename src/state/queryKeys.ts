@@ -9,4 +9,6 @@ export function aqueductKey(aqueductId: string, ...parts: readonly string[]): re
 
 export const queryKeys = {
   constraints: ['meta', 'constraints'] as const,
+  /** The notice is the same for every aqueduct, so it has no aqueduct in its key. */
+  privacyNotice: ['privacy', 'notice'] as const,
 };

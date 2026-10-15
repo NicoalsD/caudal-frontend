@@ -163,3 +163,30 @@ describe('a session snapshot holds no secrets', () => {
     );
   });
 });
+
+describe('privacy notice pending', () => {
+  it('marks an authenticated person until the notice is accepted', () => {
+    const pending = new AuthenticatedPhase(USER).next({ type: 'PRIVACY_NOTICE_PENDING' });
+    expect(pending.name).toBe('AUTHENTICATED');
+    expect(pending.snapshot).toMatchObject({
+      status: 'authenticated',
+      user: { privacyNoticePending: true },
+    });
+
+    const accepted = pending.next({ type: 'PRIVACY_NOTICE_ACCEPTED' });
+    expect(accepted.snapshot).toMatchObject({ user: { privacyNoticePending: false } });
+  });
+
+  it('keeps the password change phase while the notice is pending', () => {
+    const phase = new PasswordChangePendingPhase(USER).next({ type: 'PRIVACY_NOTICE_PENDING' });
+    expect(phase.name).toBe('PASSWORD_CHANGE_PENDING');
+    expect(phase.snapshot).toMatchObject({
+      user: { mustChangePassword: true, privacyNoticePending: true },
+    });
+  });
+
+  it('ignores the notice events when nobody is signed in', () => {
+    const anonymous = new AnonymousPhase();
+    expect(anonymous.next({ type: 'PRIVACY_NOTICE_PENDING' })).toBe(anonymous);
+  });
+});

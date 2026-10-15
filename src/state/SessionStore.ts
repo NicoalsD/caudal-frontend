@@ -45,6 +45,16 @@ export class SessionStore {
     this.dispatch({ type: 'PASSWORD_CHANGE_REQUIRED' });
   }
 
+  /** The server answered PRIVACY_NOTICE_PENDING: the person must accept the notice first. */
+  requirePrivacyNotice(): void {
+    this.dispatch({ type: 'PRIVACY_NOTICE_PENDING' });
+  }
+
+  /** The notice was accepted on the server: the rest of the app opens again. */
+  acceptPrivacyNotice(): void {
+    this.dispatch({ type: 'PRIVACY_NOTICE_ACCEPTED' });
+  }
+
   expire(): void {
     this.dispatch({ type: 'EXPIRED' });
   }

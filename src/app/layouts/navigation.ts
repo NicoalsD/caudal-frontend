@@ -18,12 +18,13 @@ export const BOARD_NAV: readonly NavItem[] = [
   { to: ROUTE_PATHS.board.network, label: t('nav.network') },
   { to: ROUTE_PATHS.board.minutes, label: t('nav.minutes') },
   { to: ROUTE_PATHS.board.incidents, label: t('nav.incidents') },
-  { to: ROUTE_PATHS.board.entities, label: t('nav.entities') },
 ];
 
-/** Extra item only for BOARD_ADMIN (user administration). */
+/** Extra items only for BOARD_ADMIN: accounts, entities and the audit log. */
 export const BOARD_ADMIN_NAV: readonly NavItem[] = [
   { to: ROUTE_PATHS.board.users, label: t('nav.users') },
+  { to: ROUTE_PATHS.board.entities, label: t('nav.entities') },
+  { to: ROUTE_PATHS.team.audit, label: t('nav.audit') },
 ];
 
 export const TEAM_NAV: readonly NavItem[] = [

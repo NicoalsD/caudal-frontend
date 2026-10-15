@@ -735,6 +735,254 @@ export interface paths {
         patch: operations["resolveAnomaly"];
         trace?: never;
     };
+    "/api/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cuentas del acueducto, paginadas por cursor
+         * @description Permiso USER_MANAGE. Orden por username.
+         */
+        get: operations["listUsers"];
+        put?: never;
+        /**
+         * Crea una cuenta con su primera membresía
+         * @description Permiso USER_MANAGE. Devuelve el código de activación una sola vez.
+         */
+        post: operations["createUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cambia el nombre o el estado de una cuenta
+         * @description Permiso USER_MANAGE. Bloquear o desactivar cierra sus sesiones. DISABLED es definitivo.
+         */
+        patch: operations["updateUser"];
+        trace?: never;
+    };
+    "/api/v1/users/{id}/reset-grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Emite un código para fijar una contraseña
+         * @description Permiso USER_MANAGE. Los códigos anteriores no usados quedan revocados.
+         */
+        post: operations["issueResetGrant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/memberships": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Membresías del acueducto, paginadas por cursor
+         * @description Permiso USER_MANAGE.
+         */
+        get: operations["listMemberships"];
+        put?: never;
+        /**
+         * Otorga un rol a una cuenta
+         * @description Permiso USER_MANAGE. Una cuenta tiene un solo rol a la vez en el acueducto.
+         */
+        post: operations["grantMembership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/memberships/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Termina una membresía vigente
+         * @description Permiso USER_MANAGE. No borra la fila: pone valid_to ahora.
+         */
+        delete: operations["revokeMembership"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-notice/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Aviso de privacidad vigente
+         * @description Permiso: autenticado. Devuelve la versión más alta con effective_at cumplido.
+         */
+        get: operations["getCurrentPrivacyNotice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-notice/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acepta la versión vigente del aviso
+         * @description Permiso: autenticado. Aceptar otra vez la misma versión devuelve la primera aceptación.
+         */
+        post: operations["acceptPrivacyNotice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summary-shares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Autoriza un resumen para una entidad
+         * @description Permiso SUMMARY_SHARE_MANAGE (solo BOARD_ADMIN). El motivo es obligatorio y expires_at debe ser futuro.
+         */
+        post: operations["createSummaryShare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summary-shares/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoca una autorización
+         * @description Permiso SUMMARY_SHARE_MANAGE. Marca revoked_at; no borra la fila.
+         */
+        delete: operations["revokeSummaryShare"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resúmenes autorizados vigentes
+         * @description Permiso SUMMARY_VIEW. La Junta ve las autorizaciones vigentes del acueducto; una entidad solo las suyas.
+         */
+        get: operations["listSummaries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bitácora de auditoría, de la más reciente a la más antigua
+         * @description Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM). Filtros opcionales from, to (instantes), action, entity_type y actor_id.
+         */
+        get: operations["listAuditLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/security-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Eventos de seguridad del acueducto
+         * @description Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM).
+         */
+        get: operations["listSecurityEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1466,6 +1714,230 @@ export interface components {
             resolution_note?: string;
             /** Format: uuid */
             related_incident_id?: string | null;
+        };
+        /** @description Cuenta del acueducto vista por la Junta (API.md 3.1). full_name es dato confidencial. */
+        ManagedUser: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            full_name: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "LOCKED" | "DISABLED";
+            /** Format: date-time */
+            locked_until?: string | null;
+            must_change_password: boolean;
+            /** Format: date-time */
+            last_login_at?: string | null;
+        };
+        ManagedUserPage: {
+            items: components["schemas"]["ManagedUser"][];
+            next_cursor: string | null;
+        };
+        /** @description Alta de una persona con su primera membresía (API.md 3.2). Campos desconocidos responden 400. */
+        CreateUserRequest: {
+            username: string;
+            full_name: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+        };
+        CreatedUserMembership: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+        };
+        /** @description Cuenta creada y su código de activación, que se muestra una sola vez (API.md 3.2). */
+        CreatedUser: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            full_name: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "LOCKED" | "DISABLED";
+            must_change_password: boolean;
+            membership: components["schemas"]["CreatedUserMembership"];
+            /** @description Código de un solo uso, por ejemplo ABCD-EFGH-JKMN. Solo en esta respuesta. */
+            activation_code: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Cambio de nombre o estado (API.md 3.3). Ningún rol: el rol se cambia con membresías. */
+        UpdateUserRequest: {
+            full_name?: string | null;
+            /** @enum {string|null} */
+            status?: "ACTIVE" | "LOCKED" | "DISABLED" | null;
+        };
+        ResetGrantRequest: {
+            reason: string;
+        };
+        /** @description Código de un solo uso para fijar una contraseña (API.md 3.4). Se muestra una sola vez. */
+        ResetGrant: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Membresía de una cuenta en un acueducto (API.md 3.5). */
+        ManagedMembership: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role_code: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: date-time */
+            valid_from: string;
+            /** Format: date-time */
+            valid_to?: string | null;
+            /** Format: uuid */
+            granted_by: string;
+        };
+        ManagedMembershipPage: {
+            items: components["schemas"]["ManagedMembership"][];
+            next_cursor: string | null;
+        };
+        /** @description Membresía nueva de una cuenta existente (API.md 3.6). */
+        GrantMembershipRequest: {
+            /** Format: uuid */
+            user_id: string;
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role_code: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: date-time */
+            valid_from?: string;
+            /** Format: date-time */
+            valid_to?: string;
+        };
+        /** @description Aviso de privacidad vigente (API.md 4.3). */
+        PrivacyNotice: {
+            version: number;
+            text_es: string;
+            text_sha256: string;
+            /** Format: date-time */
+            effective_at: string;
+        };
+        /** @description Versión vigente que la persona leyó (API.md 4.4). */
+        AcceptPrivacyNoticeRequest: {
+            version: number;
+        };
+        /** @description Aceptación del aviso (API.md 4.4). */
+        PrivacyAcceptance: {
+            /** Format: uuid */
+            user_id: string;
+            version: number;
+            /** Format: date-time */
+            accepted_at: string;
+        };
+        /** @description Autorización de la Junta para que una entidad vea un resumen (API.md 13.4). Campos desconocidos responden 400. */
+        CreateSummaryShareRequest: {
+            /** Format: uuid */
+            grantee_user_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            reason: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Autorización de resumen para una entidad (API.md 13.4). */
+        SummaryShare: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            grantee_user_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            reason: string;
+            /** Format: uuid */
+            authorized_by: string;
+            /** Format: date-time */
+            authorized_at: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            revoked_at?: string | null;
+            /** Format: uuid */
+            revoked_by?: string | null;
+        };
+        /** @description Cantidad de registros por sección del acta. Solo cifras (API.md 13.6). */
+        SummarySections: {
+            observed: number;
+            estimated: number;
+            inferred: number;
+            confirmed: number;
+        };
+        /** @description Resumen agregado de un periodo, autorizado por la Junta (API.md 13.6). */
+        Summary: {
+            /** Format: uuid */
+            summary_share_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            content: components["schemas"]["SummarySections"];
+        };
+        SummaryPage: {
+            items: components["schemas"]["Summary"][];
+            next_cursor: string | null;
+        };
+        /** @description Entrada de la bitácora. Estados redactados (API.md 18.1). */
+        AuditLogEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: date-time */
+            occurred_at: string;
+            /** @enum {string} */
+            actor_type: "USER" | "DEVICE" | "SYSTEM" | "API_KEY";
+            /** Format: uuid */
+            actor_id?: string | null;
+            action: string;
+            entity_type: string;
+            entity_id: string;
+            before_state?: Record<string, never> | null;
+            after_state?: Record<string, never> | null;
+            prev_hash: string;
+            row_hash: string;
+        };
+        AuditLogPage: {
+            items: components["schemas"]["AuditLogEntry"][];
+            next_cursor: string | null;
+        };
+        /** @description Evento de seguridad del acueducto. Sin HMAC de la IP ni secretos (API.md 18.2). */
+        SecurityEvent: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            type: "ACCOUNT_LOCKED" | "TOKEN_REUSE_DETECTED" | "PERMISSION_DENIED" | "RATE_LIMITED" | "INVALID_SIGNATURE" | "NONCE_REPLAY" | "HONEYPOT_TRIGGERED" | "IMPORT_REJECTED" | "MFA_FAILED";
+            severity: string;
+            /** Format: uuid */
+            actor_user_id?: string | null;
+            /** Format: uuid */
+            device_id?: string | null;
+            request_id?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            details: Record<string, never>;
+        };
+        SecurityEventPage: {
+            items: components["schemas"]["SecurityEvent"][];
+            next_cursor: string | null;
         };
     };
     responses: never;
@@ -2931,6 +3403,558 @@ export interface operations {
             };
             /** @description REASON_REQUIRED: descarte sin motivo. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listUsers: {
+        parameters: {
+            query?: {
+                status?: "ACTIVE" | "LOCKED" | "DISABLED";
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de cuentas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedUserPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description Cuenta creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedUser"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: el usuario ya existe. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description Cuenta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedUser"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION o CONFLICT con reason SELF_LOCKOUT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    issueResetGrant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetGrantRequest"];
+            };
+        };
+        responses: {
+            /** @description Código emitido. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResetGrant"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION: cuenta desactivada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listMemberships: {
+        parameters: {
+            query?: {
+                user_id?: string;
+                aqueduct_id?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de membresías. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedMembershipPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    grantMembership: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantMembershipRequest"];
+            };
+        };
+        responses: {
+            /** @description Membresía creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedMembership"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: otro acueducto. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con reason MEMBERSHIP_OVERLAP. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revokeMembership: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Membresía terminada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con reason SELF_LOCKOUT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCurrentPrivacyNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Aviso vigente. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyNotice"];
+                };
+            };
+            /** @description NOT_FOUND: no hay aviso vigente. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    acceptPrivacyNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptPrivacyNoticeRequest"];
+            };
+        };
+        responses: {
+            /** @description Aceptación registrada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyAcceptance"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.current_version: la versión ya no es la vigente. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createSummaryShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSummaryShareRequest"];
+            };
+        };
+        responses: {
+            /** @description Autorización creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryShare"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revokeSummaryShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revocada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CONFLICT: ya estaba revocada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSummaries: {
+        parameters: {
+            query?: {
+                period_from?: string;
+                period_to?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de resúmenes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listAuditLog: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                action?: string;
+                entity_type?: string;
+                actor_id?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de la bitácora. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSecurityEvents: {
+        parameters: {
+            query?: {
+                type?: "ACCOUNT_LOCKED" | "TOKEN_REUSE_DETECTED" | "PERMISSION_DENIED" | "RATE_LIMITED" | "INVALID_SIGNATURE" | "NONCE_REPLAY" | "HONEYPOT_TRIGGERED" | "IMPORT_REJECTED" | "MFA_FAILED";
+                from?: string;
+                to?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de eventos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityEventPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

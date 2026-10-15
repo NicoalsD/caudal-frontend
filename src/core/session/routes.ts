@@ -69,6 +69,8 @@ export const ROLES_BY_AREA = {
   board: ['BOARD_ADMIN', 'BOARD_MEMBER'],
   boardAdmin: ['BOARD_ADMIN'],
   team: ['PROJECT_TEAM'],
+  /** The audit log is read by the Board's administrator and by the project team (seed V45). */
+  audit: ['BOARD_ADMIN', 'PROJECT_TEAM'],
   entity: ['SUPPORT_ENTITY'],
   tank: ['OPERATOR', 'BOARD_ADMIN', 'BOARD_MEMBER', 'PROJECT_TEAM'],
 } as const satisfies Record<string, readonly Role[]>;

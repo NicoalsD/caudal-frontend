@@ -1896,6 +1896,829 @@
           }
         }
       }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "Cuentas del acueducto, paginadas por cursor",
+        "description": "Permiso USER_MANAGE. Orden por username.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "LOCKED",
+                "DISABLED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de cuentas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedUserPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUser",
+        "summary": "Crea una cuenta con su primera membresía",
+        "description": "Permiso USER_MANAGE. Devuelve el código de activación una sola vez.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cuenta creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: el usuario ya existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "patch": {
+        "operationId": "updateUser",
+        "summary": "Cambia el nombre o el estado de una cuenta",
+        "description": "Permiso USER_MANAGE. Bloquear o desactivar cierra sus sesiones. DISABLED es definitivo.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cuenta actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedUser"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION o CONFLICT con reason SELF_LOCKOUT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/reset-grants": {
+      "post": {
+        "operationId": "issueResetGrant",
+        "summary": "Emite un código para fijar una contraseña",
+        "description": "Permiso USER_MANAGE. Los códigos anteriores no usados quedan revocados.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetGrantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Código emitido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetGrant"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION: cuenta desactivada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memberships": {
+      "get": {
+        "operationId": "listMemberships",
+        "summary": "Membresías del acueducto, paginadas por cursor",
+        "description": "Permiso USER_MANAGE.",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "aqueduct_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de membresías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedMembershipPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "grantMembership",
+        "summary": "Otorga un rol a una cuenta",
+        "description": "Permiso USER_MANAGE. Una cuenta tiene un solo rol a la vez en el acueducto.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantMembershipRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Membresía creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagedMembership"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con reason MEMBERSHIP_OVERLAP.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/memberships/{id}": {
+      "delete": {
+        "operationId": "revokeMembership",
+        "summary": "Termina una membresía vigente",
+        "description": "Permiso USER_MANAGE. No borra la fila: pone valid_to ahora.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Membresía terminada."
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con reason SELF_LOCKOUT.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/privacy-notice/current": {
+      "get": {
+        "operationId": "getCurrentPrivacyNotice",
+        "summary": "Aviso de privacidad vigente",
+        "description": "Permiso: autenticado. Devuelve la versión más alta con effective_at cumplido.",
+        "responses": {
+          "200": {
+            "description": "Aviso vigente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyNotice"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: no hay aviso vigente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/privacy-notice/accept": {
+      "post": {
+        "operationId": "acceptPrivacyNotice",
+        "summary": "Acepta la versión vigente del aviso",
+        "description": "Permiso: autenticado. Aceptar otra vez la misma versión devuelve la primera aceptación.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptPrivacyNoticeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Aceptación registrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacyAcceptance"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT con details.current_version: la versión ya no es la vigente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/summary-shares": {
+      "post": {
+        "operationId": "createSummaryShare",
+        "summary": "Autoriza un resumen para una entidad",
+        "description": "Permiso SUMMARY_SHARE_MANAGE (solo BOARD_ADMIN). El motivo es obligatorio y expires_at debe ser futuro.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSummaryShareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Autorización creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryShare"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/summary-shares/{id}": {
+      "delete": {
+        "operationId": "revokeSummaryShare",
+        "summary": "Revoca una autorización",
+        "description": "Permiso SUMMARY_SHARE_MANAGE. Marca revoked_at; no borra la fila.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Revocada."
+          },
+          "409": {
+            "description": "CONFLICT: ya estaba revocada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/summaries": {
+      "get": {
+        "operationId": "listSummaries",
+        "summary": "Resúmenes autorizados vigentes",
+        "description": "Permiso SUMMARY_VIEW. La Junta ve las autorizaciones vigentes del acueducto; una entidad solo las suyas.",
+        "parameters": [
+          {
+            "name": "period_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "period_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de resúmenes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit-log": {
+      "get": {
+        "operationId": "listAuditLog",
+        "summary": "Bitácora de auditoría, de la más reciente a la más antigua",
+        "description": "Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM). Filtros opcionales from, to (instantes), action, entity_type y actor_id.",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,59}$"
+            }
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,59}$"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de la bitácora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/security-events": {
+      "get": {
+        "operationId": "listSecurityEvents",
+        "summary": "Eventos de seguridad del acueducto",
+        "description": "Permiso AUDIT_VIEW (BOARD_ADMIN, PROJECT_TEAM).",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACCOUNT_LOCKED",
+                "TOKEN_REUSE_DETECTED",
+                "PERMISSION_DENIED",
+                "RATE_LIMITED",
+                "INVALID_SIGNATURE",
+                "NONCE_REPLAY",
+                "HONEYPOT_TRIGGERED",
+                "IMPORT_REJECTED",
+                "MFA_FAILED"
+              ]
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de eventos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityEventPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4229,6 +5052,741 @@
               "null"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "ManagedUser": {
+        "type": "object",
+        "description": "Cuenta del acueducto vista por la Junta (API.md 3.1). full_name es dato confidencial.",
+        "required": [
+          "id",
+          "username",
+          "full_name",
+          "status",
+          "must_change_password"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "LOCKED",
+              "DISABLED"
+            ]
+          },
+          "locked_until": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "must_change_password": {
+            "type": "boolean"
+          },
+          "last_login_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ManagedUserPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagedUser"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "description": "Alta de una persona con su primera membresía (API.md 3.2). Campos desconocidos responden 400.",
+        "required": [
+          "username",
+          "full_name",
+          "aqueduct_id",
+          "role"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 32
+          },
+          "full_name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "BOARD_ADMIN",
+              "BOARD_MEMBER",
+              "OPERATOR",
+              "PROJECT_TEAM",
+              "SUPPORT_ENTITY"
+            ]
+          }
+        }
+      },
+      "CreatedUserMembership": {
+        "type": "object",
+        "required": [
+          "id",
+          "aqueduct_id",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "BOARD_ADMIN",
+              "BOARD_MEMBER",
+              "OPERATOR",
+              "PROJECT_TEAM",
+              "SUPPORT_ENTITY"
+            ]
+          }
+        }
+      },
+      "CreatedUser": {
+        "type": "object",
+        "description": "Cuenta creada y su código de activación, que se muestra una sola vez (API.md 3.2).",
+        "required": [
+          "id",
+          "username",
+          "full_name",
+          "status",
+          "must_change_password",
+          "membership",
+          "activation_code",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "LOCKED",
+              "DISABLED"
+            ]
+          },
+          "must_change_password": {
+            "type": "boolean"
+          },
+          "membership": {
+            "$ref": "#/components/schemas/CreatedUserMembership"
+          },
+          "activation_code": {
+            "type": "string",
+            "description": "Código de un solo uso, por ejemplo ABCD-EFGH-JKMN. Solo en esta respuesta."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "description": "Cambio de nombre o estado (API.md 3.3). Ningún rol: el rol se cambia con membresías.",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ACTIVE",
+              "LOCKED",
+              "DISABLED"
+            ]
+          }
+        }
+      },
+      "ResetGrantRequest": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          }
+        }
+      },
+      "ResetGrant": {
+        "type": "object",
+        "description": "Código de un solo uso para fijar una contraseña (API.md 3.4). Se muestra una sola vez.",
+        "required": [
+          "id",
+          "code",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ManagedMembership": {
+        "type": "object",
+        "description": "Membresía de una cuenta en un acueducto (API.md 3.5).",
+        "required": [
+          "id",
+          "user_id",
+          "aqueduct_id",
+          "role_code",
+          "valid_from",
+          "granted_by"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role_code": {
+            "type": "string",
+            "enum": [
+              "BOARD_ADMIN",
+              "BOARD_MEMBER",
+              "OPERATOR",
+              "PROJECT_TEAM",
+              "SUPPORT_ENTITY"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "granted_by": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ManagedMembershipPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagedMembership"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GrantMembershipRequest": {
+        "type": "object",
+        "description": "Membresía nueva de una cuenta existente (API.md 3.6).",
+        "required": [
+          "user_id",
+          "aqueduct_id",
+          "role_code"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aqueduct_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role_code": {
+            "type": "string",
+            "enum": [
+              "BOARD_ADMIN",
+              "BOARD_MEMBER",
+              "OPERATOR",
+              "PROJECT_TEAM",
+              "SUPPORT_ENTITY"
+            ]
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_to": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PrivacyNotice": {
+        "type": "object",
+        "description": "Aviso de privacidad vigente (API.md 4.3).",
+        "required": [
+          "version",
+          "text_es",
+          "text_sha256",
+          "effective_at"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer"
+          },
+          "text_es": {
+            "type": "string"
+          },
+          "text_sha256": {
+            "type": "string"
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AcceptPrivacyNoticeRequest": {
+        "type": "object",
+        "description": "Versión vigente que la persona leyó (API.md 4.4).",
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "PrivacyAcceptance": {
+        "type": "object",
+        "description": "Aceptación del aviso (API.md 4.4).",
+        "required": [
+          "user_id",
+          "version",
+          "accepted_at"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateSummaryShareRequest": {
+        "type": "object",
+        "description": "Autorización de la Junta para que una entidad vea un resumen (API.md 13.4). Campos desconocidos responden 400.",
+        "required": [
+          "grantee_user_id",
+          "scope",
+          "period_from",
+          "period_to",
+          "reason",
+          "expires_at"
+        ],
+        "properties": {
+          "grantee_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_SUMMARY",
+              "MINUTES"
+            ]
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SummaryShare": {
+        "type": "object",
+        "description": "Autorización de resumen para una entidad (API.md 13.4).",
+        "required": [
+          "id",
+          "grantee_user_id",
+          "scope",
+          "period_from",
+          "period_to",
+          "reason",
+          "authorized_by",
+          "authorized_at",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grantee_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_SUMMARY",
+              "MINUTES"
+            ]
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "authorized_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorized_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revoked_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "SummarySections": {
+        "type": "object",
+        "description": "Cantidad de registros por sección del acta. Solo cifras (API.md 13.6).",
+        "required": [
+          "observed",
+          "estimated",
+          "inferred",
+          "confirmed"
+        ],
+        "properties": {
+          "observed": {
+            "type": "integer"
+          },
+          "estimated": {
+            "type": "integer"
+          },
+          "inferred": {
+            "type": "integer"
+          },
+          "confirmed": {
+            "type": "integer"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "description": "Resumen agregado de un periodo, autorizado por la Junta (API.md 13.6).",
+        "required": [
+          "summary_share_id",
+          "scope",
+          "period_from",
+          "period_to",
+          "content"
+        ],
+        "properties": {
+          "summary_share_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_SUMMARY",
+              "MINUTES"
+            ]
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "content": {
+            "$ref": "#/components/schemas/SummarySections"
+          }
+        }
+      },
+      "SummaryPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Summary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AuditLogEntry": {
+        "type": "object",
+        "description": "Entrada de la bitácora. Estados redactados (API.md 18.1).",
+        "required": [
+          "id",
+          "occurred_at",
+          "actor_type",
+          "action",
+          "entity_type",
+          "entity_id",
+          "prev_hash",
+          "row_hash"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actor_type": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "DEVICE",
+              "SYSTEM",
+              "API_KEY"
+            ]
+          },
+          "actor_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "before_state": {
+            "type": "object",
+            "nullable": true
+          },
+          "after_state": {
+            "type": "object",
+            "nullable": true
+          },
+          "prev_hash": {
+            "type": "string"
+          },
+          "row_hash": {
+            "type": "string"
+          }
+        }
+      },
+      "AuditLogPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogEntry"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SecurityEvent": {
+        "type": "object",
+        "description": "Evento de seguridad del acueducto. Sin HMAC de la IP ni secretos (API.md 18.2).",
+        "required": [
+          "id",
+          "type",
+          "severity",
+          "created_at",
+          "details"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_LOCKED",
+              "TOKEN_REUSE_DETECTED",
+              "PERMISSION_DENIED",
+              "RATE_LIMITED",
+              "INVALID_SIGNATURE",
+              "NONCE_REPLAY",
+              "HONEYPOT_TRIGGERED",
+              "IMPORT_REJECTED",
+              "MFA_FAILED"
+            ]
+          },
+          "severity": {
+            "type": "string"
+          },
+          "actor_user_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "request_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      },
+      "SecurityEventPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityEvent"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
           }
         }
       }
