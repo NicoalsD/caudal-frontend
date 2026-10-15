@@ -1,3 +1,4 @@
+import type { ModifiedShift } from '../../../core/proposal/ProposalEditorMediator';
 import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import type { components } from '../schema';
@@ -5,12 +6,17 @@ import type {
   ScheduleProposalPageView,
   ScheduleProposalSummaryView,
   ScheduleProposalView,
+  SchedulePublicationView,
 } from '../views';
 
 type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
 type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 type GenerateDto = components['schemas']['GenerateScheduleProposalRequest'];
 type ProposalDto = components['schemas']['ScheduleProposal'];
+type DecideDto = components['schemas']['DecideScheduleProposalRequest'];
+type RejectDto = components['schemas']['RejectScheduleProposalRequest'];
+type ModifyDto = components['schemas']['ModifyScheduleProposalRequest'];
+type PublicationDto = components['schemas']['SchedulePublication'];
 
 /** Filters of GET /schedule-proposals (API.md 10.2). Dates are YYYY-MM-DD. */
 export interface ProposalListFilter {
@@ -65,5 +71,64 @@ export class ProposalsApi {
       path: `/schedule-proposals/${encodeURIComponent(id)}`,
     });
     return this.adapter.toProposal(response.body);
+  }
+
+  /** POST /schedule-proposals/{id}/approve (lock_version from the proposal the Board read). */
+  async approve(id: string, lockVersion: number): Promise<ScheduleProposalView> {
+    const body: DecideDto = { lock_version: lockVersion };
+    const response = await this.http.request<ProposalDto>({
+      method: 'POST',
+      path: `/schedule-proposals/${encodeURIComponent(id)}/approve`,
+      body,
+    });
+    return this.adapter.toProposal(response.body);
+  }
+
+  /** POST /schedule-proposals/{id}/modify: the shifts that remain, with the reason of the change. */
+  async modify(
+    id: string,
+    lockVersion: number,
+    reason: string,
+    items: readonly ModifiedShift[],
+  ): Promise<ScheduleProposalView> {
+    const body: ModifyDto = {
+      lock_version: lockVersion,
+      reason,
+      items: items.map((item) => ({
+        id: item.id,
+        sector_id: item.sectorId,
+        start_at: item.startAt,
+        end_at: item.endAt,
+        sequence: item.sequence,
+      })),
+    };
+    const response = await this.http.request<ProposalDto>({
+      method: 'POST',
+      path: `/schedule-proposals/${encodeURIComponent(id)}/modify`,
+      body,
+    });
+    return this.adapter.toProposal(response.body);
+  }
+
+  /** POST /schedule-proposals/{id}/reject: a final state, with the reason. */
+  async reject(id: string, lockVersion: number, reason: string): Promise<ScheduleProposalView> {
+    const body: RejectDto = { lock_version: lockVersion, reason };
+    const response = await this.http.request<ProposalDto>({
+      method: 'POST',
+      path: `/schedule-proposals/${encodeURIComponent(id)}/reject`,
+      body,
+    });
+    return this.adapter.toProposal(response.body);
+  }
+
+  /** POST /schedule-proposals/{id}/publish: the approved schedule goes public (no personal data). */
+  async publish(id: string, lockVersion: number): Promise<SchedulePublicationView> {
+    const body: DecideDto = { lock_version: lockVersion };
+    const response = await this.http.request<PublicationDto>({
+      method: 'POST',
+      path: `/schedule-proposals/${encodeURIComponent(id)}/publish`,
+      body,
+    });
+    return this.adapter.toPublication(response.body);
   }
 }

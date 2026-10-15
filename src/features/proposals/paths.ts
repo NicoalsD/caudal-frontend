@@ -9,3 +9,8 @@ export function proposalDetailPath(id: string): string {
 export function proposalEditPath(id: string): string {
   return ROUTE_PATHS.board.proposalEdit.replace(':id', encodeURIComponent(id));
 }
+
+/** The publication screen (S15) for one proposal; without it, the day's proposal is shown. */
+export function publicationPath(proposalId: string): string {
+  return `${ROUTE_PATHS.board.publication}?proposal=${encodeURIComponent(proposalId)}`;
+}

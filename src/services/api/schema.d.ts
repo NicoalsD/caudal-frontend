@@ -515,6 +515,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schedule-proposals/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aprueba la propuesta
+         * @description Permiso PROPOSAL_DECIDE. API.md 10.4.
+         */
+        post: operations["approveScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/modify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Modifica los turnos con motivo
+         * @description Permiso PROPOSAL_DECIDE. Guarda un snapshot antes del cambio. API.md 10.5.
+         */
+        post: operations["modifyScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rechaza la propuesta con motivo
+         * @description Permiso PROPOSAL_DECIDE. Estado final REJECTED. API.md 10.6.
+         */
+        post: operations["rejectScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publica el horario aprobado
+         * @description Permiso SCHEDULE_PUBLISH. La propuesta pasa a PUBLISHED. API.md 10.7.
+         */
+        post: operations["publishScheduleProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1016,6 +1096,44 @@ export interface components {
             unserved_sectors: components["schemas"]["UnservedSector"][];
             decisions: components["schemas"]["ScheduleDecision"][];
             snapshot_taken: boolean;
+        };
+        /** @description Versión que vio la Junta (lock_version, API.md 10.4 y 10.7). */
+        DecideScheduleProposalRequest: {
+            lock_version: number;
+        };
+        /** @description Rechazo con motivo de 10 a 500 caracteres (API.md 10.6). */
+        RejectScheduleProposalRequest: {
+            lock_version: number;
+            reason: string;
+        };
+        /** @description Turno que deja la Junta (API.md 10.5). */
+        ScheduleItemInput: {
+            /** Format: uuid */
+            id?: string | null;
+            /** Format: uuid */
+            sector_id: string;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            sequence: number;
+        };
+        /** @description Cambios de la Junta con motivo (API.md 10.5). */
+        ModifyScheduleProposalRequest: {
+            lock_version: number;
+            reason: string;
+            items: components["schemas"]["ScheduleItemInput"][];
+        };
+        /** @description Publicación del horario, sin datos personales (API.md 10.7). */
+        SchedulePublication: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            proposal_id: string;
+            /** Format: date-time */
+            published_at: string;
+            whatsapp_text: string;
+            poster_sha256?: string | null;
         };
     };
     responses: never;
@@ -2019,6 +2137,164 @@ export interface operations {
             };
             /** @description NOT_FOUND. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    approveScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    modifyScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModifyScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    rejectScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Propuesta actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description CONFLICT o INVALID_STATE_TRANSITION. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    publishScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideScheduleProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Publicación creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulePublication"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (no está aprobada) o CONFLICT. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 
 import { isDecidable } from '../../core/proposal/proposalDay';
 import type { ProposalEditorInput } from '../../core/proposal/ProposalEditorMediator';
@@ -17,13 +17,18 @@ import { cn } from '../../ui/styles/cn';
 import type { EditorBounds } from './editorMessages';
 import styles from './Proposals.module.css';
 import { ProposalEditorForm } from './ProposalEditorForm';
-import { useProposal } from './proposalQueries';
+import { useModifyProposal, useProposal } from './proposalQueries';
+import { proposalDetailPath } from './paths';
+import type { EditedShift } from '../../core/proposal/ProposalEditorMediator';
+import type { EditorSubmit } from './ProposalEditorForm';
 
 const REASON_CONSTRAINT = 'reason';
 
 /** Screen S14: change the hours of a pending proposal, with a reason. */
 export function ProposalEditorPage(): JSX.Element {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
+  const modify = useModifyProposal();
   const proposal = useProposal(id);
   const sectors = useSectors();
   const rules = useCurrentRuleSet();
@@ -111,10 +116,25 @@ export function ProposalEditorPage(): JSX.Element {
         input={input}
         sectorNames={new Map(sectors.data.map((sector) => [sector.id, sector.name]))}
         bounds={bounds}
-        isSaving={false}
-        failure={null}
-        onSubmit={() => undefined}
-        onCancel={() => undefined}
+        isSaving={modify.isPending}
+        failure={modify.isError ? errorText(modify.error).message : null}
+        onSubmit={(submit: EditorSubmit) => {
+          const ids = new Map(day.items.map((item) => [item.sectorId, item.id]));
+          const items = submit.mediator
+            .toEditedShifts()
+            .map((shift: EditedShift) => ({ ...shift, id: ids.get(shift.sectorId) ?? null }));
+          modify.mutate(
+            { id: day.id, lockVersion: day.lockVersion, reason: submit.state.reason, items },
+            {
+              onSuccess: () => {
+                void navigate(proposalDetailPath(day.id));
+              },
+            },
+          );
+        }}
+        onCancel={() => {
+          void navigate(proposalDetailPath(day.id));
+        }}
       />
     </div>
   );

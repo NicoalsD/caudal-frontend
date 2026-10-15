@@ -266,3 +266,12 @@ export interface ScheduleProposalView extends ScheduleProposalSummaryView {
   readonly decisions: readonly ScheduleDecisionView[];
   readonly snapshotTaken: boolean;
 }
+
+/** The publication of an approved proposal (API.md 10.7). Its text has no personal data. */
+export interface SchedulePublicationView {
+  readonly id: string;
+  readonly proposalId: string;
+  readonly publishedAt: TimestampView;
+  readonly whatsappText: string;
+  readonly posterSha256: string | null;
+}

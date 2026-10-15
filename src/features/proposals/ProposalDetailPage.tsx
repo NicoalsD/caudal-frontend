@@ -1,22 +1,29 @@
 import type { JSX } from 'react';
-import { Link, useParams } from 'react-router';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 
 import { formatServiceDate } from '../../core/format/serviceDate';
+import { isDecidable, isPublishable } from '../../core/proposal/proposalDay';
 import { isBandCode } from '../../core/rules/ruleSetParts';
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
+import { useConstraints } from '../../state/hooks/useConstraints';
 import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
+import { useOnline } from '../../state/hooks/useOnline';
+import { usePermission } from '../../state/hooks/usePermission';
 import { useSectors } from '../../state/hooks/useSectors';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
+import { ApproveDialog, RejectDialog } from './ProposalDecisionDialogs';
 import { hoursText } from './hoursText';
 import { ProposalStatusChip } from './ProposalStatusChip';
 import styles from './Proposals.module.css';
-import { useProposal } from './proposalQueries';
+import { useApproveProposal, useProposal, useRejectProposal } from './proposalQueries';
+import { proposalEditPath, publicationPath } from './paths';
 import type { ScheduleItemView, ScheduleProposalView } from '../../services/api/views';
 
 /** Screen S13 detail: each shift with its sector, times, hours and reasons in plain words. */
@@ -25,10 +32,11 @@ export function ProposalDetailPage(): JSX.Element {
   const proposal = useProposal(id);
   const sectors = useSectors();
   const rules = useCurrentRuleSet();
+  const constraints = useConstraints();
 
-  const failed = proposal.isError || sectors.isError || rules.isError;
+  const failed = proposal.isError || sectors.isError || rules.isError || constraints.isError;
   if (failed) {
-    const error = proposal.error ?? sectors.error ?? rules.error;
+    const error = proposal.error ?? sectors.error ?? rules.error ?? constraints.error;
     return (
       <ErrorState
         title={t('screens.proposalDetail')}
@@ -39,6 +47,7 @@ export function ProposalDetailPage(): JSX.Element {
               void proposal.refetch();
               void sectors.refetch();
               void rules.refetch();
+              void constraints.refetch();
             }}
           >
             {t('common.retry')}
@@ -47,7 +56,7 @@ export function ProposalDetailPage(): JSX.Element {
       />
     );
   }
-  if (proposal.isPending || sectors.isPending || rules.isPending) {
+  if (proposal.isPending || sectors.isPending || rules.isPending || constraints.isPending) {
     return (
       <>
         <ScreenTitle>{t('screens.proposalDetail')}</ScreenTitle>
@@ -68,6 +77,11 @@ export function ProposalDetailPage(): JSX.Element {
         {t('proposals.backToList')}
       </Link>
       <ProposalHeader proposal={proposal.data} />
+      <ProposalActions
+        proposal={proposal.data}
+        reasonMin={constraints.data.reason?.min ?? 0}
+        reasonMax={constraints.data.reason?.max ?? 0}
+      />
       <section className={cn(styles.section)} aria-labelledby="proposal-shifts-title">
         <h2 id="proposal-shifts-title" className={cn(styles.heading)}>
           {t('proposals.shiftsTitle')}
@@ -89,6 +103,110 @@ export function ProposalDetailPage(): JSX.Element {
         )}
       </section>
     </div>
+  );
+}
+
+interface ProposalActionsProps {
+  readonly proposal: ScheduleProposalView;
+  readonly reasonMin: number;
+  readonly reasonMax: number;
+}
+
+/**
+ * The Board's decisions (S13). Approve is the main action; modify and reject are secondary. Every
+ * action needs the connection, and each one is only offered when the server would accept it.
+ */
+function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProps): JSX.Element {
+  const navigate = useNavigate();
+  const online = useOnline();
+  const canDecide = usePermission('PROPOSAL_DECIDE');
+  const canPublish = usePermission('SCHEDULE_PUBLISH');
+  const approve = useApproveProposal();
+  const reject = useRejectProposal();
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const decidable = isDecidable(proposal.status);
+  const publishable = isPublishable(proposal.status);
+  const shifts = proposal.items.length;
+  const hours = proposal.items.reduce((sum, item) => sum + item.hours, 0);
+
+  if (!decidable && !(publishable && canPublish)) {
+    return <></>;
+  }
+  return (
+    <section className={cn(styles.actions)} aria-label={t('proposals.shiftsTitle')}>
+      {decidable && canDecide ? (
+        <>
+          <ApproveDialog
+            trigger={
+              <Button variant="primary" disabled={!online}>
+                {t('proposals.actions.approve')}
+              </Button>
+            }
+            open={approveOpen}
+            onOpenChange={setApproveOpen}
+            summary={t('proposals.approve.summary', {
+              date: formatServiceDate(proposal.serviceDate),
+              sectors: String(shifts),
+              hours: hoursText(hours),
+            })}
+            isSaving={approve.isPending}
+            failure={approve.isError ? errorText(approve.error).message : null}
+            onConfirm={() => {
+              approve.mutate(
+                { id: proposal.id, lockVersion: proposal.lockVersion },
+                {
+                  onSuccess: () => {
+                    setApproveOpen(false);
+                    void navigate(publicationPath(proposal.id));
+                  },
+                },
+              );
+            }}
+          />
+          <Button
+            disabled={!online}
+            onClick={() => {
+              void navigate(proposalEditPath(proposal.id));
+            }}
+          >
+            {t('proposals.actions.modify')}
+          </Button>
+          <RejectDialog
+            trigger={<Button disabled={!online}>{t('proposals.actions.reject')}</Button>}
+            open={rejectOpen}
+            onOpenChange={setRejectOpen}
+            reasonMin={reasonMin}
+            reasonMax={reasonMax}
+            isSaving={reject.isPending}
+            failure={reject.isError ? errorText(reject.error).message : null}
+            onConfirm={(reason) => {
+              reject.mutate(
+                { id: proposal.id, lockVersion: proposal.lockVersion, reason },
+                {
+                  onSuccess: () => {
+                    setRejectOpen(false);
+                    void navigate(ROUTE_PATHS.board.proposals);
+                  },
+                },
+              );
+            }}
+          />
+        </>
+      ) : null}
+      {publishable && canPublish ? (
+        <Button
+          variant="primary"
+          disabled={!online}
+          onClick={() => {
+            void navigate(publicationPath(proposal.id));
+          }}
+        >
+          {t('proposals.actions.publish')}
+        </Button>
+      ) : null}
+      {online ? null : <p>{t('proposals.offline')}</p>}
+    </section>
   );
 }
 

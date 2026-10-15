@@ -77,6 +77,11 @@ export interface EditedShift {
   readonly sequence: number;
 }
 
+/** A shift the Board leaves in the proposal; `id` is null for a shift that is new. */
+export interface ModifiedShift extends EditedShift {
+  readonly id: string | null;
+}
+
 export type EditorListener = () => void;
 
 /** Checks the reason text against its limits. The minimum ignores spaces at the ends. */

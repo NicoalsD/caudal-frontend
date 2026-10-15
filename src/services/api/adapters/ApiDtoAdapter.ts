@@ -37,6 +37,7 @@ import type {
   ScheduleProposalPageView,
   ScheduleProposalSummaryView,
   ScheduleProposalView,
+  SchedulePublicationView,
   PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
@@ -74,6 +75,7 @@ type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
 type ProposalDto = components['schemas']['ScheduleProposal'];
 type ProposalItemDto = components['schemas']['ScheduleItem'];
+type PublicationDto = components['schemas']['SchedulePublication'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -251,6 +253,16 @@ export class ApiDtoAdapter {
       hours: (end.getTime() - start.getTime()) / MS_PER_HOUR,
       origin: dto.origin,
       reasons: dto.reasons.map((reason) => ({ code: reason.code, text: reason.text })),
+    };
+  }
+
+  toPublication(dto: PublicationDto): SchedulePublicationView {
+    return {
+      id: dto.id,
+      proposalId: dto.proposal_id,
+      publishedAt: this.toTimestamp('published_at', dto.published_at),
+      whatsappText: dto.whatsapp_text,
+      posterSha256: dto.poster_sha256 ?? null,
     };
   }
 

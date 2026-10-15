@@ -151,7 +151,7 @@ export function ProposalEditorForm({
           aria-disabled={!state.canSubmit || isSaving}
           disabled={isSaving}
         >
-          {isSaving ? t('proposals.generating') : t('proposals.editor.save')}
+          {isSaving ? t('proposals.saving') : t('proposals.editor.save')}
         </Button>
         <Button onClick={onCancel}>{t('proposals.editor.cancel')}</Button>
       </div>

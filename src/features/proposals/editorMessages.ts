@@ -24,7 +24,10 @@ export function shiftIssueText(issue: ShiftIssueCode, bounds: EditorBounds): str
 }
 
 /** The text of the reason problem, with the limits the server sent (constraints "reason"). */
-export function reasonIssueText(issue: ReasonIssueCode, bounds: EditorBounds): string {
+export function reasonIssueText(
+  issue: ReasonIssueCode,
+  bounds: Pick<EditorBounds, 'reasonMin' | 'reasonMax'>,
+): string {
   switch (issue) {
     case 'REASON_REQUIRED':
       return t('proposals.editor.reasonRequired', { min: String(bounds.reasonMin) });

@@ -9,7 +9,9 @@ import type {
   ScheduleProposalPageView,
   ScheduleProposalSummaryView,
   ScheduleProposalView,
+  SchedulePublicationView,
 } from '../../services/api/views';
+import type { ModifiedShift } from '../../core/proposal/ProposalEditorMediator';
 import { useAqueductId } from '../../state/hooks/useAqueductId';
 import { useCaudalApi } from '../../state/hooks/apiContext';
 import { aqueductKey } from '../../state/queryKeys';
@@ -54,12 +56,13 @@ export function useProposalsOfDay(
 }
 
 /** GET /schedule-proposals/{id}: the full proposal (S13 detail). */
-export function useProposal(id: string): UseQueryResult<ScheduleProposalView> {
+export function useProposal(id: string, enabled = true): UseQueryResult<ScheduleProposalView> {
   const api = useCaudalApi();
   const key = useProposalKey('detail', id);
   return useQuery({
     queryKey: key,
     queryFn: () => api.proposals.get(id),
+    enabled: enabled && id !== '',
     refetchOnWindowFocus: false,
   });
 }
@@ -78,5 +81,78 @@ export function useGenerateProposal(): UseMutationResult<
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: key });
     },
+  });
+}
+
+export interface ApproveInput {
+  readonly id: string;
+  readonly lockVersion: number;
+}
+
+export interface ModifyInput extends ApproveInput {
+  readonly reason: string;
+  readonly items: readonly ModifiedShift[];
+}
+
+export interface RejectInput extends ApproveInput {
+  readonly reason: string;
+}
+
+/** Each decision reads every proposal query again, so the list, the detail and the day agree. */
+function useAfterDecision(): () => Promise<void> {
+  const client = useQueryClient();
+  const key = useProposalKey();
+  return async () => {
+    await client.invalidateQueries({ queryKey: key });
+  };
+}
+
+/** POST /schedule-proposals/{id}/approve. */
+export function useApproveProposal(): UseMutationResult<ScheduleProposalView, Error, ApproveInput> {
+  const api = useCaudalApi();
+  const refresh = useAfterDecision();
+  return useMutation({
+    mutationFn: (input) => api.proposals.approve(input.id, input.lockVersion),
+    onSuccess: refresh,
+  });
+}
+
+/** POST /schedule-proposals/{id}/modify with the shifts that remain and the reason. */
+export function useModifyProposal(): UseMutationResult<ScheduleProposalView, Error, ModifyInput> {
+  const api = useCaudalApi();
+  const refresh = useAfterDecision();
+  return useMutation({
+    mutationFn: (input) =>
+      api.proposals.modify(input.id, input.lockVersion, input.reason, input.items),
+    onSuccess: refresh,
+  });
+}
+
+/** POST /schedule-proposals/{id}/reject, a final state. */
+export function useRejectProposal(): UseMutationResult<ScheduleProposalView, Error, RejectInput> {
+  const api = useCaudalApi();
+  const refresh = useAfterDecision();
+  return useMutation({
+    mutationFn: (input) => api.proposals.reject(input.id, input.lockVersion, input.reason),
+    onSuccess: refresh,
+  });
+}
+
+export interface PublishInput {
+  readonly id: string;
+  readonly lockVersion: number;
+}
+
+/** POST /schedule-proposals/{id}/publish: the approved schedule becomes visible to the families. */
+export function usePublishProposal(): UseMutationResult<
+  SchedulePublicationView,
+  Error,
+  PublishInput
+> {
+  const api = useCaudalApi();
+  const refresh = useAfterDecision();
+  return useMutation({
+    mutationFn: (input) => api.proposals.publish(input.id, input.lockVersion),
+    onSuccess: refresh,
   });
 }
