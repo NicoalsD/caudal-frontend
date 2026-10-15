@@ -18,7 +18,8 @@ if (container === null) {
 const services = createAppServices(import.meta.env);
 void prefetchReferences(services.queryClient, services.api);
 // Once, here and not in an effect: StrictMode would run an effect twice and send two refreshes.
-void services.session.restore();
+// The stored session hints are read first, so the offline mode never races with them.
+void services.hintsReady.then(() => services.session.restore());
 
 createRoot(container).render(
   <StrictMode>

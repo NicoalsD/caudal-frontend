@@ -7,6 +7,7 @@ import { ROUTE_PATHS } from '../core/session/routes';
 import type { Scheduler } from '../core/time/Scheduler';
 import { t } from '../i18n/t';
 import { createAppServices } from '../app/createAppServices';
+import { OfflineDatabase } from '../services/offline/OfflineDatabase';
 import { FakeClock } from '../test/fakes/FakeClock';
 import { ACCESS_TOKEN_SECONDS, TEST_PASSWORD, TEST_USERS } from '../test/factories/auth';
 import { apiUrl } from '../test/msw/apiUrl';
@@ -264,8 +265,16 @@ describe('storage and cookie rules', () => {
     backend.expireAccessTokens();
     await services.api.auth.me();
 
+    const token = services.tokens.get();
+    expect(token).not.toBeNull();
     expect(setItem).not.toHaveBeenCalled();
-    expect('indexedDB' in globalThis).toBe(false);
+    // The hint is stored in IndexedDB (the aqueduct's operator), but never the access token.
+    await vi.waitFor(async () => {
+      expect(await OfflineDatabase.shared.sessionHints.count()).toBe(1);
+    });
+    expect(JSON.stringify(await OfflineDatabase.shared.sessionHints.toArray())).not.toContain(
+      token ?? '',
+    );
   });
 
   it('is refused by the server when X-Requested-With is missing, and the client always sends it', async () => {

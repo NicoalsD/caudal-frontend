@@ -1,6 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
 
-import { InMemorySessionHintRepository } from '../core/session/SessionHint';
 import type { SessionHintRepository } from '../core/session/SessionHint';
 import type { Clock } from '../core/time/Clock';
 import { SystemClock } from '../core/time/SystemClock';
@@ -17,6 +16,8 @@ import type { Scheduler } from '../core/time/Scheduler';
 import { TimeoutScheduler } from '../core/time/Scheduler';
 import { SessionController } from '../state/SessionController';
 import { SessionStore } from '../state/SessionStore';
+import { OfflineDatabase } from '../services/offline/OfflineDatabase';
+import { IndexedSessionHintRepository } from '../services/offline/IndexedSessionHintRepository';
 import { createQueryClient } from './providers/queryClient';
 
 export interface AppEnvironment {
@@ -33,6 +34,8 @@ export interface AppServices {
   readonly queryClient: QueryClient;
   /** Session hints per aqueduct (no secrets). Exposed for the local mode and for tests. */
   readonly hints: SessionHintRepository;
+  /** Loads the stored hints into memory; await it before reading hints at boot. */
+  readonly hintsReady: Promise<void>;
 }
 
 /**
@@ -43,10 +46,17 @@ export function createAppServices(
   env: AppEnvironment,
   clock: Clock = new SystemClock(),
   scheduler: Scheduler = new TimeoutScheduler(),
+  hints?: IndexedSessionHintRepository,
 ): AppServices {
   const baseUrl = readApiBaseUrl(env);
   const adapter = new ApiDtoAdapter();
   const logger = env.DEV === true ? new ConsoleLogger() : new NoopLogger();
+  // Hints live in IndexedDB; a failed write is logged and never blocks the sign-in.
+  const hintStore =
+    hints ??
+    new IndexedSessionHintRepository(OfflineDatabase.shared, (error) => {
+      logger.warn('hints.write_failed', { error: String(error) });
+    });
   const tokens = new TokenStore();
   // The refresh call goes straight to the transport: it must not pass through AuthHttpClient.
   const refreshApi = new AuthApi(new BaseFetchHttpClient({ baseUrl }), adapter);
@@ -59,7 +69,6 @@ export function createAppServices(
     random: () => Math.random(),
   });
   const api = new CaudalApi(http, adapter);
-  const hints: SessionHintRepository = new InMemorySessionHintRepository();
   const sessionStore = new SessionStore((event, phase) => {
     logger.warn('session.event_ignored', { event, phase });
   });
@@ -76,10 +85,13 @@ export function createAppServices(
     queryClient,
     clock,
     scheduler,
-    hints,
+    hints: hintStore,
   });
   errorSink.handle = (error) => {
     session.handleError(error);
   };
-  return { api, tokens, sessionStore, session, queryClient, hints };
+  const hintsReady = hintStore.load().catch((error: unknown) => {
+    logger.warn('hints.load_failed', { error: String(error) });
+  });
+  return { api, tokens, sessionStore, session, queryClient, hints: hintStore, hintsReady };
 }
