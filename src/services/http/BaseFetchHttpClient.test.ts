@@ -36,6 +36,35 @@ async function failureOf(promise: Promise<unknown>): Promise<unknown> {
 }
 
 describe('BaseFetchHttpClient success', () => {
+  it('returns the raw text of a text/plain answer when the caller asks for text', async () => {
+    server.use(
+      http.get(apiUrl('/public/demo/schedule/whatsapp-text'), () =>
+        HttpResponse.text('Horario de hoy: Sector Alto.', {
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        }),
+      ),
+    );
+
+    const response = await client.request<string>({
+      method: 'GET',
+      path: '/public/demo/schedule/whatsapp-text',
+      responseType: 'text',
+    });
+
+    expect(response.body).toBe('Horario de hoy: Sector Alto.');
+  });
+
+  it('asks for text/plain only when the caller asks for text', async () => {
+    const fake = recordingFetch();
+    const withFake = new BaseFetchHttpClient({ baseUrl: BASE_URL, fetchFn: fake.fetchFn });
+
+    await withFake.request({ method: 'GET', path: '/a', responseType: 'text' });
+    await withFake.request({ method: 'GET', path: '/b' });
+
+    expect(new Headers(fake.calls[0]?.init.headers).get('Accept')).toBe('text/plain');
+    expect(new Headers(fake.calls[1]?.init.headers).get('Accept')).toBe('application/json');
+  });
+
   it('returns the JSON body, the status and the request id', async () => {
     server.use(
       http.get(apiUrl('/things'), () =>

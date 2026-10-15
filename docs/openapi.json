@@ -759,6 +759,45 @@
           }
         }
       }
+    },
+    "/api/v1/public/{aqueductSlug}/schedule/whatsapp-text": {
+      "get": {
+        "operationId": "getPublicWhatsAppText",
+        "summary": "Horario en texto para copiar a WhatsApp",
+        "description": "Público. Texto plano del horario del día, sin datos personales.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensaje de WhatsApp.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sin publicación para el acueducto (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

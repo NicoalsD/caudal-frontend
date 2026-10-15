@@ -21,4 +21,14 @@ export class PublicApi {
     });
     return this.adapter.toPublicSchedule(response.body);
   }
+
+  /** GET /public/{slug}/schedule/whatsapp-text: the day's schedule as plain text (text/plain). */
+  async whatsappText(aqueductSlug: string): Promise<string> {
+    const response = await this.http.request<string>({
+      method: 'GET',
+      path: `/public/${encodeURIComponent(aqueductSlug)}/schedule/whatsapp-text`,
+      responseType: 'text',
+    });
+    return response.body;
+  }
 }

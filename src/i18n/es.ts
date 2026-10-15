@@ -496,6 +496,13 @@ export const strings = {
     sectorsHeading: 'Horario por sector',
     range: '{start} a {end}',
     empty: 'Todavía no hay horario publicado para hoy.',
+    share: {
+      heading: 'Compartir el horario',
+      copyWhatsApp: 'Copiar para WhatsApp',
+      copied: 'Mensaje copiado.',
+      manualHint: 'No pudimos copiarlo. Selecciona el texto y cópialo a mano.',
+      manualLabel: 'Mensaje para WhatsApp',
+    },
   },
   connection: {
     constraintsMissing:

@@ -1,5 +1,9 @@
 import type { components } from '../../services/api/schema';
 
+/** The text the backend keeps in publications.whatsapp_text (API.md 15.2). */
+export const PUBLIC_WHATSAPP_TEXT =
+  'Horario de agua de Guaitarilla.\nSector Alto: 6:00 a. m. a 2:00 p. m.';
+
 export type PublicScheduleDto = components['schemas']['PublicSchedule'];
 
 /** A published schedule with two sectors. Neutral values, not a real aqueduct. */

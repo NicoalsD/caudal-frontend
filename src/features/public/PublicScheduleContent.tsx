@@ -6,8 +6,10 @@ import type { PublicScheduleView } from '../../services/api/views';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import styles from './PublicSchedule.module.css';
+import { WhatsAppCopy } from './WhatsAppCopy';
 
 interface PublicScheduleContentProps {
+  readonly aqueductSlug: string;
   readonly schedule: PublicScheduleView;
 }
 
@@ -15,7 +17,10 @@ interface PublicScheduleContentProps {
  * The published schedule of the day, by sector. It shows the aqueduct name, the service day, the
  * publication instant and the turns: nothing else from the payload is rendered (no personal data).
  */
-export function PublicScheduleContent({ schedule }: PublicScheduleContentProps): JSX.Element {
+export function PublicScheduleContent({
+  aqueductSlug,
+  schedule,
+}: PublicScheduleContentProps): JSX.Element {
   return (
     <>
       <ScreenTitle>{t('publicSchedule.title', { name: schedule.aqueductName })}</ScreenTitle>
@@ -44,6 +49,7 @@ export function PublicScheduleContent({ schedule }: PublicScheduleContentProps):
           </ul>
         </section>
       )}
+      <WhatsAppCopy aqueductSlug={aqueductSlug} />
     </>
   );
 }

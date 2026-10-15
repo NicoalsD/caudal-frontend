@@ -331,6 +331,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/{aqueductSlug}/schedule/whatsapp-text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Horario en texto para copiar a WhatsApp
+         * @description Público. Texto plano del horario del día, sin datos personales.
+         */
+        get: operations["getPublicWhatsAppText"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1307,6 +1327,37 @@ export interface operations {
                 };
             };
             /** @description Slug inexistente, página desactivada o sin publicación (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicWhatsAppText: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mensaje de WhatsApp. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Sin publicación para el acueducto (NOT_FOUND). */
             404: {
                 headers: {
                     [name: string]: unknown;

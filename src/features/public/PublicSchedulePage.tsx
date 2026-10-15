@@ -42,5 +42,5 @@ export function PublicSchedulePage(): JSX.Element {
       />
     );
   }
-  return <PublicScheduleContent schedule={schedule.data} />;
+  return <PublicScheduleContent aqueductSlug={aqueductSlug} schedule={schedule.data} />;
 }
