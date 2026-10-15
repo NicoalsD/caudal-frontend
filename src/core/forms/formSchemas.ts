@@ -51,6 +51,12 @@ export function readingEntrySchema(
     .build();
 }
 
+/**
+ * The key of the reason limits in /meta/constraints (API.md 4.1 and the backend's MetaController).
+ * Corrections and discards read it; rule activation still reads `change_reason` (see the report).
+ */
+export const READING_REASON_CONSTRAINT = 'reason';
+
 /** The gauge value alone, for correcting a refused reading: same range rules as the reading form. */
 export function gaugeValueSchema(
   constraints: ConstraintsMap,
@@ -68,7 +74,17 @@ export function correctionFormSchema(
 ) {
   return new FormSchemaBuilder(constraints, messages)
     .decimal(FIELD.correctedGaugeValue, gauge)
-    .requiredReason(FIELD.changeReason)
+    .requiredReason(FIELD.changeReason, { constraint: READING_REASON_CONSTRAINT })
+    .build();
+}
+
+/** The mandatory reason of a reading (a correction or a discard): limits under `reason`. */
+export function readingReasonSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .requiredReason(FIELD.changeReason, { constraint: READING_REASON_CONSTRAINT })
     .build();
 }
 

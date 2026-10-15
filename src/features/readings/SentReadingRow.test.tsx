@@ -15,6 +15,8 @@ import { renderApp } from '../../test/renderApp';
 
 const TANK_ID = '0190f3a2-0000-7000-8000-0000000000e1';
 const SENT_ID = 'c-sent';
+const REASON_MIN = 10;
+const REASON_MAX = 500;
 const REASON = 'Se leyó 2,0 y no 2,4 como quedó anotado.';
 const operator = () => buildSessionUser({ role: 'OPERATOR' });
 
@@ -106,5 +108,22 @@ describe('SentReadingRow: correcting a reading the server has', () => {
 
     expect(await screen.findByRole('button', { name: t('readings.sent.correct') })).toBeDisabled();
     expect(screen.getByText(t('readings.sent.offline'))).toBeInTheDocument();
+  });
+  it('arms the correction with the reason limits the server sends under "reason"', async () => {
+    server.use(
+      http.get(apiUrl('/meta/constraints'), () =>
+        HttpResponse.json({ reason: { min: REASON_MIN, max: REASON_MAX } }),
+      ),
+    );
+    await renderWithSentReading();
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole('button', { name: t('readings.sent.correct') }));
+    const dialog = await screen.findByRole('dialog');
+
+    expect(
+      await within(dialog).findByLabelText(t('readings.correction.reasonLabel')),
+    ).toBeInTheDocument();
+    expect(within(dialog).queryByText(t('connection.constraintsMissing'))).not.toBeInTheDocument();
   });
 });

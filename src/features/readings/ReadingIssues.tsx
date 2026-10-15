@@ -7,7 +7,12 @@ import type { OutboxItemSummary } from '../../core/commands/summarizeOutbox';
 import type { RejectionDetails } from '../../core/commands/OutboxRecord';
 import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
 import type { DecimalRule } from '../../core/forms/FormSchemaBuilder';
-import { FIELD, gaugeValueSchema, reasonSchema } from '../../core/forms/formSchemas';
+import {
+  FIELD,
+  READING_REASON_CONSTRAINT,
+  gaugeValueSchema,
+  readingReasonSchema,
+} from '../../core/forms/formSchemas';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { DomainError } from '../../core/errors/DomainError';
 import { formatDateTime } from '../../core/format/time';
@@ -257,8 +262,8 @@ interface ReasonValues {
 
 function buildReasonForm(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
   return {
-    schema: reasonSchema(constraints, messages),
-    max: constraints[FIELD.changeReason]?.max ?? 0,
+    schema: readingReasonSchema(constraints, messages),
+    max: constraints[READING_REASON_CONSTRAINT]?.max ?? 0,
   };
 }
 
@@ -305,7 +310,7 @@ function DiscardDialog({ item, open, onOpenChange, trigger }: DialogBaseProps): 
 
 interface DiscardFormProps {
   readonly item: OutboxItemSummary;
-  readonly schema: ReturnType<typeof reasonSchema>;
+  readonly schema: ReturnType<typeof readingReasonSchema>;
   readonly maxLength: number;
   readonly cancelRef: RefObject<HTMLButtonElement | null>;
   readonly onCancel: () => void;

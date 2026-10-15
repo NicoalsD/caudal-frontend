@@ -147,10 +147,16 @@ export class FormSchemaBuilder {
     return this;
   }
 
-  /** Text that must not be empty, with the range the backend defines (for example a reason). */
-  requiredReason(field: string): this {
-    const minimum = Math.max(this.require(field).min ?? 0, MINIMUM_REQUIRED_LENGTH);
-    this.shape[field] = this.textSchema(field, minimum, {});
+  /**
+   * Text that must not be empty, with the range the backend defines (for example a reason). The
+   * range is read from `options.constraint` when the field has another name in /meta/constraints.
+   */
+  requiredReason(field: string, options: TextOptions = {}): this {
+    const minimum = Math.max(
+      this.require(options.constraint ?? field).min ?? 0,
+      MINIMUM_REQUIRED_LENGTH,
+    );
+    this.shape[field] = this.textSchema(field, minimum, options);
     return this;
   }
 
