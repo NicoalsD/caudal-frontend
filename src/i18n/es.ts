@@ -92,9 +92,19 @@ export const strings = {
     offlineLogin:
       'Necesitas conexión para entrar. Si ya entraste en este celular, puedes registrar lecturas sin conexión.',
     tooManyAttempts: 'Demasiados intentos. Intenta de nuevo en {minutes} min.',
+    welcome: 'Entra con la cuenta que te dio la Junta.',
+    pageTitle: 'Iniciar sesión | CAUDAL',
     showPassword: 'Mostrar contraseña',
     hidePassword: 'Ocultar contraseña',
     capsLockOn: 'Las mayúsculas están activadas.',
+    forgotPassword:
+      '¿Olvidaste tu contraseña? Pídele a la administración de la Junta que te permita crear una nueva.',
+    backToHome: 'Volver al inicio',
+    panelTitle: 'Cada lectura, cada turno y cada decisión, en un solo cuaderno.',
+    panelOffline: 'Registra lecturas aunque no haya señal.',
+    panelExplained: 'Turnos propuestos con su razón.',
+    panelApproved: 'Nada se publica sin la Junta.',
+    secureNote: 'Tu contraseña viaja cifrada y nunca se guarda en este dispositivo.',
   },
   network: {
     summary:

@@ -1,0 +1,200 @@
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100dvh;
+  background: var(--color-page);
+}
+
+.skipLink {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: calc(-1 * var(--target-min) - var(--space-4));
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-water-700);
+  color: var(--color-raised);
+  border-radius: var(--radius-control);
+  z-index: 1;
+}
+
+.skipLink:focus {
+  inset-block-start: var(--space-2);
+  color: var(--color-raised);
+}
+
+.formSide {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
+.brand:hover {
+  color: var(--color-text-primary);
+}
+
+.brandMark {
+  position: relative;
+  display: inline-block;
+  width: 1.05rem;
+  height: 1.25rem;
+  border: 2px solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 0.3rem 0.3rem;
+  overflow: hidden;
+}
+
+.brandMark::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 55%;
+  background: var(--color-water-700);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.back svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+  padding-block: var(--space-7);
+}
+
+.card h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-display);
+}
+
+.secure {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.secure svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.15rem;
+}
+
+/* The panel: a tank of deep water with its level line. */
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-water-800);
+  color: var(--color-raised);
+}
+
+.panelInner {
+  flex: 1;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 32rem;
+  padding: var(--space-7);
+}
+
+.panelTitle {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: var(--line-height-h1);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.panelPoints {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.panelPoints li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: var(--font-weight-bold);
+}
+
+.panelPoints svg {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.panelTagline {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.panelLevel {
+  display: flex;
+  align-items: flex-end;
+  flex: 0 0 30%;
+  padding: var(--space-6) var(--space-7);
+  background: var(--color-water-700);
+  border-top: var(--level-line-height) solid var(--color-raised);
+}
+
+@media (max-width: 56rem) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel {
+    display: none;
+  }
+
+  .main {
+    justify-content: flex-start;
+    padding-block: var(--space-6);
+  }
+}
