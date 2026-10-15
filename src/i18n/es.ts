@@ -595,6 +595,14 @@ export const strings = {
     originModified: 'Cambiado por la Junta',
     originAdded: 'Agregado por la Junta',
     bandName: { HIGH: 'alta', LOW: 'baja', CRITICAL: 'crítica' },
+    guide: {
+      heading: 'Siguiente paso de hoy',
+      review: 'Revisar la propuesta',
+      publish: 'Publicar horario',
+      published: 'Horario publicado. Las familias ya lo pueden ver.',
+      publishedLink: 'Ver el horario publicado',
+      noPermission: 'Pide a un miembro de la Junta que genere la propuesta de hoy.',
+    },
     unserved: {
       title: 'Sectores sin turno hoy',
       empty: 'Todos los sectores incluidos tienen turno hoy.',

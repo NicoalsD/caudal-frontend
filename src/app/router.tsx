@@ -5,6 +5,7 @@ import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
 import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
+import { BoardDayGuide } from '../features/board/BoardDayGuide';
 import {
   ProposalDetailPage,
   ProposalEditorPage,
@@ -83,7 +84,15 @@ const boardRoutes: RouteObject = {
     {
       element: <BoardLayout />,
       children: [
-        screen(ROUTE_PATHS.board.tank, t('screens.tankStatus')),
+        {
+          path: ROUTE_PATHS.board.tank,
+          element: (
+            <>
+              <BoardDayGuide />
+              <PlaceholderPage title={t('screens.tankStatus')} />
+            </>
+          ),
+        },
         { path: ROUTE_PATHS.board.proposals, element: <ProposalListPage /> },
         { path: ROUTE_PATHS.board.proposalDetail, element: <ProposalDetailPage /> },
         { path: ROUTE_PATHS.board.proposalEdit, element: <ProposalEditorPage /> },
