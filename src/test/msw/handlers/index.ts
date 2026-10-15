@@ -1,6 +1,9 @@
 import { authHandlers } from './auth';
+import { catalogHandlers } from './catalogs';
+import { incidentsHandlers } from './incidents';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
+import { publicHandlers } from './public';
 import { rulesHandlers } from './rules';
 import { statusHandlers } from './status';
 
@@ -11,4 +14,7 @@ export const handlers = [
   ...networkHandlers,
   ...rulesHandlers,
   ...statusHandlers,
+  ...publicHandlers,
+  ...catalogHandlers,
+  ...incidentsHandlers,
 ];

@@ -422,3 +422,30 @@ describe('bandList', () => {
     expect(issues([])).toEqual([['bands', 'validation.bandGap']]);
   });
 });
+
+const MAX_TEST_LENGTH = 20;
+
+describe('text fields with uppercase', () => {
+  it('checks and returns the value in upper case when the option asks for it', () => {
+    const schema = new FormSchemaBuilder({ code: { min: 3, max: 3 } }, keyMessages)
+      .text('code', { uppercase: true })
+      .build();
+
+    expect(schema.parse({ code: ' abc ' })).toEqual({ code: 'ABC' });
+  });
+});
+
+describe('text fields with a named constraint', () => {
+  it('reads the limits of the constraint named in the options, not of the field', () => {
+    const schema = new FormSchemaBuilder(
+      { 'incident.description': { min: 10, max: MAX_TEST_LENGTH } },
+      keyMessages,
+    )
+      .text('description', { constraint: 'incident.description' })
+      .build();
+
+    expect(schema.safeParse({ description: 'corto' }).success).toBe(false);
+    expect(schema.safeParse({ description: 'x'.repeat(MAX_TEST_LENGTH + 1) }).success).toBe(false);
+    expect(schema.safeParse({ description: 'texto valido' }).success).toBe(true);
+  });
+});

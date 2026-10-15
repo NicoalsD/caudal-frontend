@@ -15,6 +15,8 @@ const DECIMAL_RADIX = 10;
 const RETRY_AFTER_HEADER = 'Retry-After';
 const INTERNAL_ERROR_CODE = 'INTERNAL_ERROR';
 const UNEXPECTED_MESSAGE = 'Respuesta inesperada del servidor.';
+const TEXT_ACCEPT = 'text/plain';
+const JSON_ACCEPT = 'application/json';
 
 interface ErrorEnvelope {
   readonly error: {
@@ -76,7 +78,7 @@ export class BaseFetchHttpClient implements HttpClient {
   async request<T>(request: HttpRequest): Promise<HttpResponse<T>> {
     const response = await this.send(request);
     const requestId = response.headers.get(REQUEST_ID_HEADER);
-    const payload = await this.readBody(response, requestId);
+    const payload = await this.readBody(response, requestId, request.responseType ?? 'json');
 
     if (response.status >= FIRST_NON_SUCCESS_STATUS) {
       throw this.toApiError(response, payload, requestId);
@@ -86,7 +88,7 @@ export class BaseFetchHttpClient implements HttpClient {
 
   private async send(request: HttpRequest): Promise<Response> {
     const headers = new Headers(request.headers);
-    headers.set('Accept', 'application/json');
+    headers.set('Accept', request.responseType === 'text' ? TEXT_ACCEPT : JSON_ACCEPT);
     headers.set(REQUESTED_WITH_HEADER, REQUESTED_WITH_VALUE);
     const init: RequestInit = {
       method: request.method,
@@ -126,13 +128,20 @@ export class BaseFetchHttpClient implements HttpClient {
   }
 
   /** Returns the parsed JSON, undefined for an empty body, or the raw text when it is not JSON. */
-  private async readBody(response: Response, requestId: string | null): Promise<unknown> {
+  private async readBody(
+    response: Response,
+    requestId: string | null,
+    responseType: 'json' | 'text',
+  ): Promise<unknown> {
     if (response.status === NO_CONTENT_STATUS) {
       return undefined;
     }
     const text = await response.text();
     if (text === '') {
       return undefined;
+    }
+    if (responseType === 'text' && response.status < FIRST_NON_SUCCESS_STATUS) {
+      return text;
     }
     try {
       return JSON.parse(text) as unknown;

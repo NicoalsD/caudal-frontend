@@ -48,6 +48,8 @@ export interface DecimalRule {
 export interface TextOptions {
   /** Normalizes to lower case before checking, for example the username (API.md 2.1). */
   readonly lowercase?: boolean;
+  /** Upper case before checking, for example a tracking code (Crockford base32 is case-blind). */
+  readonly uppercase?: boolean;
   /**
    * Constraint to read when it is not the field name. A dotted constraint such as "reading.note"
    * cannot be a form field name (React Hook Form would nest it), so the field gets a plain name.
@@ -79,6 +81,14 @@ interface CrossCheck {
   readonly field: string;
   readonly key: Parameters<ValidationMessageFactory>[0];
   readonly fails: (values: Readonly<Record<string, unknown>>) => boolean;
+}
+
+/** Case normalization a text option asks for; nothing changes unless the option says so. */
+function normalizeCase(value: string, options: TextOptions): string {
+  if (options.lowercase === true) {
+    return value.toLowerCase();
+  }
+  return options.uppercase === true ? value.toUpperCase() : value;
 }
 
 /**
@@ -389,10 +399,10 @@ export class FormSchemaBuilder {
 
   private textSchema(field: string, minimum: number, options: TextOptions): z.ZodType<string> {
     const limits = this.require(options.constraint ?? field);
-    const pattern = this.compilePattern(field, limits);
+    const pattern = this.compilePattern(options.constraint ?? field, limits);
     return z.string().transform((raw, context) => {
       const trimmed = raw.trim();
-      const value = options.lowercase === true ? trimmed.toLowerCase() : trimmed;
+      const value = normalizeCase(trimmed, options);
       const fail = (key: Parameters<ValidationMessageFactory>[0], params = {}): typeof z.NEVER => {
         context.addIssue({ code: 'custom', message: this.messages(key, params) });
         return z.NEVER;

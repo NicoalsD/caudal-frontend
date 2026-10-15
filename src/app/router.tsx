@@ -6,6 +6,8 @@ import { NetworkPage } from '../features/admin';
 import { ImportPage } from '../features/imports';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
+import { IncidentsPage } from '../features/incidents';
+import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
@@ -32,9 +34,9 @@ function screen(path: string, title: string): RouteObject {
 const publicRoutes: RouteObject = {
   element: <PublicLayout />,
   children: [
-    screen(ROUTE_PATHS.public.schedule, t('screens.publicSchedule')),
-    screen(ROUTE_PATHS.public.damageReport, t('screens.publicDamageReport')),
-    screen(ROUTE_PATHS.public.tracking, t('screens.publicTracking')),
+    { path: ROUTE_PATHS.public.schedule, element: <PublicSchedulePage /> },
+    { path: ROUTE_PATHS.public.damageReport, element: <DamageReportPage /> },
+    { path: ROUTE_PATHS.public.tracking, element: <PublicTrackingPage /> },
   ],
 };
 
@@ -87,7 +89,7 @@ const boardRoutes: RouteObject = {
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
-        screen(ROUTE_PATHS.board.incidents, t('screens.incidents')),
+        { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
         screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,

@@ -18,6 +18,11 @@ export interface HttpRequest {
   /** Plain data, sent as JSON. Build it field by field: the API rejects unknown fields. */
   readonly body?: unknown;
   /**
+   * What the body is. "json" (default) parses it; "text" returns the raw text of a success, for
+   * the few routes that answer text/plain (API.md 15.2). Errors are always the JSON envelope.
+   */
+  readonly responseType?: 'json' | 'text';
+  /**
    * Marks a write as safe to repeat: its client UUID travels in the body (`id`), so the server
    * answers the same for a replay. Without it only GET is retried. It is not sent as a header.
    */
