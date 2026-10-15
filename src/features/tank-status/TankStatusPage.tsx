@@ -9,6 +9,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
+import { ForecastSection } from './ForecastSection';
 import { TankStatusCard } from './TankStatusCard';
 import styles from './TankStatus.module.css';
 
@@ -27,7 +28,12 @@ function TankStatusSection({ tank }: { readonly tank: TankView }): JSX.Element {
       />
     );
   }
-  return <TankStatusCard tank={tank} status={status.data} />;
+  return (
+    <>
+      <TankStatusCard tank={tank} status={status.data} />
+      <ForecastSection tank={tank} observed={status.data.level} />
+    </>
+  );
 }
 
 /** Screen S12 (status block): the active tank, or a picker when the aqueduct has several. */

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
+import { formatDayKey } from '../../core/format/time';
 import { buildSessionUser } from '../../test/factories/session';
 import { buildTankStatus } from '../../test/factories/status';
 import { apiUrl } from '../../test/msw/apiUrl';
@@ -26,6 +27,22 @@ describe('TankStatusPage (S12 status block)', () => {
     expect(screen.getByText(t('tankStatus.takenAgo', { hours: '6' }))).toBeVisible();
     expect(screen.getByText(t('tankStatus.trendDown'))).toBeVisible();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  });
+
+  it('states the likely level and its range for each forecast day in plain words', async () => {
+    renderStatus();
+
+    expect(
+      await screen.findByText(
+        t('forecast.summary', {
+          day: formatDayKey('2026-10-15'),
+          median: '2,2',
+          low: '2',
+          high: '2,4',
+        }),
+      ),
+    ).toBeVisible();
+    expect(screen.getByRole('img', { name: t('forecast.chartLabel') })).toBeInTheDocument();
   });
 
   it('says there are no readings yet when the tank has no level', async () => {

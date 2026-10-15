@@ -602,6 +602,21 @@ export const strings = {
     bandHours: '{hours} h de servicio al día',
     bandHoursUnknown: 'Horas de servicio no disponibles',
   },
+  forecast: {
+    title: 'Pronóstico del nivel',
+    loading: 'Cargando el pronóstico...',
+    none: 'Todavía no hay un pronóstico para este tanque.',
+    chartLabel: 'Gráfica del nivel observado y esperado por día, con el rango probable',
+    summary: '{day}: lo más probable es {median} m, pero podría estar entre {low} m y {high} m.',
+    range: 'Rango probable',
+    median: 'Lo más probable',
+    observed: 'Último nivel observado',
+    tableCaption: 'Nivel esperado por día',
+    day: 'Día',
+    p10: 'Bajo',
+    p50: 'Lo más probable',
+    p90: 'Alto',
+  },
   imports: {
     intro:
       'Carga el historial simulado del acueducto demo. Sirve para probar pronósticos y turnos con datos de varias semanas. Solo funciona en el acueducto de demostración.',

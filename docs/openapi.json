@@ -1354,6 +1354,46 @@
           }
         }
       }
+    },
+    "/api/v1/tanks/{id}/forecasts/latest": {
+      "get": {
+        "operationId": "getLatestForecast",
+        "summary": "Última corrida de pronóstico del tanque",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 8.2. Nunca devuelve la corrida de sombra.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Última corrida mostrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastRun"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe, es de otro acueducto o nunca se pronosticó.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3076,6 +3116,63 @@
           "note": {
             "type": "string",
             "maxLength": 500
+          }
+        }
+      },
+      "ForecastRun": {
+        "type": "object",
+        "required": [
+          "is_fallback",
+          "points"
+        ],
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "model_name": {
+            "type": "string"
+          },
+          "model_version": {
+            "type": "string"
+          },
+          "is_fallback": {
+            "type": "boolean"
+          },
+          "fallback_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "IA_TIMEOUT",
+              "CIRCUIT_OPEN",
+              "IA_ERROR",
+              "INSUFFICIENT_HISTORY",
+              null
+            ],
+            "description": "Motivo cuando la estimación simple reemplazó a la IA."
+          },
+          "horizon_days": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "context_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "context_to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TankStatusForecastPoint"
+            }
           }
         }
       }

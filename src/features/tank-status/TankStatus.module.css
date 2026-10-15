@@ -72,3 +72,33 @@
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
 }
+
+.summary {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.chartWrap {
+  width: 100%;
+  height: 18rem;
+}
+
+.pointsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pointsTable th,
+.pointsTable td {
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.pointsTable th {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}

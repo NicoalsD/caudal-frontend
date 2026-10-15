@@ -551,6 +551,26 @@ export interface paths {
         patch: operations["changeIncidentStatus"];
         trace?: never;
     };
+    "/api/v1/tanks/{id}/forecasts/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Última corrida de pronóstico del tanque
+         * @description Autenticado, permiso STATUS_VIEW. API.md sección 8.2. Nunca devuelve la corrida de sombra.
+         */
+        get: operations["getLatestForecast"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1095,6 +1115,26 @@ export interface components {
             /** @enum {string} */
             status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
             note?: string;
+        };
+        ForecastRun: {
+            /** Format: uuid */
+            run_id?: string;
+            model_name?: string;
+            model_version?: string;
+            is_fallback: boolean;
+            /**
+             * @description Motivo cuando la estimación simple reemplazó a la IA.
+             * @enum {string|null}
+             */
+            fallback_reason?: "IA_TIMEOUT" | "CIRCUIT_OPEN" | "IA_ERROR" | "INSUFFICIENT_HISTORY" | null;
+            horizon_days?: number;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            context_from?: string;
+            /** Format: date-time */
+            context_to?: string;
+            points: components["schemas"]["TankStatusForecastPoint"][];
         };
     };
     responses: never;
@@ -2194,6 +2234,37 @@ export interface operations {
             };
             /** @description REASON_REQUIRED: descarte sin nota válida. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getLatestForecast: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Última corrida mostrada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastRun"];
+                };
+            };
+            /** @description NOT_FOUND: el tanque no existe, es de otro acueducto o nunca se pronosticó. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
