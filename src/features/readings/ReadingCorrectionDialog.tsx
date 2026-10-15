@@ -4,11 +4,7 @@ import { useForm, useWatch } from 'react-hook-form';
 
 import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
 import type { DecimalRule } from '../../core/forms/FormSchemaBuilder';
-import {
-  FIELD,
-  READING_REASON_CONSTRAINT,
-  correctionFormSchema,
-} from '../../core/forms/formSchemas';
+import { FIELD, REASON_CONSTRAINT, correctionFormSchema } from '../../core/forms/formSchemas';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { formatDecimal, toInputText } from '../../core/format/decimal';
 import type { Gauge } from '../../core/rules/ruleSetParts';
@@ -87,7 +83,7 @@ export function ReadingCorrectionDialog({
 function buildCorrectionForm(rule: DecimalRule) {
   return (constraints: ConstraintsMap, messages: ValidationMessageFactory) => ({
     schema: correctionFormSchema(constraints, rule, messages),
-    reasonMax: constraints[READING_REASON_CONSTRAINT]?.max ?? 0,
+    reasonMax: constraints[REASON_CONSTRAINT]?.max ?? 0,
   });
 }
 

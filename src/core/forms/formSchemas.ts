@@ -55,9 +55,9 @@ export function readingEntrySchema(
 
 /**
  * The key of the reason limits in /meta/constraints (API.md 4.1 and the backend's MetaController).
- * Corrections and discards read it; rule activation still reads `change_reason` (see the report).
+ * Every mandatory reason reads it: rule activation, proposal changes, corrections and discards.
  */
-export const READING_REASON_CONSTRAINT = 'reason';
+export const REASON_CONSTRAINT = 'reason';
 
 /** The gauge value alone, for correcting a refused reading: same range rules as the reading form. */
 export function gaugeValueSchema(
@@ -76,7 +76,7 @@ export function correctionFormSchema(
 ) {
   return new FormSchemaBuilder(constraints, messages)
     .decimal(FIELD.correctedGaugeValue, gauge)
-    .requiredReason(FIELD.changeReason, { constraint: READING_REASON_CONSTRAINT })
+    .requiredReason(FIELD.changeReason, { constraint: REASON_CONSTRAINT })
     .build();
 }
 
@@ -86,13 +86,15 @@ export function readingReasonSchema(
   messages: ValidationMessageFactory,
 ) {
   return new FormSchemaBuilder(constraints, messages)
-    .requiredReason(FIELD.changeReason, { constraint: READING_REASON_CONSTRAINT })
+    .requiredReason(FIELD.changeReason, { constraint: REASON_CONSTRAINT })
     .build();
 }
 
 /** Mandatory reason for a change (rule activation, proposal changes, corrections). */
 export function reasonSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
-  return new FormSchemaBuilder(constraints, messages).requiredReason(FIELD.changeReason).build();
+  return new FormSchemaBuilder(constraints, messages)
+    .requiredReason(FIELD.changeReason, { constraint: REASON_CONSTRAINT })
+    .build();
 }
 
 /** Sign-in form: username (lower case) and password, with the limits of /meta/constraints. */
@@ -140,7 +142,6 @@ export function damageReportFormSchema(
 
 /** Note that explains a dismissal (API.md 12.3): required, with the server's "reason" limits. */
 export const DISMISSAL_NOTE_FIELD = 'note';
-export const REASON_CONSTRAINT = 'reason';
 
 export function dismissalNoteSchema(
   constraints: ConstraintsMap,

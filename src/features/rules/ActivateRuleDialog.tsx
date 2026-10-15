@@ -3,7 +3,7 @@ import type { JSX, ReactNode } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
-import { FIELD, reasonSchema } from '../../core/forms/formSchemas';
+import { FIELD, REASON_CONSTRAINT, reasonSchema } from '../../core/forms/formSchemas';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { t } from '../../i18n/t';
 import { useFormSchema } from '../../state/hooks/useFormSchema';
@@ -40,7 +40,10 @@ const REASON_FIELD = FIELD.changeReason;
 
 /** The schema of the reason and the maximum it shows in the counter, both from /meta/constraints. */
 function buildReasonForm(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
-  return { schema: reasonSchema(constraints, messages), max: constraints[REASON_FIELD]?.max ?? 0 };
+  return {
+    schema: reasonSchema(constraints, messages),
+    max: constraints[REASON_CONSTRAINT]?.max ?? 0,
+  };
 }
 
 /**

@@ -9,7 +9,7 @@ import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
 import type { DecimalRule } from '../../core/forms/FormSchemaBuilder';
 import {
   FIELD,
-  READING_REASON_CONSTRAINT,
+  REASON_CONSTRAINT,
   gaugeValueSchema,
   readingReasonSchema,
 } from '../../core/forms/formSchemas';
@@ -266,7 +266,7 @@ interface ReasonValues {
 function buildReasonForm(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
   return {
     schema: readingReasonSchema(constraints, messages),
-    max: constraints[READING_REASON_CONSTRAINT]?.max ?? 0,
+    max: constraints[REASON_CONSTRAINT]?.max ?? 0,
   };
 }
 

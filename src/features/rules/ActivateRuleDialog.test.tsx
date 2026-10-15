@@ -147,7 +147,7 @@ describe('the reason', () => {
     server.use(
       http.get(apiUrl('/meta/constraints'), () =>
         HttpResponse.json(
-          buildConstraints({ change_reason: { min: STRICT_MIN, max: STRICT_MIN * DOUBLE } }),
+          buildConstraints({ reason: { min: STRICT_MIN, max: STRICT_MIN * DOUBLE } }),
         ),
       ),
     );

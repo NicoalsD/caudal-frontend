@@ -14,7 +14,7 @@ const constraints: ConstraintsMap = {
   username: { min: 3, max: 32 },
   password: { min: 12, max: 128 },
   'reading.note': { min: 0, max: 500, maxLines: 10 },
-  change_reason: { min: 10, max: 500 },
+  reason: { min: 10, max: 500 },
 };
 const LEVEL = 2.1;
 
