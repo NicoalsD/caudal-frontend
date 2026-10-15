@@ -35,6 +35,9 @@ import type {
   IncidentView,
   ManagedMembershipPageView,
   PrivacyAcceptanceView,
+  SummaryPageView,
+  SummaryShareView,
+  SummaryView,
   PrivacyNoticeView,
   ManagedMembershipView,
   ManagedUserPageView,
@@ -82,6 +85,9 @@ type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
 type ManagedUserDto = components['schemas']['ManagedUser'];
 type PrivacyNoticeDto = components['schemas']['PrivacyNotice'];
+type SummaryDto = components['schemas']['Summary'];
+type SummaryPageDto = components['schemas']['SummaryPage'];
+type SummaryShareDto = components['schemas']['SummaryShare'];
 type PrivacyAcceptanceDto = components['schemas']['PrivacyAcceptance'];
 type ManagedUserPageDto = components['schemas']['ManagedUserPage'];
 type CreatedUserDto = components['schemas']['CreatedUser'];
@@ -212,6 +218,39 @@ export class ApiDtoAdapter {
       locationHint: dto.location_hint ?? null,
       status: dto.status,
       reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+    };
+  }
+
+  toSummary(dto: SummaryDto): SummaryView {
+    return {
+      summaryShareId: dto.summary_share_id,
+      scope: dto.scope,
+      periodFrom: dto.period_from,
+      periodTo: dto.period_to,
+      content: {
+        observed: dto.content.observed,
+        estimated: dto.content.estimated,
+        inferred: dto.content.inferred,
+        confirmed: dto.content.confirmed,
+      },
+    };
+  }
+
+  toSummaryPage(dto: SummaryPageDto): SummaryPageView {
+    return {
+      items: dto.items.map((item) => this.toSummary(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
+  }
+
+  toSummaryShare(dto: SummaryShareDto): SummaryShareView {
+    return {
+      id: dto.id,
+      granteeUserId: dto.grantee_user_id,
+      scope: dto.scope,
+      periodFrom: dto.period_from,
+      periodTo: dto.period_to,
+      expiresAt: this.toTimestamp('expires_at', dto.expires_at),
     };
   }
 

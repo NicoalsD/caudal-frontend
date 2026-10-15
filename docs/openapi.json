@@ -2390,6 +2390,155 @@
           }
         }
       }
+    },
+    "/api/v1/summary-shares": {
+      "post": {
+        "operationId": "createSummaryShare",
+        "summary": "Autoriza un resumen para una entidad",
+        "description": "Permiso SUMMARY_SHARE_MANAGE (solo BOARD_ADMIN). El motivo es obligatorio y expires_at debe ser futuro.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSummaryShareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Autorización creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryShare"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/summary-shares/{id}": {
+      "delete": {
+        "operationId": "revokeSummaryShare",
+        "summary": "Revoca una autorización",
+        "description": "Permiso SUMMARY_SHARE_MANAGE. Marca revoked_at; no borra la fila.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Revocada."
+          },
+          "409": {
+            "description": "CONFLICT: ya estaba revocada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/summaries": {
+      "get": {
+        "operationId": "listSummaries",
+        "summary": "Resúmenes autorizados vigentes",
+        "description": "Permiso SUMMARY_VIEW. La Junta ve las autorizaciones vigentes del acueducto; una entidad solo las suyas.",
+        "parameters": [
+          {
+            "name": "period_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "period_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de resúmenes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5119,6 +5268,191 @@
           "accepted_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "CreateSummaryShareRequest": {
+        "type": "object",
+        "description": "Autorización de la Junta para que una entidad vea un resumen (API.md 13.4). Campos desconocidos responden 400.",
+        "required": [
+          "grantee_user_id",
+          "scope",
+          "period_from",
+          "period_to",
+          "reason",
+          "expires_at"
+        ],
+        "properties": {
+          "grantee_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_SUMMARY",
+              "MINUTES"
+            ]
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SummaryShare": {
+        "type": "object",
+        "description": "Autorización de resumen para una entidad (API.md 13.4).",
+        "required": [
+          "id",
+          "grantee_user_id",
+          "scope",
+          "period_from",
+          "period_to",
+          "reason",
+          "authorized_by",
+          "authorized_at",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "grantee_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_SUMMARY",
+              "MINUTES"
+            ]
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "authorized_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorized_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revoked_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "SummarySections": {
+        "type": "object",
+        "description": "Cantidad de registros por sección del acta. Solo cifras (API.md 13.6).",
+        "required": [
+          "observed",
+          "estimated",
+          "inferred",
+          "confirmed"
+        ],
+        "properties": {
+          "observed": {
+            "type": "integer"
+          },
+          "estimated": {
+            "type": "integer"
+          },
+          "inferred": {
+            "type": "integer"
+          },
+          "confirmed": {
+            "type": "integer"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "description": "Resumen agregado de un periodo, autorizado por la Junta (API.md 13.6).",
+        "required": [
+          "summary_share_id",
+          "scope",
+          "period_from",
+          "period_to",
+          "content"
+        ],
+        "properties": {
+          "summary_share_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_SUMMARY",
+              "MINUTES"
+            ]
+          },
+          "period_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "period_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "content": {
+            "$ref": "#/components/schemas/SummarySections"
+          }
+        }
+      },
+      "SummaryPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Summary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

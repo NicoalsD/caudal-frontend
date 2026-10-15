@@ -883,6 +883,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/summary-shares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Autoriza un resumen para una entidad
+         * @description Permiso SUMMARY_SHARE_MANAGE (solo BOARD_ADMIN). El motivo es obligatorio y expires_at debe ser futuro.
+         */
+        post: operations["createSummaryShare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summary-shares/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoca una autorización
+         * @description Permiso SUMMARY_SHARE_MANAGE. Marca revoked_at; no borra la fila.
+         */
+        delete: operations["revokeSummaryShare"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resúmenes autorizados vigentes
+         * @description Permiso SUMMARY_VIEW. La Junta ve las autorizaciones vigentes del acueducto; una entidad solo las suyas.
+         */
+        get: operations["listSummaries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1735,6 +1795,67 @@ export interface components {
             version: number;
             /** Format: date-time */
             accepted_at: string;
+        };
+        /** @description Autorización de la Junta para que una entidad vea un resumen (API.md 13.4). Campos desconocidos responden 400. */
+        CreateSummaryShareRequest: {
+            /** Format: uuid */
+            grantee_user_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            reason: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Autorización de resumen para una entidad (API.md 13.4). */
+        SummaryShare: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            grantee_user_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            reason: string;
+            /** Format: uuid */
+            authorized_by: string;
+            /** Format: date-time */
+            authorized_at: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            revoked_at?: string | null;
+            /** Format: uuid */
+            revoked_by?: string | null;
+        };
+        /** @description Cantidad de registros por sección del acta. Solo cifras (API.md 13.6). */
+        SummarySections: {
+            observed: number;
+            estimated: number;
+            inferred: number;
+            confirmed: number;
+        };
+        /** @description Resumen agregado de un periodo, autorizado por la Junta (API.md 13.6). */
+        Summary: {
+            /** Format: uuid */
+            summary_share_id: string;
+            /** @enum {string} */
+            scope: "MONTHLY_SUMMARY" | "MINUTES";
+            /** Format: date */
+            period_from: string;
+            /** Format: date */
+            period_to: string;
+            content: components["schemas"]["SummarySections"];
+        };
+        SummaryPage: {
+            items: components["schemas"]["Summary"][];
+            next_cursor: string | null;
         };
     };
     responses: never;
@@ -3575,6 +3696,111 @@ export interface operations {
             };
             /** @description CONFLICT con details.current_version: la versión ya no es la vigente. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createSummaryShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSummaryShareRequest"];
+            };
+        };
+        responses: {
+            /** @description Autorización creada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryShare"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    revokeSummaryShare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revocada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CONFLICT: ya estaba revocada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listSummaries: {
+        parameters: {
+            query?: {
+                period_from?: string;
+                period_to?: string;
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de resúmenes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryPage"];
+                };
+            };
+            /** @description VALIDATION_ERROR o CURSOR_INVALID. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

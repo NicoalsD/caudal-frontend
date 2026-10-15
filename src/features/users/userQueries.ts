@@ -47,6 +47,28 @@ export function useManagedUsers(): UseInfiniteQueryResult<{
   });
 }
 
+/** Every account of the aqueduct, read to the last page (for pickers that need all of them). */
+export function useAllUsers(): UseQueryResult<readonly ManagedUserView[]> {
+  const api = useCaudalApi();
+  const key = useUsersKey();
+  return useQuery({
+    queryKey: [...key, 'all'],
+    queryFn: async () => {
+      const all: ManagedUserView[] = [];
+      let cursor: string | undefined;
+      let hasMore = true;
+      while (hasMore) {
+        const page = await api.users.listUsers(cursor);
+        all.push(...page.items);
+        cursor = page.nextCursor ?? undefined;
+        hasMore = cursor !== undefined;
+      }
+      return all;
+    },
+    refetchOnWindowFocus: false,
+  });
+}
+
 /**
  * Every membership of the aqueduct, read to the last page: the list shows the role of each
  * account, and the server does not filter by role.

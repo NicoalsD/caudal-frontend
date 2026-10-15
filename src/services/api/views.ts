@@ -437,6 +437,43 @@ export interface AnomalyPageView {
   readonly nextCursor: string | null;
 }
 
+/** What a summary covers: a monthly summary or the minutes of the period (API.md 13.4). */
+export type SummaryScope = 'MONTHLY_SUMMARY' | 'MINUTES';
+
+/** Quantities of a summary per section of the minutes (API.md 13.6): counts only, no text. */
+export interface SummarySectionsView {
+  readonly observed: number;
+  readonly estimated: number;
+  readonly inferred: number;
+  readonly confirmed: number;
+}
+
+/** A summary the Board shared, or an entity can read (API.md 13.6). */
+export interface SummaryView {
+  readonly summaryShareId: string;
+  readonly scope: SummaryScope;
+  /** Calendar days as YYYY-MM-DD, no zone. */
+  readonly periodFrom: string;
+  readonly periodTo: string;
+  readonly content: SummarySectionsView;
+}
+
+/** One page of summaries; `nextCursor` is null when there are no more. */
+export interface SummaryPageView {
+  readonly items: readonly SummaryView[];
+  readonly nextCursor: string | null;
+}
+
+/** An authorization the Board created (API.md 13.4). */
+export interface SummaryShareView {
+  readonly id: string;
+  readonly granteeUserId: string;
+  readonly scope: SummaryScope;
+  readonly periodFrom: string;
+  readonly periodTo: string;
+  readonly expiresAt: TimestampView;
+}
+
 /** The privacy notice in effect (API.md 4.3). `text` is plain text: it is never rendered as HTML. */
 export interface PrivacyNoticeView {
   readonly version: number;

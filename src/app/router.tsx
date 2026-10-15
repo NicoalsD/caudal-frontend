@@ -19,6 +19,7 @@ import {
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { UsersPage } from '../features/users';
 import { PrivacyNoticePage } from '../features/privacy';
+import { EntitiesPage } from '../features/entities';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
@@ -110,10 +111,12 @@ const boardRoutes: RouteObject = {
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
         { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
-        screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,
-          children: [{ path: ROUTE_PATHS.board.users, element: <UsersPage /> }],
+          children: [
+            { path: ROUTE_PATHS.board.users, element: <UsersPage /> },
+            { path: ROUTE_PATHS.board.entities, element: <EntitiesPage /> },
+          ],
         },
       ],
     },
