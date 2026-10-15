@@ -18,6 +18,31 @@ import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
 
+/**
+ * Whether the AI helps, for one horizon (API.md 14.1). Metrics are null when they cannot be
+ * computed; `helps` is null when there is not enough evidence yet.
+ */
+export interface ForecastEvaluationView {
+  readonly horizonDays: number;
+  /** First and last calendar day evaluated (YYYY-MM-DD). */
+  readonly from: string;
+  readonly to: string;
+  /** Forecasts evaluated. */
+  readonly n: number;
+  /** Mean absolute error of the AI, in meters. */
+  readonly maeIa: number | null;
+  /** Mean absolute error of the simple estimate, in meters. */
+  readonly maeSimple: number | null;
+  readonly wqlIa: number | null;
+  /** Share of real levels inside the range p10 to p90, from 0 to 1. */
+  readonly coverage80: number | null;
+  readonly avgIntervalWidth: number | null;
+  /** 1 - MAE_ia / MAE_simple: positive when the AI is better. */
+  readonly skill: number | null;
+  readonly helps: boolean | null;
+  readonly isSimulated: boolean;
+}
+
 export interface HealthView {
   readonly isUp: boolean;
 }

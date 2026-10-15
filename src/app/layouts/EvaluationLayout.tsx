@@ -1,0 +1,12 @@
+import type { JSX } from 'react';
+
+import { useSession } from '../../state/hooks/useSession';
+import { BoardLayout } from './BoardLayout';
+import { TeamLayout } from './TeamLayout';
+
+/** The AI evaluation is shared by two areas: the Board's administrator sees the Board menu, the team the team menu. */
+export function EvaluationLayout(): JSX.Element {
+  const session = useSession();
+  const isBoardAdmin = session.status === 'authenticated' && session.user.role === 'BOARD_ADMIN';
+  return isBoardAdmin ? <BoardLayout /> : <TeamLayout />;
+}

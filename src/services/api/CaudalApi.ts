@@ -20,6 +20,7 @@ import { UsersApi } from './endpoints/UsersApi';
 import { PrivacyApi } from './endpoints/PrivacyApi';
 import { SummariesApi } from './endpoints/SummariesApi';
 import { AuditApi } from './endpoints/AuditApi';
+import { EvaluationApi } from './endpoints/EvaluationApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -58,6 +59,8 @@ export class CaudalApi {
   readonly summaries: SummariesApi;
   /** The audit log and the security events (API.md section 18). */
   readonly audit: AuditApi;
+  /** Whether the AI helps against the simple estimate (API.md section 14). */
+  readonly evaluation: EvaluationApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -81,5 +84,6 @@ export class CaudalApi {
     this.privacy = new PrivacyApi(http, adapter);
     this.summaries = new SummariesApi(http, adapter);
     this.audit = new AuditApi(http, adapter);
+    this.evaluation = new EvaluationApi(http);
   }
 }
