@@ -843,6 +843,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/privacy-notice/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Aviso de privacidad vigente
+         * @description Permiso: autenticado. Devuelve la versión más alta con effective_at cumplido.
+         */
+        get: operations["getCurrentPrivacyNotice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/privacy-notice/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Acepta la versión vigente del aviso
+         * @description Permiso: autenticado. Aceptar otra vez la misma versión devuelve la primera aceptación.
+         */
+        post: operations["acceptPrivacyNotice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1675,6 +1715,26 @@ export interface components {
             valid_from?: string;
             /** Format: date-time */
             valid_to?: string;
+        };
+        /** @description Aviso de privacidad vigente (API.md 4.3). */
+        PrivacyNotice: {
+            version: number;
+            text_es: string;
+            text_sha256: string;
+            /** Format: date-time */
+            effective_at: string;
+        };
+        /** @description Versión vigente que la persona leyó (API.md 4.4). */
+        AcceptPrivacyNoticeRequest: {
+            version: number;
+        };
+        /** @description Aceptación del aviso (API.md 4.4). */
+        PrivacyAcceptance: {
+            /** Format: uuid */
+            user_id: string;
+            version: number;
+            /** Format: date-time */
+            accepted_at: string;
         };
     };
     responses: never;
@@ -3443,6 +3503,77 @@ export interface operations {
                 };
             };
             /** @description CONFLICT con reason SELF_LOCKOUT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getCurrentPrivacyNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Aviso vigente. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyNotice"];
+                };
+            };
+            /** @description NOT_FOUND: no hay aviso vigente. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    acceptPrivacyNotice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptPrivacyNoticeRequest"];
+            };
+        };
+        responses: {
+            /** @description Aceptación registrada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivacyAcceptance"];
+                };
+            };
+            /** @description VALIDATION_ERROR. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.current_version: la versión ya no es la vigente. */
             409: {
                 headers: {
                     [name: string]: unknown;

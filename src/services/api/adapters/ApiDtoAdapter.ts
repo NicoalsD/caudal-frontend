@@ -34,6 +34,8 @@ import type {
   IncidentPageView,
   IncidentView,
   ManagedMembershipPageView,
+  PrivacyAcceptanceView,
+  PrivacyNoticeView,
   ManagedMembershipView,
   ManagedUserPageView,
   ManagedUserStatus,
@@ -79,6 +81,8 @@ type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
 type ManagedUserDto = components['schemas']['ManagedUser'];
+type PrivacyNoticeDto = components['schemas']['PrivacyNotice'];
+type PrivacyAcceptanceDto = components['schemas']['PrivacyAcceptance'];
 type ManagedUserPageDto = components['schemas']['ManagedUserPage'];
 type CreatedUserDto = components['schemas']['CreatedUser'];
 type ResetGrantDto = components['schemas']['ResetGrant'];
@@ -208,6 +212,23 @@ export class ApiDtoAdapter {
       locationHint: dto.location_hint ?? null,
       status: dto.status,
       reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+    };
+  }
+
+  toPrivacyNotice(dto: PrivacyNoticeDto): PrivacyNoticeView {
+    return {
+      version: dto.version,
+      text: dto.text_es,
+      textSha256: dto.text_sha256,
+      effectiveAt: this.toTimestamp('effective_at', dto.effective_at),
+    };
+  }
+
+  toPrivacyAcceptance(dto: PrivacyAcceptanceDto): PrivacyAcceptanceView {
+    return {
+      userId: dto.user_id,
+      version: dto.version,
+      acceptedAt: this.toTimestamp('accepted_at', dto.accepted_at),
     };
   }
 

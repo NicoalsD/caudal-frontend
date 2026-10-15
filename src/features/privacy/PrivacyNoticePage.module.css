@@ -1,0 +1,23 @@
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 60ch;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.paragraph {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}

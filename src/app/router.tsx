@@ -18,9 +18,11 @@ import {
 } from '../features/proposals';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { UsersPage } from '../features/users';
+import { PrivacyNoticePage } from '../features/privacy';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
+import { RequirePrivacyAccepted } from './guards/RequirePrivacyAccepted';
 import { RequireRole } from './guards/RequireRole';
 import { AuthLayout } from './layouts/AuthLayout';
 import { BoardLayout } from './layouts/BoardLayout';
@@ -62,7 +64,7 @@ const sessionRoutes: RouteObject = {
     },
     {
       element: <PublicLayout />,
-      children: [screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice'))],
+      children: [{ path: ROUTE_PATHS.privacyNotice, element: <PrivacyNoticePage /> }],
     },
   ],
 };
@@ -169,7 +171,12 @@ export function buildRoutes(): RouteObject[] {
             sessionRoutes,
             {
               element: <RequirePasswordChanged />,
-              children: [operatorRoutes, boardRoutes, teamRoutes, entityRoutes, sharedRoutes],
+              children: [
+                {
+                  element: <RequirePrivacyAccepted />,
+                  children: [operatorRoutes, boardRoutes, teamRoutes, entityRoutes, sharedRoutes],
+                },
+              ],
             },
           ],
         },

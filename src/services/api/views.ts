@@ -437,6 +437,21 @@ export interface AnomalyPageView {
   readonly nextCursor: string | null;
 }
 
+/** The privacy notice in effect (API.md 4.3). `text` is plain text: it is never rendered as HTML. */
+export interface PrivacyNoticeView {
+  readonly version: number;
+  readonly text: string;
+  readonly textSha256: string;
+  readonly effectiveAt: TimestampView;
+}
+
+/** The acceptance of a version of the notice (API.md 4.4). */
+export interface PrivacyAcceptanceView {
+  readonly userId: string;
+  readonly version: number;
+  readonly acceptedAt: TimestampView;
+}
+
 /** Account status as the Board sees it (API.md 3.1). */
 export type ManagedUserStatus = 'ACTIVE' | 'LOCKED' | 'DISABLED';
 

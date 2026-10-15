@@ -14,6 +14,7 @@ import { SystemApi } from './endpoints/SystemApi';
 import { AnomaliesApi } from './endpoints/AnomaliesApi';
 import { TankStatusApi } from './endpoints/TankStatusApi';
 import { UsersApi } from './endpoints/UsersApi';
+import { PrivacyApi } from './endpoints/PrivacyApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -40,6 +41,8 @@ export class CaudalApi {
   readonly imports: ImportsApi;
   /** Accounts, one-time codes and memberships (API.md section 3). */
   readonly users: UsersApi;
+  /** The privacy notice in effect and its acceptance (API.md section 4). */
+  readonly privacy: PrivacyApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -57,5 +60,6 @@ export class CaudalApi {
     this.anomalies = new AnomaliesApi(http, adapter);
     this.imports = new ImportsApi(http);
     this.users = new UsersApi(http, adapter);
+    this.privacy = new PrivacyApi(http, adapter);
   }
 }

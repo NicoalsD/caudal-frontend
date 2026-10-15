@@ -7,6 +7,8 @@ export type SessionEvent =
   | { readonly type: 'SIGNED_IN'; readonly user: SessionUser }
   | { readonly type: 'PASSWORD_CHANGE_REQUIRED' }
   | { readonly type: 'PASSWORD_CHANGED' }
+  | { readonly type: 'PRIVACY_NOTICE_PENDING' }
+  | { readonly type: 'PRIVACY_NOTICE_ACCEPTED' }
   | { readonly type: 'EXPIRED' }
   | { readonly type: 'SIGNED_OUT' };
 
@@ -93,16 +95,27 @@ abstract class SignedInPhase implements SessionPhase {
         return new ExpiredPhase();
       case 'SIGNED_OUT':
         return new AnonymousPhase();
+      case 'PRIVACY_NOTICE_PENDING':
+        return this.withUser({ ...this.user, privacyNoticePending: true });
+      case 'PRIVACY_NOTICE_ACCEPTED':
+        return this.withUser({ ...this.user, privacyNoticePending: false });
       default:
         return this.other(event);
     }
   }
+
+  /** The same kind of phase with other facts about the person (the phase keeps its name). */
+  protected abstract withUser(user: SessionUser): SessionPhase;
 
   protected abstract other(event: SessionEvent): SessionPhase;
 }
 
 export class AuthenticatedPhase extends SignedInPhase {
   readonly name = 'AUTHENTICATED' as const;
+
+  protected withUser(user: SessionUser): SessionPhase {
+    return new AuthenticatedPhase(user);
+  }
 
   protected other(event: SessionEvent): SessionPhase {
     return event.type === 'PASSWORD_CHANGE_REQUIRED'
@@ -117,6 +130,10 @@ export class PasswordChangePendingPhase extends SignedInPhase {
 
   constructor(user: SessionUser) {
     super({ ...user, mustChangePassword: true });
+  }
+
+  protected withUser(user: SessionUser): SessionPhase {
+    return new PasswordChangePendingPhase(user);
   }
 
   protected other(): SessionPhase {

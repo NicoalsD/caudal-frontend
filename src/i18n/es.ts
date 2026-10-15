@@ -668,6 +668,17 @@ export const strings = {
     updated: 'Estado actualizado.',
     saving: 'Guardando...',
   },
+  privacy: {
+    loading: 'Cargando el aviso...',
+    errorBody: 'No pudimos cargar el aviso. Intenta de nuevo.',
+    empty: 'Todavía no hay un aviso vigente. Avisa a la Junta.',
+    version: 'Aviso de privacidad, versión {version}',
+    lead: 'Debes leer y aceptar el aviso para usar CAUDAL.',
+    acceptLabel: 'He leído y acepto el aviso de privacidad.',
+    submit: 'Aceptar y continuar',
+    submitting: 'Guardando...',
+    changed: 'El aviso cambió mientras lo leías. Revísalo y acéptalo de nuevo.',
+  },
   users: {
     loading: 'Cargando usuarios...',
     errorBody: 'No pudimos cargar los usuarios. Intenta de nuevo.',
