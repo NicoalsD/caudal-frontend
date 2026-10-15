@@ -185,3 +185,20 @@ export interface PublicDamageReportView {
   readonly reportedAt: TimestampView;
   readonly updatedAt: TimestampView;
 }
+
+/** A damage report as the Board sees it (API.md 12.1). The reporter's data never leaves the server. */
+export interface IncidentView {
+  readonly id: string;
+  readonly categoryCode: string;
+  readonly sectorId: string | null;
+  readonly description: string;
+  readonly locationHint: string | null;
+  readonly status: ReportStatus;
+  readonly reportedAt: TimestampView;
+}
+
+/** One page of incidents. `nextCursor` is null when there are no more (API.md 1.5). */
+export interface IncidentPageView {
+  readonly items: readonly IncidentView[];
+  readonly nextCursor: string | null;
+}

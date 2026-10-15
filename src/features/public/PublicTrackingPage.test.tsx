@@ -8,7 +8,7 @@ import { t } from '../../i18n/t';
 import { apiUrl } from '../../test/msw/apiUrl';
 import { errorResponse } from '../../test/msw/errorResponse';
 import { server } from '../../test/msw/server';
-import { STATUS_LABEL_KEY } from './ReportStatusBadge';
+import { STATUS_LABEL_KEY } from '../../ui/feedback/ReportStatusBadge';
 import { renderApp } from '../../test/renderApp';
 
 const TRACKING_PATH = '/a/seguimiento';

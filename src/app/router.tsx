@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router';
 
 import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
+import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
@@ -85,7 +86,7 @@ const boardRoutes: RouteObject = {
         screen(ROUTE_PATHS.board.ruleHistory, t('screens.ruleHistory')),
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         screen(ROUTE_PATHS.board.minutes, t('screens.minutes')),
-        screen(ROUTE_PATHS.board.incidents, t('screens.incidents')),
+        { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
         screen(ROUTE_PATHS.board.entities, t('screens.entities')),
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,

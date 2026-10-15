@@ -431,6 +431,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reportes de daño, paginados por cursor
+         * @description Permiso INCIDENT_READ. Orden descendente por fecha de reporte.
+         */
+        get: operations["listIncidents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/incidents/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cambia el estado de un reporte
+         * @description Permiso INCIDENT_CREATE o INCIDENT_MANAGE. Cada cambio queda en el historial.
+         */
+        patch: operations["changeIncidentStatus"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -810,6 +850,32 @@ export interface components {
             reported_at: string;
             /** Format: date-time */
             updated_at: string;
+        };
+        /** @description Reporte de daño para el tablero de la Junta (API.md 12.1). Sin datos del reportante. */
+        Incident: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            source: "PUBLIC_FORM" | "OPERATOR" | "ANOMALY" | "IMPORT";
+            category_code: string;
+            /** Format: uuid */
+            sector_id?: string | null;
+            description: string;
+            location_hint?: string | null;
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            /** Format: date-time */
+            reported_at: string;
+        };
+        IncidentPage: {
+            items: components["schemas"]["Incident"][];
+            next_cursor: string | null;
+        };
+        /** @description Cambio de estado (API.md 12.3). La nota es obligatoria al descartar (10 a 500). */
+        UpdateIncidentStatusRequest: {
+            /** @enum {string} */
+            status: "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            note?: string;
         };
     };
     responses: never;
@@ -1638,6 +1704,82 @@ export interface operations {
             };
             /** @description Código no existe (NOT_FOUND, mensaje genérico). */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listIncidents: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de reportes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IncidentPage"];
+                };
+            };
+            /** @description CURSOR_INVALID. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    changeIncidentStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateIncidentStatusRequest"];
+            };
+        };
+        responses: {
+            /** @description Reporte actualizado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Incident"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION o CONFLICT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED: descarte sin nota válida. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

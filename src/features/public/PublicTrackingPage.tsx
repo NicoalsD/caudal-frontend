@@ -19,7 +19,7 @@ import { FormFields } from '../../ui/primitives/FormFields';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
-import { ReportStatusBadge } from './ReportStatusBadge';
+import { ReportStatusBadge } from '../../ui/feedback/ReportStatusBadge';
 import styles from './PublicSchedule.module.css';
 import { usePublicDamageReport } from './publicQueries';
 

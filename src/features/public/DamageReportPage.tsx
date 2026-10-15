@@ -18,7 +18,8 @@ import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import { DamageReportForm } from './DamageReportForm';
 import styles from './PublicSchedule.module.css';
-import { useCreateDamageReport, useDamageCategories } from './publicQueries';
+import { useCreateDamageReport } from './publicQueries';
+import { useDamageCategories } from '../../state/hooks/useDamageCategories';
 
 /** Screen S05: the report form, then the tracking code shown once. */
 export function DamageReportPage(): JSX.Element {

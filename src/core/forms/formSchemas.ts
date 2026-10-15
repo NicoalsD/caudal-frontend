@@ -79,6 +79,19 @@ export function damageReportFormSchema(
     });
 }
 
+/** Note that explains a dismissal (API.md 12.3): required, with the server's "reason" limits. */
+export const DISMISSAL_NOTE_FIELD = 'note';
+export const REASON_CONSTRAINT = 'reason';
+
+export function dismissalNoteSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .text(DISMISSAL_NOTE_FIELD, { constraint: REASON_CONSTRAINT })
+    .build();
+}
+
 /** Field of the tracking code lookup (S06); its limits are the constraint of the same name. */
 export const TRACKING_CODE_FIELD = 'tracking_code';
 

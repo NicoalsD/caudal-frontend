@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
 import type {
-  CatalogOptionView,
   DamageReportInput,
   DamageReportReceiptView,
   PublicDamageReportView,
@@ -24,16 +23,6 @@ export function usePublicSchedule(aqueductSlug: string): UseQueryResult<PublicSc
   return useQuery({
     queryKey: publicScheduleKey(aqueductSlug),
     queryFn: () => api.public.schedule(aqueductSlug),
-    refetchOnWindowFocus: false,
-  });
-}
-
-/** GET /catalogs/DAMAGE_CATEGORY: the categories of the report, with their labels in Spanish. */
-export function useDamageCategories(): UseQueryResult<CatalogOptionView[]> {
-  const api = useCaudalApi();
-  return useQuery({
-    queryKey: ['public', 'catalog', 'DAMAGE_CATEGORY'],
-    queryFn: () => api.catalogs.options('DAMAGE_CATEGORY'),
     refetchOnWindowFocus: false,
   });
 }

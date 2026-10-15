@@ -27,6 +27,8 @@ import type {
   MeView,
   CatalogOptionView,
   DamageReportReceiptView,
+  IncidentPageView,
+  IncidentView,
   PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
@@ -58,6 +60,8 @@ type SectorDto = components['schemas']['Sector'];
 type PublicScheduleDto = components['schemas']['PublicSchedule'];
 type CatalogItemDto = components['schemas']['CatalogItem'];
 type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
+type IncidentDto = components['schemas']['Incident'];
+type IncidentPageDto = components['schemas']['IncidentPage'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -157,6 +161,28 @@ export class ApiDtoAdapter {
 
   toCatalogOption(dto: CatalogItemDto): CatalogOptionView {
     return { code: dto.code, label: dto.label_es };
+  }
+
+  toIncident(dto: IncidentDto): IncidentView {
+    if (!isReportStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      id: dto.id,
+      categoryCode: dto.category_code,
+      sectorId: dto.sector_id ?? null,
+      description: dto.description,
+      locationHint: dto.location_hint ?? null,
+      status: dto.status,
+      reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+    };
+  }
+
+  toIncidentPage(dto: IncidentPageDto): IncidentPageView {
+    return {
+      items: dto.items.map((item) => this.toIncident(item)),
+      nextCursor: dto.next_cursor ?? null,
+    };
   }
 
   toPublicDamageReport(dto: PublicDamageReportDto): PublicDamageReportView {

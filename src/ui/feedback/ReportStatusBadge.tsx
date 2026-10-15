@@ -5,8 +5,8 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReportStatus } from '../../core/incidents/reportStatus';
 import { reportStatusTone } from '../../core/incidents/reportStatus';
 import { t } from '../../i18n/t';
-import { cn } from '../../ui/styles/cn';
-import styles from './ReportStatus.module.css';
+import { cn } from '../styles/cn';
+import styles from './ReportStatusBadge.module.css';
 
 /** The icon of each status (the state's presentation lives here, next to the view). */
 const ICON_BY_STATUS: Readonly<Record<ReportStatus, LucideIcon>> = {
@@ -17,13 +17,13 @@ const ICON_BY_STATUS: Readonly<Record<ReportStatus, LucideIcon>> = {
   DISMISSED: CircleX,
 };
 
-/** The text key of each status: es.ts keys are camelCase, the API names are not. */
+/** Text key of each status (es.ts keys are camelCase; the API names are not). Shared by screens. */
 export const STATUS_LABEL_KEY = {
-  REPORTED: 'publicTracking.status.received',
-  VERIFYING: 'publicTracking.status.verifying',
-  CONFIRMED: 'publicTracking.status.confirmed',
-  RESOLVED: 'publicTracking.status.resolved',
-  DISMISSED: 'publicTracking.status.dismissed',
+  REPORTED: 'reportStatus.received',
+  VERIFYING: 'reportStatus.verifying',
+  CONFIRMED: 'reportStatus.confirmed',
+  RESOLVED: 'reportStatus.resolved',
+  DISMISSED: 'reportStatus.dismissed',
 } as const satisfies Readonly<Record<ReportStatus, string>>;
 
 interface ReportStatusBadgeProps {
