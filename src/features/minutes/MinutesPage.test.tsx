@@ -1,6 +1,9 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import { apiUrl } from '../../test/msw/apiUrl';
+import { PDF_SHA256 } from '../../test/msw/minutesBackend';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
@@ -19,6 +22,7 @@ const board = () => buildSessionUser({ role: 'BOARD_ADMIN' });
 const PAGE_PATH = ROUTE_PATHS.board.minutes;
 const FIRST_PAGE_ROWS = 2;
 const ALL_ROWS = 3;
+const SHORT_HASH_LENGTH = 12;
 
 describe('MinutesPage (S20, board)', () => {
   it('shows the empty state when there are no actas', async () => {
@@ -105,5 +109,44 @@ describe('MinutesPage (S20, board)', () => {
 
     expect(await screen.findByText(t('minutes.periodReversed'))).toBeInTheDocument();
     expect(backend.actas).toHaveLength(0);
+  });
+
+  it('finalizes a draft after the confirmation and then offers the PDF and its hash', async () => {
+    const backend = createMinutesBackend([buildMinutes()]);
+    server.use(...backend.handlers);
+    renderApp(PAGE_PATH, { user: board() });
+
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.view') }));
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.finalize') }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: t('minutes.finalizeConfirm') }),
+    );
+
+    const link = await screen.findByRole('link', { name: t('minutes.downloadPdf') });
+    expect(link).toHaveAttribute('href', apiUrl(`/minutes/${MINUTES_ID_A}/pdf`));
+    expect(screen.getByText(`${PDF_SHA256.slice(0, SHORT_HASH_LENGTH)}…`)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: t('minutes.finalize') })).not.toBeInTheDocument();
+    expect(backend.actas[0]?.status).toBe('FINAL');
+  });
+
+  it('copies the whole hash of a final acta', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    server.use(
+      ...createMinutesBackend([
+        buildMinutes({
+          status: 'FINAL',
+          pdf_sha256: PDF_SHA256,
+          finalized_at: '2026-10-08T15:00:00Z',
+        }),
+      ]).handlers,
+    );
+    renderApp(PAGE_PATH, { user: board() });
+
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.view') }));
+    await userEvent.click(await screen.findByRole('button', { name: t('minutes.copyHash') }));
+
+    expect(writeText).toHaveBeenCalledWith(PDF_SHA256);
+    expect(await screen.findByText(t('minutes.copiedHash'))).toBeInTheDocument();
   });
 });

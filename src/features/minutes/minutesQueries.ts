@@ -59,3 +59,20 @@ export function useGenerateMinutes(): UseMutationResult<MinutesView, Error, Peri
     },
   });
 }
+
+/**
+ * POST /minutes/{id}/finalize (API.md 13.7). The acta is replaced with the answer (it now has its
+ * PDF hash) and the list is read again.
+ */
+export function useFinalizeMinutes(id: string): UseMutationResult<MinutesView, Error, void> {
+  const api = useCaudalApi();
+  const client = useQueryClient();
+  const key = useMinutesKey();
+  return useMutation({
+    mutationFn: () => api.minutes.finalize(id),
+    onSuccess: async (view) => {
+      client.setQueryData([...key, id], view);
+      await client.invalidateQueries({ queryKey: key });
+    },
+  });
+}

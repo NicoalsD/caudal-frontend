@@ -842,6 +842,16 @@ export const strings = {
     sectionInferredHint: 'Lo que se sospecha a partir de los datos. Hay que verificarlo.',
     sectionConfirmedHint: 'Lo que se verificó en campo.',
     sectionEmpty: 'Sin registros en esta sección.',
+    finalize: 'Finalizar acta',
+    finalizeDescription:
+      'Al finalizar, el acta queda fija y su PDF ya no lleva la marca de borrador. No se puede volver atrás.',
+    finalizeConfirm: 'Sí, finalizar',
+    finalizing: 'Finalizando...',
+    finalizedOn: 'Finalizada el {date}',
+    downloadPdf: 'Descargar PDF',
+    hashLabel: 'Huella SHA-256',
+    copyHash: 'Copiar',
+    copiedHash: 'Huella copiada.',
     offline:
       'Sin conexión: puedes ver las actas que ya cargaste. Generar y descargar necesitan señal.',
   },

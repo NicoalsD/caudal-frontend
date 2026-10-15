@@ -15,6 +15,11 @@ const CREATED_STATUS = 201;
 const MS_PER_DAY = 86_400_000;
 const MAX_PERIOD_DAYS = 366;
 const ID_DIGITS = 12;
+const CONFLICT_STATUS = 409;
+const FINALIZED_AT = '2026-10-08T15:00:00Z';
+/** A neutral 64-character hex value, the shape of a SHA-256. */
+const SHA256_LENGTH = 64;
+export const PDF_SHA256 = 'a'.repeat(SHA256_LENGTH);
 
 /**
  * A small stateful fake of /minutes: the list is paged (PAGE_SIZE, cursor = offset), the detail
@@ -50,6 +55,24 @@ export function createMinutesBackend(initial: readonly MinutesDto[]) {
       });
       actas.unshift(created);
       return HttpResponse.json(created, { status: CREATED_STATUS });
+    }),
+    http.post(apiUrl('/minutes/:id/finalize'), ({ params }) => {
+      const index = actas.findIndex((item) => item.id === params.id);
+      const current = actas[index];
+      if (current === undefined) {
+        return errorResponse(NOT_FOUND_STATUS, 'NOT_FOUND');
+      }
+      if (current.status !== 'DRAFT') {
+        return errorResponse(CONFLICT_STATUS, 'INVALID_STATE_TRANSITION');
+      }
+      const final: MinutesDto = {
+        ...current,
+        status: 'FINAL',
+        finalized_at: FINALIZED_AT,
+        pdf_sha256: PDF_SHA256,
+      };
+      actas[index] = final;
+      return HttpResponse.json(final);
     }),
   ];
   return { actas, handlers };
