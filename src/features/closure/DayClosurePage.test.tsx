@@ -1,18 +1,11 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { buildSessionUser } from '../../test/factories/session';
-import {
-  buildProposalSummary,
-  buildScheduleProposal,
-  ITEM_ID_A,
-  SERVICE_DAY,
-} from '../../test/factories/schedule';
-import { apiUrl } from '../../test/msw/apiUrl';
+import { buildScheduleProposal, ITEM_ID_A, SERVICE_DAY } from '../../test/factories/schedule';
 import { createScheduleBackend } from '../../test/msw/scheduleBackend';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
@@ -122,17 +115,10 @@ describe('DayClosurePage (S10, operator)', () => {
     });
   });
 
-  it('says that the day has no published shifts', async () => {
-    server.use(
-      http.get(apiUrl('/schedule-proposals'), () =>
-        HttpResponse.json({
-          items: [buildProposalSummary({ status: 'REJECTED' })],
-          next_cursor: null,
-        }),
-      ),
-    );
+  it('says that the day has no published schedule', async () => {
+    server.use(...createScheduleBackend(buildScheduleProposal({ status: 'REJECTED' })).handlers);
     renderApp(DAY_PATH, { user: operator() });
 
-    expect(await screen.findByText(t('closure.empty'))).toBeInTheDocument();
+    expect(await screen.findByText(t('closure.noPublished'))).toBeInTheDocument();
   });
 });

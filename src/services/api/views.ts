@@ -377,19 +377,15 @@ export interface ScheduleItemView {
   readonly endAt: TimestampView;
 }
 
-/** A proposal for a service day, with its shifts. `status` is the server's word (PUBLISHED, CLOSED...). */
-export interface ScheduleProposalView {
-  readonly id: string;
+/**
+ * The published schedule of a service day, as the operator reads it (GET /days/{date}/schedule).
+ * The proposal it came from is only an id: the operator cannot read proposals.
+ */
+export interface PublishedScheduleView {
   readonly serviceDate: string;
-  readonly status: string;
+  readonly proposalId: string;
+  readonly publishedAt: TimestampView;
   readonly items: readonly ScheduleItemView[];
-}
-
-/** A proposal in a list: no shifts (API.md 10.2). */
-export interface ScheduleProposalSummaryView {
-  readonly id: string;
-  readonly serviceDate: string;
-  readonly status: string;
 }
 
 /** What the plumber registers for one shift (API.md 11.1). Times are instants or null. */

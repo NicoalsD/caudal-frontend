@@ -3,7 +3,6 @@ import type { components } from '../../services/api/schema';
 
 export type ScheduleItemDto = components['schemas']['ScheduleItem'];
 export type ScheduleProposalDto = components['schemas']['ScheduleProposal'];
-export type ScheduleProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 export type ShiftExecutionDto = components['schemas']['ShiftExecution'];
 
 export const PROPOSAL_ID = '0190f3a2-8888-7000-8000-000000000001';
@@ -45,18 +44,6 @@ export function buildScheduleProposal(
         end_at: `${SERVICE_DAY}T22:00:00-05:00`,
       }),
     ],
-    ...overrides,
-  };
-}
-
-export function buildProposalSummary(
-  overrides: Partial<ScheduleProposalSummaryDto> = {},
-): ScheduleProposalSummaryDto {
-  return {
-    id: PROPOSAL_ID,
-    service_date: SERVICE_DAY,
-    status: 'PUBLISHED',
-    lock_version: 2,
     ...overrides,
   };
 }

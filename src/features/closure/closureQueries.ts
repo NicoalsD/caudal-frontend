@@ -3,7 +3,7 @@ import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
 import type {
   DayClosureView,
-  ScheduleProposalView,
+  PublishedScheduleView,
   ShiftExecutionInput,
   ShiftExecutionView,
 } from '../../services/api/views';
@@ -14,23 +14,16 @@ import { aqueductKey } from '../../state/queryKeys';
 const DAY_SCOPE = 'closure-day';
 const CLOSURE_SCOPE = 'closure';
 
-/** Proposal statuses that hold the shifts of a day: a published day, or a day already closed. */
-const SHIFT_HOLDING_STATUSES: readonly string[] = ['PUBLISHED', 'CLOSED'];
-
 /**
- * The shifts of a service day (API.md 10.2 and 10.3). The list has every proposal of the day, so
- * the one that is published or closed is picked and read with its shifts. Null when the day has none.
+ * The published shifts of a service day (GET /days/{date}/schedule). Null when the day has no
+ * published schedule (its 404). The operator cannot read the proposal, so this is the source.
  */
-export function useDayProposal(serviceDate: string): UseQueryResult<ScheduleProposalView | null> {
+export function useDaySchedule(serviceDate: string): UseQueryResult<PublishedScheduleView | null> {
   const api = useCaudalApi();
   const aqueductId = useAqueductId();
   return useQuery({
     queryKey: aqueductKey(aqueductId, DAY_SCOPE, serviceDate),
-    queryFn: async () => {
-      const summaries = await api.schedule.listForDay(serviceDate);
-      const usable = summaries.find((item) => SHIFT_HOLDING_STATUSES.includes(item.status));
-      return usable === undefined ? null : api.schedule.get(usable.id);
-    },
+    queryFn: () => api.schedule.getPublished(serviceDate),
     refetchOnWindowFocus: false,
   });
 }

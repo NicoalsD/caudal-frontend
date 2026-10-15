@@ -3,17 +3,15 @@ import type { ShiftStatus } from '../../../core/execution/shiftExecution';
 import type { components } from '../schema';
 import type {
   DayClosureView,
+  PublishedScheduleView,
   ScheduleItemView,
-  ScheduleProposalSummaryView,
-  ScheduleProposalView,
   ShiftExecutionView,
 } from '../views';
 import type { ApiDtoAdapter } from './ApiDtoAdapter';
 import { InvalidDtoError } from './InvalidDtoError';
 
 type ScheduleItemDto = components['schemas']['ScheduleItem'];
-type ScheduleProposalDto = components['schemas']['ScheduleProposal'];
-type ScheduleProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
+type PublishedScheduleDto = components['schemas']['PublishedSchedule'];
 type ShiftExecutionDto = components['schemas']['ShiftExecution'];
 type DayClosureDto = components['schemas']['DayClosure'];
 
@@ -36,22 +34,17 @@ export function toScheduleItem(adapter: ApiDtoAdapter, dto: ScheduleItemDto): Sc
   };
 }
 
-export function toScheduleProposal(
+/** The published schedule of a day (GET /days/{date}/schedule). Items are the shifts of the day. */
+export function toPublishedSchedule(
   adapter: ApiDtoAdapter,
-  dto: ScheduleProposalDto,
-): ScheduleProposalView {
+  dto: PublishedScheduleDto,
+): PublishedScheduleView {
   return {
-    id: dto.id,
     serviceDate: dto.service_date,
-    status: dto.status,
+    proposalId: dto.proposal_id,
+    publishedAt: adapter.toTimestamp('published_at', dto.published_at),
     items: dto.items.map((item) => toScheduleItem(adapter, item)),
   };
-}
-
-export function toScheduleProposalSummary(
-  dto: ScheduleProposalSummaryDto,
-): ScheduleProposalSummaryView {
-  return { id: dto.id, serviceDate: dto.service_date, status: dto.status };
 }
 
 export function toShiftExecution(dto: ShiftExecutionDto): ShiftExecutionView {

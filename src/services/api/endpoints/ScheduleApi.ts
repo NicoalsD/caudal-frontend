@@ -1,23 +1,16 @@
+import { DomainError } from '../../../core/errors/DomainError';
 import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
-import {
-  toScheduleProposal,
-  toScheduleProposalSummary,
-  toShiftExecution,
-} from '../adapters/ScheduleAdapter';
+import { toPublishedSchedule, toShiftExecution } from '../adapters/ScheduleAdapter';
 import type { components } from '../schema';
-import type {
-  ScheduleProposalSummaryView,
-  ScheduleProposalView,
-  ShiftExecutionInput,
-  ShiftExecutionView,
-} from '../views';
+import type { PublishedScheduleView, ShiftExecutionInput, ShiftExecutionView } from '../views';
 
-type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
-type ProposalDto = components['schemas']['ScheduleProposal'];
+type PublishedScheduleDto = components['schemas']['PublishedSchedule'];
 type ShiftExecutionDto = components['schemas']['ShiftExecution'];
 
-/** Published shifts of a day and their executions (API.md sections 10 and 11). */
+const NOT_FOUND_CODE = 'NOT_FOUND';
+
+/** Shifts of a day and their executions (API.md 11). */
 export class ScheduleApi {
   constructor(
     private readonly http: HttpClient,
@@ -25,25 +18,22 @@ export class ScheduleApi {
   ) {}
 
   /**
-   * GET /schedule-proposals for one service day (API.md 10.2). Without `status`, the list has
-   * every proposal of the day; the caller picks the one that is published or closed.
+   * GET /days/{date}/schedule: the published shifts of a service day, readable by the operator
+   * (SCHEDULE_VIEW). A day with no published schedule answers 404: that is null here.
    */
-  async listForDay(serviceDate: string): Promise<ScheduleProposalSummaryView[]> {
-    const response = await this.http.request<ProposalPageDto>({
-      method: 'GET',
-      path: '/schedule-proposals',
-      query: { service_date_from: serviceDate, service_date_to: serviceDate },
-    });
-    return response.body.items.map((item) => toScheduleProposalSummary(item));
-  }
-
-  /** GET /schedule-proposals/{id}: the proposal with its shifts (API.md 10.3). */
-  async get(id: string): Promise<ScheduleProposalView> {
-    const response = await this.http.request<ProposalDto>({
-      method: 'GET',
-      path: `/schedule-proposals/${encodeURIComponent(id)}`,
-    });
-    return toScheduleProposal(this.adapter, response.body);
+  async getPublished(serviceDate: string): Promise<PublishedScheduleView | null> {
+    try {
+      const response = await this.http.request<PublishedScheduleDto>({
+        method: 'GET',
+        path: `/days/${encodeURIComponent(serviceDate)}/schedule`,
+      });
+      return toPublishedSchedule(this.adapter, response.body);
+    } catch (error) {
+      if (error instanceof DomainError && error.code === NOT_FOUND_CODE) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   /**

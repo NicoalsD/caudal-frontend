@@ -768,6 +768,7 @@ export const strings = {
     loading: 'Cargando los turnos del día...',
     errorBody: 'No pudimos cargar los turnos del día. Intenta de nuevo.',
     empty: 'No hay turnos publicados para esta fecha.',
+    noPublished: 'Hoy no hay un horario publicado. Pídele a la Junta que lo publique.',
     unknownSector: 'Sector sin nombre',
     shiftHours: '{start} a {end}',
     statusGroup: 'Cómo se cumplió el turno',

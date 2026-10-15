@@ -2018,6 +2018,46 @@
           }
         }
       }
+    },
+    "/api/v1/days/{date}/schedule": {
+      "get": {
+        "operationId": "getDaySchedule",
+        "summary": "Horario publicado de un día",
+        "description": "Permiso SCHEDULE_VIEW (OPERATOR lo tiene). Los turnos llevan el mismo formato que los de GET /schedule-proposals/{id}.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Horario publicado del día.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedSchedule"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el día no tiene horario publicado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3955,6 +3995,29 @@
               "MODIFIED",
               "ADDED"
             ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "params",
+                "text"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
@@ -4363,6 +4426,35 @@
           "next_cursor": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "PublishedSchedule": {
+        "type": "object",
+        "required": [
+          "service_date",
+          "proposal_id",
+          "published_at",
+          "items"
+        ],
+        "properties": {
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItem"
+            }
           }
         }
       }

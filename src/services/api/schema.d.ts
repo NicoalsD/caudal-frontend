@@ -779,6 +779,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/days/{date}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Horario publicado de un día
+         * @description Permiso SCHEDULE_VIEW (OPERATOR lo tiene). Los turnos llevan el mismo formato que los de GET /schedule-proposals/{id}.
+         */
+        get: operations["getDaySchedule"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1389,6 +1409,13 @@ export interface components {
             end_at: string;
             /** @enum {string} */
             origin: "GENERATED" | "MODIFIED" | "ADDED";
+            reasons?: {
+                code: string;
+                params: {
+                    [key: string]: unknown;
+                };
+                text: string;
+            }[];
         };
         ScheduleProposal: {
             /** Format: uuid */
@@ -1511,6 +1538,15 @@ export interface components {
         MinutesPage: {
             items: components["schemas"]["MinutesSummary"][];
             next_cursor: string | null;
+        };
+        PublishedSchedule: {
+            /** Format: date */
+            service_date: string;
+            /** Format: uuid */
+            proposal_id: string;
+            /** Format: date-time */
+            published_at: string;
+            items: components["schemas"]["ScheduleItem"][];
         };
     };
     responses: never;
@@ -3062,6 +3098,37 @@ export interface operations {
                 };
             };
             /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getDaySchedule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                date: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Horario publicado del día. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedSchedule"];
+                };
+            };
+            /** @description NOT_FOUND: el día no tiene horario publicado. */
             404: {
                 headers: {
                     [name: string]: unknown;

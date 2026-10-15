@@ -17,7 +17,7 @@ import { ClosedDayView } from './ClosedDayView';
 import { CloseDayPanel } from './CloseDayPanel';
 import styles from './DayClosure.module.css';
 import { ShiftCard } from './ShiftCard';
-import { useDayClosure, useDayProposal } from './closureQueries';
+import { useDayClosure, useDaySchedule } from './closureQueries';
 
 /** YYYY-MM-DD, the service day in the route. */
 const SERVICE_DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
@@ -35,7 +35,7 @@ export function DayClosurePage(): JSX.Element {
   const shiftSchema = useFormSchema(shiftExecutionFormSchema);
   const notesSchema = useFormSchema(closureNotesSchema);
   const sectors = useSectors();
-  const day = useDayProposal(date);
+  const day = useDaySchedule(date);
   const closure = useDayClosure(date);
   const connection = useConnection();
 
@@ -87,7 +87,7 @@ export function DayClosurePage(): JSX.Element {
     return (
       <>
         <ScreenTitle>{title}</ScreenTitle>
-        <p>{t('closure.empty')}</p>
+        <p>{t('closure.noPublished')}</p>
       </>
     );
   }

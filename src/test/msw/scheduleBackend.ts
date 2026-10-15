@@ -1,7 +1,6 @@
 import { http, HttpResponse } from 'msw';
 
 import type { components } from '../../services/api/schema';
-import { buildProposalSummary } from '../factories/schedule';
 import type { ScheduleProposalDto, ShiftExecutionDto } from '../factories/schedule';
 import { apiUrl } from './apiUrl';
 import { errorResponse } from './errorResponse';
@@ -16,9 +15,12 @@ const CREATED_STATUS = 201;
 const ID_DIGITS = 12;
 const CLOSED_PROPOSAL_STATUS = 'CLOSED';
 const PUBLISHED_PROPOSAL_STATUS = 'PUBLISHED';
+const PUBLISHED_AT = '2026-10-09T18:00:00-05:00';
+const SHIFT_HOLDING_STATUSES: readonly string[] = ['PUBLISHED', 'CLOSED'];
 
 /**
- * A small fake of the proposal, execution and closure endpoints (API.md 10, 11). Each execution is
+ * A small fake of the published schedule, execution and closure endpoints (API.md 11, and
+ * GET /days/{date}/schedule). Each execution is
  * stored in `executions`; a second one for the same shift must replace the first (`supersedes_id`),
  * as the server does. Closing the day moves the proposal to CLOSED and then refuses executions and
  * a second closure (409), as the server does.
@@ -31,17 +33,17 @@ export function createScheduleBackend(proposal: ScheduleProposalDto) {
     closure: null,
   };
   const handlers = [
-    http.get(apiUrl('/schedule-proposals'), () =>
-      HttpResponse.json({
-        items: [buildProposalSummary({ id: state.proposal.id, status: state.proposal.status })],
-        next_cursor: null,
-      }),
-    ),
-    http.get(apiUrl('/schedule-proposals/:id'), ({ params }) => {
-      if (params.id !== state.proposal.id) {
+    // The operator reads the published schedule of the day (SCHEDULE_VIEW), not the proposals.
+    http.get(apiUrl('/days/:date/schedule'), () => {
+      if (!SHIFT_HOLDING_STATUSES.includes(state.proposal.status)) {
         return errorResponse(NOT_FOUND_STATUS, 'NOT_FOUND');
       }
-      return HttpResponse.json(state.proposal);
+      return HttpResponse.json({
+        service_date: state.proposal.service_date,
+        proposal_id: state.proposal.id,
+        published_at: PUBLISHED_AT,
+        items: state.proposal.items,
+      });
     }),
     http.post(apiUrl('/schedule-items/:id/execution'), async ({ params, request }) => {
       const body = (await request.json()) as ExecutionRequest;
