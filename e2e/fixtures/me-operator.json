@@ -1,0 +1,13 @@
+{
+  "id": "0190f3a2-0000-7000-8000-000000000001",
+  "username": "fontanero.ejemplo",
+  "full_name": "Persona Fontanera",
+  "must_change_password": false,
+  "memberships": [
+    {
+      "aqueduct_id": "0190f3a2-0000-7000-8000-0000000000aa",
+      "role": "OPERATOR"
+    }
+  ],
+  "permissions": ["NETWORK_VIEW", "RULESET_VIEW", "READING_CREATE", "DAY_CLOSE", "STATUS_VIEW"]
+}

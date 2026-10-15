@@ -54,6 +54,9 @@ export function useSaveReading(): UseMutationResult<SavedReading, Error, SaveRea
   const offline = useOfflineServices();
   const owner = useOutboxOwner();
   return useMutation({
+    // Saving only writes to the local queue, so it must run without a connection. The default
+    // 'online' mode would pause the mutation offline and leave the form on "Guardando...".
+    networkMode: 'always',
     mutationFn: async (draft) => {
       const clientId = offline.ids.nextId();
       const command = new SubmitReadingCommand(clientId, {
@@ -119,6 +122,8 @@ export function useResendRejectedReading(): UseMutationResult<ResendResult, Erro
   const offline = useOfflineServices();
   const owner = useOutboxOwner();
   return useMutation({
+    // Same as the save: it only rewrites the local queue.
+    networkMode: 'always',
     mutationFn: async (draft) => {
       const refused = await offline.outbox.find(draft.clientId);
       const payload = refused === null ? null : readSubmitReadingPayload(refused.payload);
@@ -150,6 +155,8 @@ export interface DiscardDraft {
 export function useDiscardRejectedReading(): UseMutationResult<void, Error, DiscardDraft> {
   const offline = useOfflineServices();
   return useMutation({
+    // Discarding only changes the local queue, so it works without a connection too.
+    networkMode: 'always',
     mutationFn: (draft) => offline.outbox.discard(draft.clientId, draft.reason),
   });
 }

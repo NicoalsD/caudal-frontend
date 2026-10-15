@@ -6,3 +6,5 @@ src/services/api/schema.d.ts
 docs
 *.md
 .github
+playwright-report
+test-results
