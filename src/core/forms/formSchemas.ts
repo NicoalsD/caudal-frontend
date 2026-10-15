@@ -221,3 +221,28 @@ export function changePasswordFormSchema(
     .confirmation(FIELD.confirmPassword, FIELD.newPassword)
     .build();
 }
+
+/** Field names of one shift's execution form (API.md 11.1), as the form uses them. */
+export const SHIFT_FIELD = {
+  status: 'status',
+  startTime: 'startTime',
+  endTime: 'endTime',
+} as const;
+
+/**
+ * The registration of one shift (S10): the status must be chosen, the times are checked by
+ * `toExecutionTimes` (they depend on the status), and the note keeps the `reading.note` limits.
+ */
+export function shiftExecutionFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .text(FIELD.note, { constraint: FIELD.readingNote })
+    .build()
+    .extend({
+      [SHIFT_FIELD.status]: z.string().min(1, { message: messages('required', {}) }),
+      [SHIFT_FIELD.startTime]: z.string(),
+      [SHIFT_FIELD.endTime]: z.string(),
+    });
+}

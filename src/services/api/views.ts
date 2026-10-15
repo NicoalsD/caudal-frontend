@@ -1,3 +1,4 @@
+import type { ShiftStatus } from '../../core/execution/shiftExecution';
 import type { BatchItemAnswer } from '../../core/commands/batchOutcome';
 import type { ReadingImportRow } from '../../core/imports/readingImport';
 import type {
@@ -363,4 +364,46 @@ export interface AnomalyView {
 export interface AnomalyPageView {
   readonly items: readonly AnomalyView[];
   readonly nextCursor: string | null;
+}
+
+/** One shift of a proposal (API.md 10.3). The sector name is joined from the network. */
+export interface ScheduleItemView {
+  readonly id: string;
+  readonly sectorId: string;
+  readonly sequence: number;
+  readonly startAt: TimestampView;
+  readonly endAt: TimestampView;
+}
+
+/** A proposal for a service day, with its shifts. `status` is the server's word (PUBLISHED, CLOSED...). */
+export interface ScheduleProposalView {
+  readonly id: string;
+  readonly serviceDate: string;
+  readonly status: string;
+  readonly items: readonly ScheduleItemView[];
+}
+
+/** A proposal in a list: no shifts (API.md 10.2). */
+export interface ScheduleProposalSummaryView {
+  readonly id: string;
+  readonly serviceDate: string;
+  readonly status: string;
+}
+
+/** What the plumber registers for one shift (API.md 11.1). Times are instants or null. */
+export interface ShiftExecutionInput {
+  readonly scheduleItemId: string;
+  readonly status: ShiftStatus;
+  readonly actualStart: string | null;
+  readonly actualEnd: string | null;
+  readonly note: string;
+  /** The execution this one replaces, when the shift was already registered. */
+  readonly supersedesId: string | null;
+}
+
+export interface ShiftExecutionView {
+  readonly id: string;
+  readonly scheduleItemId: string;
+  readonly status: ShiftStatus;
+  readonly supersedesId: string | null;
 }

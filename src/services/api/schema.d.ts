@@ -611,6 +611,66 @@ export interface paths {
         patch: operations["resolveAnomaly"];
         trace?: never;
     };
+    "/api/v1/schedule-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Propuestas de turnos, paginadas por cursor
+         * @description Permiso PROPOSAL_VIEW. Sin items: el detalle está en GET /schedule-proposals/{id}. API.md 10.2.
+         */
+        get: operations["listScheduleProposals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-proposals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Propuesta de turnos con sus turnos
+         * @description Permiso PROPOSAL_VIEW. API.md 10.3.
+         */
+        get: operations["getScheduleProposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedule-items/{id}/execution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registra la ejecución de un turno
+         * @description Permiso DAY_CLOSE. Una ejecución nunca se edita: una corrección es una fila nueva con supersedes_id. API.md 11.1.
+         */
+        post: operations["recordShiftExecution"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1208,6 +1268,66 @@ export interface components {
             resolution_note?: string;
             /** Format: uuid */
             related_incident_id?: string | null;
+        };
+        ScheduleItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            sector_id: string;
+            sequence: number;
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            /** @enum {string} */
+            origin: "GENERATED" | "MODIFIED" | "ADDED";
+        };
+        ScheduleProposal: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            status: string;
+            lock_version: number;
+            items: components["schemas"]["ScheduleItem"][];
+        };
+        ScheduleProposalSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            service_date: string;
+            status: string;
+            lock_version: number;
+        };
+        ScheduleProposalPage: {
+            items: components["schemas"]["ScheduleProposalSummary"][];
+            next_cursor: string | null;
+        };
+        ShiftExecutionRequest: {
+            /** @enum {string} */
+            status: "COMPLETED" | "PARTIAL" | "NOT_EXECUTED";
+            /** Format: date-time */
+            actual_start?: string | null;
+            /** Format: date-time */
+            actual_end?: string | null;
+            note?: string;
+            /** Format: uuid */
+            supersedes_id?: string | null;
+        };
+        ShiftExecution: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            schedule_item_id: string;
+            /** @enum {string} */
+            status: "COMPLETED" | "PARTIAL" | "NOT_EXECUTED";
+            /** Format: date-time */
+            actual_start?: string | null;
+            /** Format: date-time */
+            actual_end?: string | null;
+            note?: string | null;
+            /** Format: uuid */
+            supersedes_id?: string | null;
         };
     };
     responses: never;
@@ -2416,6 +2536,116 @@ export interface operations {
             };
             /** @description REASON_REQUIRED: descarte sin motivo. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listScheduleProposals: {
+        parameters: {
+            query?: {
+                service_date_from?: string;
+                service_date_to?: string;
+                status?: string;
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Página de propuestas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposalPage"];
+                };
+            };
+            /** @description FORBIDDEN: el rol no tiene PROPOSAL_VIEW. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Propuesta completa. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    recordShiftExecution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShiftExecutionRequest"];
+            };
+        };
+        responses: {
+            /** @description Ejecución registrada. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftExecution"];
+                };
+            };
+            /** @description VALIDATION_ERROR: actual_end <= actual_start. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION (propuesta no publicada o día cerrado) o CONFLICT (ya reemplazada). */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -5,6 +5,7 @@ import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
 import { ImportPage } from '../features/imports';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
+import { DayClosurePage } from '../features/closure';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
@@ -68,7 +69,7 @@ const operatorRoutes: RouteObject = {
         { path: ROUTE_PATHS.operator.home, element: <OperatorHomePage /> },
         { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
         { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
-        screen(ROUTE_PATHS.operator.dayClosure, t('screens.dayClosure')),
+        { path: ROUTE_PATHS.operator.dayClosure, element: <DayClosurePage /> },
         screen(ROUTE_PATHS.operator.damage, t('screens.operatorDamage')),
       ],
     },

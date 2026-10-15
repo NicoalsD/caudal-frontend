@@ -1531,6 +1531,181 @@
           }
         }
       }
+    },
+    "/api/v1/schedule-proposals": {
+      "get": {
+        "operationId": "listScheduleProposals",
+        "summary": "Propuestas de turnos, paginadas por cursor",
+        "description": "Permiso PROPOSAL_VIEW. Sin items: el detalle está en GET /schedule-proposals/{id}. API.md 10.2.",
+        "parameters": [
+          {
+            "name": "service_date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "service_date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de propuestas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposalPage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: el rol no tiene PROPOSAL_VIEW.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{id}": {
+      "get": {
+        "operationId": "getScheduleProposal",
+        "summary": "Propuesta de turnos con sus turnos",
+        "description": "Permiso PROPOSAL_VIEW. API.md 10.3.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Propuesta completa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-items/{id}/execution": {
+      "post": {
+        "operationId": "recordShiftExecution",
+        "summary": "Registra la ejecución de un turno",
+        "description": "Permiso DAY_CLOSE. Una ejecución nunca se edita: una corrección es una fila nueva con supersedes_id. API.md 11.1.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShiftExecutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ejecución registrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShiftExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: actual_end <= actual_start.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION (propuesta no publicada o día cerrado) o CONFLICT (ya reemplazada).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3427,6 +3602,205 @@
               "null"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "ScheduleItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "sector_id",
+          "sequence",
+          "start_at",
+          "end_at",
+          "origin"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "GENERATED",
+              "MODIFIED",
+              "ADDED"
+            ]
+          }
+        }
+      },
+      "ScheduleProposal": {
+        "type": "object",
+        "required": [
+          "id",
+          "service_date",
+          "status",
+          "lock_version",
+          "items"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItem"
+            }
+          }
+        }
+      },
+      "ScheduleProposalSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "service_date",
+          "status",
+          "lock_version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "service_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lock_version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ScheduleProposalPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleProposalSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ShiftExecutionRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "PARTIAL",
+              "NOT_EXECUTED"
+            ]
+          },
+          "actual_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "actual_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "supersedes_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "ShiftExecution": {
+        "type": "object",
+        "required": [
+          "id",
+          "schedule_item_id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "schedule_item_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "PARTIAL",
+              "NOT_EXECUTED"
+            ]
+          },
+          "actual_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "actual_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "supersedes_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       }
