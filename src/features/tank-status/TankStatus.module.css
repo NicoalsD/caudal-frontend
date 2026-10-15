@@ -118,3 +118,22 @@
 .noticeEstimate strong {
   color: var(--color-ochre-800);
 }
+
+.stale {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-ochre-100);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-ochre-700);
+  border-radius: var(--radius-control);
+}
+
+.stale strong {
+  color: var(--color-ochre-800);
+}
+
+.stale p {
+  margin: 0;
+}

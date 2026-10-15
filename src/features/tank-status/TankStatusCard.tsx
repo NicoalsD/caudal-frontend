@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Clock, Minus } from 'lucide-react';
 
 import { formatDecimal } from '../../core/format/decimal';
 import { bandLabel } from '../../i18n/bandLabel';
@@ -79,6 +79,19 @@ export function TankStatusCard({ tank, status }: TankStatusCardProps): JSX.Eleme
               {t('tankStatus.observedAt', { date: status.level.observedAt.text })}
             </span>
           </div>
+          {status.stale.isStale ? (
+            <div className={cn(styles.stale)} role="status">
+              <Clock aria-hidden="true" className={cn(styles.icon)} />
+              <div>
+                <strong>{t('tankStatus.staleTitle')}</strong>
+                <p>
+                  {t('tankStatus.staleText', {
+                    hours: formatDecimal(status.stale.staleAfterHours, HOURS_DIGITS),
+                  })}
+                </p>
+              </div>
+            </div>
+          ) : null}
           <dl className={cn(styles.facts)}>
             <div className={cn(styles.fact)}>
               <dt>{t('tankStatus.trendLabel')}</dt>

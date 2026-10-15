@@ -14,6 +14,7 @@ import { renderApp } from '../../test/renderApp';
 
 const BOARD = buildSessionUser({ role: 'BOARD_MEMBER' });
 const INTERNAL_ERROR = 500;
+const STALE_HOURS = 12;
 
 function renderStatus() {
   return renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
@@ -43,6 +44,28 @@ describe('TankStatusPage (S12 status block)', () => {
       ),
     ).toBeVisible();
     expect(screen.getByRole('img', { name: t('forecast.chartLabel') })).toBeInTheDocument();
+  });
+
+  it('warns that the last reading is older than the limit the status sends', async () => {
+    server.use(
+      http.get(apiUrl('/tanks/:id/status'), () =>
+        Response.json(
+          buildTankStatus({ stale: { is_stale: true, stale_after_hours: STALE_HOURS } }),
+        ),
+      ),
+    );
+    renderStatus();
+
+    expect(
+      await screen.findByText(t('tankStatus.staleText', { hours: String(STALE_HOURS) })),
+    ).toBeVisible();
+  });
+
+  it('does not warn when the last reading is recent', async () => {
+    renderStatus();
+
+    await screen.findByText(t('tankStatus.levelValue', { value: '2,3' }));
+    expect(screen.queryByText(t('tankStatus.staleTitle'))).not.toBeInTheDocument();
   });
 
   it('says there are no readings yet when the tank has no level', async () => {

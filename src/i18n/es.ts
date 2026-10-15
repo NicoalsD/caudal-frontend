@@ -601,6 +601,9 @@ export const strings = {
     bandLabel: 'Banda',
     bandHours: '{hours} h de servicio al día',
     bandHoursUnknown: 'Horas de servicio no disponibles',
+    staleTitle: 'Dato viejo',
+    staleText:
+      'El último dato tiene más de {hours} horas. Puede no reflejar el tanque de hoy. Registra una lectura nueva.',
   },
   forecast: {
     title: 'Pronóstico del nivel',
