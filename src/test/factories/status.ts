@@ -2,6 +2,7 @@ import type { components } from '../../services/api/schema';
 
 export type TankStatusDto = components['schemas']['TankStatus'];
 export type ForecastRunDto = components['schemas']['ForecastRun'];
+export type AnomalyDto = components['schemas']['Anomaly'];
 
 /** A tank state as GET /tanks/{id}/status answers it: a level of 2,3 m taken 6 hours ago. */
 export function buildTankStatus(overrides: Partial<TankStatusDto> = {}): TankStatusDto {
@@ -32,6 +33,22 @@ export function buildForecastRun(overrides: Partial<ForecastRunDto> = {}): Forec
       { target_date: '2026-10-15', p10: 2.0, p50: 2.2, p90: 2.4 },
       { target_date: '2026-10-16', p10: 1.8, p50: 2.1, p90: 2.4 },
     ],
+    ...overrides,
+  };
+}
+
+/** An open anomaly of the seed tank: a possible leak with the level it points at (API.md 9.1). */
+export function buildAnomaly(overrides: Partial<AnomalyDto> = {}): AnomalyDto {
+  return {
+    id: '0b7f3a10-0000-4000-8000-0000000000a1',
+    kind: 'POSSIBLE_LEAK',
+    detected_at: '2026-10-14T06:30:00-05:00',
+    status: 'OPEN',
+    evidence: { gauge_value: 1.9 },
+    resolved_by: null,
+    resolved_at: null,
+    resolution_note: null,
+    related_incident_id: null,
     ...overrides,
   };
 }

@@ -1,3 +1,4 @@
+import { anomaliesHandlers } from './anomalies';
 import { authHandlers } from './auth';
 import { catalogHandlers } from './catalogs';
 import { incidentsHandlers } from './incidents';
@@ -14,6 +15,7 @@ export const handlers = [
   ...networkHandlers,
   ...rulesHandlers,
   ...statusHandlers,
+  ...anomaliesHandlers,
   ...publicHandlers,
   ...catalogHandlers,
   ...incidentsHandlers,

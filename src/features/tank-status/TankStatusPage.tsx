@@ -9,6 +9,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
+import { AnomalyList } from './AnomalyList';
 import { ForecastSection } from './ForecastSection';
 import { TankStatusCard } from './TankStatusCard';
 import styles from './TankStatus.module.css';
@@ -32,6 +33,7 @@ function TankStatusSection({ tank }: { readonly tank: TankView }): JSX.Element {
     <>
       <TankStatusCard tank={tank} status={status.data} />
       <ForecastSection tank={tank} observed={status.data.level} />
+      <AnomalyList />
     </>
   );
 }

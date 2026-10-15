@@ -1394,6 +1394,143 @@
           }
         }
       }
+    },
+    "/api/v1/anomalies": {
+      "get": {
+        "operationId": "listAnomalies",
+        "summary": "Anomalías del acueducto",
+        "description": "Autenticado, permiso STATUS_VIEW. API.md sección 9.1. De la más nueva a la más antigua.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "CONFIRMED",
+                "DISMISSED"
+              ]
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "POSSIBLE_LEAK",
+                "SENSOR_FAULT",
+                "STALE_DATA",
+                "SUSPECTED_DUPLICATE",
+                "ABNORMAL_DROP"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Una página de anomalías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyPage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anomalies/{id}": {
+      "patch": {
+        "operationId": "resolveAnomaly",
+        "summary": "Confirmar o descartar una anomalía",
+        "description": "Autenticado, permiso ANOMALY_REVIEW (BOARD_ADMIN y BOARD_MEMBER). API.md sección 9.2. El motivo es obligatorio al descartar.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAnomalyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Anomalía actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Anomaly"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "INVALID_STATE_TRANSITION: la anomalía no está OPEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED: descarte sin motivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3173,6 +3310,123 @@
             "items": {
               "$ref": "#/components/schemas/TankStatusForecastPoint"
             }
+          }
+        }
+      },
+      "Anomaly": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "detected_at",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "POSSIBLE_LEAK",
+              "SENSOR_FAULT",
+              "STALE_DATA",
+              "SUSPECTED_DUPLICATE",
+              "ABNORMAL_DROP"
+            ]
+          },
+          "detected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CONFIRMED",
+              "DISMISSED"
+            ]
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Datos que llevaron a sospechar la anomalía."
+          },
+          "resolved_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "resolved_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "resolution_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related_incident_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "AnomalyPage": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Anomaly"
+            }
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateAnomalyRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "DISMISSED"
+            ]
+          },
+          "resolution_note": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 500,
+            "description": "0 a 500; de 10 a 500 al descartar."
+          },
+          "related_incident_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           }
         }
       }

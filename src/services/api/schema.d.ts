@@ -571,6 +571,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/anomalies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Anomalías del acueducto
+         * @description Autenticado, permiso STATUS_VIEW. API.md sección 9.1. De la más nueva a la más antigua.
+         */
+        get: operations["listAnomalies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/anomalies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Confirmar o descartar una anomalía
+         * @description Autenticado, permiso ANOMALY_REVIEW (BOARD_ADMIN y BOARD_MEMBER). API.md sección 9.2. El motivo es obligatorio al descartar.
+         */
+        patch: operations["resolveAnomaly"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1135,6 +1175,39 @@ export interface components {
             /** Format: date-time */
             context_to?: string;
             points: components["schemas"]["TankStatusForecastPoint"][];
+        };
+        Anomaly: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "POSSIBLE_LEAK" | "SENSOR_FAULT" | "STALE_DATA" | "SUSPECTED_DUPLICATE" | "ABNORMAL_DROP";
+            /** Format: date-time */
+            detected_at: string;
+            /** @enum {string} */
+            status: "OPEN" | "CONFIRMED" | "DISMISSED";
+            /** @description Datos que llevaron a sospechar la anomalía. */
+            evidence?: {
+                [key: string]: unknown;
+            };
+            /** Format: uuid */
+            resolved_by?: string | null;
+            /** Format: date-time */
+            resolved_at?: string | null;
+            resolution_note?: string | null;
+            /** Format: uuid */
+            related_incident_id?: string | null;
+        };
+        AnomalyPage: {
+            items: components["schemas"]["Anomaly"][];
+            next_cursor?: string | null;
+        };
+        UpdateAnomalyRequest: {
+            /** @enum {string} */
+            status: "CONFIRMED" | "DISMISSED";
+            /** @description 0 a 500; de 10 a 500 al descartar. */
+            resolution_note?: string;
+            /** Format: uuid */
+            related_incident_id?: string | null;
         };
     };
     responses: never;
@@ -2265,6 +2338,84 @@ export interface operations {
             };
             /** @description NOT_FOUND: el tanque no existe, es de otro acueducto o nunca se pronosticó. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listAnomalies: {
+        parameters: {
+            query?: {
+                status?: "OPEN" | "CONFIRMED" | "DISMISSED";
+                kind?: "POSSIBLE_LEAK" | "SENSOR_FAULT" | "STALE_DATA" | "SUSPECTED_DUPLICATE" | "ABNORMAL_DROP";
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Una página de anomalías. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnomalyPage"];
+                };
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    resolveAnomaly: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAnomalyRequest"];
+            };
+        };
+        responses: {
+            /** @description Anomalía actualizada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Anomaly"];
+                };
+            };
+            /** @description INVALID_STATE_TRANSITION: la anomalía no está OPEN. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED: descarte sin motivo. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
