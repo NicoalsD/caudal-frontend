@@ -10,6 +10,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { cn } from '../../ui/styles/cn';
 import { ForecastChart } from './ForecastChart';
+import { ForecastSourceNotice } from './ForecastSourceNotice';
 import styles from './TankStatus.module.css';
 
 const NOT_FOUND_CODE = 'NOT_FOUND';
@@ -44,6 +45,7 @@ export function ForecastSection({
     const data = forecast.data;
     body = (
       <>
+        <ForecastSourceNotice forecast={data} />
         <ul className={cn(styles.summary)}>
           {data.points.map((point) => (
             <li key={point.targetDate}>

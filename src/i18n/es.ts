@@ -616,6 +616,18 @@ export const strings = {
     p10: 'Bajo',
     p50: 'Lo más probable',
     p90: 'Alto',
+    sourceAi: 'Pronóstico de IA',
+    sourceAiText: 'Lo calculó el modelo de inteligencia artificial con las lecturas recientes.',
+    sourceEstimate: 'Estimado',
+    sourceEstimateText:
+      'La IA no respondió. Usamos una estimación simple: se espera que siga igual que hoy. Motivo: {reason}.',
+    reasonTimeout: 'la IA no respondió a tiempo',
+    reasonCircuitOpen: 'la IA está en pausa por fallas repetidas',
+    reasonError: 'la IA tuvo un error',
+    reasonInsufficientHistory: 'hay pocas lecturas para el modelo',
+    reasonUnknown: 'no se indicó',
+    model: 'Modelo: {name}',
+    createdAt: 'Calculado el {date}',
   },
   imports: {
     intro:

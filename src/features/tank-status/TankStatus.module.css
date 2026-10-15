@@ -102,3 +102,19 @@
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
 }
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  border: 2px solid var(--color-water-700);
+  background: var(--color-water-100);
+}
+
+.noticeEstimate {
+  border-color: var(--color-ochre-700);
+  background: var(--color-ochre-100);
+}
+
+.noticeEstimate strong {
+  color: var(--color-ochre-800);
+}

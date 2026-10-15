@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 
 import { formatDecimal } from '../../core/format/decimal';
+import { forecastSourceState } from '../../core/forecast/forecastSource';
 import { formatDayKey } from '../../core/format/time';
 import { t } from '../../i18n/t';
 import type { ForecastView, TankView, TankStatusView } from '../../services/api/views';
@@ -27,6 +28,12 @@ const MARKER_RADIUS = 4;
 const AXIS_WIDTH = 48;
 const CHART_MARGIN = { top: 8, right: 16, bottom: 8, left: 0 } as const;
 const EDGE_DASH = '4 4';
+const SOURCE_DASH = '8 6';
+/** Token of each accent: the source decides the color, never a hex value here. */
+const ACCENT_TOKENS = {
+  water: { line: 'var(--color-water-700)', band: 'var(--color-water-300)' },
+  ochre: { line: 'var(--color-ochre-700)', band: 'var(--color-ochre-100)' },
+} as const;
 
 interface ForecastChartProps {
   readonly tank: TankView;
@@ -53,6 +60,9 @@ export function ForecastChart({ tank, forecast, observed }: ForecastChartProps):
     })),
   );
   const labelOf = (dayKey: string): string => formatDayKey(dayKey);
+  const source = forecastSourceState(forecast.isFallback).presentation;
+  const tokens = ACCENT_TOKENS[source.accent];
+  const lineDash = source.lineDashed ? SOURCE_DASH : undefined;
   return (
     <div className={cn(styles.stack)}>
       <div className={cn(styles.chartWrap)} role="img" aria-label={t('forecast.chartLabel')}>
@@ -85,7 +95,7 @@ export function ForecastChart({ tank, forecast, observed }: ForecastChartProps):
               dataKey="range"
               name={t('forecast.range')}
               stroke="none"
-              fill="var(--color-water-300)"
+              fill={tokens.band}
               fillOpacity={BAND_FILL_OPACITY}
               isAnimationActive={false}
             />
@@ -112,9 +122,10 @@ export function ForecastChart({ tank, forecast, observed }: ForecastChartProps):
             <Line
               dataKey="p50"
               name={t('forecast.median')}
-              stroke="var(--color-water-700)"
+              stroke={tokens.line}
               strokeWidth={MEDIAN_STROKE_WIDTH}
-              dot={{ r: MARKER_RADIUS, fill: 'var(--color-water-700)' }}
+              strokeDasharray={lineDash}
+              dot={{ r: MARKER_RADIUS, fill: tokens.line }}
               isAnimationActive={false}
             />
             <Line
