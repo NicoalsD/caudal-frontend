@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aiVerdict, formatPercent, horizonsUpTo } from './forecastEvaluation';
+import { aiVerdict, formatPercent, formatSignedPercent, horizonsUpTo } from './forecastEvaluation';
 
 const SHARE_76 = 0.76;
 const SHARE_MINUS_10 = -0.1;
@@ -52,5 +52,19 @@ describe('horizonsUpTo', () => {
 
   it('is empty when the rules define no horizon', () => {
     expect(horizonsUpTo(0)).toEqual([]);
+  });
+});
+
+describe('formatSignedPercent', () => {
+  it('adds a plus sign when the AI is better', () => {
+    expect(formatSignedPercent(SHARE_12_5)).toBe('+13 %');
+  });
+
+  it('keeps the minus sign when the AI is worse', () => {
+    expect(formatSignedPercent(SHARE_MINUS_10)).toBe('-10 %');
+  });
+
+  it('writes no sign for an exact tie', () => {
+    expect(formatSignedPercent(0)).toBe('0 %');
   });
 });

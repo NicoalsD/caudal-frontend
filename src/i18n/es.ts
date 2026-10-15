@@ -1133,6 +1133,12 @@ export const strings = {
     headlineDoesNotHelp: 'Con los datos de hasta hoy, la IA no ayuda.',
     headlineUnknown: 'Con los datos de hasta hoy, la IA aún no se sabe.',
     evaluatedCount: 'Pronósticos evaluados: {count}',
+    skillCaption:
+      'Mejora frente a la estimación simple por horizonte. Un valor positivo quiere decir que la IA se equivoca menos.',
+    horizonColumn: 'Horizonte',
+    skillColumn: 'Mejora',
+    maeIaColumn: 'Error IA',
+    maeSimpleColumn: 'Error estimación simple',
     horizonPicker: 'Horizonte del pronóstico',
     horizonOne: '1 día',
     horizonMany: '{days} días',

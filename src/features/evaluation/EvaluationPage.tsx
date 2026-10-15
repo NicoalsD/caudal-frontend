@@ -13,6 +13,8 @@ import { Button } from '../../ui/primitives/Button';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { EvaluationMetrics } from './EvaluationMetrics';
+import { HorizonSkillTable } from './HorizonSkillTable';
+import { horizonLabel } from './horizonLabel';
 import styles from './EvaluationPage.module.css';
 import { useForecastEvaluations } from './evaluationQueries';
 import type { EvaluationPeriod } from './evaluationQueries';
@@ -104,6 +106,7 @@ function EvaluationResult({
     <>
       <HorizonPicker horizons={horizons} selected={current.horizonDays} onSelect={onSelect} />
       <h2 className={cn(styles.headline)}>{headlineText(verdict)}</h2>
+      <HorizonSkillTable evaluations={evaluations} />
       <p className={cn(styles.count)}>{t('evaluation.evaluatedCount', { count: current.n })}</p>
       <EvaluationMetrics evaluation={current} />
     </>
@@ -179,9 +182,7 @@ function HorizonPicker({
             onSelect(days);
           }}
         >
-          {days === FIRST_HORIZON_DAYS
-            ? t('evaluation.horizonOne')
-            : t('evaluation.horizonMany', { days })}
+          {horizonLabel(days)}
         </Button>
       ))}
     </div>

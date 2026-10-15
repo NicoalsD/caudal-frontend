@@ -41,3 +41,9 @@ export function formatPercent(ratio: number, locale: string = DISPLAY_LOCALE): s
 export function horizonsUpTo(forecastHorizonDays: number): readonly number[] {
   return Array.from({ length: Math.max(0, forecastHorizonDays) }, (_, index) => index + 1);
 }
+
+/** A ratio as a signed percentage: "+20 %" when the AI is better (positive), "-10 %" when worse. */
+export function formatSignedPercent(ratio: number, locale: string = DISPLAY_LOCALE): string {
+  const text = formatPercent(ratio, locale);
+  return ratio > 0 ? `+${text}` : text;
+}
