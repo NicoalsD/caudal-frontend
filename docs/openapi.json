@@ -1055,6 +1055,53 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createIncident",
+        "summary": "Registra un daño desde el panel",
+        "description": "Permiso INCIDENT_CREATE. Crea con source OPERATOR. API.md sección 12.2.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIncidentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte creado con status REPORTED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Incident"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (VALIDATION_ERROR).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Sin permiso (FORBIDDEN).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/incidents/{id}/status": {
@@ -6736,6 +6783,35 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "CreateIncidentRequest": {
+        "type": "object",
+        "description": "Daño registrado por una persona del acueducto desde el panel (API.md 12.2). Campos desconocidos se rechazan.",
+        "required": [
+          "category_code",
+          "description"
+        ],
+        "properties": {
+          "category_code": {
+            "type": "string",
+            "description": "Código de DAMAGE_CATEGORY."
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Sector del acueducto, si se sabe."
+          },
+          "description": {
+            "type": "string",
+            "description": "10 a 500 caracteres (incident.description)."
+          },
+          "location_hint": {
+            "type": "string",
+            "nullable": true,
+            "description": "0 a 120 caracteres."
           }
         }
       }

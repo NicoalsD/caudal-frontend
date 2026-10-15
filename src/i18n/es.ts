@@ -664,6 +664,7 @@ export const strings = {
   },
   home: {
     greeting: 'Hola, {name}.',
+    damageSent: 'Reporte enviado. La Junta lo verá en Incidentes.',
     tankTitle: 'Último nivel del tanque',
     levelValue: '{value} m',
     levelAge: 'Tomado hace {hours} h',
@@ -719,6 +720,16 @@ export const strings = {
     codeLabel: 'Código de seguimiento',
     saveCode: 'Guarda este código. Lo necesitarás para consultar el estado.',
     checkStatus: 'Consultar mi reporte',
+  },
+  operatorDamage: {
+    loading: 'Cargando el formulario...',
+    loadError: 'No pudimos cargar el formulario. Intenta de nuevo.',
+    sectorLabel: 'Sector (opcional)',
+    noSector: 'No sé el sector',
+    submit: 'Guardar reporte',
+    saving: 'Guardando...',
+    offline:
+      'Sin conexión. Este reporte no se guarda sin señal: intenta de nuevo cuando tengas conexión.',
   },
   anomalies: {
     title: 'Anomalías pendientes de revisión',

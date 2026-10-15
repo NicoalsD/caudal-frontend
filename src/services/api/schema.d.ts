@@ -444,7 +444,11 @@ export interface paths {
          */
         get: operations["listIncidents"];
         put?: never;
-        post?: never;
+        /**
+         * Registra un daño desde el panel
+         * @description Permiso INCIDENT_CREATE. Crea con source OPERATOR. API.md sección 12.2.
+         */
+        post: operations["createIncident"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2244,6 +2248,20 @@ export interface components {
             is_simulated: boolean;
             banner?: string | null;
         };
+        /** @description Daño registrado por una persona del acueducto desde el panel (API.md 12.2). Campos desconocidos se rechazan. */
+        CreateIncidentRequest: {
+            /** @description Código de DAMAGE_CATEGORY. */
+            category_code: string;
+            /**
+             * Format: uuid
+             * @description Sector del acueducto, si se sabe.
+             */
+            sector_id?: string | null;
+            /** @description 10 a 500 caracteres (incident.description). */
+            description: string;
+            /** @description 0 a 120 caracteres. */
+            location_hint?: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -3103,6 +3121,48 @@ export interface operations {
             };
             /** @description CURSOR_INVALID. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createIncident: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateIncidentRequest"];
+            };
+        };
+        responses: {
+            /** @description Reporte creado con status REPORTED. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Incident"];
+                };
+            };
+            /** @description Datos inválidos (VALIDATION_ERROR). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sin permiso (FORBIDDEN). */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

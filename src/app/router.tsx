@@ -9,7 +9,7 @@ import { DayClosurePage } from '../features/closure';
 import { MinutesPage } from '../features/minutes';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
-import { IncidentsPage } from '../features/incidents';
+import { IncidentsPage, OperatorDamagePage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
 import { BoardDayGuide } from '../features/board/BoardDayGuide';
 import {
@@ -87,7 +87,7 @@ const operatorRoutes: RouteObject = {
         { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
         { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
         { path: ROUTE_PATHS.operator.dayClosure, element: <DayClosurePage /> },
-        screen(ROUTE_PATHS.operator.damage, t('screens.operatorDamage')),
+        { path: ROUTE_PATHS.operator.damage, element: <OperatorDamagePage /> },
       ],
     },
   ],

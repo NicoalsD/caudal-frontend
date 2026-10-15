@@ -4,6 +4,7 @@ import type { ConstraintsMap } from './FieldConstraint';
 import {
   damageReportFormSchema,
   loginFormSchema,
+  operatorDamageFormSchema,
   readingFormSchema,
   reasonSchema,
 } from './formSchemas';
@@ -110,5 +111,39 @@ describe('damageReportFormSchema', () => {
     expect(
       withoutPlaceLimit.safeParse({ ...valid, location_hint: 'x'.repeat(PLACE_MAX + 1) }).success,
     ).toBe(true);
+  });
+});
+
+describe('operatorDamageFormSchema', () => {
+  const reportConstraints: ConstraintsMap = {
+    'incident.description': { min: 10, max: DESCRIPTION_MAX },
+    'incident.location_hint': { min: 0, max: PLACE_MAX },
+  };
+  const schema = operatorDamageFormSchema(reportConstraints, keyMessages);
+
+  it('takes the shared fields and the sector, with no honeypot', () => {
+    expect(
+      schema.parse({
+        category_code: 'LEAK',
+        description: '  Hay agua saliendo del tubo.  ',
+        location_hint: '',
+        sector_id: '',
+      }),
+    ).toEqual({
+      category_code: 'LEAK',
+      description: 'Hay agua saliendo del tubo.',
+      location_hint: '',
+      sector_id: '',
+    });
+  });
+
+  it('keeps the description and the place within the server limits', () => {
+    const valid = { category_code: 'LEAK', description: 'Hay agua saliendo.', sector_id: '' };
+    expect(schema.safeParse({ ...valid, location_hint: 'x'.repeat(PLACE_MAX + 1) }).success).toBe(
+      false,
+    );
+    expect(schema.safeParse({ ...valid, description: 'corto', location_hint: '' }).success).toBe(
+      false,
+    );
   });
 });

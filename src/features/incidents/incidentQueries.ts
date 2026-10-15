@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import type { UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query';
 
 import type { IncidentTarget } from '../../core/incidents/incidentTransitions';
-import type { IncidentPageView, IncidentView } from '../../services/api/views';
+import type { IncidentInput, IncidentPageView, IncidentView } from '../../services/api/views';
 import { useAqueductId } from '../../state/hooks/useAqueductId';
 import { useCaudalApi } from '../../state/hooks/apiContext';
 import { aqueductKey } from '../../state/queryKeys';
@@ -41,6 +41,19 @@ export function useChangeIncidentStatus(): UseMutationResult<IncidentView, Error
   const key = useIncidentKey();
   return useMutation({
     mutationFn: (change) => api.incidents.changeStatus(change.id, change.target, change.note),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+/** POST /incidents (S11). The Board's list is read again, so the new report shows there. */
+export function useCreateIncident(): UseMutationResult<IncidentView, Error, IncidentInput> {
+  const api = useCaudalApi();
+  const client = useQueryClient();
+  const key = useIncidentKey();
+  return useMutation({
+    mutationFn: (input) => api.incidents.create(input),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: key });
     },

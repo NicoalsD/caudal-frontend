@@ -348,6 +348,14 @@ export interface DamageReportInput {
   readonly formStartedAt: string;
 }
 
+/** A damage report registered by a signed-in person (API.md 12.2). Empty fields are null. */
+export interface IncidentInput {
+  readonly categoryCode: string;
+  readonly description: string;
+  readonly sectorId: string | null;
+  readonly locationHint: string | null;
+}
+
 /** The status of a damage report for the person who has its code (API.md 15.5). No personal data. */
 export interface PublicDamageReportView {
   readonly status: ReportStatus;

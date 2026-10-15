@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { useLocation } from 'react-router';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { formatDecimal } from '../../core/format/decimal';
@@ -23,6 +24,7 @@ const HOURS_DECIMALS = 0;
  * reading). The day's closure is for today's date in America/Bogota.
  */
 export function OperatorHomePage(): JSX.Element {
+  const location = useLocation();
   const session = useSession();
   const offline = useOfflineServices();
   const summary = useSyncQueue();
@@ -46,6 +48,7 @@ export function OperatorHomePage(): JSX.Element {
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.operatorHome')}</ScreenTitle>
       <p className={cn(styles.greeting)}>{t('home.greeting', { name })}</p>
+      {readDamageSent(location.state) ? <p role="status">{t('home.damageSent')}</p> : null}
       <section className={cn(styles.card)} aria-labelledby="home-tank-title">
         <h2 id="home-tank-title">{t('home.tankTitle')}</h2>
         {tankBlock}
@@ -73,6 +76,16 @@ export function OperatorHomePage(): JSX.Element {
         </ul>
       </nav>
     </div>
+  );
+}
+
+/** The damage report page sends the person back here saying the report was sent (S11). */
+function readDamageSent(state: unknown): boolean {
+  return (
+    typeof state === 'object' &&
+    state !== null &&
+    'damageSent' in state &&
+    state.damageSent === true
   );
 }
 
