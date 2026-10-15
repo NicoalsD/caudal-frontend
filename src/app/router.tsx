@@ -26,9 +26,9 @@ import { EntitiesPage } from '../features/entities';
 import { EntitySummariesPage } from '../features/entity-summaries';
 import { EvaluationPage } from '../features/evaluation';
 import { AuditPage } from '../features/audit';
+import { DevicesPage } from '../features/devices';
 import { AuditLayout } from './layouts/AuditLayout';
 import { EvaluationLayout } from './layouts/EvaluationLayout';
-import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
 import { RequirePrivacyAccepted } from './guards/RequirePrivacyAccepted';
@@ -42,14 +42,8 @@ import { SharedLayout } from './layouts/SharedLayout';
 import { TeamLayout } from './layouts/TeamLayout';
 import { ErrorPage } from './pages/ErrorPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { RootRedirect } from './pages/RootRedirect';
 import { ROLES_BY_AREA, ROUTE_PATHS } from '../core/session/routes';
-
-/** Builds one leaf route that renders a placeholder until its feature exists. */
-function screen(path: string, title: string): RouteObject {
-  return { path, element: <PlaceholderPage title={title} /> };
-}
 
 const publicRoutes: RouteObject = {
   element: <PublicLayout />,
@@ -138,7 +132,6 @@ const teamRoutes: RouteObject = {
       element: <TeamLayout />,
       children: [
         { path: ROUTE_PATHS.team.health, element: <HealthPage /> },
-        screen(ROUTE_PATHS.team.devices, t('screens.devices')),
         { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
     },
@@ -161,6 +154,17 @@ const auditRoutes: RouteObject = {
     {
       element: <AuditLayout />,
       children: [{ path: ROUTE_PATHS.team.audit, element: <AuditPage /> }],
+    },
+  ],
+};
+
+/** Devices are shared by the Board's administrator and the project team (DEVICE_MANAGE). */
+const devicesRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.devices} />,
+  children: [
+    {
+      element: <AuditLayout />,
+      children: [{ path: ROUTE_PATHS.team.devices, element: <DevicesPage /> }],
     },
   ],
 };
@@ -209,6 +213,7 @@ export function buildRoutes(): RouteObject[] {
                     teamRoutes,
                     evaluationRoutes,
                     auditRoutes,
+                    devicesRoutes,
                     entityRoutes,
                     sharedRoutes,
                   ],

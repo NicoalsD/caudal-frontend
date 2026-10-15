@@ -20,6 +20,7 @@ import { UsersApi } from './endpoints/UsersApi';
 import { PrivacyApi } from './endpoints/PrivacyApi';
 import { SummariesApi } from './endpoints/SummariesApi';
 import { AuditApi } from './endpoints/AuditApi';
+import { DevicesApi } from './endpoints/DevicesApi';
 import { EvaluationApi } from './endpoints/EvaluationApi';
 
 /**
@@ -59,6 +60,8 @@ export class CaudalApi {
   readonly summaries: SummariesApi;
   /** The audit log and the security events (API.md section 18). */
   readonly audit: AuditApi;
+  /** Registered devices, their status and their keys (API.md section 16). */
+  readonly devices: DevicesApi;
   /** Whether the AI helps against the simple estimate (API.md section 14). */
   readonly evaluation: EvaluationApi;
 
@@ -84,6 +87,7 @@ export class CaudalApi {
     this.privacy = new PrivacyApi(http, adapter);
     this.summaries = new SummariesApi(http, adapter);
     this.audit = new AuditApi(http, adapter);
+    this.devices = new DevicesApi(http, adapter);
     this.evaluation = new EvaluationApi(http);
   }
 }
