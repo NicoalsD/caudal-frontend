@@ -19,14 +19,12 @@ describe('ReadingsApi.correct', () => {
   it('posts the corrected value and the reason to the reading, and maps the answer', async () => {
     const http = new FakeHttpClient(
       okResponse({
-        correction: {
-          id: 'k-1',
-          reading_id: READING.id,
-          corrected_gauge_value: 2,
-          reason: 'El fontanero leyó mal la regla.',
-          corrected_by: 'u-1',
-          created_at: '2026-10-14T13:05:00Z',
-        },
+        id: 'k-1',
+        reading_id: READING.id,
+        corrected_gauge_value: 2,
+        reason: 'El fontanero leyó mal la regla.',
+        corrected_by: 'u-1',
+        created_at: '2026-10-14T13:05:00Z',
         effective_gauge_value: 2,
       }),
     );

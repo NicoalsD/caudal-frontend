@@ -747,7 +747,8 @@ export interface components {
             corrected_gauge_value: number;
             reason: string;
         };
-        ReadingCorrection: {
+        /** @description Corrección creada y el valor efectivo nuevo de la lectura. El dato original no cambia. */
+        ReadingCorrectionResponse: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
@@ -758,9 +759,6 @@ export interface components {
             corrected_by: string;
             /** Format: date-time */
             created_at: string;
-        };
-        ReadingCorrectionResponse: {
-            correction: components["schemas"]["ReadingCorrection"];
             effective_gauge_value: number;
         };
         TankStatusLevel: {

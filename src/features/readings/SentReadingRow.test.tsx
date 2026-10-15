@@ -53,14 +53,12 @@ describe('SentReadingRow: correcting a reading the server has', () => {
         body = await request.json();
         return HttpResponse.json(
           {
-            correction: {
-              id: 'k-1',
-              reading_id: SENT_ID,
-              corrected_gauge_value: 2,
-              reason: REASON,
-              corrected_by: 'u-1',
-              created_at: '2026-10-14T13:05:00Z',
-            },
+            id: 'k-1',
+            reading_id: SENT_ID,
+            corrected_gauge_value: 2,
+            reason: REASON,
+            corrected_by: 'u-1',
+            created_at: '2026-10-14T13:05:00Z',
             effective_gauge_value: 2,
           },
           { status: 201 },

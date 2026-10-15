@@ -2027,15 +2027,17 @@
           }
         }
       },
-      "ReadingCorrection": {
+      "ReadingCorrectionResponse": {
         "type": "object",
+        "description": "Corrección creada y el valor efectivo nuevo de la lectura. El dato original no cambia.",
         "required": [
           "id",
           "reading_id",
           "corrected_gauge_value",
           "reason",
           "corrected_by",
-          "created_at"
+          "created_at",
+          "effective_gauge_value"
         ],
         "properties": {
           "id": {
@@ -2059,18 +2061,6 @@
           "created_at": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "ReadingCorrectionResponse": {
-        "type": "object",
-        "required": [
-          "correction",
-          "effective_gauge_value"
-        ],
-        "properties": {
-          "correction": {
-            "$ref": "#/components/schemas/ReadingCorrection"
           },
           "effective_gauge_value": {
             "type": "number"

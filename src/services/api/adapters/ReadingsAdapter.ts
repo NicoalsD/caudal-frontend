@@ -81,17 +81,13 @@ export function toReadingBatchResult(dto: ReadingBatchResponseDto): ReadingBatch
   };
 }
 
-/** Answer of POST /readings/{id}/corrections (API.md 7.5). */
-export interface ReadingCorrectionDto {
+/** Answer of POST /readings/{id}/corrections (API.md 7.5): the correction, flat. */
+export interface ReadingCorrectionResponseDto {
   readonly id: string;
   readonly reading_id: string;
   readonly corrected_gauge_value: number;
   readonly reason: string;
   readonly created_at: string;
-}
-
-export interface ReadingCorrectionResponseDto {
-  readonly correction: ReadingCorrectionDto;
   readonly effective_gauge_value: number;
 }
 
@@ -100,14 +96,11 @@ export function toReadingCorrection(
   dto: ReadingCorrectionResponseDto,
 ): ReadingCorrectionView {
   return {
-    id: dto.correction.id,
-    readingId: dto.correction.reading_id,
-    correctedGaugeValue: adapter.toDecimal(
-      'correction.corrected_gauge_value',
-      dto.correction.corrected_gauge_value,
-    ),
-    reason: dto.correction.reason,
-    createdAt: adapter.toTimestamp('correction.created_at', dto.correction.created_at),
+    id: dto.id,
+    readingId: dto.reading_id,
+    correctedGaugeValue: adapter.toDecimal('corrected_gauge_value', dto.corrected_gauge_value),
+    reason: dto.reason,
+    createdAt: adapter.toTimestamp('created_at', dto.created_at),
     effectiveGaugeValue: adapter.toDecimal('effective_gauge_value', dto.effective_gauge_value),
   };
 }
