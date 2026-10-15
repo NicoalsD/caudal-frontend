@@ -222,3 +222,45 @@ export interface ScheduleProposalPageView {
   readonly items: readonly ScheduleProposalSummaryView[];
   readonly nextCursor: string | null;
 }
+
+/** A reason of a shift, with the sentence the server wrote for it (API.md 10.3). */
+export interface ScheduleReasonView {
+  readonly code: string;
+  readonly text: string;
+}
+
+/** A shift of a proposal, with its times in America/Bogota and its reasons. */
+export interface ScheduleItemView {
+  readonly id: string;
+  readonly sectorId: string;
+  readonly sequence: number;
+  readonly startTime: string;
+  readonly endTime: string;
+  /** Length of the shift in hours (end minus start). */
+  readonly hours: number;
+  readonly origin: 'PROPOSED' | 'MODIFIED' | 'ADDED';
+  readonly reasons: readonly ScheduleReasonView[];
+}
+
+/** A sector that got no shift, and why (code from the server). */
+export interface UnservedSectorView {
+  readonly sectorId: string;
+  readonly reason: string;
+}
+
+/** A decision of the Board in the history of a proposal. */
+export interface ScheduleDecisionView {
+  readonly decision: 'APPROVED' | 'APPROVED_WITH_CHANGES' | 'REJECTED';
+  readonly reason: string | null;
+  readonly decidedAt: TimestampView;
+}
+
+/** A full proposal (API.md 10.3): the list fields plus its shifts and history. */
+export interface ScheduleProposalView extends ScheduleProposalSummaryView {
+  readonly ruleSetId: string;
+  readonly strategyCode: string;
+  readonly items: readonly ScheduleItemView[];
+  readonly unservedSectors: readonly UnservedSectorView[];
+  readonly decisions: readonly ScheduleDecisionView[];
+  readonly snapshotTaken: boolean;
+}

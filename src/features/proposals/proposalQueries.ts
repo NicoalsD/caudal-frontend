@@ -8,6 +8,7 @@ import type {
 import type {
   ScheduleProposalPageView,
   ScheduleProposalSummaryView,
+  ScheduleProposalView,
 } from '../../services/api/views';
 import { useAqueductId } from '../../state/hooks/useAqueductId';
 import { useCaudalApi } from '../../state/hooks/apiContext';
@@ -48,6 +49,17 @@ export function useProposalsOfDay(
       const page = await api.proposals.list({ serviceDateFrom: day, serviceDateTo: day });
       return page.items;
     },
+    refetchOnWindowFocus: false,
+  });
+}
+
+/** GET /schedule-proposals/{id}: the full proposal (S13 detail). */
+export function useProposal(id: string): UseQueryResult<ScheduleProposalView> {
+  const api = useCaudalApi();
+  const key = useProposalKey('detail', id);
+  return useQuery({
+    queryKey: key,
+    queryFn: () => api.proposals.get(id),
     refetchOnWindowFocus: false,
   });
 }

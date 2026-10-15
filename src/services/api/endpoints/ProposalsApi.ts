@@ -1,11 +1,16 @@
 import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import type { components } from '../schema';
-import type { ScheduleProposalPageView, ScheduleProposalSummaryView } from '../views';
+import type {
+  ScheduleProposalPageView,
+  ScheduleProposalSummaryView,
+  ScheduleProposalView,
+} from '../views';
 
 type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
 type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 type GenerateDto = components['schemas']['GenerateScheduleProposalRequest'];
+type ProposalDto = components['schemas']['ScheduleProposal'];
 
 /** Filters of GET /schedule-proposals (API.md 10.2). Dates are YYYY-MM-DD. */
 export interface ProposalListFilter {
@@ -51,5 +56,14 @@ export class ProposalsApi {
       body,
     });
     return this.adapter.toProposalSummary(response.body);
+  }
+
+  /** GET /schedule-proposals/{id}: the shifts, their reasons and the Board's history. */
+  async get(id: string): Promise<ScheduleProposalView> {
+    const response = await this.http.request<ProposalDto>({
+      method: 'GET',
+      path: `/schedule-proposals/${encodeURIComponent(id)}`,
+    });
+    return this.adapter.toProposal(response.body);
   }
 }

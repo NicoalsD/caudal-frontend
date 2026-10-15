@@ -7,6 +7,8 @@ import {
   toBogotaDateKey,
 } from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
+
+const MS_PER_HOUR = 3_600_000;
 import type { components } from '../schema';
 import type { Membership } from '../../../core/session/memberships';
 import { isBandCode } from '../../../core/rules/ruleSetParts';
@@ -30,8 +32,10 @@ import type {
   DamageReportReceiptView,
   IncidentPageView,
   IncidentView,
+  ScheduleItemView,
   ScheduleProposalPageView,
   ScheduleProposalSummaryView,
+  ScheduleProposalView,
   PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
@@ -67,6 +71,8 @@ type IncidentDto = components['schemas']['Incident'];
 type IncidentPageDto = components['schemas']['IncidentPage'];
 type ProposalSummaryDto = components['schemas']['ScheduleProposalSummary'];
 type ProposalPageDto = components['schemas']['ScheduleProposalPage'];
+type ProposalDto = components['schemas']['ScheduleProposal'];
+type ProposalItemDto = components['schemas']['ScheduleItem'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -206,6 +212,43 @@ export class ApiDtoAdapter {
           ? null
           : this.toDecimal('tank_level_snapshot', dto.tank_level_snapshot),
       lockVersion: dto.lock_version,
+    };
+  }
+
+  toProposal(dto: ProposalDto): ScheduleProposalView {
+    const summary = this.toProposalSummary(dto);
+    return {
+      ...summary,
+      ruleSetId: dto.rule_set_id,
+      strategyCode: dto.strategy_code,
+      items: dto.items
+        .map((item) => this.toScheduleItem(item))
+        .sort((a, b) => a.sequence - b.sequence),
+      unservedSectors: dto.unserved_sectors.map((sector) => ({
+        sectorId: sector.sector_id,
+        reason: sector.reason,
+      })),
+      decisions: dto.decisions.map((decision) => ({
+        decision: decision.decision,
+        reason: decision.reason ?? null,
+        decidedAt: this.toTimestamp('decided_at', decision.decided_at),
+      })),
+      snapshotTaken: dto.snapshot_taken,
+    };
+  }
+
+  private toScheduleItem(dto: ProposalItemDto): ScheduleItemView {
+    const start = parseInstant(dto.start_at);
+    const end = parseInstant(dto.end_at);
+    return {
+      id: dto.id,
+      sectorId: dto.sector_id,
+      sequence: dto.sequence,
+      startTime: formatTime(dto.start_at),
+      endTime: formatTime(dto.end_at),
+      hours: (end.getTime() - start.getTime()) / MS_PER_HOUR,
+      origin: dto.origin,
+      reasons: dto.reasons.map((reason) => ({ code: reason.code, text: reason.text })),
     };
   }
 

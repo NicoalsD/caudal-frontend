@@ -495,6 +495,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schedule-proposals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Detalle de una propuesta
+         * @description Permiso PROPOSAL_VIEW. Incluye turnos, sectores sin turno y decisiones (API.md 10.3).
+         */
+        get: operations["getScheduleProposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -983,7 +1003,7 @@ export interface components {
             rule_set_id: string;
             /** Format: double */
             tank_level_snapshot?: number | null;
-            tank_band?: string | null;
+            tank_band: string | null;
             /** Format: double */
             available_hours: number;
             /** Format: uuid */
@@ -1968,6 +1988,37 @@ export interface operations {
             };
             /** @description NO_LEVEL_DATA, OUTSIDE_OPERATING_WINDOW. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getScheduleProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Propuesta completa. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleProposal"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

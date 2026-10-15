@@ -64,3 +64,9 @@
   color: var(--color-water-700);
   font-weight: var(--font-weight-bold);
 }
+
+.reasons {
+  margin: 0;
+  padding-left: var(--space-4);
+  line-height: var(--line-height-body);
+}

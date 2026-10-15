@@ -1221,6 +1221,46 @@
           }
         }
       }
+    },
+    "/api/v1/schedule-proposals/{id}": {
+      "get": {
+        "operationId": "getScheduleProposal",
+        "summary": "Detalle de una propuesta",
+        "description": "Permiso PROPOSAL_VIEW. Incluye turnos, sectores sin turno y decisiones (API.md 10.3).",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Propuesta completa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleProposal"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2678,6 +2718,7 @@
           "service_date",
           "status",
           "rule_set_id",
+          "tank_band",
           "available_hours",
           "strategy_code",
           "generated_at",

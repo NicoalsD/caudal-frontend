@@ -9,7 +9,7 @@ import { t } from '../../i18n/t';
 import { PERMISSIONS_BY_ROLE } from '../../test/factories/auth';
 import { buildSessionUser } from '../../test/factories/session';
 import {
-  buildProposalSummary,
+  buildProposal,
   PROPOSAL_ID_TODAY,
   PROPOSAL_ID_YESTERDAY,
 } from '../../test/factories/proposals';
@@ -29,17 +29,17 @@ describe('ProposalListPage (S13 list)', () => {
   it('shows the proposal of today first, with its status, before the others by date', async () => {
     server.use(
       ...createProposalsBackend([
-        buildProposalSummary({
+        buildProposal({
           id: PROPOSAL_ID_YESTERDAY,
           service_date: YESTERDAY,
           status: 'PUBLISHED',
         }),
-        buildProposalSummary({
+        buildProposal({
           id: PROPOSAL_ID_TODAY,
           service_date: TODAY,
           status: 'PENDING_REVIEW',
         }),
-        buildProposalSummary({
+        buildProposal({
           id: '0190f3a2-9a00-7000-8000-000000000003',
           service_date: OLDER,
           status: 'CLOSED',
