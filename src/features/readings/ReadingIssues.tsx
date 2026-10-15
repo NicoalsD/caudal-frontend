@@ -17,7 +17,6 @@ import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
 import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
 import { useFormSchema } from '../../state/hooks/useFormSchema';
-import { useSyncQueue } from '../../state/hooks/useSyncQueue';
 import { useTanks } from '../../state/hooks/useTanks';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
@@ -54,40 +53,23 @@ export function refusalMessage(
   return text.includes('{') ? t(GAUGE_MESSAGE_FALLBACK_KEY) : text;
 }
 
-/** Refused readings of the signed-in person: the person fixes the value and resends, or discards. */
-export function ReadingIssues(): JSX.Element | null {
-  const summary = useSyncQueue();
+/** The gauge range that applies to a reading of this tank (rule set first, then the tank). */
+export function useGaugeForTank(tankId: string | null): Gauge | null {
   const tanks = useTanks();
   const ruleSet = useCurrentRuleSet();
-  const headingId = useId();
-  const review = summary.items.filter((item) => item.status === 'CORRECTION_PENDING');
-  if (review.length === 0) {
-    return null;
-  }
-  return (
-    <section className={cn(styles.review)} aria-labelledby={headingId}>
-      <h2 id={headingId}>{t('readings.review.title')}</h2>
-      {review.map((item) => (
-        <ReadingIssueCard
-          key={item.clientId}
-          item={item}
-          gauge={resolveGauge(
-            ruleSet.data?.gauge,
-            tanks.data?.find((tank) => tank.id === item.tankId),
-          )}
-        />
-      ))}
-    </section>
+  return resolveGauge(
+    ruleSet.data?.gauge,
+    tanks.data?.find((tank) => tank.id === tankId),
   );
 }
 
 interface ReadingIssueCardProps {
   readonly item: OutboxItemSummary;
-  readonly gauge: Gauge | null;
 }
 
 /** One refused reading: when it was taken, why the server refused it and the two actions. */
-export function ReadingIssueCard({ item, gauge }: ReadingIssueCardProps): JSX.Element {
+export function ReadingIssueCard({ item }: ReadingIssueCardProps): JSX.Element {
+  const gauge = useGaugeForTank(item.tankId);
   const headingId = useId();
   const [resending, setResending] = useState(false);
   const [discarding, setDiscarding] = useState(false);
@@ -102,7 +84,7 @@ export function ReadingIssueCard({ item, gauge }: ReadingIssueCardProps): JSX.El
       </h3>
       <p className={cn(styles.issueStatus)}>
         <TriangleAlert aria-hidden="true" size={ICON_SIZE} />
-        <span>{t('readings.review.notSaved')}</span>
+        <span>{t('readings.review.needsReview')}</span>
       </p>
       <p>{refusalMessage(item.lastErrorCode ?? '', item.lastErrorDetails ?? {}, gauge)}</p>
       <div className={cn(styles.actions)}>

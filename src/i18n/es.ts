@@ -484,6 +484,23 @@ export const strings = {
     noChangesToSave: 'No hay cambios por guardar.',
     readOnlyNotice: 'Puedes ver este borrador, pero no editarlo con tu rol.',
   },
+  pending: {
+    pageSummary: '{count} lecturas por enviar en este celular.',
+    offlineSummary: 'Sin conexión. {count} lecturas en el celular.',
+    sendNow: 'Enviar ahora',
+    waitingSignal: 'Esperando señal',
+    sending: 'Enviando...',
+    value: 'Nivel {value}',
+    empty: 'No tienes lecturas pendientes.',
+    sentCount: '{count} lecturas enviadas.',
+    sentOne: '1 lectura enviada.',
+    nothingSent: 'No se envió ninguna lectura. Revisa la señal e intenta de nuevo.',
+    sentTitle: 'Enviadas en esta sesión',
+    status: {
+      pending: 'Pendiente',
+      sending: 'Enviando',
+    },
+  },
   readings: {
     loading: 'Cargando el tanque...',
     noTank: 'Todavía no hay un tanque activo. Avisa a la Junta.',
@@ -526,9 +543,9 @@ export const strings = {
     review: {
       title: 'Lecturas que no se guardaron',
       observedAt: 'Lectura del {date}',
-      notSaved: 'No se guardó',
+      needsReview: 'Necesita revisión',
       unknownDate: 'Lectura sin fecha válida',
-      correct: 'Corregir y reenviar',
+      correct: 'Corregir',
       discard: 'Descartar',
       resendTitle: 'Corregir la lectura',
       resendDescription:

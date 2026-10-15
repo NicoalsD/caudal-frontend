@@ -32,7 +32,7 @@ async function renderWithSentReading() {
   const user = operator();
   const batch = createReadingsBackend();
   server.use(...batch.handlers);
-  const app = renderApp(ROUTE_PATHS.operator.newReading, { user });
+  const app = renderApp(ROUTE_PATHS.operator.pending, { user });
   const owner = { userId: user.userId, aqueductId: user.aqueductId };
   await app.services.offline.outbox.enqueue(
     new SubmitReadingCommand(SENT_ID, PAYLOAD),
@@ -43,7 +43,7 @@ async function renderWithSentReading() {
   return app;
 }
 
-describe('SentReadings: correcting a reading the server has', () => {
+describe('SentReadingRow: correcting a reading the server has', () => {
   it('stores the correction with its reason and says the original stays', async () => {
     let body: unknown = null;
     server.use(

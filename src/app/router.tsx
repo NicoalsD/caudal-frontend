@@ -3,7 +3,7 @@ import type { RouteObject } from 'react-router';
 
 import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
-import { ReadingPage } from '../features/readings';
+import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
@@ -62,7 +62,7 @@ const operatorRoutes: RouteObject = {
       children: [
         screen(ROUTE_PATHS.operator.home, t('screens.operatorHome')),
         { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
-        screen(ROUTE_PATHS.operator.pending, t('screens.pendingReadings')),
+        { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
         screen(ROUTE_PATHS.operator.dayClosure, t('screens.dayClosure')),
         screen(ROUTE_PATHS.operator.damage, t('screens.operatorDamage')),
       ],

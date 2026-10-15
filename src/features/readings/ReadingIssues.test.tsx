@@ -39,7 +39,7 @@ async function renderWithRefusal() {
   const user = operator();
   const backend = createReadingsBackend();
   server.use(...backend.handlers);
-  const app: RenderedApp = renderApp(ROUTE_PATHS.operator.newReading, { user });
+  const app: RenderedApp = renderApp(ROUTE_PATHS.operator.pending, { user });
   const owner = { userId: user.userId, aqueductId: user.aqueductId };
   const { outbox } = app.services.offline;
   await outbox.enqueue(new SubmitReadingCommand(REFUSED_ID, PAYLOAD), owner, null);
@@ -76,7 +76,7 @@ describe('ReadingIssues: refused readings', () => {
     await renderWithRefusal();
 
     expect(await screen.findByRole('heading', { name: t('readings.review.title') })).toBeVisible();
-    expect(screen.getByText(t('readings.review.notSaved'))).toBeInTheDocument();
+    expect(screen.getByText(t('readings.review.needsReview'))).toBeInTheDocument();
     expect(screen.getByText(SERVER_RANGE_TEXT)).toBeInTheDocument();
   });
 
@@ -99,10 +99,10 @@ describe('ReadingIssues: refused readings', () => {
     const [sent] = backend.batches[0]?.readings ?? [];
     expect(sent).toMatchObject({ gauge_value: 2.5, tank_id: TANK_ID });
     expect(sent?.id).not.toBe(REFUSED_ID);
-    await waitFor(() => {
-      expect(services.offline.syncQueue.getSnapshot().needsReviewCount).toBe(0);
+    await waitFor(async () => {
+      expect(await services.offline.outbox.pendingFor(owner)).toEqual([]);
     });
-    expect(await services.offline.outbox.pendingFor(owner)).toEqual([]);
+    expect(services.offline.syncQueue.getSnapshot().needsReviewCount).toBe(0);
   });
 
   it('refuses a corrected value outside the range before sending it', async () => {
