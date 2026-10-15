@@ -62,6 +62,7 @@ export class OutboxSync {
     if (owner === null) {
       return;
     }
+    await this.queue.recoverInterrupted(owner);
     const nowMs = this.clock.nowMs();
     const due = (await this.queue.pendingFor(owner)).filter(
       (record) =>

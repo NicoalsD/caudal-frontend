@@ -97,6 +97,17 @@ export class CommandQueue {
     );
   }
 
+  /**
+   * A send that was in flight when the page closed leaves its item as SENDING. Nothing is in flight
+   * after a reload, so those items go back to PENDING and are sent again (offline-sync.md 4).
+   */
+  async recoverInterrupted(owner: OutboxOwner): Promise<void> {
+    const interrupted = await this.repository.list(owner, ['SENDING']);
+    for (const record of interrupted) {
+      await this.update(record.clientId, (current) => ({ ...current, status: 'PENDING' }));
+    }
+  }
+
   async markSending(clientId: string): Promise<void> {
     await this.update(clientId, (record) => ({ ...record, status: 'SENDING' }));
   }

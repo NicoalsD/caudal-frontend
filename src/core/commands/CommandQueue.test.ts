@@ -231,3 +231,17 @@ describe('CommandQueue corrections and session log', () => {
     expect(await queue.find('missing')).toBeNull();
   });
 });
+
+describe('CommandQueue after a reload', () => {
+  it('puts back an item that was being sent when the page closed', async () => {
+    const { queue } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.markSending('c-1');
+
+    await queue.recoverInterrupted(OWNER);
+
+    expect(await queue.pendingFor(OWNER)).toEqual([
+      expect.objectContaining({ clientId: 'c-1', status: 'PENDING' }),
+    ]);
+  });
+});
