@@ -104,17 +104,6 @@ describe('OperatorHomePage (S07)', () => {
     );
   });
 
-  it('marks the data as simulated on the demo aqueduct', async () => {
-    server.use(
-      http.get(apiUrl(`/tanks/${TANK_ID}/status`), () =>
-        HttpResponse.json(buildTankStatus({ is_demo: true })),
-      ),
-    );
-    renderHome();
-
-    expect(await screen.findByText(t('common.simulatedData'))).toBeVisible();
-  });
-
   it('keeps the actions and tells the person when the level cannot be loaded', async () => {
     server.use(
       http.get(apiUrl(`/tanks/${TANK_ID}/status`), () =>

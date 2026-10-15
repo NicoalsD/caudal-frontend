@@ -801,14 +801,10 @@ export interface components {
                 is_stale: boolean;
                 stale_after_hours: number;
             };
-            band?: {
-                code?: string;
-                daily_service_hours?: number;
-            } | null;
+            /** @description Banda del nivel actual. */
+            band?: ("HIGH" | "LOW" | "CRITICAL") | null;
             forecast?: components["schemas"]["TankStatusForecast"] | null;
             open_anomalies?: number;
-            /** @description True when the aqueduct is the demo one: its data is simulated. */
-            is_demo?: boolean;
         };
         ImportReadingRow: {
             /** Format: uuid */

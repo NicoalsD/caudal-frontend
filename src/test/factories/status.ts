@@ -8,10 +8,9 @@ export function buildTankStatus(overrides: Partial<TankStatusDto> = {}): TankSta
     level: { value: 2.3, observed_at: '2026-10-14T07:15:00-05:00', hours_ago: 6 },
     trend: { slope_per_day: -0.25, label: 'DOWN', label_es: 'viene bajando' },
     stale: { is_stale: false, stale_after_hours: 12 },
-    band: { code: 'HIGH', daily_service_hours: 8 },
+    band: 'HIGH',
     forecast: null,
     open_anomalies: 0,
-    is_demo: false,
     ...overrides,
   };
 }

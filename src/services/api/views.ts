@@ -247,8 +247,6 @@ export interface TankStatusView {
   } | null;
   readonly forecast: ForecastView | null;
   readonly openAnomalies: number;
-  /** True when the aqueduct is the demo one: its data is simulated. */
-  readonly isDemo: boolean;
 }
 
 /** One batch of simulated readings (API.md 17.1). The file hash lets the server spot a repeat. */

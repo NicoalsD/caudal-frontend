@@ -2222,20 +2222,18 @@
           "band": {
             "oneOf": [
               {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string"
-                  },
-                  "daily_service_hours": {
-                    "type": "integer"
-                  }
-                }
+                "type": "string",
+                "enum": [
+                  "HIGH",
+                  "LOW",
+                  "CRITICAL"
+                ]
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Banda del nivel actual."
           },
           "forecast": {
             "oneOf": [
@@ -2249,10 +2247,6 @@
           },
           "open_anomalies": {
             "type": "integer"
-          },
-          "is_demo": {
-            "type": "boolean",
-            "description": "True when the aqueduct is the demo one: its data is simulated."
           }
         }
       },

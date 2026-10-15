@@ -12,7 +12,6 @@ import { Button } from '../../ui/primitives/Button';
 import { LinkButton } from '../../ui/primitives/LinkButton';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
-import { SimulatedDataBanner } from '../../ui/feedback/SimulatedDataBanner';
 import { cn } from '../../ui/styles/cn';
 import styles from './OperatorHome.module.css';
 
@@ -101,7 +100,6 @@ function TankLevel({ tankId }: { readonly tankId: string }): JSX.Element {
   const level = view.level;
   return (
     <>
-      {view.isDemo ? <SimulatedDataBanner /> : null}
       {level === null ? (
         <p>{t('tankStatus.noLevel')}</p>
       ) : (

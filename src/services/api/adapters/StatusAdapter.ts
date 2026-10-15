@@ -19,12 +19,6 @@ export interface ForecastDto {
   readonly points: readonly ForecastPointDto[];
 }
 
-interface BandObjectDto {
-  readonly band?: string;
-  readonly code?: string;
-  readonly daily_service_hours?: number;
-}
-
 export interface TankStatusDto {
   readonly level?: {
     readonly value: number;
@@ -37,11 +31,10 @@ export interface TankStatusDto {
     readonly label_es?: string;
   };
   readonly stale: { readonly is_stale: boolean; readonly stale_after_hours: number };
-  /** The band of the current level: its code, or an object with the code and its hours. */
-  readonly band?: string | BandObjectDto | null;
+  /** The band of the current level (HIGH, LOW or CRITICAL), null without a level. */
+  readonly band?: string | null;
   readonly forecast?: ForecastDto | null;
   readonly open_anomalies?: number;
-  readonly is_demo?: boolean;
 }
 
 const TREND_LABELS: readonly string[] = ['DOWN', 'STABLE', 'UP'];
@@ -50,15 +43,9 @@ function isTrendLabel(value: string): value is TrendLabel {
   return TREND_LABELS.includes(value);
 }
 
+/** The API sends the band code only; its hours of service are not part of the status (API.md 8.1). */
 function toBand(band: TankStatusDto['band']): TankStatusView['band'] {
-  if (band === undefined || band === null) {
-    return null;
-  }
-  if (typeof band === 'string') {
-    return { code: band, serviceHours: null };
-  }
-  const code = band.band ?? band.code;
-  return code === undefined ? null : { code, serviceHours: band.daily_service_hours ?? null };
+  return band === undefined || band === null ? null : { code: band, serviceHours: null };
 }
 
 function toPoint(dto: ForecastPointDto): ForecastPointView {
@@ -106,6 +93,5 @@ export function toTankStatus(adapter: ApiDtoAdapter, dto: TankStatusDto): TankSt
         ? null
         : toForecast(adapter, dto.forecast),
     openAnomalies: dto.open_anomalies ?? 0,
-    isDemo: dto.is_demo === true,
   };
 }
