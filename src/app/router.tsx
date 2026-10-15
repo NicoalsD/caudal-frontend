@@ -23,9 +23,11 @@ import { UsersPage } from '../features/users';
 import { PrivacyNoticePage } from '../features/privacy';
 import { EntitiesPage } from '../features/entities';
 import { EntitySummariesPage } from '../features/entity-summaries';
+import { EvaluationPage } from '../features/evaluation';
 import { AuditPage } from '../features/audit';
 import { DevicesPage } from '../features/devices';
 import { AuditLayout } from './layouts/AuditLayout';
+import { EvaluationLayout } from './layouts/EvaluationLayout';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
@@ -135,10 +137,19 @@ const teamRoutes: RouteObject = {
     {
       element: <TeamLayout />,
       children: [
-        screen(ROUTE_PATHS.team.evaluation, t('screens.evaluation')),
         screen(ROUTE_PATHS.team.health, t('screens.health')),
         { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
+    },
+  ],
+};
+
+const evaluationRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.evaluation} />,
+  children: [
+    {
+      element: <EvaluationLayout />,
+      children: [{ path: ROUTE_PATHS.team.evaluation, element: <EvaluationPage /> }],
     },
   ],
 };
@@ -206,6 +217,7 @@ export function buildRoutes(): RouteObject[] {
                     operatorRoutes,
                     boardRoutes,
                     teamRoutes,
+                    evaluationRoutes,
                     auditRoutes,
                     devicesRoutes,
                     entityRoutes,

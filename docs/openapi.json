@@ -3469,6 +3469,66 @@
           }
         }
       }
+    },
+    "/api/v1/forecast-evaluation": {
+      "get": {
+        "operationId": "getForecastEvaluation",
+        "summary": "Evaluación de la IA frente a la estimación simple",
+        "description": "Permiso EVALUATION_VIEW (PROJECT_TEAM, BOARD_ADMIN). Un horizonte por llamada. Por defecto, los últimos 90 días. helps es null sin muestra suficiente.",
+        "parameters": [
+          {
+            "name": "horizon_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3,
+              "default": 1
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La evaluación del horizonte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastEvaluation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: horizonte o periodo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7107,6 +7167,96 @@
           "activated_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ForecastEvaluation": {
+        "type": "object",
+        "required": [
+          "horizon_days",
+          "from",
+          "to",
+          "n",
+          "verdict",
+          "is_simulated"
+        ],
+        "properties": {
+          "horizon_days": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "n": {
+            "type": "integer",
+            "description": "Pronósticos evaluados."
+          },
+          "mae_ia": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Error absoluto medio del p50 de la IA."
+          },
+          "mae_simple": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Error absoluto medio de la estimación simple."
+          },
+          "wql_ia": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Pérdida cuantílica ponderada de la IA."
+          },
+          "coverage_80": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Proporción de reales dentro de [p10, p90]. Meta cercana a 0.8."
+          },
+          "avg_interval_width": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Ancho medio del rango."
+          },
+          "skill": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "1 - MAE_ia / MAE_simple. Positivo: la IA es mejor."
+          },
+          "helps": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "null sin muestra suficiente."
+          },
+          "verdict": {
+            "type": "string",
+            "description": "Respuesta del servidor en español."
+          },
+          "is_simulated": {
+            "type": "boolean"
+          },
+          "banner": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }

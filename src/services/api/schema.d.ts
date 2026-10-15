@@ -1215,6 +1215,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/forecast-evaluation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evaluación de la IA frente a la estimación simple
+         * @description Permiso EVALUATION_VIEW (PROJECT_TEAM, BOARD_ADMIN). Un horizonte por llamada. Por defecto, los últimos 90 días. helps es null sin muestra suficiente.
+         */
+        get: operations["getForecastEvaluation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2335,6 +2355,33 @@ export interface components {
             fingerprint: string;
             /** Format: date-time */
             activated_at: string;
+        };
+        ForecastEvaluation: {
+            horizon_days: number;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            /** @description Pronósticos evaluados. */
+            n: number;
+            /** @description Error absoluto medio del p50 de la IA. */
+            mae_ia?: number | null;
+            /** @description Error absoluto medio de la estimación simple. */
+            mae_simple?: number | null;
+            /** @description Pérdida cuantílica ponderada de la IA. */
+            wql_ia?: number | null;
+            /** @description Proporción de reales dentro de [p10, p90]. Meta cercana a 0.8. */
+            coverage_80?: number | null;
+            /** @description Ancho medio del rango. */
+            avg_interval_width?: number | null;
+            /** @description 1 - MAE_ia / MAE_simple. Positivo: la IA es mejor. */
+            skill?: number | null;
+            /** @description null sin muestra suficiente. */
+            helps?: boolean | null;
+            /** @description Respuesta del servidor en español. */
+            verdict: string;
+            is_simulated: boolean;
+            banner?: string | null;
         };
     };
     responses: never;
@@ -4925,6 +4972,39 @@ export interface operations {
             };
             /** @description CONFLICT: la clave ya estaba revocada. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getForecastEvaluation: {
+        parameters: {
+            query?: {
+                horizon_days?: number;
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description La evaluación del horizonte. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastEvaluation"];
+                };
+            };
+            /** @description VALIDATION_ERROR: horizonte o periodo. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
