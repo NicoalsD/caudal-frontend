@@ -497,6 +497,7 @@ export const strings = {
     range: '{start} a {end}',
     empty: 'Todavía no hay horario publicado para hoy.',
     reportDamage: 'Reportar un daño',
+    trackReport: 'Consultar mi reporte',
     share: {
       heading: 'Compartir el horario',
       copyWhatsApp: 'Copiar para WhatsApp',
@@ -525,6 +526,27 @@ export const strings = {
     codeLabel: 'Código de seguimiento',
     saveCode: 'Guarda este código. Lo necesitarás para consultar el estado.',
     checkStatus: 'Consultar mi reporte',
+  },
+  publicTracking: {
+    title: 'Consultar un reporte',
+    intro: 'Escribe el código de 8 caracteres que te dimos al reportar.',
+    codeLabel: 'Código de seguimiento',
+    codeHint: 'Son {length} caracteres. No importa si escribes mayúsculas o minúsculas.',
+    lookup: 'Consultar',
+    loading: 'Consultando el reporte...',
+    notFound: 'No encontramos un reporte con ese código. Revisa que esté bien escrito.',
+    statusLabel: 'Estado',
+    updatedAt: 'Última actualización: {date}',
+    reportedAt: 'Recibido el {date}',
+    status: {
+      received: 'Recibido',
+      verifying: 'En verificación',
+      confirmed: 'Confirmado por la Junta',
+      resolved: 'Resuelto',
+      dismissed: 'Descartado',
+    },
+    offline: 'Sin conexión. Intenta cuando tengas señal.',
+    errorBody: 'No pudimos consultar el reporte. Intenta de nuevo.',
   },
   connection: {
     constraintsMissing:

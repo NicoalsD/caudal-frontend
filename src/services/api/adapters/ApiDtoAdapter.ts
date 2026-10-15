@@ -17,6 +17,7 @@ import type {
   SectorSetting,
   ValveOrder,
 } from '../../../core/rules/ruleSetParts';
+import { isReportStatus } from '../../../core/incidents/reportStatus';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -26,6 +27,7 @@ import type {
   MeView,
   CatalogOptionView,
   DamageReportReceiptView,
+  PublicDamageReportView,
   PublicScheduleView,
   RefreshView,
   RuleSetSummaryView,
@@ -55,6 +57,7 @@ type RuleGaugeDto = components['schemas']['RuleGauge'];
 type SectorDto = components['schemas']['Sector'];
 type PublicScheduleDto = components['schemas']['PublicSchedule'];
 type CatalogItemDto = components['schemas']['CatalogItem'];
+type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
 type TankDto = components['schemas']['Tank'];
 type ValveDto = components['schemas']['Valve'];
@@ -154,6 +157,17 @@ export class ApiDtoAdapter {
 
   toCatalogOption(dto: CatalogItemDto): CatalogOptionView {
     return { code: dto.code, label: dto.label_es };
+  }
+
+  toPublicDamageReport(dto: PublicDamageReportDto): PublicDamageReportView {
+    if (!isReportStatus(dto.status)) {
+      throw new InvalidDtoError('status');
+    }
+    return {
+      status: dto.status,
+      reportedAt: this.toTimestamp('reported_at', dto.reported_at),
+      updatedAt: this.toTimestamp('updated_at', dto.updated_at),
+    };
   }
 
   toDamageReportReceipt(dto: DamageReportCreatedDto): DamageReportReceiptView {

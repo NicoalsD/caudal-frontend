@@ -958,6 +958,55 @@
           }
         }
       }
+    },
+    "/api/v1/public/damage-reports/{trackingCode}": {
+      "get": {
+        "operationId": "getPublicDamageReport",
+        "summary": "Estado de un reporte por código de seguimiento",
+        "description": "Público. El código no trae el acueducto: la búsqueda usa su hash.",
+        "parameters": [
+          {
+            "name": "trackingCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado del reporte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicDamageReportStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de código inválido (VALIDATION_ERROR).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Código no existe (NOT_FOUND, mensaje genérico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2051,6 +2100,43 @@
             "items": {
               "$ref": "#/components/schemas/CatalogItem"
             }
+          }
+        }
+      },
+      "PublicDamageReportStatus": {
+        "type": "object",
+        "description": "Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante.",
+        "required": [
+          "status",
+          "status_label_es",
+          "category_label_es",
+          "reported_at",
+          "updated_at"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "REPORTED",
+              "VERIFYING",
+              "CONFIRMED",
+              "RESOLVED",
+              "DISMISSED"
+            ]
+          },
+          "status_label_es": {
+            "type": "string"
+          },
+          "category_label_es": {
+            "type": "string"
+          },
+          "reported_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

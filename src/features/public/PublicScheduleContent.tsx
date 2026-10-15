@@ -63,6 +63,9 @@ export function PublicScheduleContent({
           to={generatePath(ROUTE_PATHS.public.damageReport, { aqueductSlug })}
         >
           {t('publicSchedule.reportDamage')}
+        </Link>{' '}
+        <Link className={cn(styles.linkButton)} to={generatePath(ROUTE_PATHS.public.tracking)}>
+          {t('publicSchedule.trackReport')}
         </Link>
       </p>
     </>

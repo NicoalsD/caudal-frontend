@@ -1,11 +1,17 @@
 import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import type { components } from '../schema';
-import type { DamageReportInput, DamageReportReceiptView, PublicScheduleView } from '../views';
+import type {
+  DamageReportInput,
+  DamageReportReceiptView,
+  PublicDamageReportView,
+  PublicScheduleView,
+} from '../views';
 
 type PublicScheduleDto = components['schemas']['PublicSchedule'];
 type CreateDamageReportDto = components['schemas']['CreateDamageReportRequest'];
 type DamageReportCreatedDto = components['schemas']['DamageReportCreated'];
+type PublicDamageReportDto = components['schemas']['PublicDamageReportStatus'];
 
 /** The public pages (API.md section 15). No session: nothing here carries a token. */
 export class PublicApi {
@@ -56,6 +62,15 @@ export class PublicApi {
       body,
     });
     return this.adapter.toDamageReportReceipt(response.body);
+  }
+
+  /** GET /public/damage-reports/{trackingCode} (S06): the status, with no personal data. */
+  async damageReportStatus(trackingCode: string): Promise<PublicDamageReportView> {
+    const response = await this.http.request<PublicDamageReportDto>({
+      method: 'GET',
+      path: `/public/damage-reports/${encodeURIComponent(trackingCode)}`,
+    });
+    return this.adapter.toPublicDamageReport(response.body);
   }
 
   /**

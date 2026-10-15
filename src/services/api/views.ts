@@ -7,6 +7,7 @@ import type {
   ValveOrder,
 } from '../../core/rules/ruleSetParts';
 import type { Membership } from '../../core/session/memberships';
+import type { ReportStatus } from '../../core/incidents/reportStatus';
 import type { Role } from '../../core/session/roles';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
@@ -176,4 +177,11 @@ export interface DamageReportInput {
   readonly website: string;
   /** ISO instant when the form was opened (the server checks the minimum filling time). */
   readonly formStartedAt: string;
+}
+
+/** The status of a damage report for the person who has its code (API.md 15.5). No personal data. */
+export interface PublicDamageReportView {
+  readonly status: ReportStatus;
+  readonly reportedAt: TimestampView;
+  readonly updatedAt: TimestampView;
 }

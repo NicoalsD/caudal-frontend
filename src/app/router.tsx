@@ -3,7 +3,7 @@ import type { RouteObject } from 'react-router';
 
 import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
-import { DamageReportPage, PublicSchedulePage } from '../features/public';
+import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
@@ -32,7 +32,7 @@ const publicRoutes: RouteObject = {
   children: [
     { path: ROUTE_PATHS.public.schedule, element: <PublicSchedulePage /> },
     { path: ROUTE_PATHS.public.damageReport, element: <DamageReportPage /> },
-    screen(ROUTE_PATHS.public.tracking, t('screens.publicTracking')),
+    { path: ROUTE_PATHS.public.tracking, element: <PublicTrackingPage /> },
   ],
 };
 

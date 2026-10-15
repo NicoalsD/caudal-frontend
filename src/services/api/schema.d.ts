@@ -411,6 +411,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/damage-reports/{trackingCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado de un reporte por código de seguimiento
+         * @description Público. El código no trae el acueducto: la búsqueda usa su hash.
+         */
+        get: operations["getPublicDamageReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -779,6 +799,17 @@ export interface components {
         };
         CatalogList: {
             items: components["schemas"]["CatalogItem"][];
+        };
+        /** @description Estado de un reporte para quien tiene el código (API.md 15.5). Sin descripción, lugar ni datos del reportante. */
+        PublicDamageReportStatus: {
+            /** @enum {string} */
+            status: "REPORTED" | "VERIFYING" | "CONFIRMED" | "RESOLVED" | "DISMISSED";
+            status_label_es: string;
+            category_label_es: string;
+            /** Format: date-time */
+            reported_at: string;
+            /** Format: date-time */
+            updated_at: string;
         };
     };
     responses: never;
@@ -1566,6 +1597,46 @@ export interface operations {
                 };
             };
             /** @description Catálogo desconocido (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicDamageReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                trackingCode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estado del reporte. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicDamageReportStatus"];
+                };
+            };
+            /** @description Formato de código inválido (VALIDATION_ERROR). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Código no existe (NOT_FOUND, mensaje genérico). */
             404: {
                 headers: {
                     [name: string]: unknown;

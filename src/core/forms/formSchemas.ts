@@ -79,6 +79,22 @@ export function damageReportFormSchema(
     });
 }
 
+/** Field of the tracking code lookup (S06); its limits are the constraint of the same name. */
+export const TRACKING_CODE_FIELD = 'tracking_code';
+
+/**
+ * Lookup form of S06. The code is checked against the server's limits and pattern; it is
+ * normalized to upper case first, because the alphabet has no case.
+ */
+export function trackingCodeFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .text(TRACKING_CODE_FIELD, { uppercase: true })
+    .build();
+}
+
 /** Names of the fields of the draft rules form. */
 export const DRAFT_FIELD = { bands: 'bands', sectors: 'sectors', windows: 'windows' } as const;
 

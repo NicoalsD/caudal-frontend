@@ -5,6 +5,7 @@ import type {
   CatalogOptionView,
   DamageReportInput,
   DamageReportReceiptView,
+  PublicDamageReportView,
   PublicScheduleView,
 } from '../../services/api/views';
 import { useCaudalApi } from '../../state/hooks/apiContext';
@@ -44,5 +45,20 @@ export function useCreateDamageReport(
   const api = useCaudalApi();
   return useMutation({
     mutationFn: (input) => api.public.createDamageReport(aqueductSlug, input),
+  });
+}
+
+/**
+ * GET /public/damage-reports/{trackingCode} (S06). Keyed by the code: the code is the only thing
+ * the person has, and the answer carries no personal data.
+ */
+export function usePublicDamageReport(
+  trackingCode: string,
+): UseQueryResult<PublicDamageReportView> {
+  const api = useCaudalApi();
+  return useQuery({
+    queryKey: ['public', 'damage-report', trackingCode],
+    queryFn: () => api.public.damageReportStatus(trackingCode),
+    refetchOnWindowFocus: false,
   });
 }
