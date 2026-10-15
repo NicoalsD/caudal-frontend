@@ -6,6 +6,7 @@ import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import type { PublicScheduleView } from '../../services/api/views';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { SimulatedDataBanner } from '../../ui/feedback/SimulatedDataBanner';
 import { cn } from '../../ui/styles/cn';
 import styles from './PublicSchedule.module.css';
 import { PosterLink } from './PosterLink';
@@ -26,6 +27,7 @@ export function PublicScheduleContent({
 }: PublicScheduleContentProps): JSX.Element {
   return (
     <>
+      {schedule.isDemo ? <SimulatedDataBanner /> : null}
       <ScreenTitle>{t('publicSchedule.title', { name: schedule.aqueductName })}</ScreenTitle>
       <p className={cn(styles.serviceDay)}>
         <time dateTime={schedule.serviceDate}>

@@ -118,3 +118,30 @@ describe('PublicSchedulePage: way to report damage', () => {
     ).toHaveAttribute('href', '/a/guaitarilla/reportar-dano');
   });
 });
+
+describe('PublicSchedulePage: simulated data', () => {
+  it('marks a demo aqueduct with the banner at the top of the page', async () => {
+    server.use(
+      http.get(apiUrl('/public/:aqueductSlug/schedule'), () =>
+        HttpResponse.json(
+          buildPublicSchedule({ aqueduct: { name: 'Guaitarilla', is_demo: true } }),
+        ),
+      ),
+    );
+    renderApp(SCHEDULE_PATH);
+
+    const heading = await screen.findByRole('heading', {
+      level: 1,
+      name: t('publicSchedule.title', { name: 'Guaitarilla' }),
+    });
+    const banner = screen.getByText(t('common.simulatedData'));
+    expect(banner.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('shows no banner for a real aqueduct', async () => {
+    renderApp(SCHEDULE_PATH);
+
+    await screen.findByText(/Sector Alto/);
+    expect(screen.queryByText(t('common.simulatedData'))).not.toBeInTheDocument();
+  });
+});
