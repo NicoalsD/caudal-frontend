@@ -15,6 +15,8 @@ import type { LoginCredentials } from './LoginForm';
 
 const PASSWORD = 'contraseña larga de prueba';
 const STRICT_MIN = 20;
+const USERNAME_MAX = buildConstraints().username?.max;
+const PASSWORD_MAX = buildConstraints().password?.max;
 const RETRY_SECONDS = 600;
 const EXPECTED_MINUTES = '10';
 
@@ -29,7 +31,11 @@ function renderForm(
     constraints.password = { ...constraints.password, min: minPassword };
   }
   const schema = loginFormSchema(constraints, validationMessages);
-  render(<LoginForm schema={schema} onSubmit={onSubmit} />);
+  const limits = {
+    usernameMax: constraints.username?.max,
+    passwordMax: constraints.password?.max,
+  };
+  render(<LoginForm schema={schema} limits={limits} onSubmit={onSubmit} />);
   return userEvent.setup();
 }
 
@@ -149,5 +155,28 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(usernameField()).toBeEnabled();
     });
+  });
+
+  it('stops typing at the server limits for username and password', () => {
+    renderForm();
+
+    expect(usernameField()).toHaveAttribute('maxlength', String(USERNAME_MAX));
+    expect(passwordField()).toHaveAttribute('maxlength', String(PASSWORD_MAX));
+  });
+
+  it('hides the password again after a failed sign in, even if it was shown', async () => {
+    const failure = Object.assign(new DomainError('INVALID_CREDENTIALS', 'x'), { status: 401 });
+    const user = renderForm(() => Promise.reject(failure));
+
+    await user.type(usernameField(), 'junta.uno');
+    await user.type(passwordField(), PASSWORD);
+    await user.click(screen.getByRole('button', { name: t('auth.showPassword') }));
+    expect(passwordField()).toHaveAttribute('type', 'text');
+
+    await user.click(submitButton());
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(t('errors.api.invalidCredentials'));
+    expect(passwordField()).toHaveAttribute('type', 'password');
+    expect(passwordField()).toHaveValue('');
   });
 });

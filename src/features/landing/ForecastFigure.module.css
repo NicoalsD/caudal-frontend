@@ -1,0 +1,125 @@
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.ground {
+  stroke: var(--color-water-700);
+  stroke-width: var(--level-line-height);
+}
+
+.today {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+}
+
+.range {
+  fill: var(--color-water-300);
+  transition: opacity var(--duration-reveal) var(--ease-out-expo) 900ms;
+}
+
+.observed,
+.likely {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.observed {
+  stroke: var(--color-text-primary);
+}
+
+.likely {
+  stroke: var(--color-water-700);
+  stroke-width: 5;
+}
+
+.simple {
+  fill: none;
+  stroke: var(--color-ochre-700);
+  stroke-width: 3;
+  stroke-dasharray: 10 8;
+  transition: opacity var(--duration-reveal) var(--ease-out-expo) 1400ms;
+}
+
+.dot {
+  fill: var(--color-raised);
+  stroke: var(--color-water-700);
+  stroke-width: 4;
+}
+
+/* Before it is seen the lines wait undrawn; with no observer the default above is fully drawn. */
+.figure[data-seen='false'] .observed,
+.figure[data-seen='false'] .likely {
+  stroke-dashoffset: 1;
+}
+
+.figure[data-seen='false'] .range,
+.figure[data-seen='false'] .simple {
+  opacity: 0;
+}
+
+.figure[data-seen='true'] .observed {
+  transition: stroke-dashoffset 1400ms var(--ease-out-expo);
+}
+
+.figure[data-seen='true'] .likely {
+  transition: stroke-dashoffset 1200ms var(--ease-out-expo) 700ms;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.key::before {
+  content: '';
+  width: 1.75rem;
+  height: 4px;
+  border-radius: var(--radius-chip);
+}
+
+.keyObserved::before {
+  background: var(--color-text-primary);
+}
+
+.keyLikely::before {
+  background: var(--color-water-700);
+}
+
+.keyRange::before {
+  height: 0.875rem;
+  background: var(--color-water-300);
+}
+
+.keySimple::before {
+  height: 0;
+  border-top: 3px dashed var(--color-ochre-700);
+}
+
+.tag {
+  margin-left: auto;
+  font-size: var(--font-size-small);
+}

@@ -1,0 +1,129 @@
+/* The water is the surface here: the one band of the page drenched in deep water. */
+.band {
+  background: var(--color-water-800);
+  color: var(--color-raised);
+  padding: var(--space-9) var(--space-4);
+  scroll-margin-top: var(--space-8);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  max-width: var(--landing-max);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.title {
+  font-size: var(--font-size-statement);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+
+.body {
+  max-width: var(--measure);
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-body);
+  text-wrap: pretty;
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-6);
+}
+
+.counterValue {
+  font-size: clamp(6rem, 20vw, 12rem);
+  line-height: 0.9;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-hero);
+  animation: count-in 600ms var(--ease-out-expo) both;
+}
+
+@keyframes count-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.15em);
+    filter: blur(8px);
+  }
+}
+
+.counterLabel {
+  font-size: var(--font-size-lead);
+  font-weight: var(--font-weight-bold);
+}
+
+.states {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--color-raised);
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-out-expo);
+}
+
+.state svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+.lit {
+  background: var(--color-raised);
+  transform: translateY(-4px);
+}
+
+.lit.offline {
+  color: var(--color-ochre-800);
+}
+
+.lit.sending {
+  color: var(--color-water-700);
+}
+
+.lit.sent {
+  color: var(--color-paramo-800);
+}
+
+.lit .spin {
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (max-width: 40rem) {
+  .band {
+    padding-block: var(--space-8);
+  }
+
+  .states {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

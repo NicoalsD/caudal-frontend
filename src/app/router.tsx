@@ -8,6 +8,7 @@ import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
 import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
 import { RequireRole } from './guards/RequireRole';
+import { AuthLayout } from './layouts/AuthLayout';
 import { BoardLayout } from './layouts/BoardLayout';
 import { EntityLayout } from './layouts/EntityLayout';
 import { OperatorLayout } from './layouts/OperatorLayout';
@@ -31,15 +32,24 @@ const publicRoutes: RouteObject = {
     screen(ROUTE_PATHS.public.schedule, t('screens.publicSchedule')),
     screen(ROUTE_PATHS.public.damageReport, t('screens.publicDamageReport')),
     screen(ROUTE_PATHS.public.tracking, t('screens.publicTracking')),
-    { path: ROUTE_PATHS.login, element: <LoginPage /> },
   ],
 };
 
+const signInRoutes: RouteObject = {
+  element: <AuthLayout />,
+  children: [{ path: ROUTE_PATHS.login, element: <LoginPage /> }],
+};
+
 const sessionRoutes: RouteObject = {
-  element: <PublicLayout />,
   children: [
-    { path: ROUTE_PATHS.changePassword, element: <ChangePasswordPage /> },
-    screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice')),
+    {
+      element: <AuthLayout />,
+      children: [{ path: ROUTE_PATHS.changePassword, element: <ChangePasswordPage /> }],
+    },
+    {
+      element: <PublicLayout />,
+      children: [screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice'))],
+    },
   ],
 };
 
@@ -129,6 +139,7 @@ export function buildRoutes(): RouteObject[] {
       children: [
         { path: ROUTE_PATHS.root, element: <RootRedirect /> },
         publicRoutes,
+        signInRoutes,
         {
           element: <RequireAuth />,
           children: [
