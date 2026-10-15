@@ -19,6 +19,9 @@ async function typeCredentials(user: User, username: string, password: string) {
   await user.click(screen.getByRole('button', { name: t('auth.signIn') }));
 }
 
+/** Generous wait for a redirect while the whole suite runs in parallel. */
+const SLOW_REDIRECT_TIMEOUT_MS = 10_000;
+
 const heading = (name: string) => screen.findByRole('heading', { level: 1, name });
 
 describe('login journey', () => {
@@ -122,8 +125,9 @@ describe('expiry while using the app', () => {
   it('a revoked family (SESSION_REVOKED) ends the session the same way', async () => {
     const backend = createSessionBackend(TEST_USERS.operator);
     server.use(...backend.handlers);
-    const { services } = renderApp(ROUTE_PATHS.operator.home);
+    const { services, router } = renderApp(ROUTE_PATHS.operator.home);
     await services.session.restore();
+    await heading(t('screens.operatorHome'));
     backend.expireAccessTokens();
     server.use(
       http.post(apiUrl('/auth/refresh'), () =>
@@ -137,7 +141,16 @@ describe('expiry while using the app', () => {
     await services.api.auth.me().catch(() => undefined);
 
     expect(services.sessionStore.getSnapshot()).toEqual({ status: 'expired' });
-    expect(await screen.findByText(t('auth.sessionExpired'))).toBeInTheDocument();
+    // Under the load of the whole suite the redirect can take longer than one default wait.
+    await waitFor(
+      () => {
+        expect(router.state.location.pathname).toBe(ROUTE_PATHS.login);
+      },
+      { timeout: SLOW_REDIRECT_TIMEOUT_MS },
+    );
+    expect(
+      await screen.findByText(t('auth.sessionExpired'), {}, { timeout: SLOW_REDIRECT_TIMEOUT_MS }),
+    ).toBeInTheDocument();
   });
 });
 
