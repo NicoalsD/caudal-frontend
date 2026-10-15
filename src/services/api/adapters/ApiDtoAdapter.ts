@@ -3,12 +3,27 @@ import { formatDecimal } from '../../../core/format/decimal';
 import { formatDateTime, parseInstant, toBogotaDateKey } from '../../../core/format/time';
 import { DEFAULT_DISPLAY_FRACTION_DIGITS } from '../../../core/policy/clientPolicy';
 import type { components } from '../schema';
-import type { DecimalView, HealthView, TimestampView } from '../views';
+import type { Membership } from '../../../core/session/memberships';
+import { isRole } from '../../../core/session/roles';
+import type {
+  AuthUserView,
+  DecimalView,
+  HealthView,
+  LoginView,
+  MeView,
+  RefreshView,
+  TimestampView,
+} from '../views';
 import { InvalidDtoError } from './InvalidDtoError';
 
 type HealthDto = components['schemas']['HealthResponse'];
 type ConstraintsDto = components['schemas']['ConstraintsResponse'];
 type FieldConstraintDto = components['schemas']['FieldConstraint'];
+type AuthUserDto = components['schemas']['AuthUser'];
+type LoginDto = components['schemas']['LoginResponse'];
+type RefreshDto = components['schemas']['RefreshResponse'];
+type MeDto = components['schemas']['MeResponse'];
+type MembershipDto = components['schemas']['Membership'];
 
 /**
  * Adapter between the server contract and the view models (api-integration.md section 5).
@@ -30,6 +45,62 @@ export class ApiDtoAdapter {
     return Object.fromEntries(
       Object.entries(dto).map(([field, limits]) => [field, this.toFieldConstraint(limits)]),
     );
+  }
+
+  toAuthUser(dto: AuthUserDto): AuthUserView {
+    if (!isRole(dto.role)) {
+      throw new InvalidDtoError('user.role');
+    }
+    return {
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      role: dto.role,
+      aqueductId: dto.aqueduct_id,
+      mustChangePassword: dto.must_change_password,
+    };
+  }
+
+  toLogin(dto: LoginDto): LoginView {
+    const refresh = this.toRefresh(dto);
+    return { ...refresh, user: this.toAuthUser(dto.user) };
+  }
+
+  toRefresh(dto: RefreshDto): RefreshView {
+    if (!Number.isFinite(dto.expires_in) || dto.expires_in <= 0 || dto.access_token === '') {
+      throw new InvalidDtoError('expires_in');
+    }
+    return { accessToken: dto.access_token, expiresInSeconds: dto.expires_in };
+  }
+
+  toMe(dto: MeDto): MeView {
+    return {
+      id: dto.id,
+      username: dto.username,
+      fullName: dto.full_name,
+      mustChangePassword: dto.must_change_password,
+      permissions: [...dto.permissions],
+      memberships: dto.memberships.map((membership) => this.toMembership(membership)),
+    };
+  }
+
+  private toMembership(dto: MembershipDto): Membership {
+    if (!isRole(dto.role)) {
+      throw new InvalidDtoError('memberships.role');
+    }
+    return {
+      aqueductId: dto.aqueduct_id,
+      role: dto.role,
+      validFromMs: this.toOptionalInstantMs('memberships.valid_from', dto.valid_from),
+      validToMs: this.toOptionalInstantMs('memberships.valid_to', dto.valid_to),
+    };
+  }
+
+  private toOptionalInstantMs(field: string, iso: string | null | undefined): number | null {
+    if (iso === undefined || iso === null) {
+      return null;
+    }
+    return this.toTimestamp(field, iso).date.getTime();
   }
 
   /** Converts an ISO-8601 instant from the API into a view with its Bogota text. */

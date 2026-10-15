@@ -20,10 +20,11 @@ Este documento describe los patrones que `caudal-frontend` implementa de forma e
 | P06 | Adapter | `ApiDtoAdapter` | `services/api/adapters` | NicoalsD |
 | P09 | Decorator | `HttpClient`, `AuthHttpClient`, `RetryHttpClient`, `LoggingHttpClient` | `services/http` | NicoalsD (en el frontend) |
 | P10 | Facade | `CaudalApi` | `services/api` | Drako / NicoalsD |
+| P11 | Proxy | `SessionRefreshProxy` | `services/session` | NicoalsD |
 | P13 | Command | `Command`, `SubmitReadingCommand`, `CloseDayCommand`, `CommandQueue` | `core/commands` | NicoalsD |
 | P15 | Mediator | `ProposalEditorMediator` | `core/proposal` | NicoalsD |
 | P17 | Observer | `SyncQueueStore`, `ConnectivityMonitor` | `state` | NicoalsD |
-| P18 | State | `ConnectionState` | `core/connection` | NicoalsD |
+| P18 | State | `ConnectionState`, `SessionPhase` | `core/connection`, `core/session` | NicoalsD |
 
 ---
 
@@ -733,6 +734,32 @@ export class AuthRequiredState implements ConnectionState {
 Nota: `SYNC_FINISHED` con `remaining > 0` no cambia de estado; la cola sigue sincronizando en otro lote. El estado se cierra cuando la cola queda vacía o sin elementos enviables (propuesta).
 
 **Prueba.** Tabla de transiciones: cada par (estado, evento) con su resultado esperado; `AUTH_REQUIRED` ignora `PROBE_FAILED`; `OFFLINE` ignora `SYNC_FINISHED`. Cada estado tiene una etiqueta en `es.ts` (`connection.online`, `connection.offline`, `connection.syncing`, `connection.authRequired`).
+
+---
+
+## P11 Proxy: `SessionRefreshProxy`
+
+**Problema.** Tres cosas piden renovar la sesión: el arranque de la app, el temporizador al 80 % de la vida del token y el reintento tras un `401`. El servidor rota la cookie `caudal_rt` en cada uso y revoca toda la familia si una cookie ya rotada vuelve. Dos renovaciones en paralelo cierran la sesión.
+
+**Qué ofrece el nativo.** Una promesa compartida en una variable. Sirve para un solo llamador; aquí hay tres.
+
+**Por qué se implementa explícito.** `SessionRefreshProxy` implementa `SessionRefresher` y se interpone ante la llamada remota `POST /auth/refresh`. Todos pasan por él. Agrega lo que la llamada remota no tiene: una sola renovación en vuelo, el token nuevo guardado en memoria y el aviso (`onRefreshed`, `onSessionLost`) a quien lo observa. Solo un `401` o `403` termina la sesión; un fallo de red no, porque el fontanero trabaja sin conexión.
+
+```ts
+// src/services/session/SessionRefreshProxy.ts
+refresh(): Promise<void> {
+  this.inFlight ??= this.run().finally(() => { this.inFlight = null; });
+  return this.inFlight;
+}
+```
+
+**Prueba.** `SessionController.test.tsx`: llamadas en paralelo con `401` hacen una sola renovación; `restore()` dos veces (StrictMode) hace una; un rechazo del servidor cierra la sesión y limpia la caché; un fallo de red la conserva.
+
+---
+
+## P18 State: `SessionPhase`
+
+La sesión también es una máquina de estados: `RESTORING` (el arranque pregunta al servidor), `ANONYMOUS` (con motivo opcional: `offline` o `password-changed`), `AUTHENTICATED`, `PASSWORD_CHANGE_PENDING` y `EXPIRED`. Cada clase en `src/core/session/SessionPhase.ts` acepta los eventos que le corresponden (`SIGNED_IN`, `PASSWORD_CHANGE_REQUIRED`, `EXPIRED`, ...) y devuelve el estado siguiente; el resto se ignora y `SessionStore` lo registra. El `snapshot` de cada estado solo tiene datos que se pueden mostrar (usuario, rol, acueducto, permisos): ningún token, cookie ni contraseña. La prueba es una tabla de transiciones y una revisión de que el `snapshot` serializado no contiene esas palabras.
 
 ---
 

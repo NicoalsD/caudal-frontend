@@ -43,6 +43,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Inicia sesión
+         * @description Público. Respuesta con el token de acceso y la cookie caudal_rt (HttpOnly) con el refresh. API.md sección 2.1.
+         */
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renueva la sesión
+         * @description Cookie caudal_rt válida, cabecera X-Requested-With: caudal-web y Origin permitido. Sin cuerpo. Rota la cookie. API.md sección 2.2.
+         */
+        post: operations["refreshSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cierra la sesión
+         * @description Autenticado. Revoca la familia del refresh y borra la cookie. API.md sección 2.3.
+         */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Datos de la persona autenticada
+         * @description Permitido aunque must_change_password sea true. API.md sección 2.7.
+         */
+        get: operations["getMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cambia la contraseña
+         * @description Autenticado. Permitido aunque must_change_password sea true. Revoca los refresh tokens (la sesión termina). API.md sección 2.5.
+         */
+        post: operations["changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/switch-aqueduct": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cambia el acueducto activo
+         * @description Autenticado. Un JWT lleva un solo acueducto. API.md sección 2.9.
+         */
+        post: operations["switchAqueduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -83,6 +203,70 @@ export interface components {
         /** @description Mapa plano de nombre de campo a límites (API.md sección 4.1). */
         ConstraintsResponse: {
             [key: string]: components["schemas"]["FieldConstraint"];
+        };
+        LoginRequest: {
+            username: string;
+            password: string;
+        };
+        AuthUser: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            full_name: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: uuid */
+            aqueduct_id: string;
+            must_change_password: boolean;
+        };
+        LoginResponse: {
+            access_token: string;
+            /** @enum {string} */
+            token_type: "Bearer";
+            /**
+             * Format: int32
+             * @description Segundos de vida del token de acceso.
+             */
+            expires_in: number;
+            user: components["schemas"]["AuthUser"];
+        };
+        RefreshResponse: {
+            access_token: string;
+            /** @enum {string} */
+            token_type?: "Bearer";
+            /** Format: int32 */
+            expires_in: number;
+        };
+        Membership: {
+            /** Format: uuid */
+            aqueduct_id: string;
+            /** @enum {string} */
+            role: "BOARD_ADMIN" | "BOARD_MEMBER" | "OPERATOR" | "PROJECT_TEAM" | "SUPPORT_ENTITY";
+            /** Format: date-time */
+            valid_from?: string;
+            /** Format: date-time */
+            valid_to?: string | null;
+        };
+        MeResponse: {
+            /** Format: uuid */
+            id: string;
+            username: string;
+            full_name: string;
+            status?: string;
+            must_change_password: boolean;
+            /** Format: int32 */
+            privacy_accepted_version?: number | null;
+            memberships: components["schemas"]["Membership"][];
+            /** @description Códigos de permiso (por ejemplo RULESET_ACTIVATE). El cliente los usa solo para mostrar u ocultar acciones. */
+            permissions: string[];
+        };
+        ChangePasswordRequest: {
+            current_password: string;
+            new_password: string;
+        };
+        SwitchAqueductRequest: {
+            /** Format: uuid */
+            aqueduct_id: string;
         };
     };
     responses: never;
@@ -151,6 +335,215 @@ export interface operations {
             };
             /** @description Error no controlado (INTERNAL_ERROR). */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Sesión iniciada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Usuario o contraseña incorrectos (INVALID_CREDENTIALS). Siempre el mismo mensaje. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Demasiados intentos (RATE_LIMITED). */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    refreshSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Token de acceso nuevo. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefreshResponse"];
+                };
+            };
+            /** @description Sin cookie, vencida o reutilizada (UNAUTHORIZED, SESSION_REVOKED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Falta X-Requested-With u Origin no permitido (FORBIDDEN). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sesión cerrada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Persona, membresías y permisos. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Contraseña cambiada. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contraseña actual incorrecta (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description La contraseña no cumple la política (PASSWORD_POLICY_VIOLATION). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    switchAqueduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwitchAqueductRequest"];
+            };
+        };
+        responses: {
+            /** @description Token de acceso del acueducto indicado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefreshResponse"];
+                };
+            };
+            /** @description La membresía no está vigente o no existe (FORBIDDEN). */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

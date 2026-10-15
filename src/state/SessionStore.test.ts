@@ -1,14 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { SessionUser } from '../core/session/SessionState';
+import { buildSessionUser } from '../test/factories/session';
 import { SessionStore } from './SessionStore';
 
-const USER: SessionUser = {
-  userId: '0190f3a2-7c1d-7b2e-9f11-3d4c5e6f7a81',
-  role: 'OPERATOR',
-  aqueductId: '0190f3a2-7c1d-7b2e-9f11-3d4c5e6f7a82',
-  displayName: 'Fontanero de prueba',
-};
+const USER: SessionUser = buildSessionUser({ displayName: 'Fontanero de prueba' });
 
 const TRANSITIONS = 3;
 
@@ -42,5 +38,53 @@ describe('SessionStore', () => {
     store.signIn(USER);
 
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe('SessionStore with the State pattern', () => {
+  it('returns the same snapshot object until the state changes', () => {
+    const store = new SessionStore();
+    store.signIn(USER);
+
+    expect(store.getSnapshot()).toBe(store.getSnapshot());
+  });
+
+  it('reports an event the current state ignores', () => {
+    const ignored: [string, string][] = [];
+    const store = new SessionStore((event, phase) => ignored.push([event, phase]));
+    const listener = vi.fn();
+    store.subscribe(listener);
+
+    store.expire();
+
+    expect(ignored).toEqual([['EXPIRED', 'ANONYMOUS']]);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('opens only the change screen after PASSWORD_CHANGE_REQUIRED', () => {
+    const store = new SessionStore();
+    store.signIn(USER);
+
+    store.requirePasswordChange();
+
+    expect(store.getSnapshot()).toMatchObject({ user: { mustChangePassword: true } });
+  });
+
+  it('a plain clear during the restore means "no session", not offline', () => {
+    const store = new SessionStore();
+    store.beginRestore();
+
+    store.clear();
+
+    expect(store.getSnapshot()).toEqual({ status: 'anonymous' });
+  });
+
+  it('a password change ends the session with a reason for the login screen', () => {
+    const store = new SessionStore();
+    store.signIn(USER);
+
+    store.clear('password-changed');
+
+    expect(store.getSnapshot()).toEqual({ status: 'anonymous', reason: 'password-changed' });
   });
 });

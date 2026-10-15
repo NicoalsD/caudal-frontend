@@ -85,10 +85,9 @@ export class BaseFetchHttpClient implements HttpClient {
   }
 
   private async send(request: HttpRequest): Promise<Response> {
-    const headers = new Headers({
-      Accept: 'application/json',
-      [REQUESTED_WITH_HEADER]: REQUESTED_WITH_VALUE,
-    });
+    const headers = new Headers(request.headers);
+    headers.set('Accept', 'application/json');
+    headers.set(REQUESTED_WITH_HEADER, REQUESTED_WITH_VALUE);
     const init: RequestInit = {
       method: request.method,
       headers,

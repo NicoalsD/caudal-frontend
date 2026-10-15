@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 import { t } from '../../i18n/t';
 import { ErrorState } from '../../ui/feedback/ErrorState';
-import { ROUTE_PATHS } from '../routes';
+import { ROUTE_PATHS } from '../../core/session/routes';
 
 export function NotFoundPage(): JSX.Element {
   return (

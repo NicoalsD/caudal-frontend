@@ -115,7 +115,7 @@ Las rutas se declaran en `src/app/router.tsx`. Las rutas no declaradas responden
 
 | Actor | Prefijo | Rutas principales | Guardas |
 |-------|---------|-------------------|---------|
-| Público (sin login) | `/p/:aqueductSlug` | `/p/:aqueductSlug` (horario por sector), `/p/:aqueductSlug/reportar-dano` (formulario), `/p/seguimiento/:trackingCode` | Ninguna. Solo `PublicLayout`. |
+| Público (sin login) | `/a/:aqueductSlug` | `/a/:aqueductSlug` (horario por sector), `/a/:aqueductSlug/reportar-dano` (formulario), `/a/seguimiento/:trackingCode` | Ninguna. Solo `PublicLayout`. |
 | Sesión (todos) | raíz | `/login`, `/cambiar-contrasena`, `/aviso-de-privacidad` | `RequireAuth` para las dos últimas; `RequirePasswordChanged`, `RequirePrivacyAccepted` según el estado del usuario. |
 | Fontanero (`OPERATOR`) | `/operador` | `/operador/inicio`, `/operador/lectura/nueva`, `/operador/pendientes`, `/operador/cierre/:date`, `/operador/dano` | `RequireRole(['OPERATOR'])` |
 | Junta (`BOARD_ADMIN`, `BOARD_MEMBER`) | `/junta` | `/junta/tanque`, `/junta/propuestas`, `/junta/propuestas/:id`, `/junta/publicacion`, `/junta/reglas`, `/junta/reglas/:id`, `/junta/reglas/:id/historial`, `/junta/red` (sectores y válvulas), `/junta/actas`, `/junta/incidentes`, `/junta/entidades` | `RequireRole(['BOARD_ADMIN','BOARD_MEMBER'])`. Dentro, las acciones dependen de permisos (ver 4.1). |

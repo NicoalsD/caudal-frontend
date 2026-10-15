@@ -1,8 +1,10 @@
 import { createBrowserRouter } from 'react-router';
 import type { RouteObject } from 'react-router';
 
+import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
+import { RequirePasswordChanged } from './guards/RequirePasswordChanged';
 import { RequireRole } from './guards/RequireRole';
 import { BoardLayout } from './layouts/BoardLayout';
 import { EntityLayout } from './layouts/EntityLayout';
@@ -14,7 +16,7 @@ import { ErrorPage } from './pages/ErrorPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { RootRedirect } from './pages/RootRedirect';
-import { ROLES_BY_AREA, ROUTE_PATHS } from './routes';
+import { ROLES_BY_AREA, ROUTE_PATHS } from '../core/session/routes';
 
 /** Builds one leaf route that renders a placeholder until its feature exists. */
 function screen(path: string, title: string): RouteObject {
@@ -27,14 +29,14 @@ const publicRoutes: RouteObject = {
     screen(ROUTE_PATHS.public.schedule, t('screens.publicSchedule')),
     screen(ROUTE_PATHS.public.damageReport, t('screens.publicDamageReport')),
     screen(ROUTE_PATHS.public.tracking, t('screens.publicTracking')),
-    screen(ROUTE_PATHS.login, t('screens.login')),
+    { path: ROUTE_PATHS.login, element: <LoginPage /> },
   ],
 };
 
 const sessionRoutes: RouteObject = {
   element: <PublicLayout />,
   children: [
-    screen(ROUTE_PATHS.changePassword, t('screens.changePassword')),
+    { path: ROUTE_PATHS.changePassword, element: <ChangePasswordPage /> },
     screen(ROUTE_PATHS.privacyNotice, t('screens.privacyNotice')),
   ],
 };
@@ -129,11 +131,10 @@ export function buildRoutes(): RouteObject[] {
           element: <RequireAuth />,
           children: [
             sessionRoutes,
-            operatorRoutes,
-            boardRoutes,
-            teamRoutes,
-            entityRoutes,
-            sharedRoutes,
+            {
+              element: <RequirePasswordChanged />,
+              children: [operatorRoutes, boardRoutes, teamRoutes, entityRoutes, sharedRoutes],
+            },
           ],
         },
         {

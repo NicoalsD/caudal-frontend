@@ -7,6 +7,11 @@ export const FIELD = {
   readingNote: 'reading.note',
   changeReason: 'change_reason',
   gaugeValue: 'gauge_value',
+  username: 'username',
+  password: 'password',
+  currentPassword: 'current_password',
+  newPassword: 'new_password',
+  confirmPassword: 'confirm_password',
 } as const;
 
 /** Reading form: gauge value (range from the active rule set) and an optional note. */
@@ -24,4 +29,35 @@ export function readingFormSchema(
 /** Mandatory reason for a change (rule activation, proposal changes, corrections). */
 export function reasonSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
   return new FormSchemaBuilder(constraints, messages).requiredReason(FIELD.changeReason).build();
+}
+
+/** Sign-in form: username (lower case) and password, with the limits of /meta/constraints. */
+export function loginFormSchema(constraints: ConstraintsMap, messages: ValidationMessageFactory) {
+  return new FormSchemaBuilder(constraints, messages)
+    .text(FIELD.username, { lowercase: true })
+    .password(FIELD.password)
+    .build();
+}
+
+/** The constraint that holds the password range (API.md 2.1 and 2.5). */
+export const PASSWORD_CONSTRAINT = 'password';
+
+/**
+ * Change-password form. The current password only has to be present (it may predate today's
+ * policy); the new one follows the server range, differs from the current one, does not contain
+ * the username and is typed twice.
+ */
+export function changePasswordFormSchema(
+  constraints: ConstraintsMap,
+  messages: ValidationMessageFactory,
+  username: string,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .password(FIELD.currentPassword, { constraint: PASSWORD_CONSTRAINT, anyLength: true })
+    .password(FIELD.newPassword, { constraint: PASSWORD_CONSTRAINT })
+    .password(FIELD.confirmPassword, { constraint: PASSWORD_CONSTRAINT })
+    .differentFrom(FIELD.newPassword, FIELD.currentPassword)
+    .notContaining(FIELD.newPassword, username)
+    .confirmation(FIELD.confirmPassword, FIELD.newPassword)
+    .build();
 }

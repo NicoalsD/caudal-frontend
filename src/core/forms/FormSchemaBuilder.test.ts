@@ -21,6 +21,8 @@ const THREE_DECIMALS = '2,123';
 const OVER_BY_ONE = 1;
 
 const constraints: ConstraintsMap = {
+  username: { min: 3, max: 32, pattern: '^[a-z0-9][a-z0-9._-]{1,30}[a-z0-9]$' },
+  password: { min: 12, max: 128 },
   'reading.note': { min: 0, max: NOTE_MAX, maxLines: NOTE_LINES },
   change_reason: { min: REASON_MIN, max: REASON_MAX },
   'sector.code': { min: 2, max: 20, pattern: '^[A-Z0-9-]+$' },
@@ -207,5 +209,115 @@ describe('configuration errors', () => {
 
   it('builds an empty schema when no field was added', () => {
     expect(new FormSchemaBuilder({}, keyMessages).build().parse({})).toEqual({});
+  });
+});
+
+describe('username text', () => {
+  const schema = new FormSchemaBuilder(constraints, keyMessages)
+    .text('username', { lowercase: true })
+    .build();
+
+  it('lowers the case before applying the server pattern', () => {
+    expect(schema.parse({ username: '  Junta.Presidencia ' })).toEqual({
+      username: 'junta.presidencia',
+    });
+  });
+
+  it('keeps rejecting what the pattern rejects', () => {
+    expect(messagesOf(schema.safeParse({ username: '.junta' }))).toEqual(['validation.pattern']);
+  });
+});
+
+describe('password fields', () => {
+  const MIN_LENGTH = 12;
+  const MAX_LENGTH = 128;
+  const schema = new FormSchemaBuilder(constraints, keyMessages).password('password').build();
+  const lenient = new FormSchemaBuilder(constraints, keyMessages)
+    .password('current', { constraint: 'password', anyLength: true })
+    .build();
+
+  it('never trims or alters the value', () => {
+    const typed = `  ${'a'.repeat(MIN_LENGTH)}  `;
+
+    expect(schema.parse({ password: typed })).toEqual({ password: typed });
+  });
+
+  it('requires the value, then the server minimum and maximum', () => {
+    expect(messagesOf(schema.safeParse({ password: '' }))).toEqual(['validation.required']);
+    expect(messagesOf(schema.safeParse({ password: 'a'.repeat(MIN_LENGTH - 1) }))).toEqual([
+      'validation.min',
+    ]);
+    expect(schema.safeParse({ password: 'a'.repeat(MAX_LENGTH) }).success).toBe(true);
+    expect(messagesOf(schema.safeParse({ password: 'a'.repeat(MAX_LENGTH + 1) }))).toEqual([
+      'validation.max',
+    ]);
+  });
+
+  it('can accept any length up to the maximum for an existing password', () => {
+    expect(lenient.safeParse({ current: 'x' }).success).toBe(true);
+    expect(messagesOf(lenient.safeParse({ current: '' }))).toEqual(['validation.required']);
+    expect(lenient.safeParse({ current: 'a'.repeat(MAX_LENGTH + 1) }).success).toBe(false);
+  });
+
+  it('throws when the constraint is missing', () => {
+    expect(() => new FormSchemaBuilder({}, keyMessages).password('password')).toThrow(
+      MissingConstraintError,
+    );
+  });
+});
+
+describe('cross-field checks', () => {
+  const NEW_PASSWORD = 'una-clave-larga-y-distinta';
+  const build = () =>
+    new FormSchemaBuilder(constraints, keyMessages)
+      .password('current', { constraint: 'password', anyLength: true })
+      .password('next', { constraint: 'password' })
+      .password('again', { constraint: 'password' })
+      .differentFrom('next', 'current')
+      .notContaining('next', 'Junta.Uno')
+      .confirmation('again', 'next')
+      .build();
+  const valid = { current: 'clave-actual', next: NEW_PASSWORD, again: NEW_PASSWORD };
+
+  function issuesOf(values: Record<string, string>): [string, string][] {
+    const result = build().safeParse(values);
+    return result.success
+      ? []
+      : result.error.issues.map((issue) => [String(issue.path[0]), issue.message]);
+  }
+
+  it('passes when every rule holds', () => {
+    expect(build().safeParse(valid).success).toBe(true);
+  });
+
+  it('reports a confirmation that does not match on the confirmation field', () => {
+    expect(issuesOf({ ...valid, again: `${NEW_PASSWORD}x` })).toEqual([
+      ['again', 'validation.mismatch'],
+    ]);
+  });
+
+  it('rejects a new password equal to the current one', () => {
+    const same = 'la-misma-clave-larga';
+
+    expect(issuesOf({ current: same, next: same, again: same })).toEqual([
+      ['next', 'validation.sameAsCurrent'],
+    ]);
+  });
+
+  it('rejects a password that contains the username, ignoring case', () => {
+    const withUser = 'xxjunta.UNOxxxxxx';
+
+    expect(issuesOf({ current: 'clave-actual', next: withUser, again: withUser })).toEqual([
+      ['next', 'validation.containsUsername'],
+    ]);
+  });
+
+  it('never fails the username rule when the term is empty', () => {
+    const schema = new FormSchemaBuilder(constraints, keyMessages)
+      .password('next', { constraint: 'password' })
+      .notContaining('next', '  ')
+      .build();
+
+    expect(schema.safeParse({ next: NEW_PASSWORD }).success).toBe(true);
   });
 });

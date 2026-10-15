@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ConstraintsMap } from './FieldConstraint';
-import { readingFormSchema, reasonSchema } from './formSchemas';
+import { loginFormSchema, readingFormSchema, reasonSchema } from './formSchemas';
 import { keyMessages } from './validationMessages';
 
 const GAUGE = { min: 0, max: 5, decimals: 2 };
 const constraints: ConstraintsMap = {
+  username: { min: 3, max: 32 },
+  password: { min: 12, max: 128 },
   'reading.note': { min: 0, max: 500, maxLines: 10 },
   change_reason: { min: 10, max: 500 },
 };
@@ -34,5 +36,21 @@ describe('reasonSchema', () => {
     expect(
       schema.safeParse({ change_reason: 'Sube la reserva por la temporada seca.' }).success,
     ).toBe(true);
+  });
+});
+
+describe('loginFormSchema', () => {
+  const schema = loginFormSchema(constraints, keyMessages);
+  const PASSWORD = 'una contraseña larga de prueba';
+
+  it('normalizes the username and keeps the password as typed', () => {
+    expect(schema.parse({ username: ' Junta.Uno ', password: PASSWORD })).toEqual({
+      username: 'junta.uno',
+      password: PASSWORD,
+    });
+  });
+
+  it('fails with empty fields', () => {
+    expect(schema.safeParse({ username: '', password: '' }).success).toBe(false);
   });
 });

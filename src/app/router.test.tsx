@@ -1,41 +1,21 @@
-import { render, screen } from '@testing-library/react';
-import { createMemoryRouter, RouterProvider } from 'react-router';
+import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import type { Role } from '../core/session/roles';
+import { ROUTE_PATHS } from '../core/session/routes';
 import { t } from '../i18n/t';
-import { SessionStore } from '../state/SessionStore';
-import { SessionProvider } from './providers/SessionProvider';
-import { buildRoutes } from './router';
-import { ROUTE_PATHS } from './routes';
-
-const USER_ID = '0190f3a2-7c1d-7b2e-9f11-3d4c5e6f7a81';
-const AQUEDUCT_ID = '0190f3a2-7c1d-7b2e-9f11-3d4c5e6f7a82';
+import { buildSessionUser } from '../test/factories/session';
+import { renderApp } from '../test/renderApp';
 
 function renderAt(path: string, role?: Role) {
-  const store = new SessionStore();
-  if (role !== undefined) {
-    store.signIn({
-      userId: USER_ID,
-      role,
-      aqueductId: AQUEDUCT_ID,
-      displayName: 'Persona de prueba',
-    });
-  }
-  const router = createMemoryRouter(buildRoutes(), { initialEntries: [path] });
-  render(
-    <SessionProvider store={store}>
-      <RouterProvider router={router} />
-    </SessionProvider>,
-  );
-  return router;
+  return renderApp(path, role === undefined ? {} : { user: buildSessionUser({ role }) }).router;
 }
 
 const heading = (name: string) => screen.getByRole('heading', { level: 1, name });
 
 describe('role router', () => {
   it('shows the public schedule without a session', () => {
-    renderAt('/p/vereda-de-prueba');
+    renderAt('/a/vereda-de-prueba');
 
     expect(heading(t('screens.publicSchedule'))).toBeInTheDocument();
   });
