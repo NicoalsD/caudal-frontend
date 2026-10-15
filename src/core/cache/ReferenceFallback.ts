@@ -19,7 +19,7 @@ export class ReferenceFallback {
   async fetch<T>(scope: string, name: string, remote: () => Promise<T>): Promise<T> {
     try {
       const value = await remote();
-      await this.remember(scope, name, value);
+      this.remember(scope, name, value);
       return value;
     } catch (error) {
       if (!(error instanceof NetworkError)) {
@@ -33,11 +33,12 @@ export class ReferenceFallback {
     }
   }
 
-  private async remember(scope: string, name: string, value: unknown): Promise<void> {
+  /** The copy is written in the background: the answer never waits for the disk. */
+  private remember(scope: string, name: string, value: unknown): void {
     try {
-      await this.store.save(scope, name, value, this.clock.nowMs());
+      void this.store.save(scope, name, value, this.clock.nowMs()).catch(() => undefined);
     } catch {
-      // A full or blocked disk must not fail a read that the server answered.
+      // A store that fails at once must not fail a read that the server answered.
     }
   }
 }
