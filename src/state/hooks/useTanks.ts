@@ -4,6 +4,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import type { TankView } from '../../services/api/views';
 import { aqueductKey } from '../queryKeys';
 import { useCaudalApi } from './apiContext';
+import { useReferenceFetch } from './offlineContext';
 import { useAqueductId } from './useAqueductId';
 import { NETWORK_SCOPE } from './useSectors';
 
@@ -11,9 +12,11 @@ import { NETWORK_SCOPE } from './useSectors';
 export function useTanks(): UseQueryResult<TankView[]> {
   const api = useCaudalApi();
   const aqueductId = useAqueductId();
+  const fetchReference = useReferenceFetch();
   return useQuery({
     queryKey: aqueductKey(aqueductId, NETWORK_SCOPE, 'tanks'),
-    queryFn: () => api.network.tanks(),
+    queryFn: () => fetchReference(aqueductId, 'tanks', () => api.network.tanks()),
+    networkMode: 'always',
     refetchOnWindowFocus: false,
   });
 }

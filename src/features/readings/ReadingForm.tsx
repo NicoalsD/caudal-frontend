@@ -23,8 +23,8 @@ import { TextAreaField } from '../../ui/primitives/TextAreaField';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
-import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
 import { useSaveReading, useWaterAppearances } from './readingQueries';
+import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
 
 const GAUGE_DISPLAY_DIGITS = 2;
 
@@ -59,13 +59,20 @@ function buildForm(rule: DecimalRule) {
  * optional note. The range is the one of the tank; the limits come from /meta/constraints.
  */
 export function ReadingForm({ tank }: ReadingFormProps): JSX.Element {
+  // The Junta's gauge range (cached for offline use) wins; the tank's own range is the fallback.
+  const ruleSet = useCurrentRuleSet();
+  const gauge = ruleSet.data?.gauge ?? {
+    min: tank.gaugeMin,
+    max: tank.gaugeMax,
+    step: tank.gaugeStep,
+  };
   const rule = useMemo<DecimalRule>(
     () => ({
-      min: tank.gaugeMin,
-      max: tank.gaugeMax,
-      decimals: gaugeDecimals({ min: tank.gaugeMin, max: tank.gaugeMax, step: tank.gaugeStep }),
+      min: gauge.min,
+      max: gauge.max,
+      decimals: gaugeDecimals({ min: gauge.min, max: gauge.max, step: gauge.step }),
     }),
-    [tank.gaugeMin, tank.gaugeMax, tank.gaugeStep],
+    [gauge.min, gauge.max, gauge.step],
   );
   const build = useCallback(
     (constraints: ConstraintsMap, messages: ValidationMessageFactory) =>

@@ -4,17 +4,23 @@ import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { SubmitReadingCommand } from '../../core/commands/SubmitReadingCommand';
 import { REFERENCE_STALE_TIME_MS } from '../../core/policy/clientPolicy';
 import type { CatalogItemView } from '../../services/api/views';
+import { GLOBAL_REFERENCE_SCOPE } from '../../core/cache/ReferenceFallback';
 import { useCaudalApi } from '../../state/hooks/apiContext';
-import { useOfflineServices } from '../../state/hooks/offlineContext';
+import { useOfflineServices, useReferenceFetch } from '../../state/hooks/offlineContext';
 import { useOutboxOwner } from '../../state/hooks/useOutboxOwner';
 
 /** GET /catalogs/WATER_APPEARANCE: the options for how the water looks. Changes rarely. */
 export function useWaterAppearances(): UseQueryResult<CatalogItemView[]> {
   const api = useCaudalApi();
+  const fetchReference = useReferenceFetch();
   return useQuery({
     queryKey: ['catalogs', 'WATER_APPEARANCE'],
-    queryFn: () => api.meta.catalog('WATER_APPEARANCE'),
+    queryFn: () =>
+      fetchReference(GLOBAL_REFERENCE_SCOPE, 'catalog:WATER_APPEARANCE', () =>
+        api.meta.catalog('WATER_APPEARANCE'),
+      ),
     staleTime: REFERENCE_STALE_TIME_MS,
+    networkMode: 'always',
     refetchOnWindowFocus: false,
   });
 }
