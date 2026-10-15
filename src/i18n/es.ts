@@ -7,7 +7,6 @@ export const strings = {
     name: 'CAUDAL',
     skipToContent: 'Saltar al contenido',
     mainNavigation: 'Navegación principal',
-    comingSoon: 'Esta pantalla se construye en una fase posterior.',
   },
   common: {
     retry: 'Reintentar',
