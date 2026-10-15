@@ -2,11 +2,15 @@ import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import { toReadingBatchResult } from '../adapters/ReadingsAdapter';
 import type { ReadingBatchResponseDto } from '../adapters/ReadingsAdapter';
+import { toReadingCorrection } from '../adapters/ReadingsAdapter';
+import type { ReadingCorrectionResponseDto } from '../adapters/ReadingsAdapter';
 import { toReadingResult } from '../adapters/ReadingsAdapter';
 import type { ReadingResponseDto } from '../adapters/ReadingsAdapter';
 import type {
   ReadingBatchInput,
   ReadingBatchResultView,
+  ReadingCorrectionInput,
+  ReadingCorrectionView,
   ReadingInput,
   ReadingResultView,
 } from '../views';
@@ -37,6 +41,22 @@ export class ReadingsApi {
    * item per reading, in the order sent. The body is built field by field (the API rejects
    * unknown fields).
    */
+  /**
+   * POST /readings/{id}/corrections: a new correction with its reason. The reading keeps its
+   * original value; the correction only changes what the reading shows now (API.md 7.5).
+   */
+  async correct(readingId: string, input: ReadingCorrectionInput): Promise<ReadingCorrectionView> {
+    const response = await this.http.request<ReadingCorrectionResponseDto>({
+      method: 'POST',
+      path: `/readings/${encodeURIComponent(readingId)}/corrections`,
+      body: {
+        corrected_gauge_value: input.correctedGaugeValue,
+        reason: input.reason,
+      },
+    });
+    return toReadingCorrection(this.adapter, response.body);
+  }
+
   async submitBatch(input: ReadingBatchInput): Promise<ReadingBatchResultView> {
     const response = await this.http.request<ReadingBatchResponseDto>({
       method: 'POST',

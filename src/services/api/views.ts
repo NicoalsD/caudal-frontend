@@ -170,6 +170,24 @@ export interface ReadingBatchResultView {
   readonly answers: readonly BatchItemAnswer[];
 }
 
+/** A correction the person asks for on a saved reading (API.md 7.5). */
+export interface ReadingCorrectionInput {
+  readonly correctedGaugeValue: number;
+  /** 10 to 500 characters, mandatory. */
+  readonly reason: string;
+}
+
+/** The correction as stored. The original reading is never changed or removed. */
+export interface ReadingCorrectionView {
+  readonly id: string;
+  readonly readingId: string;
+  readonly correctedGaugeValue: DecimalView;
+  readonly reason: string;
+  readonly createdAt: TimestampView;
+  /** The value the reading has now: the last correction, or the original value. */
+  readonly effectiveGaugeValue: DecimalView;
+}
+
 /** The server's answer to a reading: what it stored and what it noticed. */
 export interface ReadingResultView {
   readonly id: string;

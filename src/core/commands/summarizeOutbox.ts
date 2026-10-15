@@ -22,6 +22,7 @@ export interface ClosedItemSummary {
   readonly outcome: ClosedItem['outcome'];
   readonly gaugeValue: number | null;
   readonly observedAt: string | null;
+  readonly tankId: string | null;
   readonly reason: string | null;
 }
 
@@ -62,6 +63,7 @@ function summarizeClosed(item: ClosedItem): ClosedItemSummary {
     outcome: item.outcome,
     gaugeValue: payload?.gaugeValue ?? null,
     observedAt: payload?.observedAt ?? null,
+    tankId: payload?.tankId ?? null,
     reason: item.reason,
   };
 }

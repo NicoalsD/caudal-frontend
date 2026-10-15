@@ -95,6 +95,7 @@ describe('summarizeOutbox', () => {
         outcome: 'DISCARDED',
         gaugeValue: 2.1,
         observedAt: VALID_PAYLOAD.observedAt,
+        tankId: VALID_PAYLOAD.tankId,
         reason: 'Dato duplicado',
       },
     ]);

@@ -6,7 +6,7 @@ import {
   readSubmitReadingPayload,
 } from '../../core/commands/SubmitReadingCommand';
 import { REFERENCE_STALE_TIME_MS } from '../../core/policy/clientPolicy';
-import type { CatalogItemView } from '../../services/api/views';
+import type { CatalogItemView, ReadingCorrectionView } from '../../services/api/views';
 import { GLOBAL_REFERENCE_SCOPE } from '../../core/cache/ReferenceFallback';
 import { useCaudalApi } from '../../state/hooks/apiContext';
 import { useOfflineServices, useReferenceFetch } from '../../state/hooks/offlineContext';
@@ -71,6 +71,31 @@ export function useSaveReading(): UseMutationResult<SavedReading, Error, SaveRea
       }
       return { clientId, sendingNow };
     },
+  });
+}
+
+export interface CorrectionDraft {
+  readonly readingId: string;
+  readonly correctedGaugeValue: number;
+  readonly reason: string;
+}
+
+/**
+ * Corrects a reading the server already has (API.md 7.5). The reading id is the client UUID it was
+ * sent with. Online only: a correction needs the server to answer.
+ */
+export function useCorrectReading(): UseMutationResult<
+  ReadingCorrectionView,
+  Error,
+  CorrectionDraft
+> {
+  const api = useCaudalApi();
+  return useMutation({
+    mutationFn: (draft) =>
+      api.readings.correct(draft.readingId, {
+        correctedGaugeValue: draft.correctedGaugeValue,
+        reason: draft.reason,
+      }),
   });
 }
 

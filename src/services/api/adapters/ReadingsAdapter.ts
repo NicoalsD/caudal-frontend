@@ -1,4 +1,9 @@
-import type { CatalogItemView, ReadingBatchResultView, ReadingResultView } from '../views';
+import type {
+  CatalogItemView,
+  ReadingBatchResultView,
+  ReadingCorrectionView,
+  ReadingResultView,
+} from '../views';
 import type { ApiDtoAdapter } from './ApiDtoAdapter';
 
 /** Shapes of API.md sections 4.2 and 7.1 (hand written: not in the generated schema yet). */
@@ -73,5 +78,36 @@ export function toReadingBatchResult(dto: ReadingBatchResponseDto): ReadingBatch
       errorCode: item.error?.code ?? null,
       errorDetails: item.error?.details,
     })),
+  };
+}
+
+/** Answer of POST /readings/{id}/corrections (API.md 7.5). */
+export interface ReadingCorrectionDto {
+  readonly id: string;
+  readonly reading_id: string;
+  readonly corrected_gauge_value: number;
+  readonly reason: string;
+  readonly created_at: string;
+}
+
+export interface ReadingCorrectionResponseDto {
+  readonly correction: ReadingCorrectionDto;
+  readonly effective_gauge_value: number;
+}
+
+export function toReadingCorrection(
+  adapter: ApiDtoAdapter,
+  dto: ReadingCorrectionResponseDto,
+): ReadingCorrectionView {
+  return {
+    id: dto.correction.id,
+    readingId: dto.correction.reading_id,
+    correctedGaugeValue: adapter.toDecimal(
+      'correction.corrected_gauge_value',
+      dto.correction.corrected_gauge_value,
+    ),
+    reason: dto.correction.reason,
+    createdAt: adapter.toTimestamp('correction.created_at', dto.correction.created_at),
+    effectiveGaugeValue: adapter.toDecimal('effective_gauge_value', dto.effective_gauge_value),
   };
 }

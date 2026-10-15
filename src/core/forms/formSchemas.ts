@@ -13,6 +13,7 @@ export const FIELD = {
   damageNoticed: 'damage_noticed',
   changeReason: 'change_reason',
   gaugeValue: 'gauge_value',
+  correctedGaugeValue: 'corrected_gauge_value',
   username: 'username',
   password: 'password',
   currentPassword: 'current_password',
@@ -57,6 +58,18 @@ export function gaugeValueSchema(
   messages: ValidationMessageFactory,
 ) {
   return new FormSchemaBuilder(constraints, messages).decimal(FIELD.gaugeValue, gauge).build();
+}
+
+/** A correction of a saved reading: the new value in the range, and the mandatory reason. */
+export function correctionFormSchema(
+  constraints: ConstraintsMap,
+  gauge: DecimalRule,
+  messages: ValidationMessageFactory,
+) {
+  return new FormSchemaBuilder(constraints, messages)
+    .decimal(FIELD.correctedGaugeValue, gauge)
+    .requiredReason(FIELD.changeReason)
+    .build();
 }
 
 /** Mandatory reason for a change (rule activation, proposal changes, corrections). */

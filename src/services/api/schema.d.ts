@@ -331,6 +331,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/readings/{id}/corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corrige una lectura ya guardada, con motivo
+         * @description Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.
+         */
+        post: operations["correctReading"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -681,6 +701,27 @@ export interface components {
             items_rejected: number;
             idempotent_replay: boolean;
             results: components["schemas"]["ReadingBatchResult"][];
+        };
+        ReadingCorrectionRequest: {
+            /** @description Decimal con 2 cifras, dentro del rango del tanque. */
+            corrected_gauge_value: number;
+            reason: string;
+        };
+        ReadingCorrection: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            reading_id: string;
+            corrected_gauge_value: number;
+            reason: string;
+            /** Format: uuid */
+            corrected_by: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ReadingCorrectionResponse: {
+            correction: components["schemas"]["ReadingCorrection"];
+            effective_gauge_value: number;
         };
     };
     responses: never;
@@ -1339,6 +1380,59 @@ export interface operations {
             };
             /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
             413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    correctReading: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingCorrectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Corrección creada y valor efectivo de la lectura. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingCorrectionResponse"];
+                };
+            };
+            /** @description FORBIDDEN: un OPERATOR solo corrige sus propias lecturas. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND: la lectura no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres). */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

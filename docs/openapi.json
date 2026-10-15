@@ -770,6 +770,76 @@
           }
         }
       }
+    },
+    "/api/v1/readings/{id}/corrections": {
+      "post": {
+        "operationId": "correctReading",
+        "summary": "Corrige una lectura ya guardada, con motivo",
+        "description": "Autenticado, permiso READING_CREATE de la lectura o READING_CORRECT. API.md sección 7.5. El dato original no se borra: la corrección se agrega.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingCorrectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Corrección creada y valor efectivo de la lectura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingCorrectionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: un OPERATOR solo corrige sus propias lecturas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: la lectura no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "GAUGE_OUT_OF_RANGE o REASON_REQUIRED (motivo de 10 a 500 caracteres).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1827,6 +1897,74 @@
             "items": {
               "$ref": "#/components/schemas/ReadingBatchResult"
             }
+          }
+        }
+      },
+      "ReadingCorrectionRequest": {
+        "type": "object",
+        "required": [
+          "corrected_gauge_value",
+          "reason"
+        ],
+        "properties": {
+          "corrected_gauge_value": {
+            "type": "number",
+            "description": "Decimal con 2 cifras, dentro del rango del tanque."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          }
+        }
+      },
+      "ReadingCorrection": {
+        "type": "object",
+        "required": [
+          "id",
+          "reading_id",
+          "corrected_gauge_value",
+          "reason",
+          "corrected_by",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reading_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "corrected_gauge_value": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "corrected_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReadingCorrectionResponse": {
+        "type": "object",
+        "required": [
+          "correction",
+          "effective_gauge_value"
+        ],
+        "properties": {
+          "correction": {
+            "$ref": "#/components/schemas/ReadingCorrection"
+          },
+          "effective_gauge_value": {
+            "type": "number"
           }
         }
       }

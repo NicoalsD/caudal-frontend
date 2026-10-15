@@ -9,6 +9,7 @@ import { cn } from '../../ui/styles/cn';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ReadingForm } from './ReadingForm';
 import { ReadingIssues } from './ReadingIssues';
+import { SentReadings } from './SentReadings';
 import styles from './Readings.module.css';
 
 /** The plumber's screen: pick the tank (only when there is more than one) and register a level. */
@@ -64,6 +65,7 @@ export function ReadingPage(): JSX.Element {
       <ScreenTitle>{t('screens.newReading')}</ScreenTitle>
       {body}
       <ReadingIssues />
+      <SentReadings />
     </div>
   );
 }

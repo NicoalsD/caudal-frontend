@@ -11,6 +11,7 @@ export const strings = {
   },
   common: {
     retry: 'Reintentar',
+    cancel: 'Cancelar',
     simulatedData: 'Datos simulados',
   },
   nav: {
@@ -502,6 +503,26 @@ export const strings = {
     savedOffline: 'Guardada en este celular. Se enviará cuando vuelva la señal.',
     savedValue: 'Nivel {value}.',
     savedAgain: 'Esta lectura ya estaba guardada. No se repitió.',
+    sent: {
+      title: 'Enviadas en esta sesión',
+      observedAt: 'Lectura del {date}',
+      status: 'Enviada',
+      value: 'Nivel {value}',
+      correct: 'Corregir',
+      correctedNotice: 'Corrección guardada. El valor original se conserva.',
+      offline: 'Necesitas conexión para corregir una lectura que ya se envió.',
+    },
+    correction: {
+      title: 'Corregir la lectura',
+      description:
+        'La corrección se agrega a la lectura. El valor original no se borra y queda en el registro con tu nombre y la hora.',
+      valueLabel: 'Nivel correcto',
+      reasonLabel: 'Motivo de la corrección',
+      reasonHint: 'Explica qué se leyó mal o qué cambió. Es obligatorio.',
+      reasonCounter: '{length} de {max} caracteres',
+      submit: 'Guardar corrección',
+      submitting: 'Guardando...',
+    },
     review: {
       title: 'Lecturas que no se guardaron',
       observedAt: 'Lectura del {date}',

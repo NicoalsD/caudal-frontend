@@ -70,3 +70,9 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-clay-700);
 }
+
+.notice {
+  min-height: var(--target-min);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-paramo-800);
+}
