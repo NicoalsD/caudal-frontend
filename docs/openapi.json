@@ -3303,6 +3303,13 @@
               "UP",
               "DOWN"
             ]
+          },
+          "components": {
+            "type": "object",
+            "description": "Estado de cada componente, solo si el servidor lo publica (hoy no: show-components = never).",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HealthComponent"
+            }
           }
         }
       },
@@ -6812,6 +6819,18 @@
             "type": "string",
             "nullable": true,
             "description": "0 a 120 caracteres."
+          }
+        }
+      },
+      "HealthComponent": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "UP cuando funciona; otro valor cuando no."
           }
         }
       }

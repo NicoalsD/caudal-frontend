@@ -16,8 +16,23 @@ const NOTE_LINES = 10;
 
 describe('ApiDtoAdapter.toHealth', () => {
   it('maps UP and DOWN to a boolean', () => {
-    expect(adapter.toHealth({ status: 'UP' })).toEqual({ isUp: true });
-    expect(adapter.toHealth({ status: 'DOWN' })).toEqual({ isUp: false });
+    expect(adapter.toHealth({ status: 'UP' })).toEqual({ isUp: true, components: [] });
+    expect(adapter.toHealth({ status: 'DOWN' })).toEqual({ isUp: false, components: [] });
+  });
+
+  it('keeps the components the server publishes, each UP or not', () => {
+    expect(
+      adapter.toHealth({
+        status: 'DOWN',
+        components: { db: { status: 'UP' }, circuitBreaker: { status: 'OPEN' } },
+      }),
+    ).toEqual({
+      isUp: false,
+      components: [
+        { name: 'db', isUp: true },
+        { name: 'circuitBreaker', isUp: false },
+      ],
+    });
   });
 });
 

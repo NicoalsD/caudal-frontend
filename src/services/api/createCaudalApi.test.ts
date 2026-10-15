@@ -6,7 +6,7 @@ describe('createCaudalApi', () => {
   it('builds a working facade from the environment', async () => {
     const api = createCaudalApi({ VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL });
 
-    expect(await api.system.health()).toEqual({ isUp: true });
+    expect(await api.system.health()).toEqual({ isUp: true, components: [] });
   });
 
   it('fails fast when the API base URL is missing', () => {

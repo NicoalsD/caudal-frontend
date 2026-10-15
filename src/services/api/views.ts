@@ -45,6 +45,14 @@ export interface ForecastEvaluationView {
 
 export interface HealthView {
   readonly isUp: boolean;
+  /** Components the server publishes (none today: the actuator hides them, API.md 19.1). */
+  readonly components: readonly HealthComponentView[];
+}
+
+/** One component of the service, as the server names it (for example "db"). */
+export interface HealthComponentView {
+  readonly name: string;
+  readonly isUp: boolean;
 }
 
 /** An instant ready for the screen. */

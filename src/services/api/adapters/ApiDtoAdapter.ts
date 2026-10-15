@@ -131,7 +131,13 @@ function isManagedUserStatus(value: string): value is ManagedUserStatus {
 
 export class ApiDtoAdapter {
   toHealth(dto: HealthDto): HealthView {
-    return { isUp: dto.status === 'UP' };
+    return {
+      isUp: dto.status === 'UP',
+      components: Object.entries(dto.components ?? {}).map(([name, component]) => ({
+        name,
+        isUp: component.status === 'UP',
+      })),
+    };
   }
 
   /** `max_lines` becomes `maxLines`; only the limits that arrived are present. */

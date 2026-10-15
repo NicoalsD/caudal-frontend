@@ -1180,6 +1180,10 @@ export interface components {
         HealthResponse: {
             /** @enum {string} */
             status: "UP" | "DOWN";
+            /** @description Estado de cada componente, solo si el servidor lo publica (hoy no: show-components = never). */
+            components?: {
+                [key: string]: components["schemas"]["HealthComponent"];
+            };
         };
         /** @description Límites de un campo. Todos son opcionales: solo llegan los que aplican. */
         FieldConstraint: {
@@ -2261,6 +2265,10 @@ export interface components {
             description: string;
             /** @description 0 a 120 caracteres. */
             location_hint?: string | null;
+        };
+        HealthComponent: {
+            /** @description UP cuando funciona; otro valor cuando no. */
+            status: string;
         };
     };
     responses: never;

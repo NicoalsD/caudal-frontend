@@ -28,7 +28,7 @@ describe('CaudalApi.system.health', () => {
       BASE_URL,
     );
 
-    expect(await api.system.health()).toEqual({ isUp: true });
+    expect(await api.system.health()).toEqual({ isUp: true, components: [] });
   });
 
   it('reports DOWN as isUp=false', async () => {
@@ -38,7 +38,7 @@ describe('CaudalApi.system.health', () => {
       BASE_URL,
     );
 
-    expect(await api.system.health()).toEqual({ isUp: false });
+    expect(await api.system.health()).toEqual({ isUp: false, components: [] });
   });
 });
 
@@ -48,6 +48,7 @@ describe('CaudalApi over the real transport', () => {
   it('reaches the actuator outside /api/v1', async () => {
     expect(await new CaudalApi(transport, new ApiDtoAdapter(), BASE_URL).system.health()).toEqual({
       isUp: true,
+      components: [],
     });
   });
 

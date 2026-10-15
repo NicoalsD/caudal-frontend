@@ -4,6 +4,7 @@ import type { RouteObject } from 'react-router';
 import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
 import { ImportPage } from '../features/imports';
+import { HealthPage } from '../features/health';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
 import { DayClosurePage } from '../features/closure';
 import { MinutesPage } from '../features/minutes';
@@ -136,7 +137,7 @@ const teamRoutes: RouteObject = {
     {
       element: <TeamLayout />,
       children: [
-        screen(ROUTE_PATHS.team.health, t('screens.health')),
+        { path: ROUTE_PATHS.team.health, element: <HealthPage /> },
         screen(ROUTE_PATHS.team.devices, t('screens.devices')),
         { path: ROUTE_PATHS.team.imports, element: <ImportPage /> },
       ],
