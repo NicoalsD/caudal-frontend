@@ -502,6 +502,7 @@ export const strings = {
       copied: 'Mensaje copiado.',
       manualHint: 'No pudimos copiarlo. Selecciona el texto y cópialo a mano.',
       manualLabel: 'Mensaje para WhatsApp',
+      poster: 'Descargar cartel (PDF)',
     },
   },
   connection: {

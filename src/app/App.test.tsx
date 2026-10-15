@@ -23,7 +23,10 @@ describe('App', () => {
 
     expect(screen.getByRole('main')).toBeInTheDocument();
     expect(
-      await screen.findByRole('heading', { level: 1, name: t('screens.publicSchedule') }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: t('publicSchedule.title', { name: 'Guaitarilla' }),
+      }),
     ).toBeInTheDocument();
   });
 });

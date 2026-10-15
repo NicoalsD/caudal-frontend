@@ -798,6 +798,54 @@
           }
         }
       }
+    },
+    "/api/v1/public/{aqueductSlug}/schedule/poster.pdf": {
+      "get": {
+        "operationId": "getPublicPosterPdf",
+        "summary": "Cartel del horario en PDF",
+        "description": "Público. El PDF es determinista; X-Content-SHA256 trae el hash guardado en poster_sha256.",
+        "parameters": [
+          {
+            "name": "aqueductSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cartel del horario.",
+            "headers": {
+              "X-Content-SHA256": {
+                "description": "SHA-256 del PDF.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sin cartel para el acueducto (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

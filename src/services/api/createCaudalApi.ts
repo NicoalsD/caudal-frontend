@@ -19,5 +19,5 @@ export function createCaudalApi(env: ApiEnvironment): CaudalApi {
     clock: new SystemClock(),
     random: () => Math.random(),
   });
-  return new CaudalApi(http, new ApiDtoAdapter());
+  return new CaudalApi(http, new ApiDtoAdapter(), readApiBaseUrl(env));
 }

@@ -23,11 +23,12 @@ export class CaudalApi {
   readonly rules: RulesApi;
   readonly system: SystemApi;
 
-  constructor(http: HttpClient, adapter: ApiDtoAdapter) {
+  /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
+  constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
     this.auth = new AuthApi(http, adapter);
     this.meta = new MetaApi(http, adapter);
     this.network = new NetworkApi(http, adapter);
-    this.public = new PublicApi(http, adapter);
+    this.public = new PublicApi(http, adapter, apiBaseUrl);
     this.rules = new RulesApi(http, adapter);
     this.system = new SystemApi(http, adapter);
   }

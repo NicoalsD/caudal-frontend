@@ -49,8 +49,7 @@ export function WhatsAppCopy({ aqueductSlug }: WhatsAppCopyProps): JSX.Element {
   };
 
   return (
-    <section aria-labelledby="public-share-heading" className={cn(styles.share)}>
-      <h2 id="public-share-heading">{t('publicSchedule.share.heading')}</h2>
+    <div className={cn(styles.copy)}>
       <Button variant="primary" onClick={copy} disabled={fetchText.isPending}>
         {t('publicSchedule.share.copyWhatsApp')}
       </Button>
@@ -76,6 +75,6 @@ export function WhatsAppCopy({ aqueductSlug }: WhatsAppCopyProps): JSX.Element {
           />
         </>
       )}
-    </section>
+    </div>
   );
 }

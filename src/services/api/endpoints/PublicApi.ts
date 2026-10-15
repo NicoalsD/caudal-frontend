@@ -10,6 +10,7 @@ export class PublicApi {
   constructor(
     private readonly http: HttpClient,
     private readonly adapter: ApiDtoAdapter,
+    private readonly apiBaseUrl: string,
   ) {}
 
   /** GET /public/{slug}/schedule: today's published schedule when no date is given. */
@@ -30,5 +31,13 @@ export class PublicApi {
       responseType: 'text',
     });
     return response.body;
+  }
+
+  /**
+   * URL of the poster PDF (API.md 15.3). A link, not a request: the browser downloads it, and the
+   * PDF is deterministic, so its SHA-256 matches the one stored by the backend.
+   */
+  posterPdfUrl(aqueductSlug: string): string {
+    return `${this.apiBaseUrl}/public/${encodeURIComponent(aqueductSlug)}/schedule/poster.pdf`;
   }
 }

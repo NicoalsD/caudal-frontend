@@ -58,7 +58,7 @@ export function createAppServices(
     clock,
     random: () => Math.random(),
   });
-  const api = new CaudalApi(http, adapter);
+  const api = new CaudalApi(http, adapter, baseUrl);
   const hints: SessionHintRepository = new InMemorySessionHintRepository();
   const sessionStore = new SessionStore((event, phase) => {
     logger.warn('session.event_ignored', { event, phase });

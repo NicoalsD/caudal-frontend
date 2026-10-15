@@ -6,6 +6,7 @@ import type { PublicScheduleView } from '../../services/api/views';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import styles from './PublicSchedule.module.css';
+import { PosterLink } from './PosterLink';
 import { WhatsAppCopy } from './WhatsAppCopy';
 
 interface PublicScheduleContentProps {
@@ -49,7 +50,11 @@ export function PublicScheduleContent({
           </ul>
         </section>
       )}
-      <WhatsAppCopy aqueductSlug={aqueductSlug} />
+      <section aria-labelledby="public-share-heading" className={cn(styles.share)}>
+        <h2 id="public-share-heading">{t('publicSchedule.share.heading')}</h2>
+        <WhatsAppCopy aqueductSlug={aqueductSlug} />
+        <PosterLink aqueductSlug={aqueductSlug} />
+      </section>
     </>
   );
 }

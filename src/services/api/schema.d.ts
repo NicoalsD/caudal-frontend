@@ -351,6 +351,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/{aqueductSlug}/schedule/poster.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cartel del horario en PDF
+         * @description Público. El PDF es determinista; X-Content-SHA256 trae el hash guardado en poster_sha256.
+         */
+        get: operations["getPublicPosterPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1358,6 +1378,39 @@ export interface operations {
                 };
             };
             /** @description Sin publicación para el acueducto (NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getPublicPosterPdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aqueductSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cartel del horario. */
+            200: {
+                headers: {
+                    /** @description SHA-256 del PDF. */
+                    "X-Content-SHA256"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+            /** @description Sin cartel para el acueducto (NOT_FOUND). */
             404: {
                 headers: {
                     [name: string]: unknown;
