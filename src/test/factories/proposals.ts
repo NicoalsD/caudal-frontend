@@ -9,6 +9,7 @@ export const ITEM_ID_HIGH = '0190f3a2-9b00-7000-8000-0000000000a2';
 
 export const PROPOSAL_ID_TODAY = '0190f3a2-9a00-7000-8000-000000000001';
 export const PROPOSAL_ID_YESTERDAY = '0190f3a2-9a00-7000-8000-000000000002';
+export const DAY_HOURS = 16;
 export const RULE_SET_ID = '0190f3a2-0000-7000-8000-0000000000c3';
 
 /** A proposal without shifts, as GET /schedule-proposals lists it. Neutral values. */
@@ -34,7 +35,7 @@ export function buildProposalSummary(
 /** A full proposal: two shifts with their reasons (texts as the server writes them). */
 export function buildProposal(overrides: Partial<ProposalDto> = {}): ProposalDto {
   return {
-    ...buildProposalSummary(),
+    ...buildProposalSummary({ available_hours: DAY_HOURS }),
     items: [
       {
         id: ITEM_ID_SCHOOL,

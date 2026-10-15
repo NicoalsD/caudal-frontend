@@ -54,7 +54,7 @@ describe('ProposalDetailPage (S13 detail, explanations)', () => {
     renderApp(detailPath(PROPOSAL_ID_TODAY), { user: board() });
 
     expect(
-      await screen.findByText('Hay 8 horas de servicio hoy. Banda del tanque: baja.'),
+      await screen.findByText('Hay 16 horas de servicio hoy. Banda del tanque: baja.'),
     ).toBeInTheDocument();
     expect(screen.getByText('Nivel del tanque: 2,1 m')).toBeInTheDocument();
   });

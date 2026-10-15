@@ -21,6 +21,7 @@ import type {
 } from '../../../core/rules/ruleSetParts';
 import { isReportStatus } from '../../../core/incidents/reportStatus';
 import { isProposalStatus } from '../../../core/proposal/proposalStatus';
+import { bogotaMinutesOf } from '../../../core/proposal/proposalTime';
 import { isRole } from '../../../core/session/roles';
 import type {
   AuthUserView,
@@ -244,6 +245,7 @@ export class ApiDtoAdapter {
       id: dto.id,
       sectorId: dto.sector_id,
       sequence: dto.sequence,
+      startMinutes: bogotaMinutesOf(dto.start_at),
       startTime: formatTime(dto.start_at),
       endTime: formatTime(dto.end_at),
       hours: (end.getTime() - start.getTime()) / MS_PER_HOUR,

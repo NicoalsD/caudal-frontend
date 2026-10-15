@@ -4,3 +4,8 @@ import { ROUTE_PATHS } from '../../core/session/routes';
 export function proposalDetailPath(id: string): string {
   return ROUTE_PATHS.board.proposalDetail.replace(':id', encodeURIComponent(id));
 }
+
+/** The editor of one proposal (S14). */
+export function proposalEditPath(id: string): string {
+  return ROUTE_PATHS.board.proposalEdit.replace(':id', encodeURIComponent(id));
+}

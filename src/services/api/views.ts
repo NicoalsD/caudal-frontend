@@ -234,6 +234,8 @@ export interface ScheduleItemView {
   readonly id: string;
   readonly sectorId: string;
   readonly sequence: number;
+  /** Start in minutes from midnight of America/Bogota (the editor lays the shifts out from it). */
+  readonly startMinutes: number;
   readonly startTime: string;
   readonly endTime: string;
   /** Length of the shift in hours (end minus start). */

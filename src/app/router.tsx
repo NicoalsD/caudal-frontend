@@ -5,7 +5,7 @@ import { ChangePasswordPage, LoginPage } from '../features/auth';
 import { NetworkPage } from '../features/admin';
 import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
-import { ProposalDetailPage, ProposalListPage } from '../features/proposals';
+import { ProposalDetailPage, ProposalEditorPage, ProposalListPage } from '../features/proposals';
 import { RuleDraftPage, RulesPage } from '../features/rules';
 import { t } from '../i18n/t';
 import { RequireAuth } from './guards/RequireAuth';
@@ -81,6 +81,7 @@ const boardRoutes: RouteObject = {
         screen(ROUTE_PATHS.board.tank, t('screens.tankStatus')),
         { path: ROUTE_PATHS.board.proposals, element: <ProposalListPage /> },
         { path: ROUTE_PATHS.board.proposalDetail, element: <ProposalDetailPage /> },
+        { path: ROUTE_PATHS.board.proposalEdit, element: <ProposalEditorPage /> },
         screen(ROUTE_PATHS.board.publication, t('screens.publication')),
         { path: ROUTE_PATHS.board.rules, element: <RulesPage /> },
         { path: ROUTE_PATHS.board.ruleDetail, element: <RuleDraftPage /> },

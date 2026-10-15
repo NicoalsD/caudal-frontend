@@ -29,6 +29,7 @@ export const ROUTE_PATHS = {
     tank: '/junta/tanque',
     proposals: '/junta/propuestas',
     proposalDetail: '/junta/propuestas/:id',
+    proposalEdit: '/junta/propuestas/:id/editar',
     publication: '/junta/publicacion',
     rules: '/junta/reglas',
     ruleDetail: '/junta/reglas/:id',
