@@ -20,6 +20,7 @@ import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import { ApproveDialog, RejectDialog } from './ProposalDecisionDialogs';
 import { hoursText } from './hoursText';
+import { unservedReasonText } from './unservedMessages';
 import { ProposalStatusChip } from './ProposalStatusChip';
 import styles from './Proposals.module.css';
 import { useApproveProposal, useProposal, useRejectProposal } from './proposalQueries';
@@ -82,6 +83,25 @@ export function ProposalDetailPage(): JSX.Element {
         reasonMin={constraints.data.reason?.min ?? 0}
         reasonMax={constraints.data.reason?.max ?? 0}
       />
+      <section className={cn(styles.section)} aria-labelledby="proposal-unserved-title">
+        <h2 id="proposal-unserved-title" className={cn(styles.heading)}>
+          {t('proposals.unserved.title')}
+        </h2>
+        {proposal.data.unservedSectors.length === 0 ? (
+          <p>{t('proposals.unserved.empty')}</p>
+        ) : (
+          <ul className={cn(styles.list)}>
+            {proposal.data.unservedSectors.map((sector) => (
+              <li key={sector.sectorId} className={cn(styles.item)}>
+                <p className={cn(styles.heading)}>
+                  {nameBySector.get(sector.sectorId) ?? t('proposals.unknownSector')}
+                </p>
+                <p>{unservedReasonText(sector.reason)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <section className={cn(styles.section)} aria-labelledby="proposal-shifts-title">
         <h2 id="proposal-shifts-title" className={cn(styles.heading)}>
           {t('proposals.shiftsTitle')}

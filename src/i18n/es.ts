@@ -595,6 +595,15 @@ export const strings = {
     originModified: 'Cambiado por la Junta',
     originAdded: 'Agregado por la Junta',
     bandName: { HIGH: 'alta', LOW: 'baja', CRITICAL: 'crítica' },
+    unserved: {
+      title: 'Sectores sin turno hoy',
+      empty: 'Todos los sectores incluidos tienen turno hoy.',
+      noBudget:
+        'No alcanza el agua disponible. El agua se usó en los sectores anteriores de la lista.',
+      smallShare: 'La parte de agua que les tocó es muy pequeña para un turno.',
+      notIncluded: 'El sector no está incluido en las reglas de hoy.',
+      unknown: 'Hoy no tiene turno. Revisa la explicación con la Junta.',
+    },
     editor: {
       title: 'Modificar propuesta',
       readOnly: 'Esta propuesta ya no se puede modificar.',

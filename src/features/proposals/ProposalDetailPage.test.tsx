@@ -5,11 +5,13 @@ import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { PERMISSIONS_BY_ROLE } from '../../test/factories/auth';
 import { buildProposal, PROPOSAL_ID_TODAY } from '../../test/factories/proposals';
+import { SECTOR_LOW_ID } from '../../test/factories/rules';
 import { buildSessionUser } from '../../test/factories/session';
 import { createProposalsBackend } from '../../test/msw/proposalsBackend';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
 
+const UNSERVED_ROWS = 2;
 const board = () =>
   buildSessionUser({ role: 'BOARD_MEMBER', permissions: [...PERMISSIONS_BY_ROLE.BOARD_MEMBER] });
 const detailPath = (id: string) => ROUTE_PATHS.board.proposalDetail.replace(':id', id);
@@ -64,5 +66,28 @@ describe('ProposalDetailPage (S13 detail, explanations)', () => {
     renderApp(detailPath(PROPOSAL_ID_TODAY), { user: board() });
 
     expect(await screen.findByRole('button', { name: t('common.retry') })).toBeInTheDocument();
+  });
+
+  it('lists the sectors without a shift today, with the reason in plain words', async () => {
+    server.use(
+      ...createProposalsBackend([
+        buildProposal({
+          unserved_sectors: [
+            { sector_id: SECTOR_LOW_ID, reason: 'NO_BUDGET' },
+            { sector_id: SECTOR_LOW_ID, reason: 'CODIGO_NUEVO' },
+          ],
+        }),
+      ]).handlers,
+    );
+    renderApp(detailPath(PROPOSAL_ID_TODAY), { user: board() });
+
+    const section = await screen.findByRole('region', { name: t('proposals.unserved.title') });
+    expect(
+      within(section).getAllByText(
+        'No alcanza el agua disponible. El agua se usó en los sectores anteriores de la lista.',
+      ),
+    ).toHaveLength(1);
+    expect(within(section).getAllByText('Sector Bajo')).toHaveLength(UNSERVED_ROWS);
+    expect(within(section).getByText(t('proposals.unserved.unknown'))).toBeInTheDocument();
   });
 });
