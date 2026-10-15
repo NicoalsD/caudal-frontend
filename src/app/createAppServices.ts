@@ -21,6 +21,15 @@ import { IndexedSessionHintRepository } from '../services/offline/IndexedSession
 import { IndexedOutboxRepository } from '../services/offline/IndexedOutboxRepository';
 import { CryptoIdGenerator } from '../services/ids/CryptoIdGenerator';
 import { CommandQueue } from '../core/commands/CommandQueue';
+import type { OutboxOwner } from '../core/commands/OutboxRecord';
+import { ExponentialBackoff } from '../core/policy/Backoff';
+import {
+  FLUSH_INTERVAL_MS,
+  INITIAL_RETRY_DELAY_MS,
+  MAX_RETRY_DELAY_MS,
+  RETRY_JITTER_RATIO,
+} from '../core/policy/clientPolicy';
+import { SyncTrigger } from '../state/SyncTrigger';
 import { ReferenceFallback } from '../core/cache/ReferenceFallback';
 import { ConnectivityMonitor } from '../state/ConnectivityMonitor';
 import { SyncQueueStore } from '../state/SyncQueueStore';
@@ -105,15 +114,36 @@ export function createAppServices(
   const hintsReady = hintStore.load().catch((error: unknown) => {
     logger.warn('hints.load_failed', { error: String(error) });
   });
-  const outbox = new CommandQueue(new IndexedOutboxRepository(OfflineDatabase.shared), clock);
+  const ids = new CryptoIdGenerator();
+  const backoff = new ExponentialBackoff(
+    INITIAL_RETRY_DELAY_MS,
+    MAX_RETRY_DELAY_MS,
+    RETRY_JITTER_RATIO,
+    () => Math.random(),
+  );
+  const outbox = new CommandQueue(
+    new IndexedOutboxRepository(OfflineDatabase.shared),
+    clock,
+    backoff,
+  );
+  // The queue belongs to whoever is signed in: nothing is sent or shown for anybody else.
+  const currentOwner = (): OutboxOwner | null => {
+    const state = sessionStore.getSnapshot();
+    return state.status === 'authenticated'
+      ? { userId: state.user.userId, aqueductId: state.user.aqueductId }
+      : null;
+  };
+  const sync = new OutboxSync(outbox, api.readings, ids, clock, currentOwner);
+  const connectivity = new ConnectivityMonitor(new BrowserConnectivitySource());
   const offline: OfflineServices = {
     clock,
-    ids: new CryptoIdGenerator(),
+    ids,
     outbox,
-    sync: new OutboxSync(outbox, api.readings),
+    sync,
     reference: new ReferenceFallback(new IndexedReferenceStore(OfflineDatabase.shared), clock),
-    connectivity: new ConnectivityMonitor(new BrowserConnectivitySource()),
+    connectivity,
     syncQueue: new SyncQueueStore(outbox),
+    syncTrigger: new SyncTrigger(sync, connectivity, scheduler, FLUSH_INTERVAL_MS),
   };
   return {
     api,

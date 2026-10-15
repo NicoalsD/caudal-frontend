@@ -7,6 +7,7 @@ import type { ReferenceFallback } from '../../core/cache/ReferenceFallback';
 import type { OutboxSync } from '../OutboxSync';
 import type { ConnectivityMonitor } from '../ConnectivityMonitor';
 import type { SyncQueueStore } from '../SyncQueueStore';
+import type { SyncTrigger } from '../SyncTrigger';
 
 /** What the offline features need: the queue, its sender, the clock and the client ids. */
 export interface OfflineServices {
@@ -20,6 +21,8 @@ export interface OfflineServices {
   readonly connectivity: ConnectivityMonitor;
   /** The queue of the signed-in owner, observable for the status bar. */
   readonly syncQueue: SyncQueueStore;
+  /** Decides when the queue is tried: on reconnect and on an interval. */
+  readonly syncTrigger: SyncTrigger;
 }
 
 export const OfflineContext = createContext<OfflineServices | null>(null);

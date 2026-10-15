@@ -8,6 +8,9 @@ import type { SubmitReadingPayload } from '../core/commands/SubmitReadingCommand
 import { FakeClock } from '../test/fakes/FakeClock';
 import { SyncQueueStore } from './SyncQueueStore';
 
+import type { BackoffPolicy } from '../core/policy/Backoff';
+
+const NO_DELAY: BackoffPolicy = { delayFor: () => 0 };
 const OWNER: OutboxOwner = { userId: 'u-1', aqueductId: 'a-1' };
 const PAYLOAD: SubmitReadingPayload = {
   tankId: 't-1',
@@ -19,7 +22,7 @@ const PAYLOAD: SubmitReadingPayload = {
 };
 
 function setup() {
-  const queue = new CommandQueue(new InMemoryOutboxRepository(), new FakeClock(0));
+  const queue = new CommandQueue(new InMemoryOutboxRepository(), new FakeClock(0), NO_DELAY);
   const store = new SyncQueueStore(queue);
   return { queue, store };
 }

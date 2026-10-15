@@ -7,9 +7,13 @@ import { SubmitReadingCommand } from './SubmitReadingCommand';
 import type { SubmitReadingPayload } from './SubmitReadingCommand';
 import type { OutboxOwner } from './OutboxRecord';
 
+import type { BackoffPolicy } from '../policy/Backoff';
+
+const NO_DELAY: BackoffPolicy = { delayFor: () => 0 };
 const OWNER: OutboxOwner = { userId: 'u-1', aqueductId: 'a-1' };
 const OTHER_OWNER: OutboxOwner = { userId: 'u-2', aqueductId: 'a-1' };
 const CHANGES_AFTER_ENQUEUE_AND_SEND = 2;
+const RETRY_STEP_MS = 1_000;
 const START_MS = Date.parse('2026-10-14T13:00:00Z');
 
 const PAYLOAD: SubmitReadingPayload = {
@@ -24,7 +28,7 @@ const PAYLOAD: SubmitReadingPayload = {
 function setup() {
   const repository = new InMemoryOutboxRepository();
   const clock = new FakeClock(START_MS);
-  return { repository, clock, queue: new CommandQueue(repository, clock) };
+  return { repository, clock, queue: new CommandQueue(repository, clock, NO_DELAY) };
 }
 
 describe('CommandQueue', () => {
@@ -119,5 +123,30 @@ describe('CommandQueue', () => {
     unsubscribe();
     await queue.settle('c-1', { type: 'SAVED' });
     expect(changes).toBe(CHANGES_AFTER_ENQUEUE_AND_SEND);
+  });
+
+  it('schedules a retry with the backoff of the attempt', async () => {
+    const repository = new InMemoryOutboxRepository();
+    const clock = new FakeClock(START_MS);
+    const queue = new CommandQueue(repository, clock, {
+      delayFor: (attempt) => attempt * RETRY_STEP_MS,
+    });
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.settle('c-1', { type: 'RETRY', code: 'NETWORK' });
+
+    expect(await queue.pendingFor(OWNER)).toEqual([
+      expect.objectContaining({ attempts: 1, nextAttemptAtMs: START_MS + RETRY_STEP_MS }),
+    ]);
+  });
+
+  it('puts back an item the batch did not answer, without counting an attempt', async () => {
+    const { queue } = setup();
+    await queue.enqueue(new SubmitReadingCommand('c-1', PAYLOAD), OWNER, null);
+    await queue.markSending('c-1');
+    await queue.settle('c-1', { type: 'UNANSWERED' });
+
+    expect(await queue.pendingFor(OWNER)).toEqual([
+      expect.objectContaining({ status: 'PENDING', attempts: 0 }),
+    ]);
   });
 });

@@ -62,7 +62,7 @@ export function useSaveReading(): UseMutationResult<SavedReading, Error, SaveRea
       await offline.outbox.enqueue(command, owner, draft.ruleSetVersionId);
       const sendingNow = offline.connectivity.isOnline();
       if (sendingNow) {
-        void offline.sync.flush(owner);
+        void offline.sync.flush();
       }
       return { clientId, sendingNow };
     },

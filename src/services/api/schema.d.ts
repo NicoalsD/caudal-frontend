@@ -311,6 +311,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/readings/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sincroniza la cola offline de lecturas
+         * @description Autenticado, permiso READING_CREATE. API.md sección 7.2. Cada lectura se evalúa por separado; un error de una no cancela el lote. Reenviar el mismo lote y las mismas lecturas responde idempotent_replay.
+         */
+        post: operations["submitReadingBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -619,6 +639,48 @@ export interface components {
         /** @description Lista de válvulas. La forma exacta (items) se confirma con el OpenAPI del backend. */
         ValveList: {
             items: components["schemas"]["Valve"][];
+        };
+        ReadingBatchItem: {
+            /**
+             * Format: uuid
+             * @description UUID del cliente: clave de idempotencia de la lectura.
+             */
+            id: string;
+            /** Format: uuid */
+            tank_id: string;
+            gauge_value: number;
+            water_appearance_code: string;
+            damage_noticed: boolean;
+            note?: string;
+            /** Format: date-time */
+            observed_at: string;
+        };
+        ReadingBatchRequest: {
+            /** Format: uuid */
+            sync_batch_id: string;
+            readings: components["schemas"]["ReadingBatchItem"][];
+        };
+        ReadingBatchResult: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "ACCEPTED" | "FLAGGED" | "REPLAYED" | "REJECTED";
+            error?: {
+                code: string;
+                message: string;
+                details?: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        ReadingBatchResponse: {
+            /** Format: uuid */
+            sync_batch_id: string;
+            items_received: number;
+            items_accepted: number;
+            items_rejected: number;
+            idempotent_replay: boolean;
+            results: components["schemas"]["ReadingBatchResult"][];
         };
     };
     responses: never;
@@ -1226,6 +1288,57 @@ export interface operations {
             };
             /** @description El sector no existe (NOT_FOUND). */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    submitReadingBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadingBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Resultado por lectura, en el orden del envío. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingBatchResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR: lista vacía, más de 100 lecturas o ids repetidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT con details.reason SYNC_BATCH_REUSED: sync_batch_id usado con otro contenido. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE: cuerpo mayor de 64 KiB. */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,3 +1,4 @@
+import type { BackoffPolicy } from '../policy/Backoff';
 import type { Clock } from '../time/Clock';
 import type { Command } from './Command';
 import type { OutboxOwner, OutboxRecord, OutboxStatus } from './OutboxRecord';
@@ -13,7 +14,9 @@ const UNSENT_STATUSES: readonly OutboxStatus[] = ['PENDING', 'SENDING'];
 export type SubmitOutcome =
   | { readonly type: 'SAVED' }
   | { readonly type: 'REJECTED'; readonly code: string }
-  | { readonly type: 'RETRY'; readonly code: string };
+  | { readonly type: 'RETRY'; readonly code: string }
+  /** The server answered the batch but not this item: it goes back as it was, not an attempt. */
+  | { readonly type: 'UNANSWERED' };
 
 /**
  * The offline queue (Command pattern, P13). It only stores and settles commands; sending them is
@@ -25,6 +28,7 @@ export class CommandQueue {
   constructor(
     private readonly repository: OutboxRepository,
     private readonly clock: Clock,
+    private readonly backoff: BackoffPolicy,
   ) {}
 
   /** Observer: `listener` runs after every change of the queue. Returns the unsubscribe function. */
@@ -100,13 +104,21 @@ export class CommandQueue {
       }));
       return;
     }
-    await this.update(clientId, (record) => ({
-      ...record,
-      status: 'PENDING',
-      attempts: record.attempts + 1,
-      lastErrorCode: outcome.code,
-      lastErrorAtMs: nowMs,
-    }));
+    if (outcome.type === 'UNANSWERED') {
+      await this.update(clientId, (record) => ({ ...record, status: 'PENDING' }));
+      return;
+    }
+    await this.update(clientId, (record) => {
+      const attempts = record.attempts + 1;
+      return {
+        ...record,
+        status: 'PENDING',
+        attempts,
+        nextAttemptAtMs: nowMs + this.backoff.delayFor(attempts),
+        lastErrorCode: outcome.code,
+        lastErrorAtMs: nowMs,
+      };
+    });
   }
 
   private async update(

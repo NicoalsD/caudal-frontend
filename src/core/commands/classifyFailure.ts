@@ -18,16 +18,21 @@ export const LOCAL_CORRUPT_CODE = 'LOCAL_CORRUPT';
 /** Code used when there was no answer at all. */
 export const NETWORK_CODE = 'NETWORK';
 
+/** A refusal code of the API: a validation code needs the person, any other code is retried. */
+export function outcomeForCode(code: string): SubmitOutcome {
+  if (REJECTION_CODES.has(code)) {
+    return { type: 'REJECTED', code };
+  }
+  return { type: 'RETRY', code };
+}
+
 /**
  * Maps a failed send to the queue outcome (offline-sync.md section 5). A refusal with a known code
  * needs the person; anything else (no answer, 5xx, unknown codes) is sent again later.
  */
 export function classifyFailure(error: unknown): SubmitOutcome {
-  if (error instanceof DomainError && REJECTION_CODES.has(error.code)) {
-    return { type: 'REJECTED', code: error.code };
-  }
   if (error instanceof DomainError) {
-    return { type: 'RETRY', code: error.code };
+    return outcomeForCode(error.code);
   }
   if (error instanceof NetworkError) {
     return { type: 'RETRY', code: NETWORK_CODE };

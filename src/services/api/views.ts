@@ -1,3 +1,4 @@
+import type { BatchItemAnswer } from '../../core/commands/batchOutcome';
 import type {
   Gauge,
   OperatingWindow,
@@ -153,6 +154,20 @@ export interface ReadingInput {
   /** Empty when there is no note. */
   readonly note: string;
   readonly observedAt: Date;
+}
+
+/** A batch of queued readings sent together (POST /readings/batch, API.md 7.2). */
+export interface ReadingBatchInput {
+  /** Fresh client UUID for each send attempt: a changed batch never reuses an id. */
+  readonly syncBatchId: string;
+  readonly readings: readonly ReadingInput[];
+}
+
+/** The server's answer to a batch: one answer per reading, in the order it was sent. */
+export interface ReadingBatchResultView {
+  readonly syncBatchId: string;
+  readonly idempotentReplay: boolean;
+  readonly answers: readonly BatchItemAnswer[];
 }
 
 /** The server's answer to a reading: what it stored and what it noticed. */
