@@ -9,11 +9,13 @@ import { expect, expectNoSeriousViolations, test } from './support/fixtures';
 import { signIn } from './support/session';
 
 test.describe('Accesibilidad (axe, WCAG 2.1 AA)', () => {
-  test('pantallas públicas y de acceso', async ({ page }) => {
+  test('portada', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expectNoSeriousViolations(page);
+  });
 
+  test('horario público', async ({ page }) => {
     await page.goto(`/a/${PUBLIC_SLUG}`);
     await expect(
       page.getByRole('heading', {

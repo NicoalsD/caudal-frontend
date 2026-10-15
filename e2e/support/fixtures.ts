@@ -55,6 +55,8 @@ export const test = base.extend<Fixtures>({
         }
       });
       await use(mock);
+      // Requests the service worker still has in flight must not outlive the test.
+      await context.unrouteAll({ behavior: 'ignoreErrors' });
       expect(violations, 'La CSP de vercel.json bloquea recursos de la app').toEqual([]);
     },
     { auto: true },

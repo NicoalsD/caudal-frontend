@@ -21,6 +21,9 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   use: {
     baseURL: APP_ORIGIN,
+    // A service worker that controls the page takes its requests out of page.route, so the API
+    // mocks stop answering. The PWA itself is checked by the build and by hand (Version-1.0.0.md).
+    serviceWorkers: 'block',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
