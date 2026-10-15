@@ -9,6 +9,8 @@ import type { OfflineDatabase } from './OfflineDatabase';
  */
 export class IndexedSessionHintRepository implements SessionHintRepository {
   private readonly mirror = new Map<string, SessionHint>();
+  /** Counts the writes: a load that finishes after one of them must not overwrite it. */
+  private writes = 0;
 
   constructor(
     private readonly db: OfflineDatabase,
@@ -17,7 +19,11 @@ export class IndexedSessionHintRepository implements SessionHintRepository {
 
   /** Reads the stored hints into the mirror. Call once at boot, before the session restores. */
   async load(): Promise<void> {
+    const writesBefore = this.writes;
     const rows = await this.db.sessionHints.toArray();
+    if (this.writes !== writesBefore) {
+      return;
+    }
     this.mirror.clear();
     for (const row of rows) {
       const hint = toStoredHint(row);
@@ -30,17 +36,20 @@ export class IndexedSessionHintRepository implements SessionHintRepository {
   }
 
   put(hint: SessionHint): void {
+    this.writes += 1;
     const stored = toStoredHint(hint);
     this.mirror.set(stored.aqueductId, stored);
     this.persist(() => this.db.sessionHints.put(stored));
   }
 
   remove(aqueductId: string): void {
+    this.writes += 1;
     this.mirror.delete(aqueductId);
     this.persist(() => this.db.sessionHints.delete(aqueductId));
   }
 
   clear(): void {
+    this.writes += 1;
     this.mirror.clear();
     this.persist(() => this.db.sessionHints.clear());
   }

@@ -71,6 +71,17 @@ describe('IndexedSessionHintRepository', () => {
     expect(JSON.stringify(row)).not.toContain('eyJhbGciOi');
   });
 
+  it('keeps a write made while the stored hints are still loading', async () => {
+    const db = freshDatabase();
+    const repository = new IndexedSessionHintRepository(db);
+    const loading = repository.load();
+    repository.clear();
+
+    await loading;
+
+    expect(repository.get('a-1')).toBeNull();
+  });
+
   it('reports a failed write without throwing into the caller', async () => {
     const db = freshDatabase();
     const errors: unknown[] = [];
