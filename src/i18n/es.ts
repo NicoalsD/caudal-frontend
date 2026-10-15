@@ -590,6 +590,17 @@ export const strings = {
     trendDown: 'Viene bajando',
     trendStable: 'Estable',
     trendUp: 'Está subiendo',
+    trendLabel: 'Tendencia',
+    slopePerDay: '{value} m por día',
+    levelLabel: 'Último nivel',
+    levelValue: '{value} m',
+    takenAgo: 'Tomado hace {hours} h',
+    observedAt: 'Leído el {date}',
+    tankPicker: 'Tanque',
+    cardTitle: 'Tanque {name}',
+    bandLabel: 'Banda',
+    bandHours: '{hours} h de servicio al día',
+    bandHoursUnknown: 'Horas de servicio no disponibles',
   },
   imports: {
     intro:

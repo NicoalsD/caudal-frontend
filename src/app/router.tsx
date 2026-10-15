@@ -6,6 +6,7 @@ import { NetworkPage } from '../features/admin';
 import { ImportPage } from '../features/imports';
 import { OperatorHomePage } from '../features/home/OperatorHomePage';
 import { PendingReadingsPage, ReadingPage } from '../features/readings';
+import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
 import { RuleDraftPage, RulesPage } from '../features/rules';
@@ -80,7 +81,7 @@ const boardRoutes: RouteObject = {
     {
       element: <BoardLayout />,
       children: [
-        screen(ROUTE_PATHS.board.tank, t('screens.tankStatus')),
+        { path: ROUTE_PATHS.board.tank, element: <TankStatusPage /> },
         screen(ROUTE_PATHS.board.proposals, t('screens.proposals')),
         screen(ROUTE_PATHS.board.proposalDetail, t('screens.proposalDetail')),
         screen(ROUTE_PATHS.board.publication, t('screens.publication')),
@@ -131,7 +132,7 @@ const sharedRoutes: RouteObject = {
   children: [
     {
       element: <SharedLayout />,
-      children: [screen(ROUTE_PATHS.tank, t('screens.tankStatus'))],
+      children: [{ path: ROUTE_PATHS.tank, element: <TankStatusPage /> }],
     },
   ],
 };
