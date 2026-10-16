@@ -79,4 +79,13 @@ describe('FlowShowcase', () => {
 
     expect(playToggle()).toBeInTheDocument();
   });
+
+  it('shows the next step at once when the tour is resumed', async () => {
+    const user = renderShowcase();
+
+    await user.click(tab(PROPOSAL_TAB));
+    await user.click(screen.getByRole('button', { name: copy.play }));
+
+    expect(tab(copy.steps.decision.tab)).toHaveAttribute('aria-selected', 'true');
+  });
 });
