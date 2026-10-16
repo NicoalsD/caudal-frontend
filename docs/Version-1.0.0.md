@@ -118,8 +118,10 @@ Cabeceras, CSP y secretos en detalle: `.agents/deployment.md`.
 
 | Servicio | Plataforma | Identificador | URL |
 |----------|------------|---------------|-----|
-| Frontend | Vercel | Proyecto `caudal-frontend`, equipo `nicolas-6e72` | https://caudal-frontend-nicolas-6e72.vercel.app |
+| Frontend | Vercel | Proyecto `caudal-frontend`, equipo `nicolas-6e72` | https://caudal-frontend.vercel.app |
 | API | Render | Servicio `caudal-api`, rama `develop`, autodeploy apagado, plan free | https://caudal-api-7crk.onrender.com/api/v1 |
+
+El alias `caudal-frontend-nicolas-6e72.vercel.app` y las URL de cada despliegue están detrás de la protección de Vercel; la URL pública es `caudal-frontend.vercel.app` y ese es el origen que va en `CORS_ALLOWED_ORIGINS`.
 
 En el plan free de Render, la primera petición tras un periodo de inactividad tarda cerca de un minuto. Si la primera carga es lenta, es el arranque de la API y no un fallo del frontend.
 
