@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 import { strings } from '../../i18n/es';
 import { cn } from '../../ui/styles/cn';
 import { DEMO_FORECAST } from './demo';
-import { SimulatedTag } from './DemoScreens';
+import { SimulatedTag } from './Frames';
 import styles from './ForecastFigure.module.css';
 import { useReveal } from './useReveal';
 

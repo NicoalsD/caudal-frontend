@@ -36,6 +36,9 @@
   --color-border-subtle: #d9d0bc;
   --color-focus: #1d5a6e;
 
+  /* Phone bezel of the landing frames: dark glass in both themes. */
+  --color-bezel: #121a1d;
+
   /* Typography */
   --font-family-base:
     'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', 'Segoe UI', system-ui, Roboto,
@@ -101,7 +104,7 @@
   --device-bezel: 0.625rem;
   --duration-reveal: 900ms;
   --duration-fill: 2200ms;
-  --duration-step: 7000ms;
+  --duration-step: 4000ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -134,6 +137,8 @@
     --color-border-strong: #8fa3a8;
     --color-border-subtle: #2f4249;
     --color-focus: #7fc0d3;
+
+    --color-bezel: #121a1d;
   }
 }
 
@@ -164,4 +169,6 @@
   --color-border-strong: #8fa3a8;
   --color-border-subtle: #2f4249;
   --color-focus: #7fc0d3;
+
+  --color-bezel: #121a1d;
 }
