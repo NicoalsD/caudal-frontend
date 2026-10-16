@@ -35,7 +35,7 @@ interface LoginFormProps {
 
 /**
  * Sign-in form (screen S01). The limits come from /meta/constraints through `schema`. The password
- * is never kept: it is cleared after every attempt that reached the server.
+ * is never kept: it is cleared after every failed attempt, and the form unmounts on success.
  */
 export function LoginForm({ schema, limits, onSubmit }: LoginFormProps): JSX.Element {
   const [failure, setFailure] = useState<string | null>(null);
@@ -64,7 +64,8 @@ export function LoginForm({ schema, limits, onSubmit }: LoginFormProps): JSX.Ele
       await onSubmit(credentials);
     } catch (error) {
       setFailure(loginErrorMessage(error));
-    } finally {
+      // Only after a failure: on success the form unmounts with the typed values, which is the
+      // signal password managers read to offer saving the credentials.
       resetField(FIELD.password, { defaultValue: '' });
       setAttempt((count) => count + 1);
     }

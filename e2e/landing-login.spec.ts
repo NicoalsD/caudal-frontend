@@ -33,6 +33,42 @@ test.describe('Entrada a la aplicación', () => {
     await expect(page).toHaveURL(/\/operador\/inicio$/);
   });
 
+  test('el login se dibuja una sola vez, así no se pierde lo que el navegador autocompletó', async ({
+    page,
+  }) => {
+    // Counts every password field added to the page, from before the app's first render.
+    await page.addInitScript(() => {
+      const counter = { mounts: 0 };
+      Object.assign(window, { loginMounts: counter });
+      new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node instanceof Element && node.querySelector('input[type=password]') !== null) {
+              counter.mounts += 1;
+            }
+          }
+        }
+      }).observe(document, { subtree: true, childList: true });
+    });
+    const refreshed = page.waitForResponse((response) => response.url().endsWith('/auth/refresh'));
+    await page.goto('/login');
+    await page.getByLabel(strings.auth.username, { exact: true }).fill(OPERATOR_USERNAME);
+    await page.getByLabel(strings.auth.password, { exact: true }).fill(SEED_PASSWORD);
+    await refreshed;
+
+    await expect(page.getByLabel(strings.auth.username, { exact: true })).toHaveValue(
+      OPERATOR_USERNAME,
+    );
+    await expect(page.getByLabel(strings.auth.password, { exact: true })).toHaveValue(
+      SEED_PASSWORD,
+    );
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { loginMounts: { mounts: number } }).loginMounts.mounts,
+      ),
+    ).toBe(1);
+  });
+
   test('la Junta entra a su tablero de tanque', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel(strings.auth.username, { exact: true }).fill(BOARD_ADMIN_USERNAME);
