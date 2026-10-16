@@ -16,6 +16,7 @@ import { statusLabel } from './ruleLabels';
 import { useRuleVersionDetails, useRuleVersions, useValveCodes } from './ruleQueries';
 import { changeLabel, changeValueText } from './ruleHistoryText';
 import type { ChangeNames } from './ruleHistoryText';
+import { TableScroll } from '../../ui/primitives/TableScroll';
 
 /** Versions that were in force: a draft or a discarded version is not part of the history. */
 function isHistoryStatus(status: RuleSetSummaryView['status']): boolean {
@@ -206,7 +207,7 @@ function Comparison({ before, after, hasBefore, failed, names }: ComparisonProps
     return <p>{t('ruleHistory.noChanges')}</p>;
   }
   return (
-    <div className={cn(styles.tableWrap)}>
+    <TableScroll label={t('ruleHistory.diffTitle')} className={cn(styles.tableWrap)}>
       <table className={cn(styles.table)}>
         <caption>{t('ruleHistory.diffTitle')}</caption>
         <thead>
@@ -226,6 +227,6 @@ function Comparison({ before, after, hasBefore, failed, names }: ComparisonProps
           ))}
         </tbody>
       </table>
-    </div>
+    </TableScroll>
   );
 }

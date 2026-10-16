@@ -1,19 +1,26 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
-import { QUERY_RETRY_COUNT } from '../../core/policy/clientPolicy';
+import { queryRetryDelayMs, shouldRetryQuery } from '../../core/policy/queryRetry';
 import type { CaudalApi } from '../../services/api/CaudalApi';
 import { queryKeys } from '../../state/queryKeys';
 
 /**
- * Queries retry once; mutations never (the offline queue retries them). Architecture 6.1.
- * `onError` sees every failure of any query or mutation, for errors that matter app-wide.
+ * Queries retry once, never after a 4xx, and for a few minutes while the server is waking up and
+ * the browser is online (core/policy/queryRetry). Mutations never retry: the offline queue does.
+ * Architecture 6.1. `onError` sees every failure of any query or mutation, for app-wide errors.
  */
-export function createQueryClient(onError?: (error: unknown) => void): QueryClient {
+export function createQueryClient(
+  onError?: (error: unknown) => void,
+  isOnline: () => boolean = () => true,
+): QueryClient {
   return new QueryClient({
     queryCache: new QueryCache({ onError: (error) => onError?.(error) }),
     mutationCache: new MutationCache({ onError: (error) => onError?.(error) }),
     defaultOptions: {
-      queries: { retry: QUERY_RETRY_COUNT },
+      queries: {
+        retry: (failureCount, error) => shouldRetryQuery(failureCount, error, isOnline()),
+        retryDelay: queryRetryDelayMs,
+      },
       mutations: { retry: false },
     },
   });

@@ -30,6 +30,8 @@ export function RoleLayout({ navItems }: RoleLayoutProps): JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
+      {/* Screens behind a session are not for search engines (robots.txt says the same). */}
+      <meta name="robots" content="noindex" />
       <a className={cn(styles.skipLink)} href={`#${MAIN_CONTENT_ID}`}>
         {t('app.skipToContent')}
       </a>

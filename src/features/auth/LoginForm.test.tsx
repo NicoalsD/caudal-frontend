@@ -90,7 +90,20 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({ username: 'junta.uno', password: PASSWORD });
     });
-    expect(passwordField()).toHaveValue('');
+  });
+
+  it('leaves the fields as they are on success, so a password manager can offer to save them', async () => {
+    const onSubmit = vi.fn(() => Promise.resolve());
+    const user = renderForm(onSubmit);
+
+    await user.type(usernameField(), 'junta.uno');
+    await user.type(passwordField(), PASSWORD);
+    await user.click(submitButton());
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledOnce();
+    });
+    expect(passwordField()).toHaveValue(PASSWORD);
   });
 
   it('shows the generic text for any 401, clears and focuses the password', async () => {

@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 import { RouterProvider } from 'react-router/dom';
 import type { createBrowserRouter } from 'react-router';
 
+import { ServerWakeNotice } from '../features/connection';
 import type { CaudalApi } from '../services/api/CaudalApi';
 import type { SessionController } from '../state/SessionController';
 import type { OfflineServices } from '../state/hooks/offlineContext';
@@ -40,6 +41,7 @@ export function App({
             <RouterProvider router={router} />
           ) : (
             <OfflineProvider services={offline}>
+              <ServerWakeNotice />
               <RouterProvider router={router} />
             </OfflineProvider>
           )}

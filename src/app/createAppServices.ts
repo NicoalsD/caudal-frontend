@@ -10,11 +10,13 @@ import { BaseFetchHttpClient } from '../services/http/BaseFetchHttpClient';
 import { createHttpClient } from '../services/http/createHttpClient';
 import { ConsoleLogger, NoopLogger } from '../services/http/Logger';
 import { AuthApi } from '../services/api/endpoints/AuthApi';
+import { ReachabilityHttpClient } from '../services/http/ReachabilityHttpClient';
 import { SessionRefreshProxy } from '../services/session/SessionRefreshProxy';
 import { TokenStore } from '../services/session/TokenStore';
 import type { Scheduler } from '../core/time/Scheduler';
 import { TimeoutScheduler } from '../core/time/Scheduler';
 import { SessionController } from '../state/SessionController';
+import { ServerReachability } from '../state/ServerReachability';
 import { SessionStore } from '../state/SessionStore';
 import { OfflineDatabase } from '../services/offline/OfflineDatabase';
 import { IndexedSessionHintRepository } from '../services/offline/IndexedSessionHintRepository';
@@ -80,11 +82,16 @@ export function createAppServices(
     });
   const tokens = new TokenStore();
   // The refresh call goes straight to the transport: it must not pass through AuthHttpClient.
-  const refreshApi = new AuthApi(new BaseFetchHttpClient({ baseUrl }), adapter);
+  const reachability = new ServerReachability();
+  const refreshApi = new AuthApi(
+    new ReachabilityHttpClient(new BaseFetchHttpClient({ baseUrl }), reachability),
+    adapter,
+  );
   const refresher = new SessionRefreshProxy(() => refreshApi.refresh(), tokens, clock);
   const http = createHttpClient({
     baseUrl,
     auth: { tokens, refresher },
+    reachability,
     logger,
     clock,
     random: () => Math.random(),
@@ -95,9 +102,13 @@ export function createAppServices(
   });
   // The query client is needed to build the controller, and the controller reads its errors.
   const errorSink = { handle: (_error: unknown): void => undefined };
-  const queryClient = createQueryClient((error) => {
-    errorSink.handle(error);
-  });
+  const connectivitySource = new BrowserConnectivitySource();
+  const queryClient = createQueryClient(
+    (error) => {
+      errorSink.handle(error);
+    },
+    () => connectivitySource.isOnline(),
+  );
   const referenceStore = new IndexedReferenceStore(OfflineDatabase.shared);
   const session = new SessionController({
     api,
@@ -136,7 +147,7 @@ export function createAppServices(
       : null;
   };
   const sync = new OutboxSync(outbox, api.readings, ids, clock, currentOwner);
-  const connectivity = new ConnectivityMonitor(new BrowserConnectivitySource());
+  const connectivity = new ConnectivityMonitor(connectivitySource);
   const offline: OfflineServices = {
     clock,
     ids,
@@ -146,6 +157,7 @@ export function createAppServices(
     connectivity,
     syncQueue: new SyncQueueStore(outbox),
     syncTrigger: new SyncTrigger(sync, connectivity, scheduler, FLUSH_INTERVAL_MS),
+    reachability,
   };
   return {
     api,

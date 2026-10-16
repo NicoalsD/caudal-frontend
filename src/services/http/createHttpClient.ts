@@ -6,6 +6,8 @@ import { BaseFetchHttpClient } from './BaseFetchHttpClient';
 import type { HttpClient } from './HttpClient';
 import type { Logger } from './Logger';
 import { LoggingHttpClient } from './LoggingHttpClient';
+import { ReachabilityHttpClient } from './ReachabilityHttpClient';
+import type { ReachabilityReporter } from './ReachabilityHttpClient';
 import { RetryHttpClient } from './RetryHttpClient';
 import { ExponentialBackoffRetryPolicy } from './RetryPolicy';
 
@@ -19,14 +21,20 @@ export interface HttpClientDependencies {
     readonly tokens: AccessTokenSource;
     readonly refresher: SessionRefresher;
   };
+  /** Told after every attempt whether the server answered. */
+  readonly reachability?: ReachabilityReporter;
 }
 
 /**
- * Composes the decorators, outermost first: Logging -> Retry -> Auth -> Fetch.
+ * Composes the decorators, outermost first: Logging -> Retry -> Auth -> Reachability -> Fetch.
  * Logging is outermost so it records the final result of a call, not each retry.
  */
 export function createHttpClient(dependencies: HttpClientDependencies): HttpClient {
-  const transport = new BaseFetchHttpClient({ baseUrl: dependencies.baseUrl });
+  const fetchClient = new BaseFetchHttpClient({ baseUrl: dependencies.baseUrl });
+  const transport =
+    dependencies.reachability === undefined
+      ? fetchClient
+      : new ReachabilityHttpClient(fetchClient, dependencies.reachability);
   const withAuth =
     dependencies.auth === undefined
       ? transport

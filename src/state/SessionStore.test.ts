@@ -13,6 +13,20 @@ describe('SessionStore', () => {
     expect(new SessionStore().getSnapshot()).toEqual({ status: 'anonymous' });
   });
 
+  it('ignores a second beginRestore quietly while it is already restoring', () => {
+    const onIgnored = vi.fn();
+    const store = new SessionStore(onIgnored);
+    store.beginRestore();
+    const listener = vi.fn();
+    store.subscribe(listener);
+
+    store.beginRestore();
+
+    expect(store.getSnapshot()).toEqual({ status: 'restoring' });
+    expect(listener).not.toHaveBeenCalled();
+    expect(onIgnored).not.toHaveBeenCalled();
+  });
+
   it('notifies subscribers on every transition', () => {
     const store = new SessionStore();
     const listener = vi.fn();

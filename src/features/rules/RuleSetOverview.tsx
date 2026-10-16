@@ -8,6 +8,7 @@ import { useSectors } from '../../state/hooks/useSectors';
 import { buildSectorRows } from '../../core/rules/sectorOrder';
 import { bandLabel, dayLabel, windowRangeLabel } from './ruleLabels';
 import styles from './Rules.module.css';
+import { TableScroll } from '../../ui/primitives/TableScroll';
 
 interface RuleSetOverviewProps {
   readonly rules: RuleSetView;
@@ -36,7 +37,7 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
             max: level(rules.gauge.max),
           })}
         </p>
-        <div className={cn(styles.tableWrap)}>
+        <TableScroll label={t('rules.bandsCaption')} className={cn(styles.tableWrap)}>
           <table className={cn(styles.table)}>
             <caption>{t('rules.bandsCaption')}</caption>
             <thead>
@@ -62,7 +63,7 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
                 ))}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
         <p className={cn(styles.note)}>{t('rules.upperBandIncludesMax')}</p>
       </section>
 

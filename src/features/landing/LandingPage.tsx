@@ -446,6 +446,7 @@ export function LandingPage(): JSX.Element {
   return (
     <div className={cn(styles.page)}>
       <title>{copy.meta.title}</title>
+      <meta name="description" content={copy.meta.description} />
       <a className={cn(styles.skipLink)} href={`#${MAIN_ID}`}>
         {strings.app.skipToContent}
       </a>

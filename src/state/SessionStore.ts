@@ -35,8 +35,14 @@ export class SessionStore {
     this.dispatch({ type: 'SIGNED_IN', user });
   }
 
-  /** Boot: the refresh cookie is being checked, so guards must wait instead of redirecting. */
+  /**
+   * Boot: the refresh cookie is being checked, so guards must wait instead of redirecting. Calling
+   * it again while restoring does nothing (main.tsx calls it before the first render).
+   */
   beginRestore(): void {
+    if (this.phase.name === 'RESTORING') {
+      return;
+    }
     this.dispatch({ type: 'RESTORE_STARTED' });
   }
 

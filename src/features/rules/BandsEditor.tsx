@@ -15,6 +15,7 @@ import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import styles from './Rules.module.css';
 import { bandLabel } from './ruleLabels';
+import { TableScroll } from '../../ui/primitives/TableScroll';
 
 interface BandsEditorProps {
   readonly gauge: Gauge;
@@ -63,7 +64,7 @@ export function BandsEditor({ gauge }: BandsEditorProps): JSX.Element {
         })}
       </p>
       <p className={cn(styles.note)}>{t('rules.editBandsIntro')}</p>
-      <div className={cn(styles.tableWrap)}>
+      <TableScroll label={t('rules.bandsCaption')} className={cn(styles.tableWrap)}>
         <table className={cn(styles.table)}>
           <caption>{t('rules.bandsCaption')}</caption>
           <thead>
@@ -126,7 +127,7 @@ export function BandsEditor({ gauge }: BandsEditorProps): JSX.Element {
             })}
           </tbody>
         </table>
-      </div>
+      </TableScroll>
       <div aria-live="polite">
         {problems.length === 0 ? null : (
           <div className={cn(styles.problems)}>

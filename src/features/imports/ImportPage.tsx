@@ -27,6 +27,7 @@ import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { sha256Hex } from '../../services/crypto/sha256Hex';
 import styles from './ImportPage.module.css';
+import { TableScroll } from '../../ui/primitives/TableScroll';
 
 const INTEGER_TEXT = /^\d+$/;
 
@@ -162,7 +163,10 @@ export function ImportPage(): JSX.Element {
           <h2 id="import-preview-title">
             {t('imports.preview', { name: preview.fileName, count: String(preview.rows.length) })}
           </h2>
-          <div className={cn(styles.tableWrap)}>
+          <TableScroll
+            label={t('imports.sampleCaption', { count: String(sample.length) })}
+            className={cn(styles.tableWrap)}
+          >
             <table>
               <caption>{t('imports.sampleCaption', { count: String(sample.length) })}</caption>
               <thead>
@@ -184,7 +188,7 @@ export function ImportPage(): JSX.Element {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         </section>
       )}
       <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
