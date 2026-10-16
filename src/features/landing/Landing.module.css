@@ -245,8 +245,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-8) var(--space-4) var(--space-6);
+  padding-top: var(--space-8);
   text-align: center;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: var(--space-4);
 }
 
 .wordmark {
@@ -330,98 +337,153 @@
   }
 }
 
-.devices {
+/*
+ * The land: a real photo of Nariño that opens under the text. Its top fades into the page color,
+ * so the text above never sits on the photo, and the phones stand in front of it with room to
+ * spare above the bottom edge (nothing touches a border).
+ */
+.land {
   position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: calc(-1 * var(--space-6));
+  padding: var(--space-9) var(--space-4) var(--space-8);
+  overflow: hidden;
+}
+
+.landPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 34%);
+  animation: land-in 2400ms var(--ease-out-expo) 300ms both;
+}
+
+@keyframes land-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+/* The photo drifts a little slower than the page while it scrolls away. */
+@supports (animation-timeline: view()) {
+  .landPhoto {
+    animation:
+      land-in 2400ms var(--ease-out-expo) 300ms both,
+      land-drift linear both;
+    animation-timeline: auto, view();
+    animation-range:
+      normal,
+      exit 0% exit 100%;
+  }
+
+  @keyframes land-drift {
+    to {
+      translate: 0 12%;
+    }
+  }
+}
+
+.devices {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2.15fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr) minmax(0, 1fr);
   align-items: end;
-  gap: clamp(var(--space-4), 3vw, var(--space-7));
-  width: min(100%, 68rem);
-  margin-top: var(--space-8);
-  padding-bottom: var(--space-7);
-  perspective: 1800px;
-  text-align: start;
+  gap: clamp(var(--space-3), 3vw, var(--space-7));
+  width: min(100%, 52rem);
+  padding: 0;
+  list-style: none;
 }
 
 .device {
-  position: relative;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
   animation: device-in 1400ms var(--ease-out-expo) both;
 }
 
-.device figcaption {
-  position: absolute;
-  text-align: center;
-  inset-inline: 0;
-  top: calc(100% + var(--space-3));
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-bold);
+.devicePhone {
+  width: 100%;
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-strong),
+    0 2.5rem 4rem -2rem rgb(0 0 0 / 55%);
+  animation: float 6s ease-in-out 2600ms infinite alternate;
 }
 
-.deviceCenter {
+/*
+ * The phones lean and rise on their own properties (rotate, margin), so the captions under them
+ * stay on one baseline and the float animation (translate) never fights the pose.
+ */
+.device[data-device='operator'] {
   animation-delay: 1150ms;
 }
 
-.deviceLeft {
-  --tilt: 18deg;
-  transform-origin: right bottom;
+.device[data-device='board'] {
+  animation-delay: 1000ms;
+}
+
+.device[data-device='family'] {
   animation-delay: 1300ms;
 }
 
-.deviceRight {
-  --tilt: -18deg;
-  transform-origin: left bottom;
-  animation-delay: 1400ms;
+.device[data-device='operator'] .devicePhone {
+  rotate: -3deg;
 }
 
-.deviceLeft > div,
-.deviceRight > div {
-  transform: rotateY(var(--tilt));
+.device[data-device='board'] .devicePhone {
+  margin-bottom: var(--space-6);
+  animation-delay: 3400ms;
+}
+
+.device[data-device='family'] .devicePhone {
+  rotate: 3deg;
+  animation-delay: 4200ms;
 }
 
 @keyframes device-in {
   from {
     opacity: 0;
-    transform: translateY(4rem);
+    translate: 0 4rem;
   }
 }
 
-/* As the page scrolls, the side phones turn to face the visitor. */
-@supports (animation-timeline: view()) {
-  .deviceLeft > div,
-  .deviceRight > div {
-    animation: face-front linear both;
-    animation-timeline: view();
-    animation-range: entry 40% cover 55%;
-  }
-
-  @keyframes face-front {
-    to {
-      transform: rotateY(0deg);
-    }
+@keyframes float {
+  to {
+    translate: 0 -0.6rem;
   }
 }
 
-.levelLine {
-  position: absolute;
-  left: 50%;
-  bottom: var(--space-7);
-  width: 100vw;
-  height: var(--level-line-height);
-  background: var(--color-water-700);
-  transform: translateX(-50%) scaleX(1);
-  animation: line-draw 1600ms var(--ease-out-expo) 900ms both;
-}
-
-@keyframes line-draw {
-  from {
-    transform: translateX(-50%) scaleX(0);
-  }
+/* The caption is a solid chip, so it reads the same over any part of the photo. */
+.deviceCaption {
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-raised);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  box-shadow: 0 0.5rem 1.25rem -0.75rem rgb(0 0 0 / 50%);
 }
 
 .heroTag {
-  margin-top: var(--space-3);
+  margin-top: var(--space-6);
+  font-size: var(--font-size-small);
+}
+
+/* At night the photos dim, so they never outshine the dark page around them. */
+@media (prefers-color-scheme: dark) {
+  .landPhoto,
+  .closingPhoto {
+    filter: brightness(0.62) saturate(0.85);
+  }
 }
 
 /* Sections */
@@ -836,9 +898,29 @@
 /* Closing */
 
 .closing {
+  position: relative;
+  isolation: isolate;
   padding: var(--space-9) var(--space-4);
-  border-top: var(--level-line-height) solid var(--color-water-700);
+  overflow: hidden;
+}
+
+.closingPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The text sits on a solid card: its contrast never depends on the photo behind it. */
+.closingCard {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: var(--space-7) var(--space-5);
   background: var(--color-raised);
+  border-radius: var(--radius-window);
+  box-shadow: 0 2rem 4rem -2rem rgb(0 0 0 / 55%);
 }
 
 .closingTitle {
@@ -910,6 +992,20 @@
   min-height: var(--target-min);
 }
 
+.footerCredits {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+}
+
+.footerCredits h2 {
+  font-size: var(--font-size-small);
+  color: var(--color-text-primary);
+}
+
+.footerCredits a {
+  text-decoration: underline;
+}
+
 .footerRights {
   grid-column: 1 / -1;
   color: var(--color-text-secondary);
@@ -947,21 +1043,40 @@
     padding-top: var(--space-7);
   }
 
+  /* On a phone the three screens fan out: the Board in front, the other two tucked behind. */
+  .land {
+    padding-top: var(--space-8);
+  }
+
   .devices {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--space-5) var(--space-4);
-    padding-bottom: var(--space-7);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 0;
   }
 
-  .deviceCenter {
-    grid-column: 1 / -1;
-    order: -1;
-    margin-bottom: var(--space-7);
+  .device[data-device='operator'] {
+    z-index: 0;
+    margin-right: -22%;
   }
 
-  .deviceLeft,
-  .deviceRight {
-    --tilt: 0deg;
+  .device[data-device='board'] {
+    z-index: 1;
+  }
+
+  .device[data-device='family'] {
+    z-index: 0;
+    margin-left: -22%;
+  }
+
+  .device[data-device='operator'] .devicePhone {
+    rotate: -4deg;
+  }
+
+  .device[data-device='family'] .devicePhone {
+    rotate: 4deg;
+  }
+
+  .deviceCaption {
+    padding-inline: var(--space-3);
   }
 
   .section {

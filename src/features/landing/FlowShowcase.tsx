@@ -1,26 +1,13 @@
 import { useId, useRef, useState } from 'react';
 import type { JSX, KeyboardEvent } from 'react';
-import {
-  ArrowDownRight,
-  CheckCircle2,
-  FileText,
-  Globe,
-  MessageSquareText,
-  Pause,
-  Play,
-} from 'lucide-react';
+import { MessageSquareText, Pause, Play } from 'lucide-react';
 
 import { strings } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { cn } from '../../ui/styles/cn';
-import { DEMO_LEVEL_SHARE } from './demo';
-import {
-  OperatorScreen,
-  ProposalList,
-  ScheduleList,
-  SimulatedTag,
-  shareStyle,
-} from './DemoScreens';
+import { AppScreen } from './AppScreen';
+import type { AppShot } from './AppScreen';
+import { PhoneFrame, SimulatedTag } from './Frames';
 import styles from './FlowShowcase.module.css';
 import { prefersReducedMotion, useInView } from './useReveal';
 
@@ -34,63 +21,31 @@ const NOT_TABBABLE = -1;
 const STEP_ORDER = ['reading', 'status', 'proposal', 'decision', 'publication'] as const;
 type StepKey = (typeof STEP_ORDER)[number];
 
-function StatusStep(): JSX.Element {
-  const step = copy.steps.status;
-  return (
-    <div className={cn(styles.status)}>
-      <div className={cn(styles.tank)} style={shareStyle(DEMO_LEVEL_SHARE)}>
-        <span className={cn(styles.tankWater)} />
-        <span className={cn(styles.tankLine)} />
-      </div>
-      <div className={cn(styles.statusFacts)}>
-        <span className={cn(styles.factLabel)}>{step.level}</span>
-        <span className={cn(styles.factValue)}>
-          {strings.landing.operator.gauge}
-          <small>{strings.landing.operator.unit}</small>
-        </span>
-        <span className={cn(styles.factMeta)}>{step.age}</span>
-        <span className={cn(styles.factTrend)}>
-          <ArrowDownRight aria-hidden="true" />
-          {step.trend}
-        </span>
-        <span className={cn(styles.factCheck)}>
-          <CheckCircle2 aria-hidden="true" />
-          {step.check}
-        </span>
-      </div>
-    </div>
-  );
-}
+/** The real screen each step shows, and what a screen reader hears of it. */
+const STEP_SHOTS: Record<StepKey, AppShot> = {
+  reading: 'operatorReading',
+  status: 'boardTank',
+  proposal: 'boardProposal',
+  decision: 'boardApprove',
+  publication: 'publicSchedule',
+};
 
-function DecisionStep(): JSX.Element {
-  const step = copy.steps.decision;
-  return (
-    <div className={cn(styles.decision)}>
-      <ProposalList compact />
-      <div className={cn(styles.reasonBox)}>
-        <span className={cn(styles.reasonLabel)}>{step.reasonLabel}</span>
-        <p className={cn(styles.reasonText)}>{step.reason}</p>
-      </div>
-      <span className={cn(styles.confirm)}>{step.confirm}</span>
-    </div>
+function StepScreen({ step }: { readonly step: StepKey }): JSX.Element {
+  const phone = (
+    <PhoneFrame className={cn(styles.stagePhone)}>
+      <AppScreen shot={STEP_SHOTS[step]} alt={copy.steps[step].shot} />
+    </PhoneFrame>
   );
-}
-
-function PublicationStep(): JSX.Element {
-  const step = copy.steps.publication;
+  if (step !== 'publication') {
+    return <div className={cn(styles.stageRow)}>{phone}</div>;
+  }
   return (
-    <div className={cn(styles.publication)}>
-      <figure className={cn(styles.output)}>
-        <figcaption>
-          <Globe aria-hidden="true" />
-          {step.page}
-        </figcaption>
-        <ScheduleList />
-      </figure>
-      <figure className={cn(styles.output, styles.whatsapp)}>
+    <div className={cn(styles.stageRow)}>
+      {phone}
+      <figure className={cn(styles.whatsapp)}>
         <figcaption>
           <MessageSquareText aria-hidden="true" />
-          {step.whatsapp}
+          {copy.steps.publication.whatsapp}
         </figcaption>
         <p className={cn(styles.bubble)}>
           {t('landing.flow.steps.publication.message', {
@@ -102,41 +57,8 @@ function PublicationStep(): JSX.Element {
           })}
         </p>
       </figure>
-      <figure className={cn(styles.output, styles.poster)}>
-        <figcaption>
-          <FileText aria-hidden="true" />
-          {step.poster}
-        </figcaption>
-        <div className={cn(styles.sheet)}>
-          <span className={cn(styles.sheetTitle)}>{strings.landing.family.title}</span>
-          <span className={cn(styles.sheetLine)} />
-          <span className={cn(styles.sheetLine)} />
-          <span className={cn(styles.sheetLine)} />
-        </div>
-      </figure>
     </div>
   );
-}
-
-function StepScreen({ step }: { readonly step: StepKey }): JSX.Element {
-  switch (step) {
-    case 'reading':
-      return (
-        <div className={cn(styles.readingStage)}>
-          <div className={cn(styles.readingPhone)}>
-            <OperatorScreen />
-          </div>
-        </div>
-      );
-    case 'status':
-      return <StatusStep />;
-    case 'proposal':
-      return <ProposalList />;
-    case 'decision':
-      return <DecisionStep />;
-    case 'publication':
-      return <PublicationStep />;
-  }
 }
 
 /**
@@ -157,6 +79,14 @@ export function FlowShowcase(): JSX.Element {
     if (next !== undefined) {
       setActive(next);
     }
+  };
+
+  // Resuming shows the next step right away, so the button answers the press at once.
+  const togglePlaying = (): void => {
+    if (!playing) {
+      advance();
+    }
+    setPlaying(!playing);
   };
 
   const choose = (step: StepKey): void => {
@@ -246,7 +176,7 @@ export function FlowShowcase(): JSX.Element {
         <button
           type="button"
           className={cn(styles.playToggle)}
-          onClick={() => setPlaying((value) => !value)}
+          onClick={togglePlaying}
           aria-label={playing ? copy.pause : copy.play}
         >
           {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}

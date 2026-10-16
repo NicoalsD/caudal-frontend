@@ -2,7 +2,7 @@ import { strings } from '../src/i18n/es';
 import { OPERATOR_USERNAME, SEED_PASSWORD } from './support/constants';
 import { setConnection } from './support/api';
 import { expect, test } from './support/fixtures';
-import { signIn } from './support/session';
+import { goToNavLink, signIn } from './support/session';
 
 const HOME = /\/operador\/inicio$/;
 const NEW_READING = /\/operador\/lectura\/nueva$/;
@@ -32,7 +32,7 @@ test.describe('Fontanero', () => {
     await expect(page.getByText(strings.readings.savedOffline)).toBeVisible();
     expect(api.state.batches).toHaveLength(0);
 
-    await page.getByRole('link', { name: strings.nav.pending }).click();
+    await goToNavLink(page, strings.nav.pending);
     await expect(page).toHaveURL(PENDING);
     await expect(page.getByText(`Nivel ${GAUGE_VALUE}`)).toBeVisible();
     await expect(page.getByText(strings.pending.status.pending, { exact: true })).toBeVisible();
