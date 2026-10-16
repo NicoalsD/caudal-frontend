@@ -20,6 +20,7 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "e2e:install": "playwright install chromium",
+    "capture:screens": "playwright test -c playwright.capture.config.ts && python3 -I scripts/screens-to-webp.py",
     "gen:api": "node scripts/gen-api.mjs",
     "gen:api:check": "node scripts/gen-api.mjs --check"
   },

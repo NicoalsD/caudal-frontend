@@ -263,7 +263,7 @@ export default tseslint.config(
   },
   // Playwright tests and config: typed by tsconfig.e2e.json, outside the app's project.
   {
-    files: ['e2e/**/*.ts', 'playwright.config.ts'],
+    files: ['e2e/**/*.ts', 'playwright.config.ts', 'playwright.capture.config.ts'],
     languageOptions: {
       globals: { ...globals.node },
       parserOptions: {
