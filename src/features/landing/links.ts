@@ -21,3 +21,9 @@ export const SECTION_IDS = {
   forecast: 'pronostico',
   project: 'el-proyecto',
 } as const;
+
+/** Source pages of the photos, where their authors and licenses are recorded. */
+export const PHOTO_URLS = {
+  galeras: 'https://commons.wikimedia.org/wiki/File:VolcanGaleras.jpg',
+  cumbal: 'https://commons.wikimedia.org/wiki/File:Vista_de_los_volcanes_Cumbal_y_Chiles.jpg',
+} as const;
