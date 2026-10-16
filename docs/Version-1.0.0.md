@@ -110,16 +110,48 @@ Las pruebas de extremo a extremo no necesitan la API: usan un servidor simulado 
 - Después de instalarla, corta la red y abre CAUDAL: la pantalla del fontanero debe abrir y la lectura debe quedar en la cola.
 - Cuando hay una versión nueva, aparece el aviso "Hay una versión nueva." con el botón "Actualizar". La actualización nunca recarga sola.
 
-## 5. Despliegue en Vercel
+## 5. Despliegue en producción
 
-Ver `.agents/deployment.md`. Resumen:
+Cabeceras, CSP y secretos en detalle: `.agents/deployment.md`.
 
-1. **Proyecto de Vercel:** framework Vite, comando de build `pnpm build`, salida `dist`, Node 24.
-2. **Variable de entorno** `VITE_API_BASE_URL` en Production y Preview: `https://caudal-api-7crk.onrender.com/api/v1`. Un cambio exige un nuevo build.
-3. **Render (API):** agregar el origen de Vercel a `CORS_ALLOWED_ORIGINS`. La cookie de sesión usa `SameSite=None`, así que sin ese origen el refresh falla.
-4. **`vercel.json`:** cabeceras de seguridad y CSP estricta. `connect-src` solo permite la API de Render.
-5. **Secretos de GitHub Actions** para el workflow `.github/workflows/deploy.yml`: `VERCEL_TOKEN`, `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID`. Sin ellos, el job termina en verde con un aviso y no despliega. Los valores de `ORG_ID` y `PROJECT_ID` salen de `.vercel/project.json` tras `vercel link`.
-6. **Publicación:** cada push a `main` ejecuta `vercel pull`, `vercel build --prod` y `vercel deploy --prebuilt --prod`.
+### 5.1 Servicios y URLs
+
+| Servicio | Plataforma | Identificador | URL |
+|----------|------------|---------------|-----|
+| Frontend | Vercel | Proyecto `caudal-frontend`, equipo `nicolas-6e72` | https://caudal-frontend-nicolas-6e72.vercel.app |
+| API | Render | Servicio `caudal-api`, rama `develop`, autodeploy apagado, plan free | https://caudal-api-7crk.onrender.com/api/v1 |
+
+En el plan free de Render, la primera petición tras un periodo de inactividad tarda cerca de un minuto. Si la primera carga es lenta, es el arranque de la API y no un fallo del frontend.
+
+### 5.2 Configuración
+
+- **Proyecto de Vercel:** framework Vite, comando de build `pnpm build`, salida `dist`, Node 24.
+- **`VITE_API_BASE_URL`** en Production y Preview: `https://caudal-api-7crk.onrender.com/api/v1`. Se incrusta en el JavaScript al compilar, así que cambiarla exige redesplegar.
+- **Render (API):** el origen del frontend va en `CORS_ALLOWED_ORIGINS`, sin barra final. La cookie de refresco usa `SameSite=None`, así que sin ese origen el refresh falla.
+- **`vercel.json`:** cabeceras de seguridad y CSP estricta. `connect-src` solo permite la API de Render.
+
+### 5.3 Si cambia el dominio de la API
+
+1. Cambiar `VITE_API_BASE_URL` en Vercel y redesplegar el frontend.
+2. Actualizar `connect-src` en `vercel.json`.
+3. Revisar `CORS_ALLOWED_ORIGINS` en Render. Lista el origen del frontend, sin barra final, así que solo cambia si cambia el dominio de Vercel.
+
+### 5.4 Publicación
+
+- **Automática:** `.github/workflows/deploy.yml` se ejecuta en cada push a `main` y publica solo si existen los secretos `VERCEL_TOKEN`, `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID`. Sin ellos, el job termina en verde con un aviso y no despliega.
+- **Pasos del workflow:** `vercel pull`, `vercel build --prod` y `vercel deploy --prebuilt --prod`, con Vercel CLI fijada a 62.0.0. Solo corre un despliegue a la vez.
+- **Secretos:** `VERCEL_TOKEN` debe ser un token con alcance creado por el dueño del proyecto en Vercel. Nunca copies el token de la CLI local. `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` salen de `.vercel/project.json` tras `vercel link`.
+- **Manual:** mientras falte algún secreto, publica con `vercel deploy --prod` desde `main`.
+
+### 5.5 Verificación tras publicar
+
+1. La URL del frontend responde `200`.
+2. `/operador/pendientes` responde `200` (reescritura SPA a `index.html`).
+3. Las cabeceras incluyen `Content-Security-Policy`.
+4. El JavaScript publicado contiene `onrender.com` y no `localhost:8080`.
+5. La consola del navegador no muestra violaciones de CSP.
+6. El service worker queda registrado.
+7. Iniciar sesión, recargar la página y comprobar que la sesión se conserva. La cookie de refresco es cross-site (`SameSite=None`), y los navegadores que bloquean cookies de terceros, como Safari, pueden perderla.
 
 ## 6. Faltas que reporta el contrato de la API
 
