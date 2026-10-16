@@ -83,15 +83,17 @@ export function createAppServices(
   const tokens = new TokenStore();
   // The refresh call goes straight to the transport: it must not pass through AuthHttpClient.
   const reachability = new ServerReachability();
+  // Its own timer: the injected scheduler drives the session renewals that tests count.
+  const slowAnswerTimer = new TimeoutScheduler();
   const refreshApi = new AuthApi(
-    new ReachabilityHttpClient(new BaseFetchHttpClient({ baseUrl }), reachability),
+    new ReachabilityHttpClient(new BaseFetchHttpClient({ baseUrl }), reachability, slowAnswerTimer),
     adapter,
   );
   const refresher = new SessionRefreshProxy(() => refreshApi.refresh(), tokens, clock);
   const http = createHttpClient({
     baseUrl,
     auth: { tokens, refresher },
-    reachability,
+    reachability: { reporter: reachability, scheduler: slowAnswerTimer },
     logger,
     clock,
     random: () => Math.random(),

@@ -1,4 +1,5 @@
 import type { Clock } from '../../core/time/Clock';
+import type { Scheduler } from '../../core/time/Scheduler';
 import type { SessionRefresher } from '../session/SessionRefresher';
 import type { AccessTokenSource } from '../session/TokenStore';
 import { AuthHttpClient } from './AuthHttpClient';
@@ -21,8 +22,11 @@ export interface HttpClientDependencies {
     readonly tokens: AccessTokenSource;
     readonly refresher: SessionRefresher;
   };
-  /** Told after every attempt whether the server answered. */
-  readonly reachability?: ReachabilityReporter;
+  /** Told after every attempt whether the server answered, and the timer for slow answers. */
+  readonly reachability?: {
+    readonly reporter: ReachabilityReporter;
+    readonly scheduler: Scheduler;
+  };
 }
 
 /**
@@ -34,7 +38,11 @@ export function createHttpClient(dependencies: HttpClientDependencies): HttpClie
   const transport =
     dependencies.reachability === undefined
       ? fetchClient
-      : new ReachabilityHttpClient(fetchClient, dependencies.reachability);
+      : new ReachabilityHttpClient(
+          fetchClient,
+          dependencies.reachability.reporter,
+          dependencies.reachability.scheduler,
+        );
   const withAuth =
     dependencies.auth === undefined
       ? transport
