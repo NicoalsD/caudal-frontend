@@ -125,6 +125,9 @@ export class ApiMock {
     if (method === 'GET' && path === '/rule-sets/current') {
       return { status: OK, body: fixture('rule-set-current') };
     }
+    if (method === 'GET' && path === '/anomalies') {
+      return { status: OK, body: { items: [], next_cursor: null } };
+    }
     if (method === 'GET' && path === '/tanks') {
       return { status: OK, body: fixture('tanks') };
     }
