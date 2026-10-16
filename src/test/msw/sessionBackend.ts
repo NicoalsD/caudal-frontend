@@ -4,7 +4,7 @@ import type { HttpHandler } from 'msw';
 import { STATUS } from '../constants';
 import {
   buildLoginResponse,
-  buildMeResponse,
+  buildCurrentUserResponse,
   findTestUser,
   makeAccessToken,
   TEST_PASSWORD,
@@ -28,7 +28,7 @@ export interface SessionBackend {
     refresh: number;
     login: number;
     logout: number;
-    me: number;
+    currentUser: number;
     passwordChanges: number;
     switches: number;
   };
@@ -59,7 +59,14 @@ export function createSessionBackend(
   // What changed on the server: new passwords and cleared must_change_password flags.
   const passwords = new Map<string, string>();
   const changed = new Set<string>();
-  const calls = { refresh: 0, login: 0, logout: 0, me: 0, passwordChanges: 0, switches: 0 };
+  const calls = {
+    refresh: 0,
+    login: 0,
+    logout: 0,
+    currentUser: 0,
+    passwordChanges: 0,
+    switches: 0,
+  };
 
   const issue = (user: AuthUserDto): string => {
     serial += 1;
@@ -105,14 +112,14 @@ export function createSessionBackend(
         expires_in: ACCESS_TOKEN_SECONDS,
       });
     }),
-    http.get(apiUrl('/auth/me'), ({ request }) => {
-      calls.me += 1;
+    http.get(apiUrl('/auth/current-user'), ({ request }) => {
+      calls.currentUser += 1;
       const token = bearerOf(request);
       if (token === null || !validTokens.has(token) || cookieUser === null) {
         return errorResponse(STATUS.unauthorized, 'UNAUTHORIZED');
       }
       return HttpResponse.json(
-        buildMeResponse(cookieUser, memberships.length > 0 ? memberships : undefined),
+        buildCurrentUserResponse(cookieUser, memberships.length > 0 ? memberships : undefined),
       );
     }),
     http.post(apiUrl('/auth/change-password'), async ({ request }) => {

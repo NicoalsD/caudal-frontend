@@ -189,9 +189,9 @@
         }
       }
     },
-    "/api/v1/auth/me": {
+    "/api/v1/auth/current-user": {
       "get": {
-        "operationId": "getMe",
+        "operationId": "getCurrentUser",
         "summary": "Datos de la persona autenticada",
         "description": "Permitido aunque must_change_password sea true. API.md sección 2.7.",
         "responses": {
@@ -200,7 +200,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MeResponse"
+                  "$ref": "#/components/schemas/CurrentUserResponse"
                 }
               }
             }
@@ -3810,7 +3810,7 @@
           }
         }
       },
-      "MeResponse": {
+      "CurrentUserResponse": {
         "type": "object",
         "required": [
           "id",

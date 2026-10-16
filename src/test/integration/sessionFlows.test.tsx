@@ -91,9 +91,9 @@ describe('expiry while using the app', () => {
     await heading(t('screens.operatorHome'));
     backend.expireAccessTokens();
 
-    const me = await services.api.auth.me();
+    const currentUser = await services.api.auth.currentUser();
 
-    expect(me.username).toBe(TEST_USERS.operator.username);
+    expect(currentUser.username).toBe(TEST_USERS.operator.username);
     expect(router.state.location.pathname).toBe(ROUTE_PATHS.operator.home);
     expect(services.sessionStore.getSnapshot().status).toBe('authenticated');
   });
@@ -107,7 +107,7 @@ describe('expiry while using the app', () => {
     backend.expireAccessTokens();
     backend.dropCookie();
 
-    await services.api.auth.me().catch(() => undefined);
+    await services.api.auth.currentUser().catch(() => undefined);
 
     expect(await screen.findByText(t('auth.sessionExpired'))).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(ROUTE_PATHS.login);
@@ -138,7 +138,7 @@ describe('expiry while using the app', () => {
       ),
     );
 
-    await services.api.auth.me().catch(() => undefined);
+    await services.api.auth.currentUser().catch(() => undefined);
 
     expect(services.sessionStore.getSnapshot()).toEqual({ status: 'expired' });
     // Under the load of the whole suite the redirect can take longer than one default wait.
@@ -231,7 +231,7 @@ describe('secrets never reach the browser storage', () => {
     await typeCredentials(user, TEST_USERS.operator.username, TEST_PASSWORD);
     await heading(t('screens.operatorHome'));
     backend.expireAccessTokens();
-    await services.api.auth.me();
+    await services.api.auth.currentUser();
 
     expect(setItem).not.toHaveBeenCalled();
     expect(localStorage.length).toBe(0);

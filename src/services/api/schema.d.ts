@@ -103,7 +103,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/me": {
+    "/api/v1/auth/current-user": {
         parameters: {
             query?: never;
             header?: never;
@@ -114,7 +114,7 @@ export interface paths {
          * Datos de la persona autenticada
          * @description Permitido aunque must_change_password sea true. API.md sección 2.7.
          */
-        get: operations["getMe"];
+        get: operations["getCurrentUser"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1327,7 +1327,7 @@ export interface components {
             /** Format: date-time */
             valid_to?: string | null;
         };
-        MeResponse: {
+        CurrentUserResponse: {
             /** Format: uuid */
             id: string;
             username: string;
@@ -2592,7 +2592,7 @@ export interface operations {
             };
         };
     };
-    getMe: {
+    getCurrentUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -2607,7 +2607,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MeResponse"];
+                    "application/json": components["schemas"]["CurrentUserResponse"];
                 };
             };
             /** @description Sesión no válida (UNAUTHORIZED). */

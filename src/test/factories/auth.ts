@@ -1,7 +1,7 @@
 import type { components } from '../../services/api/schema';
 
 export type AuthUserDto = components['schemas']['AuthUser'];
-export type MeResponseDto = components['schemas']['MeResponse'];
+export type CurrentUserResponseDto = components['schemas']['CurrentUserResponse'];
 export type LoginResponseDto = components['schemas']['LoginResponse'];
 
 export const TEST_AQUEDUCT_ID = '0190f3a2-0000-7000-8000-0000000000aa';
@@ -106,10 +106,10 @@ export const PERMISSIONS_BY_ROLE: Record<AuthUserDto['role'], readonly string[]>
 
 export type MembershipDto = components['schemas']['Membership'];
 
-export function buildMeResponse(
+export function buildCurrentUserResponse(
   user: AuthUserDto,
   memberships: MembershipDto[] = [{ aqueduct_id: user.aqueduct_id, role: user.role }],
-): MeResponseDto {
+): CurrentUserResponseDto {
   return {
     id: user.id,
     username: user.username,

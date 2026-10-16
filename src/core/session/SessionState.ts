@@ -12,7 +12,7 @@ export interface SessionUser {
   readonly mustChangePassword: boolean;
   /** The server answered PRIVACY_NOTICE_PENDING: only the privacy notice screen is open. */
   readonly privacyNoticePending?: boolean;
-  /** Permission codes from GET /auth/me, used only to show or hide actions. */
+  /** Permission codes from GET /auth/current-user, used only to show or hide actions. */
   readonly permissions: readonly string[];
   /** Where the person can work (current memberships), to offer a change of aqueduct. */
   readonly memberships: readonly MembershipChoice[];

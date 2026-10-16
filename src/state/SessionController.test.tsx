@@ -154,9 +154,9 @@ describe('401 and expiry during use', () => {
     await services.session.restore();
     backend.expireAccessTokens();
 
-    const me = await services.api.auth.me();
+    const currentUser = await services.api.auth.currentUser();
 
-    expect(me.username).toBe(TEST_USERS.operator.username);
+    expect(currentUser.username).toBe(TEST_USERS.operator.username);
     expect(backend.calls.refresh).toBe(TWO_REFRESHES); // boot + this 401
   });
 
@@ -167,7 +167,11 @@ describe('401 and expiry during use', () => {
     await services.session.restore();
     backend.expireAccessTokens();
 
-    await Promise.all([services.api.auth.me(), services.api.auth.me(), services.api.auth.me()]);
+    await Promise.all([
+      services.api.auth.currentUser(),
+      services.api.auth.currentUser(),
+      services.api.auth.currentUser(),
+    ]);
 
     expect(backend.calls.refresh).toBe(TWO_REFRESHES);
   });
@@ -181,7 +185,9 @@ describe('401 and expiry during use', () => {
     backend.expireAccessTokens();
     backend.dropCookie();
 
-    await expect(services.api.auth.me()).rejects.toMatchObject({ status: STATUS.unauthorized });
+    await expect(services.api.auth.currentUser()).rejects.toMatchObject({
+      status: STATUS.unauthorized,
+    });
 
     expect(services.sessionStore.getSnapshot()).toEqual({ status: 'expired' });
     expect(services.tokens.get()).toBeNull();
@@ -196,7 +202,7 @@ describe('401 and expiry during use', () => {
     backend.expireAccessTokens();
     server.use(http.post(apiUrl('/auth/refresh'), () => HttpResponse.error()));
 
-    await expect(services.api.auth.me()).rejects.toThrow('Network request failed');
+    await expect(services.api.auth.currentUser()).rejects.toThrow('Network request failed');
 
     expect(services.sessionStore.getSnapshot().status).toBe('authenticated');
   });
@@ -210,7 +216,7 @@ describe('401 and expiry during use', () => {
     backend.expireAccessTokens();
     backend.dropCookie();
 
-    await services.api.auth.me().catch(() => undefined);
+    await services.api.auth.currentUser().catch(() => undefined);
 
     expect(await screen.findByText(t('auth.sessionExpired'))).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(ROUTE_PATHS.login);
@@ -325,7 +331,7 @@ describe('storage and cookie rules', () => {
       password: TEST_PASSWORD,
     });
     backend.expireAccessTokens();
-    await services.api.auth.me();
+    await services.api.auth.currentUser();
 
     const token = services.tokens.get();
     expect(token).not.toBeNull();
