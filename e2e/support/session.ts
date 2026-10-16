@@ -16,3 +16,18 @@ export async function signIn(
   await page.getByRole('button', { name: strings.auth.signIn }).click();
   await expect(page).toHaveURL(firstScreen);
 }
+
+/**
+ * Follows a link of the main navigation. On a narrow screen the links fold behind the "Menú"
+ * button, so the menu opens first when the button is there.
+ */
+export async function goToNavLink(page: Page, name: string): Promise<void> {
+  const menu = page.getByRole('button', { name: strings.app.menu });
+  if (await menu.isVisible()) {
+    await menu.click();
+  }
+  await page
+    .getByRole('navigation', { name: strings.app.mainNavigation })
+    .getByRole('link', { name })
+    .click();
+}
