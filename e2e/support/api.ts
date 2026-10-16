@@ -103,10 +103,12 @@ export class ApiMock {
       );
       return { status: OK, body: omit(login, ['user']) };
     }
-    if (method === 'GET' && path === '/auth/me') {
+    if (method === 'GET' && path === '/auth/current-user') {
       return {
         status: OK,
-        body: fixture(this.state.loggedInAs === 'admin' ? 'me-admin' : 'me-operator'),
+        body: fixture(
+          this.state.loggedInAs === 'admin' ? 'current-user-admin' : 'current-user-operator',
+        ),
       };
     }
     if (method === 'POST' && path === '/auth/logout') {

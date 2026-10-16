@@ -29,7 +29,7 @@ import type {
   DecimalView,
   HealthView,
   LoginView,
-  MeView,
+  CurrentUserView,
   CatalogOptionView,
   DamageReportReceiptView,
   IncidentPageView,
@@ -77,7 +77,7 @@ type FieldConstraintDto = components['schemas']['FieldConstraint'];
 type AuthUserDto = components['schemas']['AuthUser'];
 type LoginDto = components['schemas']['LoginResponse'];
 type RefreshDto = components['schemas']['RefreshResponse'];
-type MeDto = components['schemas']['MeResponse'];
+type CurrentUserDto = components['schemas']['CurrentUserResponse'];
 type MembershipDto = components['schemas']['Membership'];
 type RuleSetDto = components['schemas']['RuleSet'];
 type RuleSetSummaryDto = components['schemas']['RuleSetSummary'];
@@ -225,7 +225,7 @@ export class ApiDtoAdapter {
     return { accessToken: dto.access_token, expiresInSeconds: dto.expires_in };
   }
 
-  toMe(dto: MeDto): MeView {
+  toCurrentUser(dto: CurrentUserDto): CurrentUserView {
     return {
       id: dto.id,
       username: dto.username,

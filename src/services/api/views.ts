@@ -96,8 +96,8 @@ export interface RefreshView {
   readonly expiresInSeconds: number;
 }
 
-/** Who the server says is signed in (GET /auth/me). Permissions are for showing actions only. */
-export interface MeView {
+/** Who the server says is signed in (GET /auth/current-user). Permissions are for showing actions only. */
+export interface CurrentUserView {
   readonly id: string;
   readonly username: string;
   readonly fullName: string;

@@ -12,7 +12,7 @@ import { OPERATOR_SESSION_HINT_MS, PROACTIVE_REFRESH_FRACTION } from '../core/po
 import type { Clock } from '../core/time/Clock';
 import type { Scheduler } from '../core/time/Scheduler';
 import type { CaudalApi } from '../services/api/CaudalApi';
-import type { MeView } from '../services/api/views';
+import type { CurrentUserView } from '../services/api/views';
 import type { ObservableSessionRefresher } from '../services/session/SessionRefreshProxy';
 import type { TokenStore } from '../services/session/TokenStore';
 import type { SessionStore } from './SessionStore';
@@ -37,19 +37,19 @@ export interface SessionControllerDependencies {
 }
 
 function toSessionUser(
-  me: MeView,
+  currentUser: CurrentUserView,
   identity: Pick<SessionUser, 'role' | 'aqueductId'>,
   nowMs: number,
 ): SessionUser {
   return {
-    userId: me.id,
-    username: me.username,
+    userId: currentUser.id,
+    username: currentUser.username,
     role: identity.role,
     aqueductId: identity.aqueductId,
-    displayName: me.fullName,
-    mustChangePassword: me.mustChangePassword,
-    permissions: me.permissions,
-    memberships: currentMembershipChoices(me.memberships, nowMs),
+    displayName: currentUser.fullName,
+    mustChangePassword: currentUser.mustChangePassword,
+    permissions: currentUser.permissions,
+    memberships: currentMembershipChoices(currentUser.memberships, nowMs),
   };
 }
 
@@ -83,8 +83,8 @@ export class SessionController {
     const expiresAtMs = this.deps.clock.nowMs() + login.expiresInSeconds * MS_PER_SECOND;
     this.deps.tokens.set(login.accessToken, expiresAtMs);
     try {
-      const me = await this.deps.api.auth.me();
-      const user = toSessionUser(me, login.user, this.deps.clock.nowMs());
+      const currentUser = await this.deps.api.auth.currentUser();
+      const user = toSessionUser(currentUser, login.user, this.deps.clock.nowMs());
       this.admit(user);
       this.scheduleRenewal(expiresAtMs);
       return user;
@@ -177,8 +177,8 @@ export class SessionController {
     if (claims === null) {
       throw new Error('The access token has no readable claims');
     }
-    const me = await this.deps.api.auth.me();
-    const user = toSessionUser(me, claims, this.deps.clock.nowMs());
+    const currentUser = await this.deps.api.auth.currentUser();
+    const user = toSessionUser(currentUser, claims, this.deps.clock.nowMs());
     this.admit(user);
     this.scheduleRenewal(expiresAtMs);
     return user;
@@ -236,8 +236,8 @@ export class SessionController {
       if (claims === null) {
         throw new Error('The access token has no readable claims');
       }
-      const me = await this.deps.api.auth.me();
-      this.admit(toSessionUser(me, claims, this.deps.clock.nowMs()));
+      const currentUser = await this.deps.api.auth.currentUser();
+      this.admit(toSessionUser(currentUser, claims, this.deps.clock.nowMs()));
     } catch (error) {
       const offline = error instanceof NetworkError;
       this.cleanUp(offline);

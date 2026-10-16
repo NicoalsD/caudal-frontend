@@ -5,7 +5,7 @@ import type { components } from '../../../services/api/schema';
 import { STATUS } from '../../constants';
 import {
   buildLoginResponse,
-  buildMeResponse,
+  buildCurrentUserResponse,
   findTestUser,
   TEST_PASSWORD,
 } from '../../factories/auth';
@@ -48,7 +48,7 @@ export function changePasswordOutcome(
 
 /**
  * Default session handlers, faithful to API.md section 2. They are stateless: login answers for
- * the fixture users, /auth/me reads the claims of the bearer token, refresh finds no cookie.
+ * the fixture users, /auth/current-user reads the claims of the bearer token, refresh finds no cookie.
  * Tests that need a cookie jar use createSessionBackend.
  */
 export const authHandlers = [
@@ -62,14 +62,14 @@ export const authHandlers = [
     }
     return HttpResponse.json(buildLoginResponse(user));
   }),
-  http.get(apiUrl('/auth/me'), ({ request }) => {
+  http.get(apiUrl('/auth/current-user'), ({ request }) => {
     const token = bearerOf(request);
     const claims = token === null ? null : readAccessTokenClaims(token);
     const user =
       claims === null ? undefined : findTestUser((candidate) => candidate.id === claims.subject);
     return user === undefined
       ? errorResponse(STATUS.unauthorized, 'UNAUTHORIZED')
-      : HttpResponse.json(buildMeResponse(user));
+      : HttpResponse.json(buildCurrentUserResponse(user));
   }),
   http.post(apiUrl('/auth/change-password'), async ({ request }) => {
     const token = bearerOf(request);

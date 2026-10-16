@@ -47,7 +47,7 @@ const reasonField = () => screen.getByLabelText(t('rules.reasonLabel'));
 const confirm = () => screen.getByRole('button', { name: t('rules.confirmActivate') });
 
 describe('who can activate', () => {
-  it('shows the button to BOARD_ADMIN only (the permission comes from /auth/me)', async () => {
+  it('shows the button to BOARD_ADMIN only (the permission comes from /auth/current-user)', async () => {
     server.use(...createRulesBackend({ draft: buildDraft() }).handlers);
     renderApp(DRAFT_PATH, {
       user: buildSessionUser({

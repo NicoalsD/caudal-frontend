@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildLoginResponse, buildMeResponse, TEST_USERS } from '../../../test/factories/auth';
+import {
+  buildLoginResponse,
+  buildCurrentUserResponse,
+  TEST_USERS,
+} from '../../../test/factories/auth';
 import { plain } from '../../../test/text';
 
 import { ApiDtoAdapter } from './ApiDtoAdapter';
@@ -130,8 +134,8 @@ describe('ApiDtoAdapter.toLogin', () => {
   });
 });
 
-describe('ApiDtoAdapter.toMe', () => {
-  const me = buildMeResponse(TEST_USERS.admin, [
+describe('ApiDtoAdapter.toCurrentUser', () => {
+  const currentUser = buildCurrentUserResponse(TEST_USERS.admin, [
     {
       aqueduct_id: TEST_USERS.admin.aqueduct_id,
       role: 'BOARD_ADMIN',
@@ -141,7 +145,7 @@ describe('ApiDtoAdapter.toMe', () => {
   ]);
 
   it('maps the profile, the permissions and the membership dates', () => {
-    const view = adapter.toMe(me);
+    const view = adapter.toCurrentUser(currentUser);
 
     expect(view.fullName).toBe(TEST_USERS.admin.full_name);
     expect(view.permissions).toContain('RULESET_ACTIVATE');
@@ -159,10 +163,16 @@ describe('ApiDtoAdapter.toMe', () => {
     const base = { aqueduct_id: TEST_USERS.admin.aqueduct_id };
 
     expect(() =>
-      adapter.toMe({ ...me, memberships: [{ ...base, role: 'ROOT' as 'OPERATOR' }] }),
+      adapter.toCurrentUser({
+        ...currentUser,
+        memberships: [{ ...base, role: 'ROOT' as 'OPERATOR' }],
+      }),
     ).toThrow(InvalidDtoError);
     expect(() =>
-      adapter.toMe({ ...me, memberships: [{ ...base, role: 'OPERATOR', valid_to: 'ayer' }] }),
+      adapter.toCurrentUser({
+        ...currentUser,
+        memberships: [{ ...base, role: 'OPERATOR', valid_to: 'ayer' }],
+      }),
     ).toThrow(InvalidDtoError);
   });
 });

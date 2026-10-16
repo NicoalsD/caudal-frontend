@@ -1,12 +1,12 @@
 import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import type { components } from '../schema';
-import type { LoginView, MeView, RefreshView } from '../views';
+import type { LoginView, CurrentUserView, RefreshView } from '../views';
 
 type LoginRequestDto = components['schemas']['LoginRequest'];
 type LoginDto = components['schemas']['LoginResponse'];
 type RefreshDto = components['schemas']['RefreshResponse'];
-type MeDto = components['schemas']['MeResponse'];
+type CurrentUserDto = components['schemas']['CurrentUserResponse'];
 
 type SwitchAqueductRequestDto = components['schemas']['SwitchAqueductRequest'];
 type ChangePasswordRequestDto = components['schemas']['ChangePasswordRequest'];
@@ -51,10 +51,13 @@ export class AuthApi {
     return this.adapter.toRefresh(response.body);
   }
 
-  /** GET /api/v1/auth/me: allowed even while the password change is pending. */
-  async me(): Promise<MeView> {
-    const response = await this.http.request<MeDto>({ method: 'GET', path: '/auth/me' });
-    return this.adapter.toMe(response.body);
+  /** GET /api/v1/auth/current-user: allowed even while the password change is pending. */
+  async currentUser(): Promise<CurrentUserView> {
+    const response = await this.http.request<CurrentUserDto>({
+      method: 'GET',
+      path: '/auth/current-user',
+    });
+    return this.adapter.toCurrentUser(response.body);
   }
 
   /**
