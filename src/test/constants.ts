@@ -10,6 +10,8 @@ export const STATUS = {
   conflict: 409,
   unprocessable: 422,
   tooManyRequests: 429,
+  internalServerError: 500,
   badGateway: 502,
   serviceUnavailable: 503,
+  gatewayTimeout: 504,
 } as const;

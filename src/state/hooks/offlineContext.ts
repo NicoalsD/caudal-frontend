@@ -7,6 +7,7 @@ import type { ReferenceFallback } from '../../core/cache/ReferenceFallback';
 import type { OutboxSync } from '../OutboxSync';
 import type { ConnectivityMonitor } from '../ConnectivityMonitor';
 import type { SyncQueueStore } from '../SyncQueueStore';
+import type { ServerReachability } from '../ServerReachability';
 import type { SyncTrigger } from '../SyncTrigger';
 
 /** What the offline features need: the queue, its sender, the clock and the client ids. */
@@ -23,6 +24,8 @@ export interface OfflineServices {
   readonly syncQueue: SyncQueueStore;
   /** Decides when the queue is tried: on reconnect and on an interval. */
   readonly syncTrigger: SyncTrigger;
+  /** Whether the last request reached the API, which may be asleep and waking up. */
+  readonly reachability: ServerReachability;
 }
 
 export const OfflineContext = createContext<OfflineServices | null>(null);

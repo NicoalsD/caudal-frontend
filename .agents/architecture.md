@@ -184,7 +184,8 @@ Sin este modo, un fontanero que recarga la página sin señal no puede registrar
 ### 6.1 Configuración
 
 - Un `QueryClient` en `src/app/providers/QueryProvider.tsx`.
-- `retry`: 1 para queries; 0 para mutaciones (las reintenta la cola offline, no TanStack).
+- `retry`: 1 para queries; 0 para mutaciones (las reintenta la cola offline, no TanStack). Un `4xx` no se reintenta. Si el servidor no responde (error de red, `502`, `503` o `504`) y el navegador está en línea, la query sigue intentando hasta 24 veces, con esperas de 2 a 5 s: el plan gratuito de Render duerme la API y tarda unos 3 minutos en arrancar (`core/policy/queryRetry.ts`).
+- `ServerReachability` (Observer) recibe de `ReachabilityHttpClient` (Decorator junto al transporte) si cada intento llegó al servidor. Mientras no llega, `ServerWakeNotice` muestra un solo aviso para toda la app en lugar de un error por bloque.
 - `refetchOnWindowFocus`: true para estado del tanque y propuestas; false para catálogos.
 - `staleTime` por query (valores por definir en `src/core/policy/clientPolicy.ts`). Referencias (`meta/constraints`, `catalogs`) pueden tener `staleTime` largo porque cambian poco; `rule-sets/current` se invalida al activar una versión.
 

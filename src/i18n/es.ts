@@ -1380,6 +1380,8 @@ export const strings = {
     },
   },
   connection: {
+    serverWaking:
+      'Estamos despertando el servidor. Si nadie lo usó en un rato, la primera carga puede tardar unos minutos; seguimos intentando solos.',
     constraintsMissing:
       'No pudimos cargar los límites de los campos. Conéctate a internet para registrar datos.',
   },

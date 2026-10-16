@@ -71,6 +71,25 @@ export const REFERENCE_STALE_TIME_MS = 3_600_000;
 /** Client policy: retries of a failed query before showing the error (architecture.md 6.1). */
 export const QUERY_RETRY_COUNT = 1;
 
+/** First status code of the client error family: the same request would fail again. */
+export const CLIENT_ERROR_MIN_STATUS = 400;
+const BAD_GATEWAY_STATUS = 502;
+const SERVICE_UNAVAILABLE_STATUS = 503;
+const GATEWAY_TIMEOUT_STATUS = 504;
+/** Answers of a proxy whose server is not up yet (Render starts a sleeping service on demand). */
+export const SERVER_UNAVAILABLE_STATUSES: readonly number[] = [
+  BAD_GATEWAY_STATUS,
+  SERVICE_UNAVAILABLE_STATUS,
+  GATEWAY_TIMEOUT_STATUS,
+];
+/**
+ * A sleeping server takes about three minutes to start. While the browser is online, a query that
+ * cannot reach it keeps trying for that long instead of showing an error at once.
+ */
+export const SERVER_WAKE_QUERY_RETRIES = 24;
+export const SERVER_WAKE_RETRY_BASE_DELAY_MS = 2_000;
+export const SERVER_WAKE_RETRY_MAX_DELAY_MS = 5_000;
+
 /** Offline queue (offline-sync.md section 5 and 6): first retry, ceiling and jitter of the backoff. */
 export const INITIAL_RETRY_DELAY_MS = 2_000;
 export const MAX_RETRY_DELAY_MS = 300_000;
