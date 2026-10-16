@@ -5,6 +5,8 @@
 export const strings = {
   app: {
     name: 'CAUDAL',
+    /** Browser tab of every screen: its h1 and the product name. */
+    documentTitle: '{screen} | CAUDAL',
     skipToContent: 'Saltar al contenido',
     mainNavigation: 'Navegación principal',
     menu: 'Menú',
@@ -104,7 +106,6 @@ export const strings = {
       'Necesitas conexión para entrar. Si ya entraste en este celular, puedes registrar lecturas sin conexión.',
     tooManyAttempts: 'Demasiados intentos. Intenta de nuevo en {minutes} min.',
     welcome: 'Entra con la cuenta que te dio la Junta.',
-    pageTitle: 'Iniciar sesión | CAUDAL',
     showPassword: 'Mostrar contraseña',
     hidePassword: 'Ocultar contraseña',
     capsLockOn: 'Las mayúsculas están activadas.',
@@ -120,6 +121,8 @@ export const strings = {
   landing: {
     meta: {
       title: 'CAUDAL: el cuaderno del acueducto, pero digital',
+      description:
+        'CAUDAL ayuda a los acueductos de las veredas de Guaitarilla, Nariño, a registrar las lecturas del tanque aunque no haya señal, proponer turnos de agua y publicar el horario aprobado por la Junta.',
     },
     nav: {
       label: 'Secciones',

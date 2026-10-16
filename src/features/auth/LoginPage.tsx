@@ -56,7 +56,6 @@ export function LoginPage(): JSX.Element {
 
   return (
     <>
-      <title>{t('auth.pageTitle')}</title>
       <ScreenTitle>{t('screens.login')}</ScreenTitle>
       <p className={cn(styles.welcome)}>{t('auth.welcome')}</p>
       {session.status === 'expired' ? (
