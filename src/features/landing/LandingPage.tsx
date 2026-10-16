@@ -16,18 +16,14 @@ import {
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { strings } from '../../i18n/es';
 import { cn } from '../../ui/styles/cn';
-import {
-  BoardScreen,
-  FamilyScreen,
-  OperatorScreen,
-  PanelFrame,
-  PhoneFrame,
-  SimulatedTag,
-} from './DemoScreens';
+import { AppScreen } from './AppScreen';
+import type { AppShot } from './AppScreen';
+import { PhoneFrame, SimulatedTag } from './Frames';
 import { FlowShowcase } from './FlowShowcase';
 import { ForecastFigure } from './ForecastFigure';
 import styles from './Landing.module.css';
-import { DOCS_URL, REPOSITORY_URLS, SECTION_IDS } from './links';
+import { DOCS_URL, PHOTO_URLS, REPOSITORY_URLS, SECTION_IDS } from './links';
+import { CLOSING_PHOTO, HERO_PHOTO } from './photos';
 import { OfflineBand } from './OfflineBand';
 import { useReveal } from './useReveal';
 
@@ -110,52 +106,76 @@ function LandingNav(): JSX.Element {
   );
 }
 
-/** First viewport: the wordmark fills with water, the three screens stand on the level line. */
+/** The three real screens of the first viewport: the plumber, the Board and the families. */
+const HERO_DEVICES = [
+  {
+    key: 'operator',
+    shot: 'operatorOffline',
+    caption: copy.operator.caption,
+    alt: copy.hero.operatorShot,
+  },
+  { key: 'board', shot: 'boardProposal', caption: copy.board.caption, alt: copy.hero.boardShot },
+  {
+    key: 'family',
+    shot: 'publicSchedule',
+    caption: copy.family.caption,
+    alt: copy.hero.familyShot,
+  },
+] as const satisfies readonly { key: string; shot: AppShot; caption: string; alt: string }[];
+
+/**
+ * First viewport: the wordmark fills with water over the page color, and below it the land of
+ * Nariño opens up with three real screens of the app standing in front of it.
+ */
 function Hero(): JSX.Element {
   return (
     <section className={cn(styles.hero)} aria-labelledby="landing-title">
-      <h1 id="landing-title" className={cn(styles.wordmark)}>
-        <span className={cn(styles.visuallyHidden)}>{copy.hero.title}</span>
-        <span className={cn(styles.wordmarkDry)} aria-hidden="true">
-          {copy.hero.title}
-        </span>
-        <span className={cn(styles.wordmarkWet)} aria-hidden="true">
-          {copy.hero.title}
-        </span>
-      </h1>
-      <p className={cn(styles.tagline)}>{copy.hero.tagline}</p>
-      <p className={cn(styles.place)}>{copy.hero.place}</p>
-      <div className={cn(styles.heroActions)}>
-        <Link to={ROUTE_PATHS.login} className={cn(styles.button)}>
-          {copy.hero.primary}
-        </Link>
-        <a href={`#${SECTION_IDS.flow}`} className={cn(styles.button, styles.buttonSecondary)}>
-          {copy.hero.secondary}
-        </a>
+      <div className={cn(styles.heroText)}>
+        <h1 id="landing-title" className={cn(styles.wordmark)}>
+          <span className={cn(styles.visuallyHidden)}>{copy.hero.title}</span>
+          <span className={cn(styles.wordmarkDry)} aria-hidden="true">
+            {copy.hero.title}
+          </span>
+          <span className={cn(styles.wordmarkWet)} aria-hidden="true">
+            {copy.hero.title}
+          </span>
+        </h1>
+        <p className={cn(styles.tagline)}>{copy.hero.tagline}</p>
+        <p className={cn(styles.place)}>{copy.hero.place}</p>
+        <div className={cn(styles.heroActions)}>
+          <Link to={ROUTE_PATHS.login} className={cn(styles.button)}>
+            {copy.hero.primary}
+          </Link>
+          <a href={`#${SECTION_IDS.flow}`} className={cn(styles.button, styles.buttonSecondary)}>
+            {copy.hero.secondary}
+          </a>
+        </div>
       </div>
 
-      <div className={cn(styles.devices)} role="img" aria-label={copy.hero.devicesLabel}>
-        <figure className={cn(styles.device, styles.deviceLeft)}>
-          <PhoneFrame>
-            <OperatorScreen />
-          </PhoneFrame>
-          <figcaption>{copy.operator.caption}</figcaption>
-        </figure>
-        <figure className={cn(styles.device, styles.deviceCenter)}>
-          <PanelFrame>
-            <BoardScreen />
-          </PanelFrame>
-          <figcaption>{copy.board.caption}</figcaption>
-        </figure>
-        <figure className={cn(styles.device, styles.deviceRight)}>
-          <PhoneFrame>
-            <FamilyScreen />
-          </PhoneFrame>
-          <figcaption>{copy.family.caption}</figcaption>
-        </figure>
-        <span className={cn(styles.levelLine)} />
+      <div className={cn(styles.land)}>
+        <img
+          className={cn(styles.landPhoto)}
+          src={HERO_PHOTO.src}
+          srcSet={HERO_PHOTO.srcSet}
+          sizes="100vw"
+          width={HERO_PHOTO.width}
+          height={HERO_PHOTO.height}
+          alt={copy.hero.photoAlt}
+          fetchPriority="high"
+          decoding="async"
+        />
+        <ul className={cn(styles.devices)} aria-label={copy.hero.devicesLabel}>
+          {HERO_DEVICES.map(({ key, shot, caption, alt }) => (
+            <li key={key} className={cn(styles.device)} data-device={key}>
+              <PhoneFrame className={cn(styles.devicePhone)}>
+                <AppScreen shot={shot} alt={alt} eager />
+              </PhoneFrame>
+              <span className={cn(styles.deviceCaption)}>{caption}</span>
+            </li>
+          ))}
+        </ul>
+        <SimulatedTag className={cn(styles.heroTag)} />
       </div>
-      <SimulatedTag className={cn(styles.heroTag)} />
     </section>
   );
 }
@@ -352,7 +372,18 @@ function ProjectSection(): JSX.Element {
 function Closing(): JSX.Element {
   return (
     <section className={cn(styles.closing)} aria-labelledby="closing-title">
-      <Reveal className={cn(styles.centerText)}>
+      <img
+        className={cn(styles.closingPhoto)}
+        src={CLOSING_PHOTO.src}
+        srcSet={CLOSING_PHOTO.srcSet}
+        sizes="100vw"
+        width={CLOSING_PHOTO.width}
+        height={CLOSING_PHOTO.height}
+        alt={copy.hero.closingPhotoAlt}
+        loading="lazy"
+        decoding="async"
+      />
+      <Reveal className={cn(styles.centerText, styles.closingCard)}>
         <h2 id="closing-title" className={cn(styles.closingTitle)}>
           {copy.closing.title}
         </h2>
@@ -389,6 +420,17 @@ function LandingFooter(): JSX.Element {
             </ExternalLink>
           </li>
         </ul>
+        <div className={cn(styles.footerCredits)}>
+          <h2>{copy.credits.title}</h2>
+          <ul>
+            {(['galeras', 'cumbal'] as const).map((photo) => (
+              <li key={photo}>
+                {copy.credits[photo]}{' '}
+                <ExternalLink href={PHOTO_URLS[photo]}>{copy.credits.source}</ExternalLink>
+              </li>
+            ))}
+          </ul>
+        </div>
         <p className={cn(styles.footerRights)}>{copy.footer.rights}</p>
       </div>
     </footer>
