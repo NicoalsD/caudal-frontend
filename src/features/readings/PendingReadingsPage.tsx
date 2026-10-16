@@ -70,9 +70,13 @@ export function PendingReadingsPage(): JSX.Element {
   const summaryLine =
     openCount === 0
       ? null
-      : online
-        ? t('pending.pageSummary', { count: String(openCount) })
-        : t('pending.offlineSummary', { count: String(openCount) });
+      : openCount === ONE_READING
+        ? online
+          ? t('pending.pageSummaryOne')
+          : t('pending.offlineSummaryOne')
+        : online
+          ? t('pending.pageSummary', { count: String(openCount) })
+          : t('pending.offlineSummary', { count: String(openCount) });
 
   return (
     <div className={cn(styles.stack)}>

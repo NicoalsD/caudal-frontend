@@ -492,7 +492,9 @@ export const strings = {
   },
   pending: {
     pageSummary: '{count} lecturas por enviar en este celular.',
+    pageSummaryOne: '1 lectura por enviar en este celular.',
     offlineSummary: 'Sin conexión. {count} lecturas en el celular.',
+    offlineSummaryOne: 'Sin conexión. 1 lectura en el celular.',
     sendNow: 'Enviar ahora',
     waitingSignal: 'Esperando señal',
     sending: 'Enviando...',
