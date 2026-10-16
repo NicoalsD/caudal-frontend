@@ -89,6 +89,8 @@ export const SERVER_UNAVAILABLE_STATUSES: readonly number[] = [
 export const SERVER_WAKE_QUERY_RETRIES = 24;
 export const SERVER_WAKE_RETRY_BASE_DELAY_MS = 2_000;
 export const SERVER_WAKE_RETRY_MAX_DELAY_MS = 5_000;
+/** A request still without an answer after this long shows the waking server notice. */
+export const SLOW_SERVER_ANSWER_MS = 5_000;
 
 /** Offline queue (offline-sync.md section 5 and 6): first retry, ceiling and jitter of the backoff. */
 export const INITIAL_RETRY_DELAY_MS = 2_000;
