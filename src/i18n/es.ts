@@ -7,6 +7,7 @@ export const strings = {
     name: 'CAUDAL',
     skipToContent: 'Saltar al contenido',
     mainNavigation: 'Navegación principal',
+    menu: 'Menú',
   },
   pwa: {
     updateAvailable: 'Hay una versión nueva.',
