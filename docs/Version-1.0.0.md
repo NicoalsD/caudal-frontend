@@ -110,6 +110,12 @@ Las pruebas de extremo a extremo no necesitan la API: usan un servidor simulado 
 - Después de instalarla, corta la red y abre CAUDAL: la pantalla del fontanero debe abrir y la lectura debe quedar en la cola.
 - Cuando hay una versión nueva, aparece el aviso "Hay una versión nueva." con el botón "Actualizar". La actualización nunca recarga sola.
 
+### 4.5 Imágenes de la portada
+
+- **Pantallas reales:** los celulares de la portada muestran capturas de la app, no dibujos. Se generan con `pnpm capture:screens`, que corre `e2e/capture/screens.capture.ts` contra el build con la API simulada de los e2e, en tema claro y oscuro (390 x 844 a 2x), y las guarda como WebP en `src/assets/landing/screens/`. Repite la captura cuando cambie una pantalla que sale en la portada.
+- **Fotos:** `src/assets/landing/photos/` guarda dos fotos de Nariño tomadas de Wikimedia Commons, con licencia CC BY-SA 4.0. Son el volcán Galeras (Luis Eduardo White Patiño, recortada) y los volcanes Cumbal y Chiles (Vlahebo). El pie de página de la portada da su crédito y enlaza a su fuente.
+- Las imágenes son WebP con nombre con hash bajo `/assets`: la CSP sigue con `img-src 'self'` y el service worker no las precarga.
+
 ## 5. Despliegue en producción
 
 Cabeceras, CSP y secretos en detalle: `.agents/deployment.md`.
