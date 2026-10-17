@@ -123,7 +123,9 @@ function TankLevel({ tankId }: { readonly tankId: string }): JSX.Element {
           <p>{t('home.levelAge', { hours: formatDecimal(level.hoursAgo, HOURS_DECIMALS) })}</p>
         </>
       )}
-      {view.trend.label === null ? (
+      {view.trend === null ? (
+        <p>{t('tankStatus.noTrend')}</p>
+      ) : view.trend.label === null ? (
         <p>{view.trend.labelEs ?? ''}</p>
       ) : (
         <p>{t(TREND_TEXT[view.trend.label])}</p>

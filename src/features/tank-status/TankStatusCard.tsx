@@ -18,7 +18,7 @@ interface TankStatusCardProps {
   readonly status: TankStatusView;
 }
 
-function trendText(trend: TankStatusView['trend']): string {
+function trendText(trend: NonNullable<TankStatusView['trend']>): string {
   switch (trend.label) {
     case 'DOWN':
       return t('tankStatus.trendDown');
@@ -95,15 +95,21 @@ export function TankStatusCard({ tank, status }: TankStatusCardProps): JSX.Eleme
           <dl className={cn(styles.facts)}>
             <div className={cn(styles.fact)}>
               <dt>{t('tankStatus.trendLabel')}</dt>
-              <dd className={cn(styles.trend)}>
-                <TrendIcon label={status.trend.label} />
-                {trendText(status.trend)}
-              </dd>
-              <dd className={cn(styles.muted)}>
-                {t('tankStatus.slopePerDay', {
-                  value: formatDecimal(status.trend.slopePerDay, SLOPE_DIGITS),
-                })}
-              </dd>
+              {status.trend === null ? (
+                <dd>{t('tankStatus.noTrend')}</dd>
+              ) : (
+                <>
+                  <dd className={cn(styles.trend)}>
+                    <TrendIcon label={status.trend.label} />
+                    {trendText(status.trend)}
+                  </dd>
+                  <dd className={cn(styles.muted)}>
+                    {t('tankStatus.slopePerDay', {
+                      value: formatDecimal(status.trend.slopePerDay, SLOPE_DIGITS),
+                    })}
+                  </dd>
+                </>
+              )}
             </div>
             <div className={cn(styles.fact)}>
               <dt>{t('tankStatus.bandLabel')}</dt>

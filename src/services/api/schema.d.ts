@@ -1877,7 +1877,7 @@ export interface components {
         };
         TankStatus: {
             level?: components["schemas"]["TankStatusLevel"] | null;
-            trend: components["schemas"]["TankStatusTrend"];
+            trend: components["schemas"]["TankStatusTrend"] | null;
             stale: {
                 is_stale: boolean;
                 stale_after_hours: number;

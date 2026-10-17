@@ -25,11 +25,12 @@ export interface TankStatusDto {
     readonly observed_at: string;
     readonly hours_ago: number;
   } | null;
-  readonly trend: {
+  /** Null while there is too little history to draw a line (API.md 8.1). */
+  readonly trend?: {
     readonly slope_per_day: number;
     readonly label: string;
     readonly label_es?: string;
-  };
+  } | null;
   readonly stale: { readonly is_stale: boolean; readonly stale_after_hours: number };
   /** The band of the current level (HIGH, LOW or CRITICAL), null without a level. */
   readonly band?: string | null;
@@ -81,11 +82,14 @@ export function toTankStatus(adapter: ApiDtoAdapter, dto: TankStatusDto): TankSt
             observedAt: adapter.toTimestamp('level.observed_at', dto.level.observed_at),
             hoursAgo: dto.level.hours_ago,
           },
-    trend: {
-      slopePerDay: dto.trend.slope_per_day,
-      label: isTrendLabel(dto.trend.label) ? dto.trend.label : null,
-      labelEs: dto.trend.label_es ?? null,
-    },
+    trend:
+      dto.trend === undefined || dto.trend === null
+        ? null
+        : {
+            slopePerDay: dto.trend.slope_per_day,
+            label: isTrendLabel(dto.trend.label) ? dto.trend.label : null,
+            labelEs: dto.trend.label_es ?? null,
+          },
     stale: { isStale: dto.stale.is_stale, staleAfterHours: dto.stale.stale_after_hours },
     band: toBand(dto.band),
     forecast:

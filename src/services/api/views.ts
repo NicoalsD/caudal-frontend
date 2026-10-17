@@ -271,13 +271,14 @@ export interface TankStatusView {
     readonly observedAt: TimestampView;
     readonly hoursAgo: number;
   } | null;
+  /** Null while there are too few days of readings to tell where the level goes. */
   readonly trend: {
     readonly slopePerDay: number;
     /** A known label, or null when the server sent one this client does not know. */
     readonly label: TrendLabel | null;
     /** Server text, the fallback for an unknown label. */
     readonly labelEs: string | null;
-  };
+  } | null;
   readonly stale: { readonly isStale: boolean; readonly staleAfterHours: number };
   readonly band: {
     readonly code: string;
