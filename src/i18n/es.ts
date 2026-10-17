@@ -590,6 +590,7 @@ export const strings = {
     trendDown: 'Viene bajando',
     trendStable: 'Estable',
     trendUp: 'Está subiendo',
+    noTrend: 'Todavía faltan lecturas de varios días para saber si sube o baja.',
     trendLabel: 'Tendencia',
     slopePerDay: '{value} m por día',
     levelLabel: 'Último nivel',
