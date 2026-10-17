@@ -5587,7 +5587,14 @@
             ]
           },
           "trend": {
-            "$ref": "#/components/schemas/TankStatusTrend"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TankStatusTrend"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "stale": {
             "type": "object",
