@@ -1,0 +1,87 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+}
+
+.meta {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.select {
+  min-height: 48px;
+  font: inherit;
+}
+
+.error {
+  margin: 0;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-chip);
+  font-weight: var(--font-weight-bold);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: var(--font-size-h2);
+  height: var(--font-size-h2);
+}
+
+.active {
+  color: var(--color-water-800);
+  background: var(--color-water-100);
+}
+
+.suspended {
+  color: var(--color-ochre-800);
+  background: var(--color-ochre-100);
+}
+
+.retired {
+  color: var(--color-paramo-800);
+  background: var(--color-paramo-100);
+}

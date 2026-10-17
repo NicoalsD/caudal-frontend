@@ -1,0 +1,65 @@
+import * as RadixDialog from '@radix-ui/react-dialog';
+import type { JSX, ReactNode, RefObject } from 'react';
+
+import { cn } from '../styles/cn';
+import styles from './Dialog.module.css';
+
+interface DialogProps {
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly title: string;
+  readonly description: string;
+  readonly children: ReactNode;
+  /**
+   * The control that opens the dialog: the focus goes back to it when the dialog closes. Omit it
+   * for a dialog that the screen opens by its own state (for example a code shown after an action).
+   */
+  readonly trigger?: ReactNode;
+  /** Chooses the first control that gets the focus (for example Cancelar in a destructive action). */
+  readonly onOpenAutoFocus?: (event: Event) => void;
+  /** Takes the focus when the dialog opens (Cancel in destructive actions, ux-guidelines 6). */
+  readonly initialFocusRef?: RefObject<HTMLElement | null>;
+}
+
+/**
+ * Modal dialog over Radix: it traps the focus, closes with Escape, gives the screen reader its
+ * title and description, and returns the focus to the button that opened it.
+ */
+export function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  trigger,
+  onOpenAutoFocus,
+  initialFocusRef,
+}: DialogProps): JSX.Element {
+  return (
+    <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
+      {trigger === undefined ? null : <RadixDialog.Trigger asChild>{trigger}</RadixDialog.Trigger>}
+      <RadixDialog.Portal>
+        <RadixDialog.Overlay className={cn(styles.overlay)} />
+        <RadixDialog.Content
+          className={cn(styles.content)}
+          onOpenAutoFocus={(event) => {
+            if (onOpenAutoFocus !== undefined) {
+              onOpenAutoFocus(event);
+              return;
+            }
+            if (initialFocusRef?.current) {
+              event.preventDefault();
+              initialFocusRef.current.focus();
+            }
+          }}
+        >
+          <RadixDialog.Title className={cn(styles.title)}>{title}</RadixDialog.Title>
+          <RadixDialog.Description className={cn(styles.description)}>
+            {description}
+          </RadixDialog.Description>
+          {children}
+        </RadixDialog.Content>
+      </RadixDialog.Portal>
+    </RadixDialog.Root>
+  );
+}

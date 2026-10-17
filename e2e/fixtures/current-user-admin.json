@@ -1,0 +1,27 @@
+{
+  "id": "0190f3a2-0000-7000-8000-000000000002",
+  "username": "junta.presidencia",
+  "full_name": "Persona Presidente",
+  "must_change_password": false,
+  "memberships": [
+    {
+      "aqueduct_id": "0190f3a2-0000-7000-8000-0000000000aa",
+      "role": "BOARD_ADMIN"
+    }
+  ],
+  "permissions": [
+    "NETWORK_VIEW",
+    "RULESET_VIEW",
+    "RULESET_DRAFT",
+    "STATUS_VIEW",
+    "PROPOSAL_VIEW",
+    "PROPOSAL_GENERATE",
+    "PROPOSAL_DECIDE",
+    "SCHEDULE_PUBLISH",
+    "ANOMALY_REVIEW",
+    "RULESET_ACTIVATE",
+    "NETWORK_MANAGE",
+    "USER_MANAGE",
+    "DEVICE_MANAGE"
+  ]
+}

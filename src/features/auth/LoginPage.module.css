@@ -1,0 +1,24 @@
+.welcome {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.notice {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-water-100);
+  color: var(--color-water-700);
+  border-radius: var(--radius-control);
+  font-weight: var(--font-weight-bold);
+}
+
+.help {
+  margin-top: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.formArea {
+  margin-top: var(--space-6);
+}
