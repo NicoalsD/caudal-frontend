@@ -75,7 +75,7 @@ describe('TankStatusPage (S12 status block)', () => {
           buildTankStatus({
             level: null,
             band: null,
-            trend: { slope_per_day: 0, label: 'STABLE' },
+            trend: null,
           }),
         ),
       ),
@@ -83,6 +83,17 @@ describe('TankStatusPage (S12 status block)', () => {
     renderStatus();
 
     expect(await screen.findByText(t('tankStatus.noLevel'))).toBeVisible();
+  });
+
+  it('says the trend is not known yet when there are few days of readings', async () => {
+    server.use(
+      http.get(apiUrl('/tanks/:id/status'), () => Response.json(buildTankStatus({ trend: null }))),
+    );
+    renderStatus();
+
+    await screen.findByText(t('tankStatus.levelValue', { value: '2,3' }));
+    expect(screen.getByText(t('tankStatus.noTrend'))).toBeVisible();
+    expect(screen.queryByRole('button', { name: t('common.retry') })).not.toBeInTheDocument();
   });
 
   it('offers a retry when the status does not load', async () => {

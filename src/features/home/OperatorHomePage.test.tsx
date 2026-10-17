@@ -72,12 +72,26 @@ describe('OperatorHomePage (S07)', () => {
   it('says there is no level yet when the tank has no readings', async () => {
     server.use(
       http.get(apiUrl(`/tanks/${TANK_ID}/status`), () =>
-        HttpResponse.json(buildTankStatus({ level: null })),
+        HttpResponse.json(buildTankStatus({ level: null, band: null, trend: null })),
       ),
     );
     renderHome();
 
     expect(await screen.findByText(t('tankStatus.noLevel'))).toBeVisible();
+    expect(screen.getByText(t('tankStatus.noTrend'))).toBeVisible();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('shows the level and says the trend is not known yet with few days of readings', async () => {
+    server.use(
+      http.get(apiUrl(`/tanks/${TANK_ID}/status`), () =>
+        HttpResponse.json(buildTankStatus({ trend: null })),
+      ),
+    );
+    renderHome();
+
+    expect(await screen.findByText(t('home.levelValue', { value: '2,3' }))).toBeVisible();
+    expect(screen.getByText(t('tankStatus.noTrend'))).toBeVisible();
   });
 
   it('counts the readings that have not reached the server and links to them', async () => {
