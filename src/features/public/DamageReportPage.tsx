@@ -11,17 +11,20 @@ import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import type { DamageReportInput, DamageReportReceiptView } from '../../services/api/views';
 import { useConstraints } from '../../state/hooks/useConstraints';
+import { useDamageCategories } from '../../state/hooks/useDamageCategories';
 import { useFormSchema } from '../../state/hooks/useFormSchema';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
+import { CircleCheck } from 'lucide-react';
+import { copyText } from './clipboard';
 import { DamageReportForm } from './DamageReportForm';
 import styles from './PublicSchedule.module.css';
 import { useCreateDamageReport } from './publicQueries';
-import { useDamageCategories } from '../../state/hooks/useDamageCategories';
 
-/** Screen S05: the report form, then the tracking code shown once. */
+/** Screen S05: the report in two steps, then the tracking code shown once, big and easy to copy. */
 export function DamageReportPage(): JSX.Element {
   const { aqueductSlug = '' } = useParams();
   const constraints = useConstraints();
@@ -60,6 +63,7 @@ export function DamageReportPage(): JSX.Element {
       <DamageReportForm
         schema={schema.schema}
         categories={categories.data}
+        descriptionMin={constraints.data?.[INCIDENT_DESCRIPTION_CONSTRAINT]?.min}
         descriptionMax={descriptionMax}
         locationMax={constraints.data?.[INCIDENT_LOCATION_CONSTRAINT]?.max}
         onSubmit={send}
@@ -68,17 +72,44 @@ export function DamageReportPage(): JSX.Element {
   );
 }
 
+/** The code, large, with one button to copy it and what to do with it next. */
 function DamageReceipt({ receipt }: { readonly receipt: DamageReportReceiptView }): JSX.Element {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const trackingPath = generatePath(ROUTE_PATHS.public.tracking, {
     trackingCode: receipt.trackingCode,
   });
+
+  const copyCode = async (): Promise<void> => {
+    setCopyState((await copyText(receipt.trackingCode)) ? 'copied' : 'failed');
+  };
+
   return (
     <section>
       <ScreenTitle>{t('publicReport.receiptTitle')}</ScreenTitle>
       <p className={cn(styles.codeLabel)}>{t('publicReport.codeLabel')}</p>
       <p className={cn(styles.code)}>{receipt.trackingCode}</p>
       <p>{t('publicReport.saveCode')}</p>
-      <Link className={cn(styles.linkButton)} to={trackingPath}>
+      <div className={cn(styles.stepActions)}>
+        <Button variant="primary" onClick={() => void copyCode()}>
+          {t('publicReport.copyCode')}
+        </Button>
+        <p role="status" className={cn(styles.status)}>
+          {copyState === 'copied' ? (
+            <>
+              <CircleCheck aria-hidden="true" className={cn(styles.statusIcon)} />
+              <span>{t('publicReport.codeCopied')}</span>
+            </>
+          ) : copyState === 'failed' ? (
+            <span>{t('publicReport.codeCopyFailed')}</span>
+          ) : null}
+        </p>
+      </div>
+      <h2>{t('publicReport.nextTitle')}</h2>
+      <ul className={cn(styles.nextList)}>
+        <li>{t('publicReport.nextCheck')}</li>
+        <li>{t('publicReport.nextLost')}</li>
+      </ul>
+      <Link className={cn(styles.action)} to={trackingPath}>
         {t('publicReport.checkStatus')}
       </Link>
     </section>
