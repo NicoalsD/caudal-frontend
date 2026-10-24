@@ -69,6 +69,9 @@ const PAIRS: readonly (readonly [string, string, number])[] = [
   ['--color-focus', '--color-page', MIN_CONTROL_RATIO],
   ['--color-focus', '--color-raised', MIN_CONTROL_RATIO],
   ['--color-ochre-700', '--color-page', MIN_CONTROL_RATIO],
+  ['--color-on-brand', '--color-brand-900', MIN_TEXT_RATIO],
+  ['--color-water-700', '--color-raised', MIN_TEXT_RATIO],
+  ['--color-text-primary', '--color-water-100', MIN_TEXT_RATIO],
 ];
 
 describe.each([
@@ -93,8 +96,9 @@ describe('token structure', () => {
     expect(darkBySystem).toEqual(dark);
   });
 
-  it('uses the self-hosted font stack with fallbacks', () => {
-    expect(css).toContain("--font-family-base:\n    'Atkinson Hyperlegible Next'");
+  it('uses the self-hosted style tile fonts with fallbacks', () => {
+    expect(css).toContain("--font-family-base:\n    'Montserrat'");
+    expect(css).toContain("--font-family-display:\n    'Barlow'");
     expect(css).not.toMatch(/fonts\.(googleapis|gstatic)\.com/);
   });
 });

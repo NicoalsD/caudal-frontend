@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import type { JSX } from 'react';
 import { generatePath, useNavigate, useParams } from 'react-router';
 
@@ -19,6 +19,8 @@ import { FormFields } from '../../ui/primitives/FormFields';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
+import { normalizeTrackingCodeInput } from '../../core/public/trackingCode';
+import type { ReportStatus } from '../../core/incidents/reportStatus';
 import { ReportStatusBadge } from '../../ui/feedback/ReportStatusBadge';
 import styles from './PublicSchedule.module.css';
 import { usePublicDamageReport } from './publicQueries';
@@ -26,6 +28,15 @@ import { usePublicDamageReport } from './publicQueries';
 const NOT_FOUND_CODE = 'NOT_FOUND';
 const VALIDATION_CODE = 'VALIDATION_ERROR';
 const TRACKING_CODE_CONSTRAINT = 'tracking_code';
+
+/** What each status means for the family, in plain words (keys of es.ts). */
+const STATUS_HELP_KEY = {
+  REPORTED: 'publicTracking.statusHelp.received',
+  VERIFYING: 'publicTracking.statusHelp.verifying',
+  CONFIRMED: 'publicTracking.statusHelp.confirmed',
+  RESOLVED: 'publicTracking.statusHelp.resolved',
+  DISMISSED: 'publicTracking.statusHelp.dismissed',
+} as const satisfies Readonly<Record<ReportStatus, string>>;
 
 interface TrackingValues {
   readonly tracking_code: string;
@@ -87,14 +98,16 @@ function TrackingLookupForm({
   initialCode,
   onSearch,
 }: TrackingLookupFormProps): JSX.Element {
-  const { register, handleSubmit, formState } = useForm<TrackingValues>({
+  const { register, handleSubmit, formState, control } = useForm<TrackingValues>({
     resolver: formResolver<TrackingValues>(schema),
     mode: 'onSubmit',
     defaultValues: { tracking_code: initialCode },
   });
   const { errors, isSubmitting } = formState;
+  const codeField = register(TRACKING_CODE_FIELD);
+  const typed = useWatch({ control, name: TRACKING_CODE_FIELD }) ?? '';
   const submit = handleSubmit((values) => {
-    onSearch(values.tracking_code);
+    onSearch(normalizeTrackingCodeInput(values.tracking_code));
   });
 
   return (
@@ -108,8 +121,19 @@ function TrackingLookupForm({
           autoComplete="off"
           spellCheck={false}
           error={errors.tracking_code?.message}
-          {...register(TRACKING_CODE_FIELD)}
+          {...codeField}
+          onChange={(event) => {
+            // The code is cleaned as it is typed: no spaces, no hyphens, upper case.
+            event.currentTarget.value = normalizeTrackingCodeInput(event.currentTarget.value);
+            void codeField.onChange(event);
+          }}
         />
+        <p className={cn(styles.hint)} aria-live="polite">
+          {t('publicTracking.codeTyped', {
+            length: String(typed.length),
+            max: String(codeLength),
+          })}
+        </p>
         <Button type="submit" variant="primary" className={cn(styles.submit)}>
           {t('publicTracking.lookup')}
         </Button>
@@ -143,8 +167,16 @@ function TrackingResult({ code }: { readonly code: string }): JSX.Element {
   return (
     <section aria-labelledby="tracking-status-heading">
       <h2 id="tracking-status-heading">{t('publicTracking.statusLabel')}</h2>
-      <ReportStatusBadge status={report.data.status} />
-      <p>{t('publicTracking.updatedAt', { date: report.data.updatedAt.text })}</p>
+      <div className={cn(styles.trackingStatus)}>
+        <ReportStatusBadge status={report.data.status} />
+        <p className={cn(styles.statusHelp)}>{t(STATUS_HELP_KEY[report.data.status])}</p>
+        <p className={cn(styles.hint)}>
+          {t('publicTracking.reportedAt', { date: report.data.reportedAt.text })}
+        </p>
+        <p className={cn(styles.hint)}>
+          {t('publicTracking.updatedAt', { date: report.data.updatedAt.text })}
+        </p>
+      </div>
     </section>
   );
 }

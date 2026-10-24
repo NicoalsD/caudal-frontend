@@ -3,6 +3,8 @@ import { Link } from 'react-router';
 
 import {
   currentProposalOf,
+  isDecidable,
+  isPublishable,
   orderProposals,
   type DayProposal,
 } from '../../core/proposal/proposalDay';
@@ -17,8 +19,9 @@ import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
+import { LinkButton } from '../../ui/primitives/LinkButton';
 import { cn } from '../../ui/styles/cn';
-import { proposalDetailPath } from './paths';
+import { proposalDetailPath, publicationPath } from './paths';
 import { ProposalStatusChip } from './ProposalStatusChip';
 import styles from './Proposals.module.css';
 import { useGenerateProposal, useProposalList } from './proposalQueries';
@@ -72,14 +75,17 @@ export function ProposalListPage(): JSX.Element {
   return (
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.proposals')}</ScreenTitle>
-      <section className={cn(styles.section)} aria-labelledby="proposal-today-title">
+      <section
+        className={cn(styles.section, todayView !== null && styles.highlight)}
+        aria-labelledby="proposal-today-title"
+      >
         <h2 id="proposal-today-title" className={cn(styles.heading)}>
           {t('proposals.today')}
         </h2>
         {todayView === null ? (
           <p>{t('proposals.todayEmpty')}</p>
         ) : (
-          <ProposalSummary proposal={todayView} />
+          <ProposalSummary proposal={todayView} emphasis />
         )}
         {todayProposal === null && canGenerate ? (
           <div className={cn(styles.actions)}>
@@ -132,9 +138,15 @@ interface ProposalSummaryProps {
   readonly proposal: ScheduleProposalSummaryView;
   /** Other days show their date in the heading; today's block does not need it. */
   readonly showDay?: boolean;
+  /** Today's block: a proposal that waits for the Board, or is approved, gets the primary action. */
+  readonly emphasis?: boolean;
 }
 
-function ProposalSummary({ proposal, showDay = false }: ProposalSummaryProps): JSX.Element {
+function ProposalSummary({
+  proposal,
+  showDay = false,
+  emphasis = false,
+}: ProposalSummaryProps): JSX.Element {
   return (
     <>
       {showDay ? (
@@ -147,9 +159,36 @@ function ProposalSummary({ proposal, showDay = false }: ProposalSummaryProps): J
       <p className={cn(styles.meta)}>
         {t('proposals.generatedOn', { date: proposal.generatedAt.text })}
       </p>
-      <Link className={cn(styles.link)} to={proposalDetailPath(proposal.id)}>
-        {t('proposals.open')}
-      </Link>
+      <NextLink proposal={proposal} emphasis={emphasis} />
     </>
+  );
+}
+
+/** The one action a proposal invites: review it while it waits, publish it once it is approved. */
+function NextLink({
+  proposal,
+  emphasis,
+}: {
+  readonly proposal: ScheduleProposalSummaryView;
+  readonly emphasis: boolean;
+}): JSX.Element {
+  if (emphasis && isDecidable(proposal.status)) {
+    return (
+      <LinkButton variant="primary" to={proposalDetailPath(proposal.id)}>
+        {t('proposals.open')}
+      </LinkButton>
+    );
+  }
+  if (emphasis && isPublishable(proposal.status)) {
+    return (
+      <LinkButton variant="primary" to={publicationPath(proposal.id)}>
+        {t('proposals.actions.publish')}
+      </LinkButton>
+    );
+  }
+  return (
+    <Link className={cn(styles.link)} to={proposalDetailPath(proposal.id)}>
+      {t('proposals.open')}
+    </Link>
   );
 }

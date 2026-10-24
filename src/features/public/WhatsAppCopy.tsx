@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { CircleCheck } from 'lucide-react';
 
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
@@ -8,6 +9,7 @@ import { useCaudalApi } from '../../state/hooks/apiContext';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
+import { copyText } from './clipboard';
 import styles from './PublicSchedule.module.css';
 
 interface WhatsAppCopyProps {
@@ -15,8 +17,9 @@ interface WhatsAppCopyProps {
 }
 
 /**
- * Copies the day's schedule as a WhatsApp message. When the clipboard is unavailable or refuses,
- * the text stays on screen in a selectable box, so the person can copy it by hand.
+ * Copies the day's schedule as a WhatsApp message. The confirmation is text with an icon, read by
+ * assistive technology. When the clipboard is unavailable or refuses, the text stays on screen in
+ * a selectable box, so the person can copy it by hand.
  */
 export function WhatsAppCopy({ aqueductSlug }: WhatsAppCopyProps): JSX.Element {
   const api = useCaudalApi();
@@ -27,13 +30,9 @@ export function WhatsAppCopy({ aqueductSlug }: WhatsAppCopyProps): JSX.Element {
   });
 
   const placeText = async (text: string): Promise<void> => {
-    try {
-      if (navigator.clipboard === undefined) {
-        throw new Error('Clipboard API unavailable');
-      }
-      await navigator.clipboard.writeText(text);
+    if (await copyText(text)) {
       setCopied(true);
-    } catch {
+    } else {
       setManualText(text);
     }
   };
@@ -50,12 +49,19 @@ export function WhatsAppCopy({ aqueductSlug }: WhatsAppCopyProps): JSX.Element {
 
   return (
     <div className={cn(styles.copy)}>
-      <Button variant="primary" onClick={copy} disabled={fetchText.isPending}>
-        {t('publicSchedule.share.copyWhatsApp')}
+      <Button className={cn(styles.action)} onClick={copy} disabled={fetchText.isPending}>
+        {fetchText.isPending
+          ? t('publicSchedule.share.copying')
+          : t('publicSchedule.share.copyWhatsApp')}
       </Button>
       {fetchText.isError ? <FormAlert message={errorText(fetchText.error).message} /> : null}
       <p role="status" className={cn(styles.status)}>
-        {copied ? t('publicSchedule.share.copied') : ''}
+        {copied ? (
+          <>
+            <CircleCheck aria-hidden="true" className={cn(styles.statusIcon)} />
+            <span>{t('publicSchedule.share.copied')}</span>
+          </>
+        ) : null}
       </p>
       {manualText === null ? null : (
         <>

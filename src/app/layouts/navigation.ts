@@ -1,13 +1,16 @@
+import { AlertTriangle, ClipboardList, Droplets, House, PencilLine } from 'lucide-react';
+
 import { t } from '../../i18n/t';
 import type { NavItem } from './RoleLayout';
 import { ROUTE_PATHS } from '../../core/session/routes';
 
+/** The operator works one-handed on a phone: these five become a bottom tab bar on small screens. */
 export const OPERATOR_NAV: readonly NavItem[] = [
-  { to: ROUTE_PATHS.operator.home, label: t('nav.operatorHome') },
-  { to: ROUTE_PATHS.operator.newReading, label: t('nav.newReading') },
-  { to: ROUTE_PATHS.operator.pending, label: t('nav.pending') },
-  { to: ROUTE_PATHS.operator.damage, label: t('nav.damage') },
-  { to: ROUTE_PATHS.tank, label: t('nav.tank') },
+  { to: ROUTE_PATHS.operator.home, label: t('nav.operatorHome'), icon: House },
+  { to: ROUTE_PATHS.operator.newReading, label: t('nav.newReading'), icon: PencilLine },
+  { to: ROUTE_PATHS.operator.pending, label: t('nav.pending'), icon: ClipboardList },
+  { to: ROUTE_PATHS.operator.damage, label: t('nav.damage'), icon: AlertTriangle },
+  { to: ROUTE_PATHS.tank, label: t('nav.tank'), icon: Droplets },
 ];
 
 export const BOARD_NAV: readonly NavItem[] = [

@@ -4,9 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 import packageJson from './package.json';
 
-// Colors come from the tokens in src/ui/styles/tokens.css (--color-page, --color-water-700).
-const PAGE_COLOR = '#f4f0e6';
-const WATER_COLOR = '#1d5a6e';
+// Colors come from the tokens in src/ui/styles/tokens.css (--color-page, --color-brand-900).
+const PAGE_COLOR = '#f2f6f5';
+const WATER_COLOR = '#0b3333';
 
 export default defineConfig({
   plugins: [
@@ -43,6 +43,15 @@ export default defineConfig({
       workbox: {
         // App shell only: the HTML, JS, CSS, fonts and icons. Operator screens open offline.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // The landing's water (three.js) and scroll motion (GSAP) load on demand and only on "/":
+        // an operator installing the app over a weak signal never downloads them.
+        globIgnores: [
+          '**/waterScene-*.js',
+          '**/heroMotion-*.js',
+          '**/three*.js',
+          '**/gsap*.js',
+          '**/ScrollTrigger-*.js',
+        ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,

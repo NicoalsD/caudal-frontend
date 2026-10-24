@@ -5,20 +5,20 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces and text */
-  --color-page: #f4f0e6;
-  --color-raised: #fbf9f3;
-  --color-sand-200: #e6dcc6;
-  --color-text-primary: #1e2b2f;
-  --color-text-secondary: #4a5b60;
+  /* Surfaces and text: cool paper tinted from the brand teal (style tile, CAUDAL.pdf). */
+  --color-page: #f2f6f5;
+  --color-raised: #fcfefd;
+  --color-sand-200: #e0ebe9;
+  --color-text-primary: #132e2d;
+  --color-text-secondary: #3d5958;
 
-  /* Water: action and focus */
-  --color-water-700: #1d5a6e;
-  --color-water-800: #164857;
-  --color-water-300: #a9cdd6;
-  --color-water-100: #d7e8ee;
+  /* Water: action and focus. 700 is the style tile's #336666, the darkest brand teal. */
+  --color-water-700: #336666;
+  --color-water-800: #1f4d4d;
+  --color-water-300: #99cccc;
+  --color-water-100: #d9edeb;
 
-  /* Paramo: correct, online */
+  /* Paramo: correct, online (kept yellow-green so it never reads as brand teal) */
   --color-paramo-800: #2f5e3e;
   --color-paramo-100: #dde9dc;
 
@@ -32,19 +32,30 @@
   --color-clay-100: #f3ddd6;
 
   /* Borders and focus */
-  --color-border-strong: #6b7c81;
-  --color-border-subtle: #d9d0bc;
-  --color-focus: #1d5a6e;
+  --color-border-strong: #5e7776;
+  --color-border-subtle: #cfdedc;
+  --color-focus: #336666;
+
+  /* Brand: the logo's teals. Decoration and large display only, never body text. */
+  --color-brand-900: #0b3333;
+  --color-brand-500: #26a6a2;
+  --color-brand-400: #669999;
+  --color-brand-200: #bfe3e1;
+  /* Text on the deep brand fields (header band, landing, login) */
+  --color-on-brand: #f2fbfa;
 
   /* Phone bezel of the landing frames: dark glass in both themes. */
-  --color-bezel: #121a1d;
+  --color-bezel: #0c1a1a;
 
   /* Typography */
+  /* Style tile: Montserrat Medium for text, Montserrat Bold for subtitles, Barlow ExtraBold for titles. */
   --font-family-base:
-    'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', 'Segoe UI', system-ui, Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  --font-weight-regular: 400;
+    'Montserrat', 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-display:
+    'Barlow', 'Montserrat', 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-weight-regular: 500;
   --font-weight-bold: 700;
+  --font-weight-display: 800;
   --font-size-display: 3rem;
   --font-size-h1: 1.75rem;
   --font-size-h2: 1.375rem;
@@ -93,8 +104,8 @@
   --font-size-statement: clamp(2.25rem, 5.6vw, 4.75rem);
   --font-size-lead: clamp(1.25rem, 2.1vw, 1.625rem);
   --line-height-tight: 1.04;
-  --tracking-display: -0.035em;
-  --tracking-hero: -0.05em;
+  --tracking-display: -0.025em;
+  --tracking-hero: -0.03em;
   --space-8: 4.5rem;
   --space-9: 7.5rem;
   --landing-max: 75rem;
@@ -113,16 +124,16 @@
   :root:not([data-theme='light']) {
     color-scheme: dark;
 
-    --color-page: #0f1a1d;
-    --color-raised: #16252a;
-    --color-sand-200: #22343a;
-    --color-text-primary: #e8eef0;
-    --color-text-secondary: #a9bcc1;
+    --color-page: #0b1c1c;
+    --color-raised: #112626;
+    --color-sand-200: #1a3332;
+    --color-text-primary: #e4f1f0;
+    --color-text-secondary: #a5c1bf;
 
-    --color-water-700: #7fc0d3;
-    --color-water-800: #a9d5e3;
-    --color-water-300: #2b5a68;
-    --color-water-100: #1f3e49;
+    --color-water-700: #8fd3cf;
+    --color-water-800: #b6e4e1;
+    --color-water-300: #2a5c5a;
+    --color-water-100: #173a39;
 
     --color-paramo-800: #8fcb9f;
     --color-paramo-100: #1f3b2a;
@@ -134,27 +145,33 @@
     --color-clay-700: #f0907d;
     --color-clay-100: #4a211a;
 
-    --color-border-strong: #8fa3a8;
-    --color-border-subtle: #2f4249;
-    --color-focus: #7fc0d3;
+    --color-border-strong: #84a3a1;
+    --color-border-subtle: #24403f;
+    --color-focus: #8fd3cf;
 
-    --color-bezel: #121a1d;
+    --color-brand-900: #061717;
+    --color-brand-500: #2fbcb7;
+    --color-brand-400: #669999;
+    --color-brand-200: #1e4847;
+    --color-on-brand: #f2fbfa;
+
+    --color-bezel: #0c1a1a;
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --color-page: #0f1a1d;
-  --color-raised: #16252a;
-  --color-sand-200: #22343a;
-  --color-text-primary: #e8eef0;
-  --color-text-secondary: #a9bcc1;
+  --color-page: #0b1c1c;
+  --color-raised: #112626;
+  --color-sand-200: #1a3332;
+  --color-text-primary: #e4f1f0;
+  --color-text-secondary: #a5c1bf;
 
-  --color-water-700: #7fc0d3;
-  --color-water-800: #a9d5e3;
-  --color-water-300: #2b5a68;
-  --color-water-100: #1f3e49;
+  --color-water-700: #8fd3cf;
+  --color-water-800: #b6e4e1;
+  --color-water-300: #2a5c5a;
+  --color-water-100: #173a39;
 
   --color-paramo-800: #8fcb9f;
   --color-paramo-100: #1f3b2a;
@@ -166,9 +183,15 @@
   --color-clay-700: #f0907d;
   --color-clay-100: #4a211a;
 
-  --color-border-strong: #8fa3a8;
-  --color-border-subtle: #2f4249;
-  --color-focus: #7fc0d3;
+  --color-border-strong: #84a3a1;
+  --color-border-subtle: #24403f;
+  --color-focus: #8fd3cf;
 
-  --color-bezel: #121a1d;
+  --color-brand-900: #061717;
+  --color-brand-500: #2fbcb7;
+  --color-brand-400: #669999;
+  --color-brand-200: #1e4847;
+  --color-on-brand: #f2fbfa;
+
+  --color-bezel: #0c1a1a;
 }

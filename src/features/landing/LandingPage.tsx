@@ -15,6 +15,7 @@ import {
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { strings } from '../../i18n/es';
+import { BrandLogo } from '../../ui/brand/BrandLogo';
 import { cn } from '../../ui/styles/cn';
 import { AppScreen } from './AppScreen';
 import type { AppShot } from './AppScreen';
@@ -25,6 +26,7 @@ import styles from './Landing.module.css';
 import { DOCS_URL, PHOTO_URLS, REPOSITORY_URLS, SECTION_IDS } from './links';
 import { CLOSING_PHOTO, HERO_PHOTO } from './photos';
 import { OfflineBand } from './OfflineBand';
+import { useHeroWater } from './useHeroWater';
 import { useReveal } from './useReveal';
 
 const copy = strings.landing;
@@ -81,8 +83,7 @@ function LandingNav(): JSX.Element {
     <header className={cn(styles.navBar)} data-scrolled={scrolled}>
       <div className={cn(styles.navInner)}>
         <Link to={ROUTE_PATHS.root} className={cn(styles.navBrand)} aria-label={copy.nav.home}>
-          <span className={cn(styles.brandMark)} aria-hidden="true" />
-          {strings.app.name}
+          <BrandLogo tone="onBrand" />
         </Link>
         <nav aria-label={copy.nav.label} className={cn(styles.navLinks)}>
           <ul>
@@ -124,12 +125,15 @@ const HERO_DEVICES = [
 ] as const satisfies readonly { key: string; shot: AppShot; caption: string; alt: string }[];
 
 /**
- * First viewport: the wordmark fills with water over the page color, and below it the land of
- * Nariño opens up with three real screens of the app standing in front of it.
+ * First viewport: the brand's deep teal field with moving water (three.js, loaded on demand), the
+ * wordmark filling up to its level, and below it the land of Guaitarilla with three real screens of
+ * the app rising out of the water as the visitor scrolls (GSAP).
  */
 function Hero(): JSX.Element {
+  const { heroRef, canvasRef } = useHeroWater();
   return (
-    <section className={cn(styles.hero)} aria-labelledby="landing-title">
+    <section ref={heroRef} className={cn(styles.hero)} aria-labelledby="landing-title">
+      <canvas ref={canvasRef} className={cn(styles.water)} aria-hidden="true" />
       <div className={cn(styles.heroText)}>
         <h1 id="landing-title" className={cn(styles.wordmark)}>
           <span className={cn(styles.visuallyHidden)}>{copy.hero.title}</span>
@@ -154,6 +158,7 @@ function Hero(): JSX.Element {
 
       <div className={cn(styles.land)}>
         <img
+          data-hero-photo
           className={cn(styles.landPhoto)}
           src={HERO_PHOTO.src}
           srcSet={HERO_PHOTO.srcSet}
@@ -402,8 +407,7 @@ function LandingFooter(): JSX.Element {
     <footer className={cn(styles.footer)}>
       <div className={cn(styles.footerInner)}>
         <p className={cn(styles.footerBrand)}>
-          <span className={cn(styles.brandMark)} aria-hidden="true" />
-          {strings.app.name}
+          <BrandLogo />
           <span className={cn(styles.footerTagline)}>{copy.hero.tagline}</span>
         </p>
         <p className={cn(styles.footerSimulated)}>{copy.footer.simulated}</p>
@@ -423,7 +427,7 @@ function LandingFooter(): JSX.Element {
         <div className={cn(styles.footerCredits)}>
           <h2>{copy.credits.title}</h2>
           <ul>
-            {(['galeras', 'cumbal'] as const).map((photo) => (
+            {(['galeras', 'azufral'] as const).map((photo) => (
               <li key={photo}>
                 {copy.credits[photo]}{' '}
                 <ExternalLink href={PHOTO_URLS[photo]}>{copy.credits.source}</ExternalLink>

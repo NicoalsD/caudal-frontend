@@ -1,5 +1,6 @@
-import '@fontsource/atkinson-hyperlegible-next/latin-400.css';
-import '@fontsource/atkinson-hyperlegible-next/latin-700.css';
+import '@fontsource/montserrat/latin-500.css';
+import '@fontsource/montserrat/latin-700.css';
+import '@fontsource/barlow/latin-800.css';
 import './ui/styles/index.css';
 
 import { StrictMode } from 'react';

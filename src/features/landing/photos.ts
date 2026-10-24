@@ -1,5 +1,6 @@
-import cumbal960 from '../../assets/landing/photos/cumbal-960.webp';
-import cumbal1440 from '../../assets/landing/photos/cumbal-1440.webp';
+import azufral960 from '../../assets/landing/photos/azufral-960.webp';
+import azufral1600 from '../../assets/landing/photos/azufral-1600.webp';
+import azufral2400 from '../../assets/landing/photos/azufral-2400.webp';
 import galeras960 from '../../assets/landing/photos/galeras-960.webp';
 import galeras1600 from '../../assets/landing/photos/galeras-1600.webp';
 import galeras2400 from '../../assets/landing/photos/galeras-2400.webp';
@@ -16,9 +17,10 @@ export const HERO_PHOTO = {
   height: 1258,
 } as const;
 
+/** Laguna Verde in the crater of the Azufral, the volcano next to Guaitarilla: the water source. */
 export const CLOSING_PHOTO = {
-  src: cumbal1440,
-  srcSet: `${cumbal960} 960w, ${cumbal1440} 1440w`,
-  width: 1440,
-  height: 960,
+  src: azufral1600,
+  srcSet: `${azufral960} 960w, ${azufral1600} 1600w, ${azufral2400} 2400w`,
+  width: 2400,
+  height: 1800,
 } as const;

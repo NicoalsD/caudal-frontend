@@ -43,6 +43,11 @@ describe('PendingReadingsPage (S09)', () => {
     renderPending();
 
     expect(await screen.findByText(t('pending.empty'))).toBeInTheDocument();
+    expect(screen.getByText(t('pending.emptyHelp'))).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: t('home.newReading') })).toHaveAttribute(
+      'href',
+      ROUTE_PATHS.operator.newReading,
+    );
   });
 
   it('lists each reading with its value, its time in 12 hours and its status', async () => {
@@ -110,7 +115,7 @@ describe('PendingReadingsPage (S09)', () => {
   it('cannot send while the phone is offline and says it is waiting for a signal', async () => {
     const { services, owner } = renderPending();
     await services.offline.outbox.enqueue(
-      new SubmitReadingCommand('c-1', payload(VALUE_ONE)),
+      new SubmitReadingCommand('c-offline', payload(VALUE_ONE)),
       owner,
       null,
     );
@@ -122,5 +127,16 @@ describe('PendingReadingsPage (S09)', () => {
     await waitFor(() => {
       expect(button).toBeDisabled();
     });
+  });
+
+  it('says the readings are sent by themselves when the signal comes back', async () => {
+    const { services, owner } = renderPending();
+    await services.offline.outbox.enqueue(
+      new SubmitReadingCommand('c-auto', payload(VALUE_ONE)),
+      owner,
+      null,
+    );
+
+    expect(await screen.findByText(new RegExp(t('pending.autoSend')))).toBeInTheDocument();
   });
 });

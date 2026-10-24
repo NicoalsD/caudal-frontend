@@ -1,69 +1,62 @@
 # Tema visual
 
-Tema de CAUDAL en modo claro, inspirado en el agua de los acueductos andinos y en el páramo que los alimenta. El tema es sobrio y legible en exterior, sin degradados, sin emojis y sin decoración que compita con los datos. Todos los colores, tamaños y espaciados salen de tokens CSS definidos en `:root` (`src/ui/styles/tokens.css`). Ningún componente escribe un valor de color o de fuente directamente.
+Tema de CAUDAL a partir del **style tile** de la marca (`CAUDAL.pdf`, guía de estilo visual rápida del equipo): turquesas y verde azulado que evocan el recorrido del agua, Barlow ExtraBold para los títulos y Montserrat para el texto, fotografía sobria de Guaitarilla y Nariño. El style tile manda sobre cualquier regla anterior de este documento. Todos los colores, tamaños y espaciados salen de tokens CSS definidos en `:root` (`src/ui/styles/tokens.css`). Ningún componente escribe un valor de color o de fuente directamente.
 
 ## 1. Principios
 
-1. **Legibilidad al sol primero.** Fondos claros, texto oscuro, contraste AA como mínimo (ver `ux-guidelines.md`).
-2. **El agua es el tema, no el adorno.** La paleta sale del agua (azul profundo), el páramo (verdes apagados y tierra) y el sol andino (ocre). El único motivo gráfico es la línea de nivel.
+1. **Dos registros, una marca.** Las superficies de marca (landing, inicio de sesión, cabecera) llevan el campo turquesa profundo, los degradados del logo, la fotografía y el movimiento. Las pantallas de tareas (fontanero, Junta, público, equipo) usan la misma paleta y las mismas fuentes, pero con fondos planos: se leen al sol y en celulares de gama baja.
+2. **Legibilidad al sol primero.** En las pantallas de tareas: fondos claros, texto oscuro, contraste AA como mínimo (ver `ux-guidelines.md`).
 3. **Los datos mandan.** Los números son grandes y claros; el color solo ordena, nunca es lo único que informa.
-4. **Sin decoración que no informe.** Sin degradados, sin sombras de color, sin texturas de fondo, sin ilustraciones de relleno.
-5. **Modo claro primero.** El modo oscuro se agrega después redefiniendo los mismos tokens, sin tocar componentes.
+4. **Menos cosas, mejor hechas.** Una acción dominante por pantalla, detalles bajo demanda, estado del sistema siempre visible.
+5. **Claro y oscuro.** Ambos modos redefinen los mismos tokens; los componentes no cambian.
 
 ## 2. Paleta (tokens)
 
-Todos los valores hexadecimales están verificados con el cálculo de contraste WCAG 2.1 (luminancia relativa). Las razones se indican con dos decimales.
+Los nombres de los tokens se conservaron de la primera versión (`water`, `paramo`, `ochre`, `clay`) para no tocar los componentes; sus valores salen del style tile. Todas las razones se calculan con la luminancia relativa de WCAG 2.1 y las verifica `src/ui/styles/tokens.test.ts`.
 
-### 2.1 Superficies y texto
+### 2.1 Colores del style tile
 
-| Token | Valor | Uso | Contraste |
-|-------|-------|-----|-----------|
-| `--color-page` | `#F4F0E6` | Fondo de la página (lana de páramo, papel claro) | Base de referencia |
-| `--color-raised` | `#FBF9F3` | Superficies de formularios, diálogos y tarjetas de contenido (sin borde de acento) | Texto primario 13,83:1 |
-| `--color-sand-200` | `#E6DCC6` | Zonas de énfasis suave, encabezados de tabla | Texto primario 10,69:1 |
-| `--color-text-primary` | `#1E2B2F` | Texto principal | 12,80:1 sobre `page`; 13,83:1 sobre `raised` |
-| `--color-text-secondary` | `#4A5B60` | Texto de apoyo, etiquetas auxiliares, metadatos | 6,24:1 sobre `page`; 6,75:1 sobre `raised` |
+| Color del tile | Valor | Dónde vive | Nota de contraste |
+|----------------|-------|------------|-------------------|
+| Verde azulado oscuro | `#336666` | `--color-water-700`: acción, enlaces, foco | Texto `raised` sobre él 6,41:1; sobre `page` 5,96:1 |
+| Gris turquesa | `#669999` | `--color-brand-400`: decoración | 3,15:1 sobre blanco: **nunca** para texto normal |
+| Turquesa claro | `#99CCCC` | `--color-water-300`: rellenos, banda del pronóstico, selección | Texto primario sobre él 8,15:1 |
+| Turquesa del logo (R38 G166 B162) | `#26A6A2` | `--color-brand-500`: línea de nivel, acentos sobre el campo profundo | 2,94:1 sobre blanco: solo decoración |
 
-### 2.2 Agua (acción y foco)
-
-| Token | Valor | Uso | Contraste |
-|-------|-------|-----|-----------|
-| `--color-water-700` | `#1D5A6E` | Botón principal (texto `raised` sobre él), enlaces, foco | Texto `raised` sobre `water-700` 7,28:1; enlace sobre `page` 6,74:1 |
-| `--color-water-800` | `#164857` | Estado pulsado y al pasar el cursor del botón principal | Texto `raised` sobre `water-800` 9,50:1 |
-| `--color-water-300` | `#A9CDD6` | Relleno de la banda del pronóstico (decorativo; el límite va en `water-700`) | Texto primario sobre `water-300` 8,59:1 |
-| `--color-water-100` | `#D7E8EE` | Fondo de chips "Observado" | `water-700` sobre `water-100` 6,08:1 |
-
-### 2.3 Páramo (correcto, en línea)
+### 2.2 Superficies y texto
 
 | Token | Valor | Uso | Contraste |
 |-------|-------|-----|-----------|
-| `--color-paramo-800` | `#2F5E3E` | Texto de estado "En línea", "Cumplido", "Confirmado" | 6,61:1 sobre `page`; 7,15:1 sobre `raised` |
-| `--color-paramo-100` | `#DDE9DC` | Fondo de chips de estado correcto | Texto primario 11,63:1 |
+| `--color-page` | `#F2F6F5` | Fondo de la página, papel frío teñido de turquesa | Base de referencia |
+| `--color-raised` | `#FCFEFD` | Formularios, diálogos y tarjetas de contenido | Texto primario 14,24:1 |
+| `--color-sand-200` | `#E0EBE9` | Énfasis suave, encabezados de tabla, cursor sobre listas | Texto primario 11,83:1 |
+| `--color-text-primary` | `#132E2D` | Texto principal | 13,24:1 sobre `page` |
+| `--color-text-secondary` | `#3D5958` | Texto de apoyo y metadatos | 6,96:1 sobre `page`; 7,49:1 sobre `raised` |
+| `--color-brand-900` | `#0B3333` | Campo de marca: cabecera, landing, panel del login | `on-brand` sobre él 13,00:1 |
+| `--color-on-brand` | `#F2FBFA` | Texto sobre `brand-900` | |
+| `--color-brand-200` | `#BFE3E1` | Estado de cursor de los botones claros sobre el campo de marca | |
 
-### 2.4 Sol andino (atención, sin conexión)
-
-| Token | Valor | Uso | Contraste |
-|-------|-------|-----|-----------|
-| `--color-ochre-800` | `#7A4E0E` | Texto de "Sin conexión", avisos de respaldo, "Estimado" | 6,31:1 sobre `page`; 6,82:1 sobre `raised` |
-| `--color-ochre-700` | `#A8691A` | Solo trazos de gráficas (línea de la estimación simple) | 3,93:1 sobre `page`; 4,24:1 sobre `raised` (gráfico, no texto) |
-| `--color-ochre-100` | `#F5E6C8` | Fondo de chips de atención | `ochre-800` sobre `ochre-100` 5,83:1 |
-
-### 2.5 Tierra (error, daño, riesgo)
+### 2.3 Agua (acción y foco)
 
 | Token | Valor | Uso | Contraste |
 |-------|-------|-----|-----------|
-| `--color-clay-700` | `#8E3424` | Texto de error, botón de acción destructiva (texto `raised` sobre él), "Inferido" con borde discontinuo | 6,92:1 sobre `page`; 7,48:1 sobre `raised`; `raised` sobre `clay-700` 7,48:1 |
-| `--color-clay-100` | `#F3DDD6` | Fondo de chips de error | `clay-700` sobre `clay-100` 6,05:1 |
+| `--color-water-700` | `#336666` | Botón principal, enlaces, foco | `raised` sobre él 6,41:1; sobre `water-100` 5,34:1 |
+| `--color-water-800` | `#1F4D4D` | Botón principal al pasar el cursor o pulsado | `raised` sobre él 9,31:1 |
+| `--color-water-300` | `#99CCCC` | Relleno de la banda del pronóstico, selección de texto | Texto primario 8,15:1 |
+| `--color-water-100` | `#D9EDEB` | Fondo de chips "Observado" | |
 
-### 2.6 Bordes, foco y líneas
+### 2.4 Estados (sin cambios de significado)
 
 | Token | Valor | Uso | Contraste |
 |-------|-------|-----|-----------|
-| `--color-border-strong` | `#6B7C81` | Borde de campos, casillas, radios y del control de deslizamiento | 3,82:1 sobre `page`; 4,13:1 sobre `raised` (mínimo 3:1 de WCAG 1.4.11) |
-| `--color-border-subtle` | `#D9D0BC` | Separadores decorativos entre secciones (no bordes de control) | Decorativo, sin requisito de contraste |
-| `--color-focus` | `#1D5A6E` | Anillo de foco de 3 px con desplazamiento de 2 px | 6,74:1 sobre `page`; 7,28:1 sobre `raised` |
+| `--color-paramo-800` / `-100` | `#2F5E3E` / `#DDE9DC` | Correcto, en línea, confirmado. Verde amarillento, distinto del turquesa de marca | 6,91:1 sobre `page`; 6,01:1 sobre su chip |
+| `--color-ochre-800` / `-700` / `-100` | `#7A4E0E` / `#A8691A` / `#F5E6C8` | Atención, sin conexión, estimado; `700` solo en trazos de gráficas | 6,59:1; 5,83:1; `700` 4,10:1 (gráfico) |
+| `--color-clay-700` / `-100` | `#8E3424` / `#F3DDD6` | Error, daño, riesgo, acción destructiva | 7,23:1 sobre `page`; `raised` sobre él 7,77:1 |
+| `--color-border-strong` | `#5E7776` | Borde de campos y controles | 4,40:1 sobre `page` (mínimo 3:1) |
+| `--color-border-subtle` | `#CFDEDC` | Separadores decorativos | |
+| `--color-focus` | `#336666` | Anillo de foco de 3 px, desplazado 2 px | 5,96:1 |
 
-### 2.7 Uso de los estados
+### 2.5 Uso de los estados
 
 Los estados se comunican con **icono + texto + color**, nunca solo color:
 
@@ -77,38 +70,38 @@ Los estados se comunican con **icono + texto + color**, nunca solo color:
 | Sin conexión | `ochre-100` / `ochre-800` | `CloudOff` | "Sin conexión" |
 | Error | `clay-100` / `clay-700` | `AlertTriangle` | "Revisar" |
 
-Las cuatro categorías epistémicas (observado, estimado, inferido, confirmado; sección 17 de los hechos canónicos) tienen chip propio en las actas y en la propuesta.
+### 2.6 Modo oscuro
 
-### 2.8 Pruebas de contraste
-
-El script de verificación (`scripts/check-contrast.mjs`, propuesta) lee `tokens.css`, toma los pares de la tabla y falla si un texto queda por debajo de 4,5:1, o un control o un foco por debajo de 3:1. Los valores de esta página se actualizan en el mismo commit que el cambio de token.
+El modo oscuro sigue al sistema (`prefers-color-scheme`) o a `data-theme="dark"` y redefine los mismos nombres: fondo `#0B1C1C`, superficies `#112626`, texto `#E4F1F0`, acción `#8FD3CF`. La prueba de tokens exige los mismos pares en ambos modos.
 
 ## 3. Tipografía
 
-| Rol | Familia | Pesos | Fuente |
-|-----|---------|-------|--------|
-| Texto y títulos | Atkinson Hyperlegible Next (propuesta) | 400, 700 | Google Fonts, licencia OFL, diseñada para máxima legibilidad (baja visión, exterior) |
-| Respaldo | `"Atkinson Hyperlegible", "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif` | | |
+| Rol | Familia | Pesos | Paquete |
+|-----|---------|-------|---------|
+| Títulos (`h1`, landing, wordmark) | Barlow ExtraBold (`--font-family-display`) | 800 | `@fontsource/barlow`, subset latino |
+| Subtítulos (`h2`, `h3`, etiquetas, botones) | Montserrat Bold | 700 | `@fontsource/montserrat` |
+| Texto | Montserrat Medium (`--font-family-base`) | 500 | `@fontsource/montserrat` |
 
 Reglas:
 
-- Las fuentes se **autoalojan** con el paquete de `@fontsource` (verificar que exista la versión de Atkinson en fontsource antes de instalar; si no existe, se autoaloja el archivo de la fuente). Así `font-src 'self'` basta en la CSP (ver `deployment.md`) y no hay peticiones a terceros: no se carga `fonts.gstatic.com`.
-- Solo se cargan los pesos 400 y 700. Subset latino.
-- Los números usan `font-variant-numeric: tabular-nums`, para que las columnas y los valores de nivel no se muevan al cambiar.
+- Las fuentes se **autoalojan** con `@fontsource` (solo `latin`), así `font-src 'self'` basta en la CSP. No se carga Google Fonts.
+- Solo los tres archivos anteriores; el service worker los precachea con el resto del cascarón.
+- Los números usan `font-variant-numeric: tabular-nums` (Montserrat trae cifras tabulares).
+- El seguimiento mínimo es `-0,03em` (`--tracking-hero`), para que Barlow no se apriete.
 
 ### 3.1 Escala
 
 | Token | Tamaño | Altura de línea | Uso |
 |-------|--------|-----------------|-----|
-| `--font-size-display` | 48 px | 1,1 | Número principal (nivel del tanque en S12, lectura en S08) |
-| `--font-size-h1` | 28 px | 1,2 | Título de pantalla (un único `h1`) |
-| `--font-size-h2` | 22 px | 1,25 | Secciones |
+| `--font-size-display` | 48 px | 1,1 | Número principal (nivel del tanque, lectura) |
+| `--font-size-h1` | 28 px | 1,2 | Título de pantalla (un único `h1`, Barlow) |
+| `--font-size-h2` | 22 px | 1,25 | Secciones (Montserrat Bold) |
 | `--font-size-h3` | 20 px | 1,3 | Subsecciones, títulos de tarjeta |
 | `--font-size-body` | 18 px | 1,5 | Texto base en móvil (mínimo) |
 | `--font-size-small` | 16 px | 1,45 | Metadatos y avisos cortos (mínimo) |
 | `--font-size-label` | 18 px | 1,3 | Etiquetas de campo, siempre visibles |
 
-En escritorio, `body` sube a 20 px; las demás escalas se mantienen. El texto se define en `rem`, para que respete el tamaño de texto del sistema.
+En escritorio, `body` sube a 20 px. El texto se define en `rem`, para que respete el tamaño de texto del sistema.
 
 ## 4. Espaciado, radios y medidas
 
@@ -128,7 +121,7 @@ En escritorio, `body` sube a 20 px; las demás escalas se mantienen. El texto se
 | `--field-height` | 52 px | Altura de campos de texto |
 | `--content-max` | 720 px | Ancho máximo del contenido (escritorio) |
 
-Sin sombras de elevación. La jerarquía se da con color de superficie y con borde (`--color-border-subtle` para separar, `--color-border-strong` para controles).
+La jerarquía se da con color de superficie y con borde (`--color-border-subtle` para separar, `--color-border-strong` para controles). La única sombra de las pantallas de tareas es la del botón principal: corta, con desplazamiento y teñida del turquesa profundo, como los botones del style tile.
 
 ## 5. Movimiento
 
@@ -142,11 +135,11 @@ Sin sombras de elevación. La jerarquía se da con color de superficie y con bor
 - Sin rebotes ni animaciones de entrada decorativas.
 - `@media (prefers-reduced-motion: reduce)` deja todas las duraciones en 0 ms, salvo el giro del icono de envío, que se reemplaza por texto fijo "Enviando".
 
-## 6. Motivo gráfico: la línea de nivel
+## 6. Motivos gráficos
 
-El único elemento decorativo es una línea horizontal de 2 px en `--color-water-700`, que aparece bajo el encabezado de la app y como separador de la página pública. Representa el nivel del agua. Va sin texto, con `aria-hidden="true"`. No se repite en cada pantalla.
-
-Prohibido agregar mosaicos, patrones de fondo, ilustraciones, mapas de relleno o fotos de stock.
+- **La línea de nivel.** Línea de 2 px en `--color-brand-500` bajo la cabecera de la app y de la landing. Representa el nivel del agua. Va sin texto, con `aria-hidden="true"`.
+- **Los anillos concéntricos del style tile.** Solo en superficies de marca (panel del inicio de sesión): círculos finos que salen de una esquina, dibujados con `repeating-radial-gradient` sobre el campo profundo.
+- **El logo.** `src/ui/brand/BrandLogo.tsx` muestra el logo oficial cuando sus archivos existen (`src/assets/brand/logo.ts`, WebP con fondo transparente en 320 y 640 px). Mientras el equipo no entregue los archivos finales, muestra la palabra "Caudal" en Barlow ExtraBold con el mismo espacio reservado.
 
 ## 7. Iconos
 
@@ -190,14 +183,17 @@ Sonner para avisos (toasts) con estilo de tokens. Recharts para la gráfica (ver
 | `SimulatedDataBanner` | Aviso "Datos simulados" (`screens.md`, sección 7). |
 | `EmptyState`, `ErrorState`, `LoadingSkeleton` | Estados de pantalla con texto y acción. |
 | `LevelLine` | Línea de nivel decorativa. |
+| `BrandLogo` | Logo oficial o, mientras llegan sus archivos, la palabra "Caudal" en Barlow ExtraBold. Tonos `onPage` y `onBrand`. |
 
 ### 8.3 Lo que no se permite en componentes
 
 - **Cards con borde izquierdo de color** (ni de acento, ni de estado). Los avisos usan el chip del estado, un icono y el texto, sin barra lateral.
-- Degradados lineales, radiales o cónicos en cualquier superficie, botón o fondo.
-- Sombras de color, glassmorphism y desenfoques de fondo.
+- Degradados en las pantallas de tareas (formularios, listas, tablas, chips, botones). Los degradados del logo viven solo en las superficies de marca: landing, panel del inicio de sesión y wordmark.
+- Texto normal en `brand-500`, `brand-400` o `water-300`: no llegan a 4,5:1.
+- Sombras de color sin desplazamiento (halos), glassmorphism y desenfoques decorativos.
 - Emojis en cualquier texto.
 - Colores o fuentes escritos en un componente (`style={{ color: '#...' }}` o clases con valores fijos).
+- "Eyebrows" o rótulos encima de los títulos y números de sección (01, 02) sin información.
 
 ## 9. Estados
 
@@ -211,28 +207,22 @@ Sonner para avisos (toasts) con estilo de tokens. Recharts para la gráfica (ver
 | Error | Borde `clay-700` (2 px), texto de error `clay-700` con icono. |
 | Cargando | Esqueleto en `sand-200`, sin animación de brillo (no es degradado). |
 
-## 10. Modo oscuro (después)
-
-El modo oscuro no se implementa en la primera versión. Cuando se haga:
-
-- Se redefinen los mismos nombres de token en `:root[data-theme="dark"]`, sin cambiar componentes.
-- Se verifica de nuevo cada par de la sección 2 con el script de contraste.
-- Los chips y los estados conservan icono y texto.
-
-## 11. Verificación visual
+## 10. Verificación visual
 
 - Capturas de cada pantalla en 360 px, 390 px y 1280 px, con texto del sistema al 200 %.
 - Revisión con celular real en exterior (prueba de brillo) antes de cada entrega a la Junta.
 - Revisión con `web-design-guidelines` y `ui-ux-pro-max` según las reglas del proyecto, y con `axe` en Playwright.
 
-## 12. Landing (`/`): excepción de movimiento y escala
+## 11. Landing (`/`): la superficie de marca
 
-La página de presentación (`src/features/landing`) es la única superficie que se aparta de la sección 5. Lo aprobó el equipo para presentar CAUDAL al profesor, a los evaluadores y a las Juntas. Las demás pantallas de la app, el login y el cambio de contraseña siguen sobrios.
+La página de presentación (`src/features/landing`) es donde la marca se expresa entera. Las demás pantallas siguen sobrias.
 
-- **Movimiento con propósito, una vez:** el wordmark se llena de agua hasta su nivel; la línea de nivel se dibuja bajo los dispositivos; los bloques suben al entrar en pantalla; el recorrido por pestañas avanza solo y se puede pausar; la banda "Funciona sin señal" recorre sus tres estados una vez; la gráfica de ejemplo se dibuja al verla. Nada rebota ni se repite sin fin.
-- **Siempre visible por defecto:** sin `IntersectionObserver` o con `prefers-reduced-motion: reduce`, todo aparece en su estado final y el recorrido no avanza solo.
-- **Escala de display:** tokens propios de la landing en `tokens.css` (`--font-size-hero`, `--font-size-statement`, `--font-size-lead`, `--tracking-*`, `--space-8`, `--space-9`, `--landing-max`, `--duration-reveal`, `--duration-fill`, `--duration-step`, `--ease-out-expo`). Ningún color nuevo: solo la paleta de la sección 2.
-- **Se mantiene todo lo demás:** sin degradados, sin sombras de elevación, sin fotos de stock, sin emojis, sin cards con borde izquierdo. Las pantallas de muestra son HTML con la marca "Datos simulados", no imágenes.
-- **Sin llamadas a la API:** la landing no depende del backend; los datos de muestra viven en `src/features/landing/demo*.json` y los textos en `es.ts`.
+- **Campo de marca y agua en movimiento:** el hero es el campo `brand-900` con agua en movimiento hecha con **three.js** (`waterScene.ts`, un sombreador de corrientes con los colores del logo leídos de los tokens). La pintura inicial y el respaldo son degradados CSS quietos; el lienzo aparece con un fundido cuando está listo.
+- **Un momento de desplazamiento con GSAP** (`heroMotion.ts`, `ScrollTrigger`): al bajar, los tres teléfonos suben del agua a distinta velocidad, la foto se desplaza y las corrientes se aceleran. El resto de entradas son CSS (`useReveal`), una sola vez.
+- **Carga diferida y PWA:** three.js y GSAP se importan con `import()` solo desde la landing, solo si el navegador tiene WebGL. `vite.config.ts` los excluye del precache (`globIgnores`), así un fontanero que instala la PWA con mala señal nunca los descarga. El bucle se pausa fuera de pantalla y con la pestaña oculta.
+- **Movimiento reducido:** con `prefers-reduced-motion: reduce` el agua se pinta una vez y nada se mueve. Sin WebGL o si algo falla, queda el campo CSS.
+- **Fotografía:** paisajes reales de Nariño en WebP con `srcset` (960, 1600 y 2400 px) desde Wikimedia Commons, con créditos en el pie: volcán Galeras y la Laguna Verde del Azufral, vecino de Guaitarilla. En Commons no hay fotos de Guaitarilla con la resolución suficiente; cuando el equipo tenga fotos propias del municipio, reemplazan a estas.
+- **Escala de display:** tokens propios de la landing en `tokens.css` (`--font-size-hero`, `--font-size-statement`, `--font-size-lead`, `--tracking-*`, `--space-8`, `--space-9`, `--landing-max`, `--duration-reveal`, `--duration-fill`, `--duration-step`, `--ease-out-expo`).
+- **Sin llamadas a la API:** la landing no depende del backend; las pantallas de muestra llevan la marca "Datos simulados".
 
 Relacionados: [`ux-guidelines.md`](ux-guidelines.md), [`screens.md`](screens.md), [`forecast-visualization.md`](forecast-visualization.md), [`architecture.md`](architecture.md)

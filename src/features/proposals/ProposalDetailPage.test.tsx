@@ -55,10 +55,42 @@ describe('ProposalDetailPage (S13 detail, explanations)', () => {
     server.use(...createProposalsBackend([buildProposal()]).handlers);
     renderApp(detailPath(PROPOSAL_ID_TODAY), { user: board() });
 
-    expect(
-      await screen.findByText('Hay 16 horas de servicio hoy. Banda del tanque: baja.'),
-    ).toBeInTheDocument();
+    const hours = (await screen.findByText(t('proposals.summary.hours'))).closest('div');
+    expect(within(hours as HTMLElement).getByText('16 horas')).toBeInTheDocument();
+    const band = screen.getByText(t('proposals.summary.band')).closest('div');
+    expect(within(band as HTMLElement).getByText('baja')).toBeInTheDocument();
     expect(screen.getByText('Nivel del tanque: 2,1 m')).toBeInTheDocument();
+  });
+
+  it('puts approve first, then modify and reject as secondary actions', async () => {
+    server.use(...createProposalsBackend([buildProposal()]).handlers);
+    renderApp(detailPath(PROPOSAL_ID_TODAY), { user: board() });
+
+    const decisions = await screen.findByRole('region', { name: t('proposals.decideTitle') });
+    const names = within(decisions)
+      .getAllByRole('button')
+      .map((button) => button.textContent);
+    expect(names).toEqual([
+      t('proposals.actions.approve'),
+      t('proposals.actions.modify'),
+      t('proposals.actions.reject'),
+    ]);
+  });
+
+  it('keeps the reasons of a shift behind a disclosure', async () => {
+    server.use(...createProposalsBackend([buildProposal()]).handlers);
+    renderApp(detailPath(PROPOSAL_ID_TODAY), { user: board() });
+
+    const school = (
+      await screen.findByRole('heading', { level: 3, name: 'Sector Escuela' })
+    ).closest('li') as HTMLElement;
+    const disclosure = school.querySelector('details');
+    expect(disclosure).not.toBeNull();
+    expect(
+      within(disclosure as HTMLElement).getByText(
+        'Escuela es prioritario y recibe turno antes que los demás.',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('gives an error with a retry when the proposal does not exist', async () => {
