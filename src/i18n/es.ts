@@ -5,6 +5,8 @@
 export const strings = {
   app: {
     name: 'CAUDAL',
+    /** Typeset wordmark shown until the official logo files arrive (assets/brand/logo.ts). */
+    brandWordmark: 'Caudal',
     /** Browser tab of every screen: its h1 and the product name. */
     documentTitle: '{screen} | CAUDAL',
     skipToContent: 'Saltar al contenido',

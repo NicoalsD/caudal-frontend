@@ -1,0 +1,35 @@
+.wordmark {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.onPage {
+  color: var(--color-water-700);
+}
+
+.onBrand {
+  color: var(--color-on-brand);
+}
+
+.compact {
+  font-size: 1.75rem;
+}
+
+.large {
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+}
+
+.image {
+  display: block;
+  width: auto;
+}
+
+.image.compact {
+  height: 2rem;
+}
+
+.image.large {
+  height: clamp(3rem, 8vw, 4.5rem);
+}
