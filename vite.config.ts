@@ -43,15 +43,9 @@ export default defineConfig({
       workbox: {
         // App shell only: the HTML, JS, CSS, fonts and icons. Operator screens open offline.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // The landing's water (three.js) and scroll motion (GSAP) load on demand and only on "/":
-        // an operator installing the app over a weak signal never downloads them.
-        globIgnores: [
-          '**/waterScene-*.js',
-          '**/heroMotion-*.js',
-          '**/three*.js',
-          '**/gsap*.js',
-          '**/ScrollTrigger-*.js',
-        ],
+        // The landing's scroll motion (GSAP) loads on demand and only on "/": an operator
+        // installing the app over a weak signal never downloads it.
+        globIgnores: ['**/heroMotion-*.js', '**/gsap*.js', '**/ScrollTrigger-*.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
