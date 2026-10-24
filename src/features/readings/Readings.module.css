@@ -84,3 +84,58 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-paramo-800);
 }
+
+/* The level is the one big field of the screen: a big figure, easy to reach with a thumb. */
+.gaugeInput {
+  min-height: calc(var(--target-min) * 1.5);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.submit {
+  width: 100%;
+  min-height: calc(var(--target-min) * 1.5);
+}
+
+.optional {
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-raised);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  cursor: pointer;
+}
+
+.optionalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.savedValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.nextTitle {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+}
+
+.help {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}

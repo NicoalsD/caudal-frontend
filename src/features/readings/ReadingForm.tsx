@@ -6,15 +6,19 @@ import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
 import type { DecimalRule } from '../../core/forms/FormSchemaBuilder';
 import { FIELD, readingEntrySchema } from '../../core/forms/formSchemas';
 import { formatDecimal, toInputText } from '../../core/format/decimal';
+import { toBogotaDateKey } from '../../core/format/time';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { gaugeDecimals } from '../../core/rules/bandCoverage';
 import { t } from '../../i18n/t';
 import type { TankView } from '../../services/api/views';
+import { useOfflineServices } from '../../state/hooks/offlineContext';
 import { useFormSchema } from '../../state/hooks/useFormSchema';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { Button } from '../../ui/primitives/Button';
+import { LinkButton } from '../../ui/primitives/LinkButton';
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { CheckboxField } from '../../ui/primitives/CheckboxField';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { FormFields } from '../../ui/primitives/FormFields';
@@ -104,8 +108,10 @@ interface ReadingFieldsProps {
 function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Element {
   const appearances = useWaterAppearances();
   const ruleSet = useCurrentRuleSet();
+  const offline = useOfflineServices();
   const save = useSaveReading();
   const [saveFailed, setSaveFailed] = useState(false);
+  const [optionalOpen, setOptionalOpen] = useState(false);
   const [saved, setSaved] = useState<{ value: number; sendingNow: boolean } | null>(null);
   const {
     register,
@@ -120,6 +126,12 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
   });
   const typedNote = useWatch({ control, name: FIELD.note });
   const { errors, isSubmitting } = formState;
+  // The optional fields open on their own when they hold an error, so the error is never hidden.
+  const showOptional = optionalOpen || errors.note !== undefined;
+  const closeToday = ROUTE_PATHS.operator.dayClosure.replace(
+    ':date',
+    toBogotaDateKey(new Date(offline.clock.nowMs()).toISOString()),
+  );
 
   const submit = handleSubmit(async (values) => {
     setSaveFailed(false);
@@ -143,12 +155,21 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
       <section className={cn(styles.confirmation)} role="status" aria-labelledby="reading-saved">
         <h2 id="reading-saved">{t('readings.savedTitle')}</h2>
         <p>{saved.sendingNow ? t('readings.savedQueued') : t('readings.savedOffline')}</p>
-        <p>
+        <p className={cn(styles.savedValue)}>
           {t('readings.savedValue', { value: formatDecimal(saved.value, GAUGE_DISPLAY_DIGITS) })}
         </p>
+        <h3 className={cn(styles.nextTitle)}>{t('readings.savedNext')}</h3>
         <div className={cn(styles.actions)}>
+          {saved.sendingNow ? (
+            <LinkButton variant="primary" to={closeToday}>
+              {t('home.closeDay')}
+            </LinkButton>
+          ) : (
+            <LinkButton variant="primary" to={ROUTE_PATHS.operator.pending}>
+              {t('readings.savedSeePending')}
+            </LinkButton>
+          )}
           <Button
-            variant="primary"
             onClick={() => {
               resetForm();
               setSaved(null);
@@ -156,6 +177,13 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
           >
             {t('readings.another')}
           </Button>
+          {saved.sendingNow ? (
+            <LinkButton to={ROUTE_PATHS.operator.pending}>
+              {t('readings.savedSeePending')}
+            </LinkButton>
+          ) : (
+            <LinkButton to={closeToday}>{t('home.closeDay')}</LinkButton>
+          )}
         </div>
       </section>
     );
@@ -179,6 +207,7 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
           autoComplete="off"
           placeholder={toInputText(tank.gaugeMin)}
           error={errors.gauge_value?.message}
+          className={cn(styles.gaugeInput)}
           {...register(FIELD.gaugeValue)}
         />
         {appearances.isError ? (
@@ -191,20 +220,31 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
             {...register(FIELD.waterAppearance)}
           />
         )}
-        <CheckboxField label={t('readings.damageLabel')} {...register(FIELD.damageNoticed)} />
-        <TextAreaField
-          label={t('readings.noteLabel')}
-          hint={t('readings.noteHint')}
-          length={typedNote.length}
-          maxLength={noteMax}
-          counterText={(length, max) =>
-            t('readings.noteCounter', { length: String(length), max: String(max) })
-          }
-          error={errors.note?.message}
-          {...register(FIELD.note)}
-        />
+        <details
+          className={cn(styles.optional)}
+          open={showOptional}
+          onToggle={(event) => {
+            setOptionalOpen(event.currentTarget.open);
+          }}
+        >
+          <summary className={cn(styles.summary)}>{t('readings.optionalSummary')}</summary>
+          <div className={cn(styles.optionalBody)}>
+            <CheckboxField label={t('readings.damageLabel')} {...register(FIELD.damageNoticed)} />
+            <TextAreaField
+              label={t('readings.noteLabel')}
+              hint={t('readings.noteHint')}
+              length={typedNote.length}
+              maxLength={noteMax}
+              counterText={(length, max) =>
+                t('readings.noteCounter', { length: String(length), max: String(max) })
+              }
+              error={errors.note?.message}
+              {...register(FIELD.note)}
+            />
+          </div>
+        </details>
         <div className={cn(styles.actions)}>
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" className={cn(styles.submit)}>
             {isSubmitting ? t('readings.submitting') : t('readings.submit')}
           </Button>
         </div>
