@@ -83,25 +83,6 @@ export function ProposalDetailPage(): JSX.Element {
         reasonMin={constraints.data.reason?.min ?? 0}
         reasonMax={constraints.data.reason?.max ?? 0}
       />
-      <section className={cn(styles.section)} aria-labelledby="proposal-unserved-title">
-        <h2 id="proposal-unserved-title" className={cn(styles.heading)}>
-          {t('proposals.unserved.title')}
-        </h2>
-        {proposal.data.unservedSectors.length === 0 ? (
-          <p>{t('proposals.unserved.empty')}</p>
-        ) : (
-          <ul className={cn(styles.list)}>
-            {proposal.data.unservedSectors.map((sector) => (
-              <li key={sector.sectorId} className={cn(styles.item)}>
-                <p className={cn(styles.heading)}>
-                  {nameBySector.get(sector.sectorId) ?? t('proposals.unknownSector')}
-                </p>
-                <p>{unservedReasonText(sector.reason)}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
       <section className={cn(styles.section)} aria-labelledby="proposal-shifts-title">
         <h2 id="proposal-shifts-title" className={cn(styles.heading)}>
           {t('proposals.shiftsTitle')}
@@ -109,9 +90,9 @@ export function ProposalDetailPage(): JSX.Element {
         {proposal.data.items.length === 0 ? (
           <p>{t('proposals.noShifts')}</p>
         ) : (
-          <ol className={cn(styles.list)}>
+          <ol className={cn(styles.schedule)}>
             {proposal.data.items.map((item) => (
-              <li key={item.id} className={cn(styles.item)}>
+              <li key={item.id} className={cn(styles.shift)}>
                 <ShiftExplanation
                   item={item}
                   name={nameBySector.get(item.sectorId) ?? t('proposals.unknownSector')}
@@ -122,6 +103,28 @@ export function ProposalDetailPage(): JSX.Element {
           </ol>
         )}
       </section>
+      <section className={cn(styles.section)} aria-labelledby="proposal-unserved-title">
+        <h2 id="proposal-unserved-title" className={cn(styles.heading)}>
+          {t('proposals.unserved.title')}
+        </h2>
+        {proposal.data.unservedSectors.length === 0 ? (
+          <p>{t('proposals.unserved.empty')}</p>
+        ) : (
+          <ul className={cn(styles.list)}>
+            {proposal.data.unservedSectors.map((sector) => (
+              <li key={sector.sectorId} className={cn(styles.item)}>
+                <p className={cn(styles.sectorName)}>
+                  {nameBySector.get(sector.sectorId) ?? t('proposals.unknownSector')}
+                </p>
+                <p>{unservedReasonText(sector.reason)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <p className={cn(styles.meta)}>
+        {t('proposals.generatedOn', { date: proposal.data.generatedAt.text })}
+      </p>
     </div>
   );
 }
@@ -133,8 +136,9 @@ interface ProposalActionsProps {
 }
 
 /**
- * The Board's decisions (S13). Approve is the main action; modify and reject are secondary. Every
- * action needs the connection, and each one is only offered when the server would accept it.
+ * The Board's decisions (S13). Approve is the one primary action; modify and reject are secondary,
+ * and reject uses the clay tone because it discards the proposal. Every action needs the
+ * connection, and each one is only offered when the server would accept it.
  */
 function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProps): JSX.Element {
   const navigate = useNavigate();
@@ -154,76 +158,87 @@ function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProp
     return <></>;
   }
   return (
-    <section className={cn(styles.actions)} aria-label={t('proposals.shiftsTitle')}>
+    <section className={cn(styles.decisions)} aria-label={t('proposals.decideTitle')}>
       {decidable && canDecide ? (
         <>
-          <ApproveDialog
-            trigger={
-              <Button variant="primary" disabled={!online}>
-                {t('proposals.actions.approve')}
-              </Button>
-            }
-            open={approveOpen}
-            onOpenChange={setApproveOpen}
-            summary={t('proposals.approve.summary', {
-              date: formatServiceDate(proposal.serviceDate),
-              sectors: String(shifts),
-              hours: hoursText(hours),
-            })}
-            isSaving={approve.isPending}
-            failure={approve.isError ? errorText(approve.error).message : null}
-            onConfirm={() => {
-              approve.mutate(
-                { id: proposal.id, lockVersion: proposal.lockVersion },
-                {
-                  onSuccess: () => {
-                    setApproveOpen(false);
-                    void navigate(publicationPath(proposal.id));
+          <div className={cn(styles.primaryAction)}>
+            <ApproveDialog
+              trigger={
+                <Button variant="primary" className={cn(styles.wide)} disabled={!online}>
+                  {t('proposals.actions.approve')}
+                </Button>
+              }
+              open={approveOpen}
+              onOpenChange={setApproveOpen}
+              summary={t('proposals.approve.summary', {
+                date: formatServiceDate(proposal.serviceDate),
+                sectors: String(shifts),
+                hours: hoursText(hours),
+              })}
+              isSaving={approve.isPending}
+              failure={approve.isError ? errorText(approve.error).message : null}
+              onConfirm={() => {
+                approve.mutate(
+                  { id: proposal.id, lockVersion: proposal.lockVersion },
+                  {
+                    onSuccess: () => {
+                      setApproveOpen(false);
+                      void navigate(publicationPath(proposal.id));
+                    },
                   },
-                },
-              );
-            }}
-          />
-          <Button
-            disabled={!online}
-            onClick={() => {
-              void navigate(proposalEditPath(proposal.id));
-            }}
-          >
-            {t('proposals.actions.modify')}
-          </Button>
-          <RejectDialog
-            trigger={<Button disabled={!online}>{t('proposals.actions.reject')}</Button>}
-            open={rejectOpen}
-            onOpenChange={setRejectOpen}
-            reasonMin={reasonMin}
-            reasonMax={reasonMax}
-            isSaving={reject.isPending}
-            failure={reject.isError ? errorText(reject.error).message : null}
-            onConfirm={(reason) => {
-              reject.mutate(
-                { id: proposal.id, lockVersion: proposal.lockVersion, reason },
-                {
-                  onSuccess: () => {
-                    setRejectOpen(false);
-                    void navigate(ROUTE_PATHS.board.proposals);
+                );
+              }}
+            />
+          </div>
+          <div className={cn(styles.secondaryActions)}>
+            <Button
+              disabled={!online}
+              onClick={() => {
+                void navigate(proposalEditPath(proposal.id));
+              }}
+            >
+              {t('proposals.actions.modify')}
+            </Button>
+            <RejectDialog
+              trigger={
+                <Button className={cn(styles.danger)} disabled={!online}>
+                  {t('proposals.actions.reject')}
+                </Button>
+              }
+              open={rejectOpen}
+              onOpenChange={setRejectOpen}
+              reasonMin={reasonMin}
+              reasonMax={reasonMax}
+              isSaving={reject.isPending}
+              failure={reject.isError ? errorText(reject.error).message : null}
+              onConfirm={(reason) => {
+                reject.mutate(
+                  { id: proposal.id, lockVersion: proposal.lockVersion, reason },
+                  {
+                    onSuccess: () => {
+                      setRejectOpen(false);
+                      void navigate(ROUTE_PATHS.board.proposals);
+                    },
                   },
-                },
-              );
-            }}
-          />
+                );
+              }}
+            />
+          </div>
         </>
       ) : null}
       {publishable && canPublish ? (
-        <Button
-          variant="primary"
-          disabled={!online}
-          onClick={() => {
-            void navigate(publicationPath(proposal.id));
-          }}
-        >
-          {t('proposals.actions.publish')}
-        </Button>
+        <div className={cn(styles.primaryAction)}>
+          <Button
+            variant="primary"
+            className={cn(styles.wide)}
+            disabled={!online}
+            onClick={() => {
+              void navigate(publicationPath(proposal.id));
+            }}
+          >
+            {t('proposals.actions.publish')}
+          </Button>
+        </div>
       ) : null}
       {online ? null : <p>{t('proposals.offline')}</p>}
     </section>
@@ -232,30 +247,34 @@ function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProp
 
 const BAND_KEY = { HIGH: 'high', LOW: 'low', CRITICAL: 'critical' } as const;
 
+/** The day in one compact block: date and status, then the hours and the band that produced them. */
 function ProposalHeader({ proposal }: { readonly proposal: ScheduleProposalView }): JSX.Element {
   const band = proposal.tankBand;
   const bandText =
     band !== null && isBandCode(band) ? t(`proposals.bandName.${BAND_KEY[band]}`) : (band ?? '');
   return (
-    <section className={cn(styles.section)} aria-labelledby="proposal-day-title">
-      <h2 id="proposal-day-title" className={cn(styles.heading)}>
-        {formatServiceDate(proposal.serviceDate)}
-      </h2>
-      <ProposalStatusChip status={proposal.status} />
-      <p>
-        {t('proposals.availableBand', {
-          hours: hoursText(proposal.availableHours.value),
-          band: bandText,
-        })}
-      </p>
+    <section className={cn(styles.summary)} aria-labelledby="proposal-day-title">
+      <div className={cn(styles.summaryTop)}>
+        <h2 id="proposal-day-title" className={cn(styles.heading)}>
+          {formatServiceDate(proposal.serviceDate)}
+        </h2>
+        <ProposalStatusChip status={proposal.status} />
+      </div>
+      <dl className={cn(styles.facts)}>
+        <div className={cn(styles.fact)}>
+          <dt className={cn(styles.factLabel)}>{t('proposals.summary.hours')}</dt>
+          <dd className={cn(styles.factValue)}>{hoursText(proposal.availableHours.value)}</dd>
+        </div>
+        <div className={cn(styles.fact)}>
+          <dt className={cn(styles.factLabel)}>{t('proposals.summary.band')}</dt>
+          <dd className={cn(styles.factValue)}>{bandText}</dd>
+        </div>
+      </dl>
       {proposal.tankLevel === null ? null : (
         <p className={cn(styles.meta)}>
           {t('proposals.tankLevel', { level: proposal.tankLevel.text })}
         </p>
       )}
-      <p className={cn(styles.meta)}>
-        {t('proposals.generatedOn', { date: proposal.generatedAt.text })}
-      </p>
     </section>
   );
 }
@@ -266,26 +285,39 @@ interface ShiftExplanationProps {
   readonly priority: boolean;
 }
 
+/**
+ * One row of the schedule: sector on the left, the range and hours on the right. The reasons sit
+ * behind a disclosure, so the list stays easy to scan.
+ */
 function ShiftExplanation({ item, name, priority }: ShiftExplanationProps): JSX.Element {
   return (
     <>
-      <h3 className={cn(styles.heading)}>{name}</h3>
-      {priority ? <ProposalPriorityMark /> : null}
-      {item.origin === 'PROPOSED' ? null : (
-        <p className={cn(styles.meta)}>
-          {item.origin === 'ADDED' ? t('proposals.originAdded') : t('proposals.originModified')}
+      <div className={cn(styles.shiftName)}>
+        <h3 className={cn(styles.sectorName)}>{name}</h3>
+        {priority ? <ProposalPriorityMark /> : null}
+        {item.origin === 'PROPOSED' ? null : (
+          <p className={cn(styles.meta)}>
+            {item.origin === 'ADDED' ? t('proposals.originAdded') : t('proposals.originModified')}
+          </p>
+        )}
+      </div>
+      <div className={cn(styles.shiftTime)}>
+        <p className={cn(styles.range)}>
+          {t('proposals.shiftRange', { start: item.startTime, end: item.endTime })}
         </p>
-      )}
-      <p>{t('proposals.shiftRange', { start: item.startTime, end: item.endTime })}</p>
-      <p className={cn(styles.meta)}>{hoursText(item.hours)}</p>
+        <p className={cn(styles.meta, styles.hours)}>{hoursText(item.hours)}</p>
+      </div>
       {item.reasons.length === 0 ? (
-        <p className={cn(styles.meta)}>{t('proposals.noReasons')}</p>
+        <p className={cn(styles.meta, styles.fullRow)}>{t('proposals.noReasons')}</p>
       ) : (
-        <ul className={cn(styles.reasons)}>
-          {item.reasons.map((reason, index) => (
-            <li key={`${reason.code}-${String(index)}`}>{reason.text}</li>
-          ))}
-        </ul>
+        <details className={cn(styles.reasonsDisclosure)}>
+          <summary className={cn(styles.reasonsToggle)}>{t('proposals.reasonsToggle')}</summary>
+          <ul className={cn(styles.reasons)}>
+            {item.reasons.map((reason, index) => (
+              <li key={`${reason.code}-${String(index)}`}>{reason.text}</li>
+            ))}
+          </ul>
+        </details>
       )}
     </>
   );
