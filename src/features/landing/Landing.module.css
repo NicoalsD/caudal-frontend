@@ -1,7 +1,6 @@
 /*
- * Presentation page. Same tokens as the app; the brand field, the moving water (three.js) and the
- * authored motion (GSAP) live only here (design-theme.md section 12), and every entrance starts
- * from a visible default.
+ * Presentation page. Same tokens as the app; the brand field and the authored motion (GSAP) live
+ * only here (design-theme.md section 11), and every entrance starts from a visible default.
  */
 
 @property --water-dry {
@@ -248,10 +247,7 @@
 
 /* Hero */
 
-/*
- * The hero is the style tile's deep teal field. The CSS paints still currents (the fallback and
- * the first paint); the three.js water fades in over them once it is ready.
- */
+/* The hero is the style tile's deep teal field, still: the brand gradient with no motion. */
 .hero {
   position: relative;
   isolation: isolate;
@@ -274,20 +270,6 @@
     linear-gradient(180deg, var(--color-water-800), var(--color-brand-900) 70%);
   color: var(--color-on-brand);
   text-align: center;
-}
-
-.water {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 1600ms var(--ease-out-expo);
-}
-
-.hero[data-water='on'] .water {
-  opacity: 1;
 }
 
 .heroText {
