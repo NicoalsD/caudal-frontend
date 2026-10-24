@@ -4,12 +4,13 @@ import { ArrowLeft, CheckCircle2, CloudOff, ListChecks, LockKeyhole } from 'luci
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
+import { BrandLogo } from '../../ui/brand/BrandLogo';
 import { cn } from '../../ui/styles/cn';
 import styles from './AuthLayout.module.css';
 import { MAIN_CONTENT_ID } from './RoleLayout';
 
 /**
- * Sign in and password screens: the form on one side, a quiet panel of deep water on the other
+ * Sign in and password screens: the form on one side, a panel in the brand's deep teal on the other
  * (hidden on small screens). No animation here; the field screens stay calm (design-theme.md).
  */
 export function AuthLayout(): JSX.Element {
@@ -26,9 +27,8 @@ export function AuthLayout(): JSX.Element {
       </a>
       <div className={cn(styles.formSide)}>
         <header className={cn(styles.header)}>
-          <Link to={ROUTE_PATHS.root} className={cn(styles.brand)}>
-            <span className={cn(styles.brandMark)} aria-hidden="true" />
-            {t('app.name')}
+          <Link to={ROUTE_PATHS.root} className={cn(styles.brand)} aria-label={t('app.name')}>
+            <BrandLogo />
           </Link>
           <Link to={ROUTE_PATHS.root} className={cn(styles.back)}>
             <ArrowLeft aria-hidden="true" />

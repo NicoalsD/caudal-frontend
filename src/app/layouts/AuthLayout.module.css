@@ -43,34 +43,11 @@
   gap: var(--space-2);
   min-height: var(--target-min);
   color: var(--color-text-primary);
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.06em;
   text-decoration: none;
 }
 
 .brand:hover {
   color: var(--color-text-primary);
-}
-
-.brandMark {
-  position: relative;
-  display: inline-block;
-  width: 1.05rem;
-  height: 1.25rem;
-  border: 2px solid currentColor;
-  border-top: 0;
-  border-radius: 0 0 0.3rem 0.3rem;
-  overflow: hidden;
-}
-
-.brandMark::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 55%;
-  background: var(--color-water-700);
 }
 
 .back {
@@ -123,14 +100,23 @@
   margin-top: 0.15rem;
 }
 
-/* The panel: a tank of deep water with its level line. */
+/*
+ * The panel: the style tile's deep teal field. The brand gradient lives here, on a surface with no
+ * controls, and the concentric rings of the tile ripple out from the lower corner.
+ */
 .panel {
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--color-water-800);
-  color: var(--color-raised);
+  background:
+    repeating-radial-gradient(
+      circle at 100% 100%,
+      transparent 0 22px,
+      color-mix(in srgb, var(--color-on-brand) 9%, transparent) 22px 23px
+    ),
+    linear-gradient(160deg, var(--color-brand-900) 30%, var(--color-water-800) 100%);
+  color: var(--color-on-brand);
 }
 
 .panelInner {
@@ -144,9 +130,10 @@
 }
 
 .panelTitle {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  line-height: var(--line-height-h1);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-display);
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-display);
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -180,8 +167,8 @@
   align-items: flex-end;
   flex: 0 0 30%;
   padding: var(--space-6) var(--space-7);
-  background: var(--color-water-700);
-  border-top: var(--level-line-height) solid var(--color-raised);
+  background: transparent;
+  border-top: var(--level-line-height) solid var(--color-brand-500);
 }
 
 @media (max-width: 56rem) {
