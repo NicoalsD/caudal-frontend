@@ -11,6 +11,8 @@ import { useOfflineServices } from '../../state/hooks/offlineContext';
 import { useOutboxOwner } from '../../state/hooks/useOutboxOwner';
 import { useSyncQueue } from '../../state/hooks/useSyncQueue';
 import { Button } from '../../ui/primitives/Button';
+import { LinkButton } from '../../ui/primitives/LinkButton';
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
@@ -67,38 +69,60 @@ export function PendingReadingsPage(): JSX.Element {
     setNotice(sentNoticeText(sentNow));
   };
 
+  // Only the readings still waiting in the queue are "por enviar"; the ones to review are not.
+  const queuedCount = queued.length;
   const summaryLine =
-    openCount === 0
+    queuedCount === 0
       ? null
-      : openCount === ONE_READING
+      : queuedCount === ONE_READING
         ? online
           ? t('pending.pageSummaryOne')
           : t('pending.offlineSummaryOne')
         : online
-          ? t('pending.pageSummary', { count: String(openCount) })
-          : t('pending.offlineSummary', { count: String(openCount) });
+          ? t('pending.pageSummary', { count: String(queuedCount) })
+          : t('pending.offlineSummary', { count: String(queuedCount) });
 
   return (
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.pendingReadings')}</ScreenTitle>
-      {summaryLine === null ? null : <p>{summaryLine}</p>}
-      <div className={cn(styles.actions)}>
-        <Button
-          variant="primary"
-          disabled={!online || sending || openCount === 0}
-          onClick={() => void sendNow()}
-        >
-          {sending
-            ? t('pending.sending')
-            : online
-              ? t('pending.sendNow')
-              : t('pending.waitingSignal')}
-        </Button>
-      </div>
+      {openCount === 0 ? (
+        <>
+          <p>{t('pending.empty')}</p>
+          <p className={cn(styles.help)}>{t('pending.emptyHelp')}</p>
+          <div className={cn(styles.actions)}>
+            <LinkButton variant="primary" to={ROUTE_PATHS.operator.newReading}>
+              {t('home.newReading')}
+            </LinkButton>
+          </div>
+        </>
+      ) : (
+        <>
+          {summaryLine === null ? null : <p>{summaryLine}</p>}
+          {queuedCount === 0 ? null : (
+            <>
+              <p className={cn(styles.help)}>
+                {t('pending.autoSend')} {online ? t('pending.retryHelp') : t('pending.waitingHelp')}
+              </p>
+              <div className={cn(styles.actions)}>
+                <Button
+                  variant="primary"
+                  disabled={!online || sending}
+                  onClick={() => void sendNow()}
+                >
+                  {sending
+                    ? t('pending.sending')
+                    : online
+                      ? t('pending.sendNow')
+                      : t('pending.waitingSignal')}
+                </Button>
+              </div>
+            </>
+          )}
+        </>
+      )}
       <p role="status" className={cn(styles.notice)}>
         {notice}
       </p>
-      {openCount === 0 ? <p>{t('pending.empty')}</p> : null}
       {queued.length === 0 ? null : (
         <ul className={cn(styles.list)}>
           {queued.map((item) => (
