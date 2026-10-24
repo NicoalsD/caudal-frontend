@@ -65,7 +65,11 @@ export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.E
             <ul className={cn(styles.navList)}>
               {navItems.map(({ to, label, icon: Icon }) => (
                 <li key={to}>
-                  <NavLink className={cn(styles.navLink)} to={to} onClick={() => setMenuOpen(false)}>
+                  <NavLink
+                    className={cn(styles.navLink)}
+                    to={to}
+                    onClick={() => setMenuOpen(false)}
+                  >
                     {tabBar && Icon !== undefined && (
                       <Icon className={cn(styles.navIcon)} aria-hidden="true" />
                     )}
