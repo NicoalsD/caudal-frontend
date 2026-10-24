@@ -96,5 +96,18 @@ describe('proposal decisions (S13 approve, reject; S15 publish)', () => {
     renderApp(ROUTE_PATHS.board.publication, { user: board() });
 
     expect(await screen.findByText(t('proposals.publication.empty'))).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: t('proposals.publication.toProposals') }),
+    ).toHaveAttribute('href', ROUTE_PATHS.board.proposals);
+  });
+
+  it('sends a pending proposal to its review from the publication screen', async () => {
+    server.use(...createProposalsBackend([buildProposal()]).handlers);
+    renderApp(`${ROUTE_PATHS.board.publication}?proposal=${PROPOSAL_ID_TODAY}`, { user: board() });
+
+    expect(await screen.findByRole('link', { name: t('proposals.guide.review') })).toHaveAttribute(
+      'href',
+      detailPath,
+    );
   });
 });
