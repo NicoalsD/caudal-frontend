@@ -139,4 +139,29 @@ describe('PublicTrackingPage (S06, without login)', () => {
     await screen.findByText(t(STATUS_LABEL_KEY.REPORTED));
     expect(screen.queryByText(/Lopez|3001234567|10\.0\.0\.1/)).not.toBeInTheDocument();
   });
+
+  it('cleans the code as it is typed: upper case, and no spaces or hyphens', async () => {
+    renderApp(TRACKING_PATH);
+    const field = await screen.findByRole('textbox', { name: t('publicTracking.codeLabel') });
+
+    await userEvent.type(field, '7k2m-9q az');
+
+    expect(field).toHaveValue('7K2M9QAZ');
+    expect(screen.getByText('8 de 8 caracteres escritos')).toBeInTheDocument();
+  });
+
+  it('explains what the status means for the family', async () => {
+    renderApp(`${TRACKING_PATH}/${KNOWN_CODE}`);
+
+    expect(await screen.findByText('La Junta está revisando el daño.')).toBeInTheDocument();
+  });
+
+  it('shows the day the report was received, next to the last update', async () => {
+    renderApp(`${TRACKING_PATH}/${KNOWN_CODE}`);
+
+    const section = await screen.findByRole('region', { name: t('publicTracking.statusLabel') });
+    expect(
+      within(section).getByText(/^Recibido el 9 de oct de 2026, 9:30 a\. m\.$/),
+    ).toBeInTheDocument();
+  });
 });
