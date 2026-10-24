@@ -104,8 +104,8 @@
   --font-size-statement: clamp(2.25rem, 5.6vw, 4.75rem);
   --font-size-lead: clamp(1.25rem, 2.1vw, 1.625rem);
   --line-height-tight: 1.04;
-  --tracking-display: -0.035em;
-  --tracking-hero: -0.05em;
+  --tracking-display: -0.025em;
+  --tracking-hero: -0.03em;
   --space-8: 4.5rem;
   --space-9: 7.5rem;
   --landing-max: 75rem;

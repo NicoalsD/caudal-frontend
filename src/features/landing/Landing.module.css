@@ -1,6 +1,7 @@
 /*
- * Presentation page. Same tokens as the app; the authored motion lives only here
- * (design-theme.md section 12) and every entrance starts from a visible default.
+ * Presentation page. Same tokens as the app; the brand field, the moving water (three.js) and the
+ * authored motion (GSAP) live only here (design-theme.md section 12), and every entrance starts
+ * from a visible default.
  */
 
 @property --water-dry {
@@ -127,7 +128,12 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--color-page);
+  background: var(--color-brand-900);
+  color: var(--color-on-brand);
+}
+
+.navBar :focus-visible {
+  outline-color: var(--color-on-brand);
 }
 
 .navBar::after {
@@ -136,7 +142,7 @@
   inset-inline: 0;
   bottom: 0;
   height: var(--level-line-height);
-  background: var(--color-water-700);
+  background: var(--color-brand-500);
   transform: scaleX(0);
   transition: transform var(--duration-reveal) var(--ease-out-expo);
 }
@@ -159,36 +165,7 @@
   align-items: center;
   gap: var(--space-2);
   min-height: var(--target-min);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-h3);
-  letter-spacing: 0.06em;
   text-decoration: none;
-}
-
-.navBrand:hover {
-  color: var(--color-text-primary);
-}
-
-/* The mark: a small tank with water up to its level line. */
-.brandMark {
-  position: relative;
-  display: inline-block;
-  width: 1.05rem;
-  height: 1.25rem;
-  border: 2px solid currentColor;
-  border-top: 0;
-  border-radius: 0 0 0.3rem 0.3rem;
-  overflow: hidden;
-}
-
-.brandMark::after {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 55%;
-  background: var(--color-water-700);
 }
 
 .navLinks {
@@ -206,7 +183,7 @@
   align-items: center;
   min-height: var(--target-min);
   padding-inline: var(--space-3);
-  color: var(--color-text-secondary);
+  color: color-mix(in srgb, var(--color-on-brand) 82%, transparent);
   font-size: var(--font-size-small);
   text-decoration: none;
   border-radius: var(--radius-control);
@@ -214,7 +191,7 @@
 }
 
 .navLinks a:hover {
-  color: var(--color-text-primary);
+  color: var(--color-on-brand);
 }
 
 .navActions {
@@ -229,24 +206,88 @@
   align-items: center;
   min-height: var(--target-min);
   padding-inline: var(--space-3);
-  color: var(--color-text-primary);
+  color: var(--color-on-brand);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-bold);
   text-decoration: none;
 }
 
 .navSignIn:hover {
-  color: var(--color-water-700);
+  color: var(--color-brand-200);
+  text-decoration: underline;
+}
+
+/* On the brand field the main button turns light, so it reads on deep teal and on the water. */
+.navBar .button,
+.hero .button {
+  background: var(--color-on-brand);
+  border-color: var(--color-on-brand);
+  color: var(--color-brand-900);
+  box-shadow: 0 0.75rem 1.5rem -1rem rgb(0 0 0 / 70%);
+}
+
+.navBar .button:hover,
+.hero .button:hover {
+  background: var(--color-brand-200);
+  border-color: var(--color-brand-200);
+  color: var(--color-brand-900);
+}
+
+.hero .buttonSecondary {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--color-on-brand) 70%, transparent);
+  color: var(--color-on-brand);
+  box-shadow: none;
+}
+
+.hero .buttonSecondary:hover {
+  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
+  border-color: var(--color-on-brand);
+  color: var(--color-on-brand);
 }
 
 /* Hero */
 
+/*
+ * The hero is the style tile's deep teal field. The CSS paints still currents (the fallback and
+ * the first paint); the three.js water fades in over them once it is ready.
+ */
 .hero {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: var(--space-8);
+  overflow: hidden;
+  background:
+    radial-gradient(
+      60% 50% at 20% 10%,
+      color-mix(in srgb, var(--color-brand-500) 30%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 40% at 85% 30%,
+      color-mix(in srgb, var(--color-water-300) 18%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--color-water-800), var(--color-brand-900) 70%);
+  color: var(--color-on-brand);
   text-align: center;
+}
+
+.water {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1600ms var(--ease-out-expo);
+}
+
+.hero[data-water='on'] .water {
+  opacity: 1;
 }
 
 .heroText {
@@ -263,7 +304,8 @@
   font-size: var(--font-size-hero);
   line-height: 0.92;
   letter-spacing: var(--tracking-hero);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
   animation: water-rise var(--duration-fill) var(--ease-out-expo) 200ms both;
 }
 
@@ -276,11 +318,19 @@
 .wordmarkDry {
   /* Outline only: the dry letters are drawn by the stroke, so the text itself has no fill. */
   color: transparent;
-  -webkit-text-stroke: 2px var(--color-water-700);
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--color-on-brand) 65%, transparent);
 }
 
+/* The wet letters carry the logo's gradient, light foam on top to deep teal below. */
 .wordmarkWet {
-  color: var(--color-water-700);
+  background: linear-gradient(
+    180deg,
+    var(--color-on-brand) 0%,
+    var(--color-water-300) 45%,
+    var(--color-brand-500) 100%
+  );
+  background-clip: text;
+  color: transparent;
   clip-path: inset(var(--water-dry) 0 0 0);
 }
 
@@ -291,7 +341,7 @@
   inset-inline: -0.12em;
   top: var(--water-dry);
   height: var(--level-line-height);
-  background: var(--color-water-700);
+  background: var(--color-brand-500);
 }
 
 @keyframes water-rise {
@@ -304,7 +354,8 @@
   margin-top: var(--space-5);
   font-size: clamp(1.5rem, 3.4vw, 2.625rem);
   line-height: var(--line-height-h1);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
   letter-spacing: -0.02em;
   text-wrap: balance;
   animation: rise-in var(--duration-reveal) var(--ease-out-expo) 700ms both;
@@ -313,7 +364,7 @@
 .place {
   max-width: 34rem;
   margin-top: var(--space-3);
-  color: var(--color-text-secondary);
+  color: color-mix(in srgb, var(--color-on-brand) 84%, transparent);
   font-size: var(--font-size-lead);
   line-height: var(--line-height-body);
   text-wrap: pretty;
@@ -496,6 +547,8 @@
 }
 
 .statement {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
   font-size: var(--font-size-statement);
   line-height: var(--line-height-tight);
   letter-spacing: var(--tracking-display);
@@ -535,6 +588,8 @@
 .flow .statement,
 .decide .statement,
 .project .statement {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
   font-size: clamp(2.25rem, 3.8vw, 3.5rem);
 }
 
@@ -693,6 +748,8 @@
 
 .quote {
   max-width: 22ch;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
   font-size: var(--font-size-statement);
   line-height: var(--line-height-tight);
   letter-spacing: var(--tracking-display);
@@ -924,6 +981,8 @@
 }
 
 .closingTitle {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
   font-size: clamp(3rem, 10vw, 8rem);
   line-height: 0.95;
   letter-spacing: var(--tracking-hero);
@@ -963,7 +1022,6 @@
   align-items: center;
   gap: var(--space-2) var(--space-3);
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0.06em;
 }
 
 .footerTagline {
