@@ -4,5 +4,5 @@ import { OPERATOR_NAV } from './navigation';
 import { RoleLayout } from './RoleLayout';
 
 export function OperatorLayout(): JSX.Element {
-  return <RoleLayout navItems={OPERATOR_NAV} />;
+  return <RoleLayout navItems={OPERATOR_NAV} tabBar />;
 }

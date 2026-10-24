@@ -7,13 +7,17 @@
   background: var(--color-water-700);
   color: var(--color-raised);
   border-radius: var(--radius-control);
-  z-index: 1;
+  z-index: 3;
 }
 
 .skipLink:focus {
   inset-block-start: var(--space-2);
 }
 
+/*
+ * Brand header: the deep teal field of the style tile, flat (no gradient) so the links stay
+ * readable in sunlight. The level line in the logo's bright teal closes it.
+ */
 .header {
   position: relative;
   display: flex;
@@ -21,21 +25,24 @@
   align-items: center;
   gap: var(--space-2) var(--space-5);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-raised);
+  background: var(--color-brand-900);
+  color: var(--color-on-brand);
 }
 
-/* The level line: the only decorative motif, hidden from assistive technology. */
+/* The level line: the app's water motif, hidden from assistive technology. */
 .header::after {
   content: '';
   position: absolute;
   inset-inline: 0;
   inset-block-end: 0;
   height: var(--level-line-height);
-  background: var(--color-water-700);
+  background: var(--color-brand-500);
 }
 
 .brand {
-  font-weight: var(--font-weight-bold);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
 }
 
 .menu {
@@ -55,13 +62,14 @@
   min-height: var(--target-min);
   margin-inline-start: auto;
   padding: 0 var(--space-4);
-  background: var(--color-raised);
-  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-on-brand) 55%, transparent);
   border-radius: var(--radius-control);
-  color: var(--color-text-primary);
+  color: var(--color-on-brand);
   font: inherit;
   font-weight: var(--font-weight-bold);
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .menuToggle svg {
@@ -70,7 +78,68 @@
 }
 
 .menuToggle:hover {
-  background: var(--color-sand-200);
+  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
+}
+
+.header :focus-visible {
+  outline-color: var(--color-on-brand);
+}
+
+.navList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-control);
+  color: color-mix(in srgb, var(--color-on-brand) 86%, transparent);
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.navLink:hover {
+  background: color-mix(in srgb, var(--color-on-brand) 10%, transparent);
+  color: var(--color-on-brand);
+}
+
+/* Current page: bold, full contrast and a short bar of bright water under the label. */
+.navLink[aria-current='page'] {
+  color: var(--color-on-brand);
+  font-weight: var(--font-weight-bold);
+}
+
+.navLink[aria-current='page']::after {
+  content: '';
+  position: absolute;
+  inset-inline: var(--space-3);
+  inset-block-end: var(--space-1);
+  height: 3px;
+  border-radius: var(--radius-chip);
+  background: var(--color-brand-500);
+}
+
+.navIcon {
+  width: 1.375rem;
+  height: 1.375rem;
+  flex: none;
+}
+
+.main {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
 }
 
 @media (max-width: 48rem) {
@@ -97,39 +166,66 @@
   .navLink {
     width: 100%;
   }
-}
 
-.navList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
+  /*
+   * Bottom tab bar (operator). The links leave the header and sit fixed at the bottom, within thumb
+   * reach; sign out stays in the header. The main area keeps room so nothing hides behind the bar.
+   */
+  .shell[data-tab-bar='true'] .menu,
+  .shell[data-tab-bar='true'] .menu[data-open='false'] {
+    display: contents;
+  }
 
-.navLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-control);
-  color: var(--color-text-primary);
-  text-decoration: none;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
+  .shell[data-tab-bar='true'] .signOut {
+    margin-inline-start: auto;
+  }
 
-.navLink:hover {
-  background: var(--color-sand-200);
-  color: var(--color-text-primary);
-}
+  .shell[data-tab-bar='true'] .nav {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 2;
+    padding-block-end: env(safe-area-inset-bottom, 0);
+    background: var(--color-raised);
+    border-top: 1px solid var(--color-border-subtle);
+  }
 
-.navLink[aria-current='page'] {
-  color: var(--color-water-700);
-  font-weight: var(--font-weight-bold);
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
-}
+  .shell[data-tab-bar='true'] .navList {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    flex-direction: row;
+  }
 
-.main {
-  max-width: var(--content-max);
-  margin-inline: auto;
-  padding: var(--space-5) var(--space-4) var(--space-7);
+  .shell[data-tab-bar='true'] .navLink {
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 4rem;
+    padding: var(--space-1);
+    border-radius: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .shell[data-tab-bar='true'] .navLink:hover {
+    background: var(--color-sand-200);
+    color: var(--color-text-primary);
+  }
+
+  .shell[data-tab-bar='true'] .navLink[aria-current='page'] {
+    color: var(--color-water-700);
+  }
+
+  .shell[data-tab-bar='true'] .navLink[aria-current='page']::after {
+    inset-inline: 30%;
+    inset-block: 0 auto;
+    height: 3px;
+  }
+
+  .shell[data-tab-bar='true'] .main {
+    padding-block-end: calc(4rem + var(--space-7) + env(safe-area-inset-bottom, 0px));
+  }
 }
