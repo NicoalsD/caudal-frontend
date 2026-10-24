@@ -792,7 +792,25 @@ Reglas:
 - Los mensajes de estado de la barra de sincronización usan `aria-live="polite"`. Los errores de validación usan `aria-describedby`.
 - Los botones de solo icono llevan `aria-label` desde `es.ts`.
 
-## 11. Pendientes de diseño
+## 11. Mejoras de experiencia por rol (identidad del style tile)
+
+Con la identidad nueva (`design-theme.md`) las pantallas de tareas quedaron más livianas: menos bloques, una acción dominante y el estado del sistema siempre a la vista. Los bocetos de las secciones anteriores muestran el orden original; donde chocan, manda esta sección.
+
+| Rol | Pantalla | Cambio | Patrón de UX |
+|-----|----------|--------|--------------|
+| Todos | Cabecera | Banda turquesa profunda con el logo (o la palabra "Caudal" mientras llega el logo oficial) y la línea de nivel | Consistencia de marca |
+| Fontanero | Navegación | En el celular, barra de pestañas abajo (Inicio, Nueva lectura, Pendientes, Reportar daño, Tanque), al alcance del pulgar | Navegación secundaria clara |
+| Fontanero | S07 Inicio | Arriba, una sola acción que cambia con el día: "Registrar lectura" o "Hacer el cierre del día". Debajo, la lista "Hoy" (lectura, pendientes, cierre) con icono y texto, y el nivel del tanque en grande | Estado del sistema visible, una acción por pantalla |
+| Fontanero | S08 Lectura | El nivel es el campo protagonista (`inputmode="decimal"`); nota y daño van en una sección plegable que se abre sola si tiene un error; al guardar, la confirmación dice dónde quedó la lectura y propone el siguiente paso | Divulgación progresiva, retroalimentación inmediata |
+| Fontanero | S09 Pendientes | Estado vacío con explicación y atajo a registrar; con pendientes, explica que se envían solas al volver la señal | Visibilidad del estado |
+| Junta | Guía del día | Pasos Generar, Revisar y decidir, Publicar, en lista ordenada con "Hecho", "Ahora" o "Falta" y `aria-current="step"`; un solo botón, el del paso actual | Indicador de progreso, fragmentación |
+| Junta | S13 Detalle | Resumen compacto (fecha, estado, horas, banda); "Aprobar" dominante y "Modificar"/"Rechazar" secundarias, con rechazar en tono de riesgo; turnos como horario y razones plegables | Jerarquía visual, prevención de errores |
+| Junta | Lista y publicación | La propuesta de hoy destacada con su acción; chips de estado con icono | Consistencia |
+| Público | S04 Horario | "Mi turno hoy": la familia elige su sector una vez (se recuerda solo el nombre del sector en el celular) y ve su horario en grande; la lista completa debajo con su sector resaltado; compartir y reportar al final con la misma jerarquía | Personalización, jerarquía de información |
+| Público | S05 Reporte de daño | Dos pasos ("Elige qué pasó", "Cuéntanos más") con "Paso X de 2"; el mínimo de caracteres se marca al cumplirse; el recibo trae el código grande con "Copiar código" y "Qué hacer ahora" | Fragmentación, formularios con retroalimentación |
+| Público | S06 Seguimiento | El código se normaliza al escribir (mayúsculas, sin espacios ni guiones) con contador; el estado se explica en lenguaje claro | Prevención de errores |
+
+## 12. Pendientes de diseño
 
 - Nombre exacto del campo de permisos en `/auth/me` (verificar en OpenAPI).
 - Quién puede editar la red (sectores y válvulas) (por definir con la Junta).
