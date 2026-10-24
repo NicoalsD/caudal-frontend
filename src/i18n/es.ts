@@ -149,12 +149,13 @@ export const strings = {
       boardShot: 'Pantalla de la Junta: propuesta de turnos del día con la razón de cada uno.',
       familyShot: 'Pantalla pública: horario de agua de hoy por sector, sin datos personales.',
       photoAlt: 'Volcán Galeras con el mosaico de cultivos de sus laderas, en Nariño.',
-      closingPhotoAlt: 'Volcanes Cumbal y Chiles sobre los potreros del sur de Nariño.',
+      closingPhotoAlt:
+        'Laguna Verde de color turquesa en el cráter del volcán Azufral, vecino de Guaitarilla, entre laderas de páramo.',
     },
     credits: {
       title: 'Fotos',
       galeras: 'Volcán Galeras, Nariño. Luis Eduardo White Patiño, CC BY-SA 4.0, recortada.',
-      cumbal: 'Volcanes Cumbal y Chiles, Nariño. Vlahebo, CC BY-SA 4.0.',
+      azufral: 'Laguna Verde del volcán Azufral, Nariño. Memocali, CC BY-SA 4.0.',
       source: 'Wikimedia Commons',
     },
     operator: {

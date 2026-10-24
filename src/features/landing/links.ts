@@ -25,5 +25,5 @@ export const SECTION_IDS = {
 /** Source pages of the photos, where their authors and licenses are recorded. */
 export const PHOTO_URLS = {
   galeras: 'https://commons.wikimedia.org/wiki/File:VolcanGaleras.jpg',
-  cumbal: 'https://commons.wikimedia.org/wiki/File:Vista_de_los_volcanes_Cumbal_y_Chiles.jpg',
+  azufral: 'https://commons.wikimedia.org/wiki/File:Vida_en_el_Azufral.jpg',
 } as const;
