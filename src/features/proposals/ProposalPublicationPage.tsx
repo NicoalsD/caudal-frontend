@@ -5,9 +5,11 @@ import { Link, useSearchParams } from 'react-router';
 import { formatServiceDate } from '../../core/format/serviceDate';
 import {
   currentProposalOf,
+  isDecidable,
   isPublishable,
   type DayProposal,
 } from '../../core/proposal/proposalDay';
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
 import { useOnline } from '../../state/hooks/useOnline';
@@ -19,6 +21,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
 import { Dialog } from '../../ui/primitives/Dialog';
+import { LinkButton } from '../../ui/primitives/LinkButton';
 import { cn } from '../../ui/styles/cn';
 import type { ScheduleProposalSummaryView } from '../../services/api/views';
 import styles from './Proposals.module.css';
@@ -74,7 +77,16 @@ export function ProposalPublicationPage(): JSX.Element {
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.publication')}</ScreenTitle>
       {proposal === null ? (
-        <p>{t('proposals.publication.empty')}</p>
+        <div className={cn(styles.section)}>
+          <p>{t('proposals.publication.empty')}</p>
+          <LinkButton
+            variant="primary"
+            className={cn(styles.wide)}
+            to={ROUTE_PATHS.board.proposals}
+          >
+            {t('proposals.publication.toProposals')}
+          </LinkButton>
+        </div>
       ) : (
         <PublicationStatus proposal={proposal} />
       )}
@@ -167,9 +179,19 @@ function PublicationStatus({
         <p role="status">{t('proposals.publication.success')}</p>
       ) : null}
       {online ? null : <p>{t('proposals.offline')}</p>}
-      <Link className={cn(styles.link)} to={proposalDetailPath(proposal.id)}>
-        {t('proposals.publication.reviewLink')}
-      </Link>
+      {isDecidable(proposal.status) ? (
+        <LinkButton
+          variant="primary"
+          className={cn(styles.wide)}
+          to={proposalDetailPath(proposal.id)}
+        >
+          {t('proposals.guide.review')}
+        </LinkButton>
+      ) : (
+        <Link className={cn(styles.link)} to={proposalDetailPath(proposal.id)}>
+          {t('proposals.publication.reviewLink')}
+        </Link>
+      )}
     </section>
   );
 }

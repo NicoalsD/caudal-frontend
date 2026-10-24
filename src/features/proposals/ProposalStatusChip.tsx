@@ -1,3 +1,5 @@
+import { Archive, CheckCheck, CircleX, Clock, Send } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { JSX } from 'react';
 
 import { t } from '../../i18n/t';
@@ -18,7 +20,27 @@ const STATUS_KEY = {
   CLOSED: 'closed',
 } as const satisfies Record<ProposalStatus, string>;
 
-/** The status in words (never only by colour): the chip text is the status name. */
+const ICON_SIZE = 18;
+
+/** Each status has its own icon and tone: attention waits for the Board, correct is decided. */
+const STATUS_LOOK: Readonly<
+  Record<ProposalStatus, { icon: LucideIcon; tone: string | undefined }>
+> = {
+  PENDING_REVIEW: { icon: Clock, tone: styles.toneAttention },
+  APPROVED: { icon: CheckCheck, tone: styles.toneCorrect },
+  APPROVED_WITH_CHANGES: { icon: CheckCheck, tone: styles.toneCorrect },
+  REJECTED: { icon: CircleX, tone: styles.toneDanger },
+  PUBLISHED: { icon: Send, tone: styles.toneInfo },
+  CLOSED: { icon: Archive, tone: styles.toneNeutral },
+};
+
+/** The status in words (never only by colour): the icon is decorative, the text is the status. */
 export function ProposalStatusChip({ status }: ProposalStatusChipProps): JSX.Element {
-  return <span className={cn(styles.chip)}>{t(`proposals.status.${STATUS_KEY[status]}`)}</span>;
+  const { icon: Icon, tone } = STATUS_LOOK[status];
+  return (
+    <span className={cn(styles.status, tone)}>
+      <Icon aria-hidden="true" size={ICON_SIZE} />
+      {t(`proposals.status.${STATUS_KEY[status]}`)}
+    </span>
+  );
 }
