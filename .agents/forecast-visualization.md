@@ -111,6 +111,16 @@ Aparecen encima de la gráfica, en texto, con icono y sin color como única señ
 
 Regla: si la IA falla, el pronóstico sigue apareciendo con la estimación simple. Nunca se oculta la gráfica por una falla de la IA.
 
+### 4.1 Recalcular el pronóstico
+
+El backend no crea pronósticos solo: cada corrida sale de `POST /tanks/{id}/forecasts`. Por eso la tarjeta tiene el botón "Recalcular pronóstico" (`ForecastRunAction`), visible solo para quien tenga `FORECAST_RUN`, también cuando el tanque todavía no tiene pronóstico.
+
+- Se envía sin `horizon_days`, así que el backend usa `forecast_horizon_days` de la regla vigente.
+- Mientras espera, el botón queda deshabilitado con "Recalculando..." y un texto que avisa que puede tardar unos segundos.
+- La corrida nueva reemplaza la de pantalla de inmediato (sin esperar el siguiente refresco) y se vuelve a leer el estado del tanque. Un mensaje `role="status"` dice si respondió la IA o si quedó la estimación simple; el aviso de origen de la sección 4 da el motivo.
+- Errores: `429 RATE_LIMITED` dice cuántos minutos esperar si llega `Retry-After`; `422 NO_LEVEL_DATA` pide registrar una lectura; el resto usa el texto común de `errorText`.
+- Si el servicio de IA está dormido (Render free), la primera corrida puede llegar como estimación simple con `IA_TIMEOUT`; al pulsar otra vez, con el servicio ya despierto, responde la IA.
+
 ## 5. Textos de ejemplo
 
 | Situación | Texto |
