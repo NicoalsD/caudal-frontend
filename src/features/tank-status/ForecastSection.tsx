@@ -5,18 +5,24 @@ import { formatDecimal } from '../../core/format/decimal';
 import { formatDayKey } from '../../core/format/time';
 import { t } from '../../i18n/t';
 import type { TankStatusView, TankView } from '../../services/api/views';
+import { usePermission } from '../../state/hooks/usePermission';
 import { useLatestForecast } from '../../state/hooks/useTankStatus';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { cn } from '../../ui/styles/cn';
 import { ForecastChart } from './ForecastChart';
+import { ForecastRunAction } from './ForecastRunAction';
 import { ForecastSourceNotice } from './ForecastSourceNotice';
 import styles from './TankStatus.module.css';
 
 const NOT_FOUND_CODE = 'NOT_FOUND';
 const LEVEL_DIGITS = 2;
+const RUN_PERMISSION = 'FORECAST_RUN';
 
-/** The forecast block: loading, error, "no forecast yet" or the chart with its plain sentences. */
+/**
+ * The forecast block: loading, error, "no forecast yet" or the chart with its plain sentences.
+ * Whoever has FORECAST_RUN also gets the button that asks the AI for a new run.
+ */
 export function ForecastSection({
   tank,
   observed,
@@ -25,6 +31,7 @@ export function ForecastSection({
   readonly observed: TankStatusView['level'];
 }): JSX.Element {
   const forecast = useLatestForecast(tank.id);
+  const canRun = usePermission(RUN_PERMISSION);
   let body: JSX.Element;
   if (forecast.isPending) {
     body = <LoadingState message={t('forecast.loading')} />;
@@ -66,6 +73,7 @@ export function ForecastSection({
     <section className={cn(styles.card)} aria-labelledby="forecast-title">
       <h2 id="forecast-title">{t('forecast.title')}</h2>
       {body}
+      {canRun ? <ForecastRunAction tankId={tank.id} /> : null}
     </section>
   );
 }
