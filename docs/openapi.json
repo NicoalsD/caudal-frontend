@@ -1777,6 +1777,96 @@
         }
       }
     },
+    "/api/v1/tanks/{id}/forecasts": {
+      "post": {
+        "operationId": "requestForecast",
+        "summary": "Pronosticar el tanque ahora",
+        "description": "Autenticado, permiso FORECAST_RUN. API.md sección 8.3. Si la IA no responde, la corrida es la estimación simple con is_fallback en verdadero y el motivo. Hasta 10 por hora por acueducto.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestForecast"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Corrida nueva.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: horizon_days fuera de 1 a 3.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe o es de otro acueducto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "NO_LEVEL_DATA: no hay lecturas en la ventana.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: más de 10 por hora, con Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "IA_UNAVAILABLE: también falló la estimación simple.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/tanks/{id}/forecasts/latest": {
       "get": {
         "operationId": "getLatestForecast",
@@ -7359,6 +7449,17 @@
           "status": {
             "type": "string",
             "description": "UP cuando funciona; otro valor cuando no."
+          }
+        }
+      },
+      "RequestForecast": {
+        "type": "object",
+        "properties": {
+          "horizon_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "Días a pronosticar. Sin él se usa forecast_horizon_days de la regla vigente."
           }
         }
       }

@@ -679,6 +679,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tanks/{id}/forecasts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pronosticar el tanque ahora
+         * @description Autenticado, permiso FORECAST_RUN. API.md sección 8.3. Si la IA no responde, la corrida es la estimación simple con is_fallback en verdadero y el motivo. Hasta 10 por hora por acueducto.
+         */
+        post: operations["requestForecast"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tanks/{id}/forecasts/latest": {
         parameters: {
             query?: never;
@@ -2409,6 +2429,10 @@ export interface components {
             /** @description UP cuando funciona; otro valor cuando no. */
             status: string;
         };
+        RequestForecast: {
+            /** @description Días a pronosticar. Sin él se usa forecast_horizon_days de la regla vigente. */
+            horizon_days?: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -3815,6 +3839,77 @@ export interface operations {
             };
             /** @description IMPORT_LIMIT_EXCEEDED: más de 5.000 filas. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    requestForecast: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestForecast"];
+            };
+        };
+        responses: {
+            /** @description Corrida nueva. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastRun"];
+                };
+            };
+            /** @description VALIDATION_ERROR: horizon_days fuera de 1 a 3. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND: el tanque no existe o es de otro acueducto. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NO_LEVEL_DATA: no hay lecturas en la ventana. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description RATE_LIMITED: más de 10 por hora, con Retry-After. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description IA_UNAVAILABLE: también falló la estimación simple. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
