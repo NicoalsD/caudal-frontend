@@ -28,4 +28,17 @@ export class TankStatusApi {
     });
     return toForecast(this.adapter, response.body);
   }
+
+  /**
+   * POST /tanks/{id}/forecasts: asks the AI for a new run now. Without a body the horizon is the
+   * one of the rule in force. When the AI does not answer, the run is the simple estimate.
+   */
+  async runForecast(tankId: string): Promise<ForecastView> {
+    const response = await this.http.request<ForecastDto>({
+      method: 'POST',
+      path: `/tanks/${encodeURIComponent(tankId)}/forecasts`,
+      body: {},
+    });
+    return toForecast(this.adapter, response.body);
+  }
 }

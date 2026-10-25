@@ -325,8 +325,8 @@ Las pantallas de esta sección viven bajo `/junta`. Las acciones de decisión de
   - Texto de resumen: "Lo más probable es 2,1 m en 2 días, pero podría estar entre 1,8 m y 2,4 m."
   - Aviso de respaldo cuando la IA no respondió: "La IA no respondió. Usamos una estimación simple: se espera que siga igual que hoy (2,3 m)."
   - Aviso de dato viejo cuando la última lectura supera el umbral: "El último dato tiene más de {hours} horas. Puede no reflejar el tanque de hoy."
-  - Botón "Actualizar pronóstico" (limitado por rate limit: 10 por hora por acueducto).
-- **Acciones:** "Actualizar pronóstico" (secundaria); "Registrar lectura" (principal para el fontanero; en la Junta, enlace secundario).
+  - Botón "Recalcular pronóstico", solo con el permiso `FORECAST_RUN` (`POST /tanks/{id}/forecasts`, 10 por hora por acueducto). También aparece cuando el tanque nunca tuvo pronóstico.
+- **Acciones:** "Recalcular pronóstico" (secundaria); "Registrar lectura" (principal para el fontanero; en la Junta, enlace secundario).
 - **Estados:**
   - Vacío: "Aún no hay lecturas de este tanque."
   - Cargando: esqueleto de la gráfica.
@@ -339,7 +339,7 @@ Las pantallas de esta sección viven bajo `/junta`. Las acciones de decisión de
 |  Último nivel: 2,3 m                     |
 |  Tomado hace 6 h  -  bajando             |
 |                                          |
-|  Pronóstico a 3 días        [Actualizar] |
+|  Pronóstico a 3 días       [Recalcular] |
 |  ~~~~~~~ gráfica con banda ~~~~~~~       |
 |                                          |
 |  Lo más probable: 2,1 m en 2 días.       |

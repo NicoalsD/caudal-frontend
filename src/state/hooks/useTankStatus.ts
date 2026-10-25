@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
 import type { ForecastView, TankStatusView, TankView } from '../../services/api/views';
 import { aqueductKey } from '../queryKeys';
@@ -32,6 +32,25 @@ export function useLatestForecast(tankId: string): UseQueryResult<ForecastView> 
     queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'forecast', tankId),
     queryFn: () => api.tankStatus.latestForecast(tankId),
     refetchInterval: STATUS_REFETCH_INTERVAL_MS,
+  });
+}
+
+/**
+ * POST /tanks/{id}/forecasts. The new run replaces the latest forecast at once; the status of the
+ * tank is read again because it carries the forecast of the day.
+ */
+export function useRunForecast(tankId: string): UseMutationResult<ForecastView, Error, void> {
+  const api = useCaudalApi();
+  const client = useQueryClient();
+  const aqueductId = useAqueductId();
+  return useMutation({
+    mutationFn: () => api.tankStatus.runForecast(tankId),
+    onSuccess: async (run) => {
+      client.setQueryData(aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'forecast', tankId), run);
+      await client.invalidateQueries({
+        queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'status', tankId),
+      });
+    },
   });
 }
 

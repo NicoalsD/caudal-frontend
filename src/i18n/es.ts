@@ -642,6 +642,16 @@ export const strings = {
     reasonUnknown: 'no se indicó',
     model: 'Modelo: {name}',
     createdAt: 'Calculado el {date}',
+    run: 'Recalcular pronóstico',
+    running: 'Recalculando...',
+    runningHint: 'La IA está calculando con las lecturas recientes. Puede tardar unos segundos.',
+    runDoneAi: 'Listo. Este es el pronóstico nuevo de la IA.',
+    runDoneEstimate: 'Listo, pero la IA no respondió. Se muestra una estimación simple.',
+    runRateLimited: 'Ya se recalculó varias veces en la última hora. Intenta más tarde.',
+    runRateLimitedWait:
+      'Ya se recalculó varias veces en la última hora. Intenta de nuevo en {minutes} min.',
+    runNoLevelData:
+      'No hay lecturas recientes para pronosticar. Registra una lectura e intenta de nuevo.',
   },
   imports: {
     intro:
