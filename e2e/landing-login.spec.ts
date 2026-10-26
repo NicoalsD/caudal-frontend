@@ -3,13 +3,13 @@ import { BOARD_ADMIN_USERNAME, OPERATOR_USERNAME, SEED_PASSWORD } from './suppor
 import { expect, expectNoSeriousViolations, test } from './support/fixtures';
 
 test.describe('Entrada a la aplicación', () => {
-  test('la portada lleva a la demo y el login rechaza una contraseña incorrecta', async ({
+  test('la portada lleva al login y el login rechaza una contraseña incorrecta', async ({
     page,
   }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-    await page.getByRole('link', { name: strings.landing.nav.demo }).first().click();
+    await page.getByRole('link', { name: strings.landing.nav.signIn }).first().click();
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole('heading', { name: strings.screens.login })).toBeVisible();
 
