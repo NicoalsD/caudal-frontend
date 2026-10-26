@@ -89,7 +89,7 @@ Las pruebas de extremo a extremo no necesitan la API: usan un servidor simulado 
 
 | Archivo | Flujo |
 |---------|-------|
-| `e2e/landing-login.spec.ts` | Portada → "Entrar a la demo" → login. Contraseña incorrecta muestra el mensaje genérico. Entrada del fontanero y de la Junta. |
+| `e2e/landing-login.spec.ts` | Portada → "Iniciar sesión" → login. Contraseña incorrecta muestra el mensaje genérico. Entrada del fontanero y de la Junta. |
 | `e2e/operator.spec.ts` | Fontanero registra una lectura sin conexión, la ve en Pendientes y se envía al volver la red. |
 | `e2e/board.spec.ts` | La Junta revisa la propuesta del tanque, la aprueba y la publica. |
 | `e2e/public-schedule.spec.ts` | Horario público sin sesión. |
