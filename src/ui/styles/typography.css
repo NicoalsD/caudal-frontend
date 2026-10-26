@@ -1,0 +1,69 @@
+body {
+  background: var(--color-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 48rem) {
+  body {
+    font-size: 1.25rem;
+  }
+}
+
+/* Titles: Barlow ExtraBold. Subtitles and section heads: Montserrat Bold (style tile). */
+h1 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-h1);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h2 {
+  text-wrap: balance;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+  font-weight: var(--font-weight-bold);
+}
+
+h3 {
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-h3);
+  font-weight: var(--font-weight-bold);
+}
+
+a {
+  color: var(--color-water-700);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+::selection {
+  background: var(--color-water-300);
+  color: var(--color-text-primary);
+}
+
+body {
+  caret-color: var(--color-water-700);
+  accent-color: var(--color-water-700);
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+a:hover {
+  color: var(--color-water-800);
+}
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Headings receive programmatic focus on navigation; no ring needed for that. */
+h1:focus {
+  outline: none;
+}

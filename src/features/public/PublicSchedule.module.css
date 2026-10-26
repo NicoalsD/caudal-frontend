@@ -1,0 +1,312 @@
+/* Big text for reading outdoors on a phone: the hours are the largest thing on the page. */
+
+.serviceDay {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+  font-weight: var(--font-weight-bold);
+}
+
+.published {
+  margin: var(--space-1) 0 var(--space-5);
+  color: var(--color-text-secondary);
+}
+
+/* "My sector": one select, then the turn of that sector in big figures. */
+
+.mySector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.selectLabel {
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-label);
+  font-weight: var(--font-weight-bold);
+}
+
+.select {
+  min-height: var(--field-height);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  background: var(--color-raised);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  color: var(--color-text-secondary);
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--color-water-100);
+  border-radius: var(--radius-surface);
+}
+
+.turnSector {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-h3);
+  font-weight: var(--font-weight-bold);
+}
+
+.turnHours {
+  margin: 0;
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-h1);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-water-800);
+}
+
+.message {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* All sectors: name on the left, hours on the right, figures aligned. */
+
+.sectorList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sectorRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.sectorRowChosen {
+  padding-inline: var(--space-3);
+  background: var(--color-water-100);
+  border-bottom-color: transparent;
+  border-radius: var(--radius-control);
+}
+
+.sectorName {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-bold);
+}
+
+.chosenTag {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-water-800);
+}
+
+.hours {
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-h3);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* Secondary actions: one tier, all the same size, grouped at the end of the page. */
+
+.more {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.moreHeading {
+  margin: 0;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-5);
+  font: inherit;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  text-decoration: none;
+  background: var(--color-raised);
+  border: 2px solid var(--color-water-700);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--color-water-100);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-paramo-800);
+}
+
+.statusIcon {
+  flex-shrink: 0;
+  width: var(--font-size-body);
+  height: var(--font-size-body);
+}
+
+.manualLabel {
+  font-weight: var(--font-weight-bold);
+}
+
+.manualText {
+  width: 100%;
+  min-height: var(--field-height);
+  padding: var(--space-3);
+  font: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+/* Damage report steps and receipt. */
+
+.progress {
+  margin: 0;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.stepHeading {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  color: var(--color-text-secondary);
+}
+
+.checkItemMet {
+  color: var(--color-paramo-800);
+  font-weight: var(--font-weight-bold);
+}
+
+.checkIcon {
+  flex-shrink: 0;
+  width: var(--font-size-body);
+  height: var(--font-size-body);
+}
+
+.stepActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.submitHint {
+  margin: 0;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  color: var(--color-text-secondary);
+}
+
+.codeLabel {
+  margin: var(--space-5) 0 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.code {
+  margin: var(--space-2) 0 var(--space-4);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-display);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-code);
+  color: var(--color-water-800);
+  overflow-wrap: anywhere;
+}
+
+.nextList {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  line-height: var(--line-height-body);
+}
+
+.submit {
+  align-self: flex-start;
+}
+
+.trackingStatus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.statusHelp {
+  margin: 0;
+}
+
+@media (min-width: 48rem) {
+  .sectorRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  }
+
+  .more {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .action {
+    width: auto;
+  }
+}

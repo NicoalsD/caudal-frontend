@@ -1,0 +1,11 @@
+.alert {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-clay-100);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-clay-700);
+  border-radius: var(--radius-control);
+}
+
+.message {
+  font-weight: var(--font-weight-bold);
+}

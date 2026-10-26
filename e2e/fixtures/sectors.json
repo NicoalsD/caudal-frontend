@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000d1",
+      "code": "ESCUELA",
+      "name": "Sector Escuela",
+      "parent_sector_id": null,
+      "households_count": 12,
+      "is_active": true
+    },
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000d2",
+      "code": "ALTO",
+      "name": "Sector Alto",
+      "parent_sector_id": null,
+      "households_count": 30,
+      "is_active": true
+    },
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000d3",
+      "code": "BAJO",
+      "name": "Sector Bajo",
+      "parent_sector_id": null,
+      "households_count": 25,
+      "is_active": true
+    }
+  ]
+}

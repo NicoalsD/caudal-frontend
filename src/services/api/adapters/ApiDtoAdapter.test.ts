@@ -1,0 +1,202 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  buildLoginResponse,
+  buildCurrentUserResponse,
+  TEST_USERS,
+} from '../../../test/factories/auth';
+import { plain } from '../../../test/text';
+
+import { ApiDtoAdapter } from './ApiDtoAdapter';
+import { InvalidDtoError } from './InvalidDtoError';
+
+const adapter = new ApiDtoAdapter();
+
+const LEVEL = 2.1;
+const PRECISE_LEVEL = 2.345;
+const TWO_DECIMALS = 2;
+const NOTE_MAX = 500;
+const NOTE_LINES = 10;
+
+describe('ApiDtoAdapter.toHealth', () => {
+  it('maps UP and DOWN to a boolean', () => {
+    expect(adapter.toHealth({ status: 'UP' })).toEqual({ isUp: true, components: [] });
+    expect(adapter.toHealth({ status: 'DOWN' })).toEqual({ isUp: false, components: [] });
+  });
+
+  it('keeps the components the server publishes, each UP or not', () => {
+    expect(
+      adapter.toHealth({
+        status: 'DOWN',
+        components: { db: { status: 'UP' }, circuitBreaker: { status: 'OPEN' } },
+      }),
+    ).toEqual({
+      isUp: false,
+      components: [
+        { name: 'db', isUp: true },
+        { name: 'circuitBreaker', isUp: false },
+      ],
+    });
+  });
+});
+
+describe('ApiDtoAdapter.toConstraints', () => {
+  it('converts snake_case limits to camelCase', () => {
+    const map = adapter.toConstraints({
+      'reading.note': { min: 0, max: NOTE_MAX, max_lines: NOTE_LINES },
+    });
+
+    expect(map).toEqual({ 'reading.note': { min: 0, max: NOTE_MAX, maxLines: NOTE_LINES } });
+  });
+
+  it('copies only the limits that arrived, so absent ones stay absent', () => {
+    const map = adapter.toConstraints({
+      'sector.code': { pattern: '^[A-Z0-9-]+$' },
+      empty: {},
+    });
+
+    expect(map['sector.code']).toEqual({ pattern: '^[A-Z0-9-]+$' });
+    expect(map.empty).toEqual({});
+    expect(Object.keys(map['sector.code'] ?? {})).toEqual(['pattern']);
+  });
+
+  it('does not copy unknown fields of a limit', () => {
+    const dto = { f: { max: 1, surprise: 'x' } } as unknown as Parameters<
+      ApiDtoAdapter['toConstraints']
+    >[0];
+
+    expect(adapter.toConstraints(dto).f).toEqual({ max: 1 });
+  });
+
+  it('returns an empty map for an empty response', () => {
+    expect(adapter.toConstraints({})).toEqual({});
+  });
+});
+
+describe('ApiDtoAdapter.toTimestamp', () => {
+  it('gives the Date, the Bogota text and the service day', () => {
+    const view = adapter.toTimestamp('observed_at', '2026-10-10T03:30:00Z');
+
+    expect(view.date.toISOString()).toBe('2026-10-10T03:30:00.000Z');
+    expect(plain(view.text)).toBe('9 de oct de 2026, 10:30 p. m.');
+    expect(view.dayKey).toBe('2026-10-09');
+  });
+
+  it('names the field when the instant is invalid', () => {
+    expect(() => adapter.toTimestamp('observed_at', 'no-es-fecha')).toThrow(InvalidDtoError);
+    expect(() => adapter.toTimestamp('observed_at', 'no-es-fecha')).toThrow('"observed_at"');
+  });
+});
+
+describe('ApiDtoAdapter.toDecimal', () => {
+  it('keeps the number and writes the text with comma', () => {
+    expect(adapter.toDecimal('gauge_value', LEVEL)).toEqual({ value: LEVEL, text: '2,1' });
+  });
+
+  it('rounds the text, not the value, to the requested digits', () => {
+    expect(adapter.toDecimal('gauge_value', PRECISE_LEVEL, TWO_DECIMALS)).toEqual({
+      value: PRECISE_LEVEL,
+      text: '2,35',
+    });
+  });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY])('rejects %s', (value) => {
+    expect(() => adapter.toDecimal('gauge_value', value)).toThrow(InvalidDtoError);
+  });
+});
+
+describe('ApiDtoAdapter.toLogin', () => {
+  const dto = buildLoginResponse(TEST_USERS.admin);
+
+  it('turns the snake_case answer into a view', () => {
+    expect(adapter.toLogin(dto)).toEqual({
+      accessToken: dto.access_token,
+      expiresInSeconds: dto.expires_in,
+      user: {
+        id: TEST_USERS.admin.id,
+        username: TEST_USERS.admin.username,
+        fullName: TEST_USERS.admin.full_name,
+        role: 'BOARD_ADMIN',
+        aqueductId: TEST_USERS.admin.aqueduct_id,
+        mustChangePassword: false,
+      },
+    });
+  });
+
+  it('rejects a role the client does not know', () => {
+    const unknownRole = { ...dto, user: { ...dto.user, role: 'SUPERUSER' as 'OPERATOR' } };
+
+    expect(() => adapter.toLogin(unknownRole)).toThrow(InvalidDtoError);
+  });
+
+  it.each([0, Number.NEGATIVE_INFINITY, Number.NaN])('rejects expires_in %s', (seconds) => {
+    expect(() => adapter.toLogin({ ...dto, expires_in: seconds })).toThrow(InvalidDtoError);
+  });
+});
+
+describe('ApiDtoAdapter.toCurrentUser', () => {
+  const currentUser = buildCurrentUserResponse(TEST_USERS.admin, [
+    {
+      aqueduct_id: TEST_USERS.admin.aqueduct_id,
+      role: 'BOARD_ADMIN',
+      valid_from: '2026-01-01T00:00:00-05:00',
+      valid_to: null,
+    },
+  ]);
+
+  it('maps the profile, the permissions and the membership dates', () => {
+    const view = adapter.toCurrentUser(currentUser);
+
+    expect(view.fullName).toBe(TEST_USERS.admin.full_name);
+    expect(view.permissions).toContain('RULESET_ACTIVATE');
+    expect(view.memberships).toEqual([
+      {
+        aqueductId: TEST_USERS.admin.aqueduct_id,
+        role: 'BOARD_ADMIN',
+        validFromMs: Date.parse('2026-01-01T00:00:00-05:00'),
+        validToMs: null,
+      },
+    ]);
+  });
+
+  it('rejects a membership with an unknown role or a broken date', () => {
+    const base = { aqueduct_id: TEST_USERS.admin.aqueduct_id };
+
+    expect(() =>
+      adapter.toCurrentUser({
+        ...currentUser,
+        memberships: [{ ...base, role: 'ROOT' as 'OPERATOR' }],
+      }),
+    ).toThrow(InvalidDtoError);
+    expect(() =>
+      adapter.toCurrentUser({
+        ...currentUser,
+        memberships: [{ ...base, role: 'OPERATOR', valid_to: 'ayer' }],
+      }),
+    ).toThrow(InvalidDtoError);
+  });
+});
+
+describe('ApiDtoAdapter.toPublicDamageReport', () => {
+  const dto = {
+    status: 'VERIFYING' as const,
+    status_label_es: 'En verificación',
+    category_label_es: 'Fuga',
+    reported_at: '2026-10-09T14:30:00Z',
+    updated_at: '2026-10-09T20:40:00Z',
+  };
+
+  it('keeps the status and the two instants, and nothing else', () => {
+    const view = adapter.toPublicDamageReport(dto);
+
+    expect(view.status).toBe('VERIFYING');
+    expect(view.updatedAt.text).toBe('9 de oct de 2026, 3:40 p. m.');
+    expect(Object.keys(view).sort()).toEqual(['reportedAt', 'status', 'updatedAt']);
+  });
+
+  it('refuses a status the screens do not know', () => {
+    expect(() =>
+      adapter.toPublicDamageReport({ ...dto, status: 'ARCHIVED' as unknown as 'REPORTED' }),
+    ).toThrow(InvalidDtoError);
+  });
+});

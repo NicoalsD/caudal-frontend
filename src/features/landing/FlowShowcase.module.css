@@ -1,0 +1,254 @@
+.showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.window {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-window);
+  overflow: hidden;
+}
+
+.windowBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--font-size-small);
+}
+
+.windowBrand {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  letter-spacing: 0.04em;
+}
+
+.windowTitle {
+  flex: 1;
+  min-width: 0;
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 27rem;
+  padding: var(--space-5);
+  background: var(--color-page);
+  font-size: clamp(0.875rem, 2.4cqi, 1.0625rem);
+}
+
+.panel:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: stage-in var(--duration-reveal) var(--ease-out-expo) both;
+}
+
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+    filter: blur(6px);
+  }
+}
+
+.stepBody {
+  max-width: var(--measure);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+/* Each step stands a real screen in the window; the publication adds the WhatsApp message. */
+
+.stageRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+}
+
+.stagePhone {
+  width: min(16.5rem, 72%);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-strong),
+    0 1.5rem 3rem -1.5rem rgb(0 0 0 / 45%);
+}
+
+.whatsapp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 17rem;
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+}
+
+.whatsapp figcaption {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+}
+
+.whatsapp svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+
+.bubble {
+  padding: var(--space-3);
+  background: var(--color-paramo-100);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-surface) var(--radius-surface) var(--radius-surface) 0;
+  line-height: var(--line-height-small);
+}
+
+/* Tabs under the window */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tabs {
+  display: flex;
+  flex: 1;
+  gap: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab {
+  position: relative;
+  flex: none;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  inset-inline: var(--space-3);
+  bottom: var(--space-1);
+  height: var(--level-line-height);
+  background: var(--color-border-subtle);
+  opacity: 0;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.tab[aria-selected='true']::after {
+  opacity: 1;
+  background: var(--color-text-primary);
+}
+
+.tab:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.progress {
+  position: absolute;
+  inset-inline: var(--space-3);
+  bottom: var(--space-1);
+  height: var(--level-line-height);
+  background: var(--color-water-700);
+  transform-origin: left center;
+  animation: tab-progress var(--duration-step) linear both paused;
+  z-index: 1;
+}
+
+.progressRunning {
+  animation-play-state: running;
+}
+
+@keyframes tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.playToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--target-min);
+  height: var(--target-min);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-chip);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.playToggle:hover {
+  background: var(--color-sand-200);
+}
+
+.playToggle svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+@media (max-width: 40rem) {
+  /* Every step stays visible: the tabs wrap instead of hiding behind the play button. */
+  .controls {
+    align-items: flex-start;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .panel {
+    min-height: 0;
+    padding: var(--space-4);
+  }
+
+  .stagePhone {
+    width: min(15rem, 80%);
+  }
+}

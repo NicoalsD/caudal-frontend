@@ -1,0 +1,277 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.highlight {
+  padding: var(--space-4);
+  border: 1px solid var(--color-water-700);
+  border-radius: var(--radius-surface);
+  background: var(--color-water-100);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+}
+
+.sectorName {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-bold);
+}
+
+.meta {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+/* Neutral tag, for example the priority sector. Statuses use the tones below instead. */
+.chip {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-label);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Status chip: an icon and the words, with a tone per state (never colour alone). */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-label);
+  line-height: var(--line-height-label);
+  font-weight: var(--font-weight-bold);
+}
+
+.toneAttention {
+  background: var(--color-ochre-100);
+  border-color: var(--color-ochre-700);
+  color: var(--color-ochre-800);
+}
+
+.toneCorrect {
+  background: var(--color-paramo-100);
+  border-color: var(--color-paramo-800);
+  color: var(--color-paramo-800);
+}
+
+.toneInfo {
+  background: var(--color-water-100);
+  border-color: var(--color-water-700);
+  color: var(--color-water-800);
+}
+
+.toneDanger {
+  background: var(--color-clay-100);
+  border-color: var(--color-clay-700);
+  color: var(--color-clay-700);
+}
+
+.toneNeutral {
+  background: var(--color-sand-200);
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+}
+
+/* Day summary: the date, the status, the hours and the band, in one compact block. */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  background: var(--color-water-100);
+}
+
+.summaryTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.factLabel {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.factValue {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-h3);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Decisions: approve is the primary action, modify and reject sit together below it. */
+.decisions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.primaryAction {
+  display: flex;
+}
+
+.wide {
+  width: 100%;
+}
+
+.secondaryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.secondaryActions > * {
+  flex: 1 1 8rem;
+}
+
+/* Rejecting discards the proposal: it looks like a delicate action, not like a second main one. */
+.secondaryActions .danger:not(:disabled) {
+  border-color: var(--color-clay-700);
+  color: var(--color-clay-700);
+}
+
+.secondaryActions .danger:hover:not(:disabled) {
+  background: var(--color-clay-100);
+}
+
+/* Schedule: sector on the left, the range and hours on the right, figures in tabular digits. */
+.schedule {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shift {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.shiftName {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.shiftTime {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  text-align: right;
+}
+
+.range {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hours {
+  font-variant-numeric: tabular-nums;
+}
+
+.fullRow {
+  grid-column: 1 / -1;
+}
+
+.reasonsDisclosure {
+  grid-column: 1 / -1;
+}
+
+.reasonsToggle {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--color-water-700);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.link {
+  min-height: var(--target-min);
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-water-700);
+  font-weight: var(--font-weight-bold);
+}
+
+.reasons {
+  margin: 0;
+  padding-left: var(--space-4);
+  line-height: var(--line-height-body);
+}

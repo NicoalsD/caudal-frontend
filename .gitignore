@@ -28,3 +28,6 @@ coverage/
 playwright-report/
 test-results/
 .vite/
+
+# Vercel CLI (vercel pull en local o en CI)
+.vercel/

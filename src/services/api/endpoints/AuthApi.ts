@@ -1,0 +1,93 @@
+import type { HttpClient } from '../../http/HttpClient';
+import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
+import type { components } from '../schema';
+import type { LoginView, CurrentUserView, RefreshView } from '../views';
+
+type LoginRequestDto = components['schemas']['LoginRequest'];
+type LoginDto = components['schemas']['LoginResponse'];
+type RefreshDto = components['schemas']['RefreshResponse'];
+type CurrentUserDto = components['schemas']['CurrentUserResponse'];
+
+type SwitchAqueductRequestDto = components['schemas']['SwitchAqueductRequest'];
+type ChangePasswordRequestDto = components['schemas']['ChangePasswordRequest'];
+
+export interface ChangePasswordInput {
+  readonly currentPassword: string;
+  readonly newPassword: string;
+}
+
+export interface LoginInput {
+  readonly username: string;
+  readonly password: string;
+}
+
+/** Session endpoints (API.md section 2). */
+export class AuthApi {
+  constructor(
+    private readonly http: HttpClient,
+    private readonly adapter: ApiDtoAdapter,
+  ) {}
+
+  /**
+   * POST /api/v1/auth/login (public). The body is built field by field: the API rejects unknown
+   * fields. The refresh cookie arrives as Set-Cookie and the JavaScript never sees it.
+   */
+  async login(input: LoginInput): Promise<LoginView> {
+    const body: LoginRequestDto = { username: input.username, password: input.password };
+    const response = await this.http.request<LoginDto>({
+      method: 'POST',
+      path: '/auth/login',
+      body,
+    });
+    return this.adapter.toLogin(response.body);
+  }
+
+  /**
+   * POST /api/v1/auth/refresh. No body: the browser sends the HttpOnly cookie (credentials are
+   * included for /auth/ paths) and the rotated cookie comes back as Set-Cookie.
+   */
+  async refresh(): Promise<RefreshView> {
+    const response = await this.http.request<RefreshDto>({ method: 'POST', path: '/auth/refresh' });
+    return this.adapter.toRefresh(response.body);
+  }
+
+  /** GET /api/v1/auth/current-user: allowed even while the password change is pending. */
+  async currentUser(): Promise<CurrentUserView> {
+    const response = await this.http.request<CurrentUserDto>({
+      method: 'GET',
+      path: '/auth/current-user',
+    });
+    return this.adapter.toCurrentUser(response.body);
+  }
+
+  /**
+   * POST /api/v1/auth/change-password (204). The server revokes every refresh token of the
+   * account, so the session ends: the caller must sign in again with the new password.
+   */
+  async changePassword(input: ChangePasswordInput): Promise<void> {
+    const body: ChangePasswordRequestDto = {
+      current_password: input.currentPassword,
+      new_password: input.newPassword,
+    };
+    await this.http.request<undefined>({ method: 'POST', path: '/auth/change-password', body });
+  }
+
+  /**
+   * POST /api/v1/auth/switch-aqueduct: a new access token for another aqueduct (a token carries a
+   * single one). The server answers 403 when the membership does not exist or is not current.
+   */
+  async switchAqueduct(aqueductId: string): Promise<RefreshView> {
+    const body: SwitchAqueductRequestDto = { aqueduct_id: aqueductId };
+    const response = await this.http.request<RefreshDto>({
+      method: 'POST',
+      path: '/auth/switch-aqueduct',
+      body,
+    });
+    return this.adapter.toRefresh(response.body);
+  }
+
+  /** POST /api/v1/auth/logout (204): the server revokes the refresh family and clears the cookie. */
+  async logout(): Promise<void> {
+    await this.http.request<undefined>({ method: 'POST', path: '/auth/logout' });
+  }
+}

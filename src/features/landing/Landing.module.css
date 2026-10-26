@@ -1,0 +1,1139 @@
+/*
+ * Presentation page. Same tokens as the app; the brand field and the authored motion (GSAP) live
+ * only here (design-theme.md section 11), and every entrance starts from a visible default.
+ */
+
+@property --water-dry {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 42%;
+}
+
+.page {
+  overflow-x: clip;
+  background: var(--color-page);
+}
+
+.main:focus {
+  outline: none;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skipLink {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: calc(-1 * var(--target-min) - var(--space-4));
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-water-700);
+  color: var(--color-raised);
+  border-radius: var(--radius-control);
+  z-index: 20;
+}
+
+.skipLink:focus {
+  inset-block-start: var(--space-2);
+  color: var(--color-raised);
+}
+
+/* Buttons and links */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-water-700);
+  color: var(--color-raised);
+  border: 2px solid var(--color-water-700);
+  border-radius: var(--radius-control);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.button:hover {
+  background: var(--color-water-800);
+  border-color: var(--color-water-800);
+  color: var(--color-raised);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.buttonSecondary {
+  background: transparent;
+  color: var(--color-water-700);
+}
+
+.buttonSecondary:hover {
+  background: var(--color-water-100);
+  border-color: var(--color-water-700);
+  color: var(--color-water-800);
+}
+
+.buttonSmall {
+  padding-inline: var(--space-4);
+  font-size: var(--font-size-small);
+}
+
+.buttonLarge {
+  min-height: calc(var(--target-min) + var(--space-3));
+  padding-inline: var(--space-7);
+  font-size: var(--font-size-lead);
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  font-weight: var(--font-weight-bold);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+
+.textLink svg {
+  width: 1.25em;
+  height: 1.25em;
+  transition: transform var(--duration-base) var(--ease-out-expo);
+}
+
+.textLink:hover svg {
+  transform: translateX(4px);
+}
+
+/* Navigation */
+
+.navBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-brand-900);
+  color: var(--color-on-brand);
+}
+
+.navBar :focus-visible {
+  outline-color: var(--color-on-brand);
+}
+
+.navBar::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--level-line-height);
+  background: var(--color-brand-500);
+  transform: scaleX(0);
+  transition: transform var(--duration-reveal) var(--ease-out-expo);
+}
+
+.navBar[data-scrolled='true']::after {
+  transform: scaleX(1);
+}
+
+.navInner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  max-width: var(--landing-max);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4);
+}
+
+.navBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  text-decoration: none;
+}
+
+.navLinks {
+  flex: 1;
+}
+
+.navLinks ul {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.navLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding-inline: var(--space-3);
+  color: color-mix(in srgb, var(--color-on-brand) 82%, transparent);
+  font-size: var(--font-size-small);
+  text-decoration: none;
+  border-radius: var(--radius-control);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.navLinks a:hover {
+  color: var(--color-on-brand);
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+/* On the brand field the main button turns light, so it reads on deep teal and on the water. */
+.navBar .button,
+.hero .button {
+  background: var(--color-on-brand);
+  border-color: var(--color-on-brand);
+  color: var(--color-brand-900);
+  box-shadow: 0 0.75rem 1.5rem -1rem rgb(0 0 0 / 70%);
+}
+
+.navBar .button:hover,
+.hero .button:hover {
+  background: var(--color-brand-200);
+  border-color: var(--color-brand-200);
+  color: var(--color-brand-900);
+}
+
+.hero .buttonSecondary {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--color-on-brand) 70%, transparent);
+  color: var(--color-on-brand);
+  box-shadow: none;
+}
+
+.hero .buttonSecondary:hover {
+  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
+  border-color: var(--color-on-brand);
+  color: var(--color-on-brand);
+}
+
+/* Hero */
+
+/* The hero is the style tile's deep teal field, still: the brand gradient with no motion. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--space-8);
+  overflow: hidden;
+  background:
+    radial-gradient(
+      60% 50% at 20% 10%,
+      color-mix(in srgb, var(--color-brand-500) 30%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 40% at 85% 30%,
+      color-mix(in srgb, var(--color-water-300) 18%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--color-water-800), var(--color-brand-900) 70%);
+  color: var(--color-on-brand);
+  text-align: center;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: var(--space-4);
+}
+
+.wordmark {
+  --water-dry: 42%;
+  position: relative;
+  display: grid;
+  font-size: var(--font-size-hero);
+  line-height: 0.92;
+  letter-spacing: var(--tracking-hero);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  animation: water-rise var(--duration-fill) var(--ease-out-expo) 200ms both;
+}
+
+.wordmarkDry,
+.wordmarkWet {
+  grid-area: 1 / 1;
+  padding-inline: 0.04em;
+}
+
+.wordmarkDry {
+  /* Outline only: the dry letters are drawn by the stroke, so the text itself has no fill. */
+  color: transparent;
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--color-on-brand) 65%, transparent);
+}
+
+/* The wet letters carry the logo's gradient, light foam on top to deep teal below. */
+.wordmarkWet {
+  background: linear-gradient(
+    180deg,
+    var(--color-on-brand) 0%,
+    var(--color-water-300) 45%,
+    var(--color-brand-500) 100%
+  );
+  background-clip: text;
+  color: transparent;
+  clip-path: inset(var(--water-dry) 0 0 0);
+}
+
+/* The level line crosses the wordmark at the water height. */
+.wordmark::after {
+  content: '';
+  position: absolute;
+  inset-inline: -0.12em;
+  top: var(--water-dry);
+  height: var(--level-line-height);
+  background: var(--color-brand-500);
+}
+
+@keyframes water-rise {
+  from {
+    --water-dry: 100%;
+  }
+}
+
+.tagline {
+  margin-top: var(--space-5);
+  font-size: clamp(1.5rem, 3.4vw, 2.625rem);
+  line-height: var(--line-height-h1);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  animation: rise-in var(--duration-reveal) var(--ease-out-expo) 700ms both;
+}
+
+.place {
+  max-width: 34rem;
+  margin-top: var(--space-3);
+  color: color-mix(in srgb, var(--color-on-brand) 84%, transparent);
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-body);
+  text-wrap: pretty;
+  animation: rise-in var(--duration-reveal) var(--ease-out-expo) 850ms both;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  animation: rise-in var(--duration-reveal) var(--ease-out-expo) 1000ms both;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    filter: blur(8px);
+  }
+}
+
+/*
+ * The land: a real photo of Nariño that opens under the text. Its top fades into the page color,
+ * so the text above never sits on the photo, and the phones stand in front of it with room to
+ * spare above the bottom edge (nothing touches a border).
+ */
+.land {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: calc(-1 * var(--space-6));
+  padding: var(--space-9) var(--space-4) var(--space-8);
+  overflow: hidden;
+}
+
+.landPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 34%);
+  animation: land-in 2400ms var(--ease-out-expo) 300ms both;
+}
+
+@keyframes land-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+/* The photo drifts a little slower than the page while it scrolls away. */
+@supports (animation-timeline: view()) {
+  .landPhoto {
+    animation:
+      land-in 2400ms var(--ease-out-expo) 300ms both,
+      land-drift linear both;
+    animation-timeline: auto, view();
+    animation-range:
+      normal,
+      exit 0% exit 100%;
+  }
+
+  @keyframes land-drift {
+    to {
+      translate: 0 12%;
+    }
+  }
+}
+
+.devices {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(var(--space-3), 3vw, var(--space-7));
+  width: min(100%, 52rem);
+  padding: 0;
+  list-style: none;
+}
+
+.device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  animation: device-in 1400ms var(--ease-out-expo) both;
+}
+
+.devicePhone {
+  width: 100%;
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-strong),
+    0 2.5rem 4rem -2rem rgb(0 0 0 / 55%);
+  animation: float 6s ease-in-out 2600ms infinite alternate;
+}
+
+/*
+ * The phones lean and rise on their own properties (rotate, margin), so the captions under them
+ * stay on one baseline and the float animation (translate) never fights the pose.
+ */
+.device[data-device='operator'] {
+  animation-delay: 1150ms;
+}
+
+.device[data-device='board'] {
+  animation-delay: 1000ms;
+}
+
+.device[data-device='family'] {
+  animation-delay: 1300ms;
+}
+
+.device[data-device='operator'] .devicePhone {
+  rotate: -3deg;
+}
+
+.device[data-device='board'] .devicePhone {
+  margin-bottom: var(--space-6);
+  animation-delay: 3400ms;
+}
+
+.device[data-device='family'] .devicePhone {
+  rotate: 3deg;
+  animation-delay: 4200ms;
+}
+
+@keyframes device-in {
+  from {
+    opacity: 0;
+    translate: 0 4rem;
+  }
+}
+
+@keyframes float {
+  to {
+    translate: 0 -0.6rem;
+  }
+}
+
+/* The caption is a solid chip, so it reads the same over any part of the photo. */
+.deviceCaption {
+  padding: var(--space-1) var(--space-4);
+  background: var(--color-raised);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  box-shadow: 0 0.5rem 1.25rem -0.75rem rgb(0 0 0 / 50%);
+}
+
+.heroTag {
+  margin-top: var(--space-6);
+  font-size: var(--font-size-small);
+}
+
+/* At night the photos dim, so they never outshine the dark page around them. */
+@media (prefers-color-scheme: dark) {
+  .landPhoto,
+  .closingPhoto {
+    filter: brightness(0.62) saturate(0.85);
+  }
+}
+
+/* Sections */
+
+.section {
+  max-width: var(--landing-max);
+  margin-inline: auto;
+  padding: var(--space-9) var(--space-4);
+  scroll-margin-top: var(--space-6);
+}
+
+.statement {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--font-size-statement);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: var(--measure);
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lead);
+  line-height: var(--line-height-body);
+  text-wrap: pretty;
+}
+
+.centerText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.reveal[data-seen='false'] {
+  opacity: 0;
+  transform: translateY(2.5rem);
+  filter: blur(6px);
+}
+
+.reveal[data-seen='true'] {
+  transition:
+    opacity var(--duration-reveal) var(--ease-out-expo),
+    transform 1200ms var(--ease-out-expo),
+    filter var(--duration-reveal) var(--ease-out-expo);
+}
+
+/* In a two-column split the statement steps down so it holds in three or four lines. */
+.flow .statement,
+.decide .statement,
+.project .statement {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  font-size: clamp(2.25rem, 3.8vw, 3.5rem);
+}
+
+/* Flow: the Chronicle split */
+
+.flow {
+  display: grid;
+  grid-template-columns: minmax(0, 4.5fr) minmax(0, 7.5fr);
+  gap: var(--space-7);
+  align-items: center;
+}
+
+/* Decide */
+
+.decide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.points li {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--space-3);
+}
+
+.points svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.1rem;
+  color: var(--color-water-700);
+}
+
+.points h3 {
+  font-size: var(--font-size-h3);
+}
+
+.points p {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+.ledger {
+  padding: var(--space-6);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-window);
+}
+
+.ledgerHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--level-line-height) solid var(--color-water-700);
+}
+
+.ledgerHead h3 {
+  font-size: var(--font-size-h3);
+}
+
+.versions {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The rail that joins the versions. */
+.versions::before {
+  content: '';
+  position: absolute;
+  top: var(--space-5);
+  bottom: var(--space-5);
+  left: calc(1.25rem - 1px);
+  width: 2px;
+  background: var(--color-border-subtle);
+}
+
+.version {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--space-4);
+  padding-block: var(--space-4);
+}
+
+.versionNode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--color-raised);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-chip);
+  color: var(--color-text-secondary);
+}
+
+.versionNode svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.versionActive .versionNode {
+  background: var(--color-water-700);
+  border-color: var(--color-water-700);
+  color: var(--color-raised);
+}
+
+.versionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.versionState {
+  padding: 0.1rem var(--space-3);
+  background: var(--color-sand-200);
+  border-radius: var(--radius-chip);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.versionActive .versionState {
+  background: var(--color-paramo-100);
+  color: var(--color-paramo-800);
+}
+
+.versionReason {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+/* Forecast */
+
+.forecast {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.quote {
+  max-width: 22ch;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  font-size: var(--font-size-statement);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+
+/* Honesty: the four kinds of data */
+
+.honesty {
+  padding-top: var(--space-8);
+}
+
+.kinds {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+}
+
+.kind {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-strong);
+  transition:
+    opacity var(--duration-reveal) var(--ease-out-expo),
+    transform 1100ms var(--ease-out-expo);
+}
+
+.kinds[data-seen='false'] .kind {
+  opacity: 0;
+  transform: translateY(1.5rem);
+}
+
+.kind:nth-child(2) {
+  transition-delay: 120ms;
+}
+
+.kind:nth-child(3) {
+  transition-delay: 240ms;
+}
+
+.kind:nth-child(4) {
+  transition-delay: 360ms;
+}
+
+.kind p {
+  color: var(--color-text-secondary);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-chip);
+  font-weight: var(--font-weight-bold);
+}
+
+.chip svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.chip-observed {
+  background: var(--color-water-100);
+  color: var(--color-water-700);
+}
+
+.chip-estimated {
+  background: var(--color-ochre-100);
+  color: var(--color-ochre-800);
+}
+
+.chip-inferred {
+  background: var(--color-clay-100);
+  color: var(--color-clay-700);
+  outline: 2px dashed var(--color-clay-700);
+  outline-offset: -2px;
+}
+
+.chip-confirmed {
+  background: var(--color-paramo-100);
+  color: var(--color-paramo-800);
+}
+
+/* Project */
+
+.project {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-7);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.projectText {
+  grid-column: 1;
+}
+
+.patterns {
+  grid-column: 2;
+}
+
+.patterns h3,
+.team h3 {
+  font-size: var(--font-size-h3);
+  margin-bottom: var(--space-4);
+}
+
+.patterns dl {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.patterns dl > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.patterns dt {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+}
+
+.patterns dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.repos {
+  grid-column: 1 / -1;
+}
+
+.repos ul {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  overflow: hidden;
+}
+
+.repos li + li {
+  border-left: 1px solid var(--color-border-subtle);
+}
+
+.repos a {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 7.5rem;
+  justify-content: center;
+  padding: var(--space-5);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.repos a:hover {
+  background: var(--color-raised);
+  color: var(--color-text-primary);
+}
+
+.repos a:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.repoName {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+}
+
+.repoStack {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.team {
+  grid-column: 1 / -1;
+}
+
+.team ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.team li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.team span {
+  color: var(--color-text-secondary);
+}
+
+/* Closing */
+
+.closing {
+  position: relative;
+  isolation: isolate;
+  padding: var(--space-9) var(--space-4);
+  overflow: hidden;
+}
+
+.closingPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The text sits on a solid card: its contrast never depends on the photo behind it. */
+.closingCard {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: var(--space-7) var(--space-5);
+  background: var(--color-raised);
+  border-radius: var(--radius-window);
+  box-shadow: 0 2rem 4rem -2rem rgb(0 0 0 / 55%);
+}
+
+.closingTitle {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  font-size: clamp(3rem, 10vw, 8rem);
+  line-height: 0.95;
+  letter-spacing: var(--tracking-hero);
+}
+
+.closing .button {
+  margin-top: var(--space-6);
+}
+
+.note {
+  max-width: var(--measure);
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+/* Footer */
+
+.footer {
+  background: var(--color-raised);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.footerInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4) var(--space-6);
+  max-width: var(--landing-max);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+  font-size: var(--font-size-small);
+}
+
+.footerBrand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  font-weight: var(--font-weight-bold);
+}
+
+.footerTagline {
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+  color: var(--color-text-secondary);
+}
+
+.footerLinks {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  align-items: center;
+}
+
+.footerLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+}
+
+.footerCredits {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+}
+
+.footerCredits h2 {
+  font-size: var(--font-size-small);
+  color: var(--color-text-primary);
+}
+
+.footerCredits a {
+  text-decoration: underline;
+}
+
+.footerRights {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+}
+
+/* Narrower screens */
+
+@media (max-width: 64rem) {
+  .navLinks {
+    display: none;
+  }
+
+  .flow,
+  .decide,
+  .project {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .projectText,
+  .patterns {
+    grid-column: 1;
+  }
+
+  .kinds {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .hero {
+    padding-top: var(--space-7);
+  }
+
+  /* On a phone the three screens fan out: the Board in front, the other two tucked behind. */
+  .land {
+    padding-top: var(--space-8);
+  }
+
+  .devices {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .device[data-device='operator'] {
+    z-index: 0;
+    margin-right: -22%;
+  }
+
+  .device[data-device='board'] {
+    z-index: 1;
+  }
+
+  .device[data-device='family'] {
+    z-index: 0;
+    margin-left: -22%;
+  }
+
+  .device[data-device='operator'] .devicePhone {
+    rotate: -4deg;
+  }
+
+  .device[data-device='family'] .devicePhone {
+    rotate: 4deg;
+  }
+
+  .deviceCaption {
+    padding-inline: var(--space-3);
+  }
+
+  .section {
+    padding-block: var(--space-8);
+  }
+
+  .repos ul,
+  .team ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .repos li + li {
+    border-left: 0;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .repos a {
+    min-height: 0;
+  }
+
+  .footerInner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footerLinks {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 30rem) {
+  .kinds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .patterns dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+
+  .heroActions {
+    flex-direction: column;
+    align-self: stretch;
+  }
+}
