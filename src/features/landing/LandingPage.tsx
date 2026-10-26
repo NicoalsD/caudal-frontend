@@ -95,11 +95,8 @@ function LandingNav(): JSX.Element {
           </ul>
         </nav>
         <div className={cn(styles.navActions)}>
-          <Link to={ROUTE_PATHS.login} className={cn(styles.navSignIn)}>
-            {copy.nav.signIn}
-          </Link>
           <Link to={ROUTE_PATHS.login} className={cn(styles.button, styles.buttonSmall)}>
-            {copy.nav.demo}
+            {copy.nav.signIn}
           </Link>
         </div>
       </div>
@@ -410,7 +407,6 @@ function LandingFooter(): JSX.Element {
           <BrandLogo />
           <span className={cn(styles.footerTagline)}>{copy.hero.tagline}</span>
         </p>
-        <p className={cn(styles.footerSimulated)}>{copy.footer.simulated}</p>
         <ul className={cn(styles.footerLinks)}>
           <li>
             <Link to={ROUTE_PATHS.login}>{copy.footer.signIn}</Link>

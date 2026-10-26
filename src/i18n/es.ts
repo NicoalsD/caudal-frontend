@@ -135,16 +135,15 @@ export const strings = {
       forecast: 'Pronóstico',
       project: 'El proyecto',
       signIn: 'Iniciar sesión',
-      demo: 'Entrar a la demo',
     },
     hero: {
       title: 'CAUDAL',
       tagline: 'El cuaderno del acueducto, pero digital.',
       place:
         'Lecturas del tanque, turnos de agua y decisiones de la Junta, para los acueductos de las veredas de Guaitarilla, Nariño.',
-      primary: 'Entrar a la demo',
+      primary: 'Iniciar sesión',
       secondary: 'Ver cómo funciona',
-      devicesLabel: 'Tres pantallas reales de CAUDAL con datos simulados.',
+      devicesLabel: 'Tres pantallas reales de CAUDAL con datos de ejemplo.',
       operatorShot: 'Pantalla del fontanero: lectura de 2,1 m guardada sin conexión.',
       boardShot: 'Pantalla de la Junta: propuesta de turnos del día con la razón de cada uno.',
       familyShot: 'Pantalla pública: horario de agua de hoy por sector, sin datos personales.',
@@ -336,13 +335,11 @@ export const strings = {
     },
     closing: {
       title: 'Abre el cuaderno.',
-      body: 'Entra a la vereda demo y recorre el día completo: lectura, propuesta, decisión y publicación.',
-      primary: 'Entrar a la demo',
-      note: 'Las cuentas de la demo se entregan al equipo evaluador y a las Juntas interesadas.',
+      body: 'Entra con la cuenta que te dio tu Junta y lleva el día completo: lectura, propuesta, decisión y publicación.',
+      primary: 'Iniciar sesión',
+      note: 'Las cuentas las crea la administración de cada Junta.',
     },
     footer: {
-      simulated:
-        'Todos los datos de la demo son simulados. No hay datos reales de la región ni de las familias.',
       signIn: 'Iniciar sesión',
       docs: 'Documentación',
       rights: 'Proyecto académico de Patrones de Software.',

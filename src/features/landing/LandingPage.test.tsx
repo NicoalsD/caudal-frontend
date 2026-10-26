@@ -32,7 +32,7 @@ describe('LandingPage', () => {
     expect(heading(FIRST_LEVEL, copy.hero.title)).toBeInTheDocument();
   });
 
-  it.each([copy.nav.demo, copy.hero.primary, copy.closing.primary])(
+  it.each([copy.nav.signIn, copy.hero.primary, copy.closing.primary])(
     'sends the "%s" links to the sign in',
     (name) => {
       renderLanding();
@@ -45,9 +45,10 @@ describe('LandingPage', () => {
     },
   );
 
-  it('marks the sample screens as simulated data', () => {
+  it('labels the real screens and keeps the simulated-data mark', () => {
     renderLanding();
 
+    expect(screen.getByRole('list', { name: copy.hero.devicesLabel })).toBeInTheDocument();
     expect(screen.getAllByText(strings.common.simulatedData).length).toBeGreaterThan(0);
   });
 

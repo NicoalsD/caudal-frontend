@@ -201,22 +201,6 @@
   margin-left: auto;
 }
 
-.navSignIn {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
-  padding-inline: var(--space-3);
-  color: var(--color-on-brand);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-bold);
-  text-decoration: none;
-}
-
-.navSignIn:hover {
-  color: var(--color-brand-200);
-  text-decoration: underline;
-}
-
 /* On the brand field the main button turns light, so it reads on deep teal and on the water. */
 .navBar .button,
 .hero .button {
@@ -1030,11 +1014,6 @@
   color: var(--color-text-secondary);
 }
 
-.footerSimulated {
-  grid-column: 1;
-  color: var(--color-text-secondary);
-}
-
 .footerLinks {
   grid-column: 2;
   grid-row: 1 / span 2;
@@ -1093,10 +1072,6 @@
 }
 
 @media (max-width: 48rem) {
-  .navSignIn {
-    display: none;
-  }
-
   .hero {
     padding-top: var(--space-7);
   }
