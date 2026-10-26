@@ -62,7 +62,7 @@ Cada patrón se implementa de forma explícita aunque React o JavaScript traigan
 
 ### 3.5 Diseño y accesibilidad
 - Modo claro primero; colores y fuentes solo desde tokens CSS ([`.agents/design-theme.md`](.agents/design-theme.md)).
-- Identidad del style tile (`CAUDAL.pdf`): paleta turquesa, Barlow ExtraBold y Montserrat. Degradados, fotos y movimiento (GSAP, three.js) solo en la landing y las superficies de marca; las pantallas de tareas van con fondos planos. Sin emojis, sin cards con borde izquierdo.
+- Identidad del style tile (`CAUDAL.pdf`): paleta turquesa, Barlow ExtraBold y Montserrat. Degradados, fotos y movimiento (GSAP) solo en la landing y las superficies de marca; las pantallas de tareas van con fondos planos. Sin emojis, sin cards con borde izquierdo.
 - WCAG 2.1 AA, objetivos táctiles ≥ 48 px, responsive desde 360 px, lenguaje claro ([`.agents/ux-guidelines.md`](.agents/ux-guidelines.md)).
 - El acueducto demo muestra siempre el aviso "Datos simulados".
 - Para diseñar, usa las skills de diseño instaladas (frontend-design, web-design-guidelines, ui-ux-pro-max, emil-design-eng, break-ui).
@@ -72,7 +72,7 @@ Se hacen con draw.io (MCP de draw.io y sus iconos). El `.drawio` y su `.png` van
 
 ## 4. Stack y comandos
 
-React 19 · Vite · TypeScript estricto · React Router · TanStack Query · React Hook Form + Zod · vite-plugin-pwa + Dexie · Radix UI · CSS Modules + tokens · GSAP y three.js (solo la landing) · Recharts · sonner · lucide-react · openapi-typescript · Vitest, Testing Library, MSW, Playwright · ESLint, Prettier · pnpm.
+React 19 · Vite · TypeScript estricto · React Router · TanStack Query · React Hook Form + Zod · vite-plugin-pwa + Dexie · Radix UI · CSS Modules + tokens · GSAP (solo la landing) · Recharts · sonner · lucide-react · openapi-typescript · Vitest, Testing Library, MSW, Playwright · ESLint, Prettier · pnpm.
 
 Comandos (disponibles desde la Fase 1):
 

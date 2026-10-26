@@ -217,10 +217,10 @@ Sonner para avisos (toasts) con estilo de tokens. Recharts para la gráfica (ver
 
 La página de presentación (`src/features/landing`) es donde la marca se expresa entera. Las demás pantallas siguen sobrias.
 
-- **Campo de marca y agua en movimiento:** el hero es el campo `brand-900` con agua en movimiento hecha con **three.js** (`waterScene.ts`, un sombreador de corrientes con los colores del logo leídos de los tokens). La pintura inicial y el respaldo son degradados CSS quietos; el lienzo aparece con un fundido cuando está listo.
-- **Un momento de desplazamiento con GSAP** (`heroMotion.ts`, `ScrollTrigger`): al bajar, los tres teléfonos suben del agua a distinta velocidad, la foto se desplaza y las corrientes se aceleran. El resto de entradas son CSS (`useReveal`), una sola vez.
-- **Carga diferida y PWA:** three.js y GSAP se importan con `import()` solo desde la landing, solo si el navegador tiene WebGL. `vite.config.ts` los excluye del precache (`globIgnores`), así un fontanero que instala la PWA con mala señal nunca los descarga. El bucle se pausa fuera de pantalla y con la pestaña oculta.
-- **Movimiento reducido:** con `prefers-reduced-motion: reduce` el agua se pinta una vez y nada se mueve. Sin WebGL o si algo falla, queda el campo CSS.
+- **Campo de marca quieto:** el hero es el campo `brand-900` con el degradado turquesa del logo, sin fondo animado (se probó agua en movimiento con three.js y el equipo la descartó).
+- **Un momento de desplazamiento con GSAP** (`heroMotion.ts`, `ScrollTrigger`): al bajar, los tres teléfonos suben a distinta velocidad y la foto se desplaza. El resto de entradas son CSS (`useReveal`), una sola vez.
+- **Carga diferida y PWA:** GSAP se importa con `import()` solo desde la landing (`useHeroMotion.ts`). `vite.config.ts` lo excluye del precache (`globIgnores`), así un fontanero que instala la PWA con mala señal nunca lo descarga.
+- **Movimiento reducido:** con `prefers-reduced-motion: reduce` GSAP no se carga y nada se mueve.
 - **Fotografía:** paisajes reales de Nariño en WebP con `srcset` (960, 1600 y 2400 px) desde Wikimedia Commons, con créditos en el pie: volcán Galeras y la Laguna Verde del Azufral, vecino de Guaitarilla. En Commons no hay fotos de Guaitarilla con la resolución suficiente; cuando el equipo tenga fotos propias del municipio, reemplazan a estas.
 - **Escala de display:** tokens propios de la landing en `tokens.css` (`--font-size-hero`, `--font-size-statement`, `--font-size-lead`, `--tracking-*`, `--space-8`, `--space-9`, `--landing-max`, `--duration-reveal`, `--duration-fill`, `--duration-step`, `--ease-out-expo`).
 - **Sin llamadas a la API:** la landing no depende del backend; las pantallas de muestra llevan la marca "Datos simulados".

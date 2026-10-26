@@ -26,7 +26,7 @@ import styles from './Landing.module.css';
 import { DOCS_URL, PHOTO_URLS, REPOSITORY_URLS, SECTION_IDS } from './links';
 import { CLOSING_PHOTO, HERO_PHOTO } from './photos';
 import { OfflineBand } from './OfflineBand';
-import { useHeroWater } from './useHeroWater';
+import { useHeroMotion } from './useHeroMotion';
 import { useReveal } from './useReveal';
 
 const copy = strings.landing;
@@ -125,15 +125,13 @@ const HERO_DEVICES = [
 ] as const satisfies readonly { key: string; shot: AppShot; caption: string; alt: string }[];
 
 /**
- * First viewport: the brand's deep teal field with moving water (three.js, loaded on demand), the
- * wordmark filling up to its level, and below it the land of Guaitarilla with three real screens of
- * the app rising out of the water as the visitor scrolls (GSAP).
+ * First viewport: the brand's deep teal field, the wordmark filling up to its level, and below it
+ * the land of Nariño with three real screens of the app rising as the visitor scrolls (GSAP).
  */
 function Hero(): JSX.Element {
-  const { heroRef, canvasRef } = useHeroWater();
+  const heroRef = useHeroMotion();
   return (
     <section ref={heroRef} className={cn(styles.hero)} aria-labelledby="landing-title">
-      <canvas ref={canvasRef} className={cn(styles.water)} aria-hidden="true" />
       <div className={cn(styles.heroText)}>
         <h1 id="landing-title" className={cn(styles.wordmark)}>
           <span className={cn(styles.visuallyHidden)}>{copy.hero.title}</span>
