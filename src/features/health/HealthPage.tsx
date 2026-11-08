@@ -7,6 +7,8 @@ import { t } from '../../i18n/t';
 import type { HealthComponentView } from '../../services/api/views';
 import { useConnection } from '../../state/hooks/useConnection';
 import { useSyncQueue } from '../../state/hooks/useSyncQueue';
+import { Card } from '../../ui/cards/Card';
+import { PageHeader } from '../../ui/layout/PageHeader';
 import { Button } from '../../ui/primitives/Button';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
@@ -34,6 +36,14 @@ export function HealthPage(): JSX.Element {
   return (
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.health')}</ScreenTitle>
+      <PageHeader
+        lead={t('health.lead')}
+        actions={
+          <Button onClick={() => void health.refetch()} disabled={health.isFetching}>
+            {health.isFetching ? t('health.refreshing') : t('health.refresh')}
+          </Button>
+        }
+      />
       {health.isPending ? <LoadingState message={t('health.loading')} /> : null}
       {health.isError && !isServiceDown(health.error) ? (
         <ErrorState
@@ -57,53 +67,61 @@ export function HealthPage(): JSX.Element {
         <ServiceStatus isUp={health.data.isUp} components={health.data.components} />
       ) : null}
 
-      <section className={cn(styles.section)} aria-labelledby="health-device-title">
-        <h2 id="health-device-title">{t('health.deviceTitle')}</h2>
-        <ul className={cn(styles.list)}>
-          <li className={cn(styles.item)}>
-            <span>{t('health.connection')}</span>
-            <span
-              className={cn(
-                styles.itemName,
-                connection === 'ONLINE' ? styles.good : styles.warning,
-              )}
-            >
-              {connection === 'ONLINE' ? (
-                <Wifi aria-hidden="true" size={ICON_SIZE} />
-              ) : (
-                <WifiOff aria-hidden="true" size={ICON_SIZE} />
-              )}{' '}
-              {connection === 'ONLINE' ? t('health.online') : t('health.offline')}
-            </span>
-          </li>
-          <li className={cn(styles.item)}>
-            <span>{t('health.pendingTitle')}</span>
-            <span className={cn(styles.itemName)}>
-              {queue.pendingCount === 0
-                ? t('health.nothingPending')
-                : t('health.pending', { count: String(queue.pendingCount) })}
-            </span>
-          </li>
-          {queue.needsReviewCount > 0 ? (
+      <div className={cn(styles.pair)}>
+        <Card
+          as="section"
+          tint="mint"
+          variant="tinted"
+          className={cn(styles.section)}
+          aria-labelledby="health-device-title"
+        >
+          <h2 id="health-device-title">{t('health.deviceTitle')}</h2>
+          <ul className={cn(styles.list)}>
             <li className={cn(styles.item)}>
-              <span>{t('health.reviewTitle')}</span>
-              <span className={cn(styles.itemName, styles.warning)}>
-                {t('health.needsReview', { count: String(queue.needsReviewCount) })}
+              <span>{t('health.connection')}</span>
+              <span
+                className={cn(
+                  styles.itemName,
+                  connection === 'ONLINE' ? styles.good : styles.warning,
+                )}
+              >
+                {connection === 'ONLINE' ? (
+                  <Wifi aria-hidden="true" size={ICON_SIZE} />
+                ) : (
+                  <WifiOff aria-hidden="true" size={ICON_SIZE} />
+                )}{' '}
+                {connection === 'ONLINE' ? t('health.online') : t('health.offline')}
               </span>
             </li>
-          ) : null}
-        </ul>
-      </section>
+            <li className={cn(styles.item)}>
+              <span>{t('health.pendingTitle')}</span>
+              <span className={cn(styles.itemName)}>
+                {queue.pendingCount === 0
+                  ? t('health.nothingPending')
+                  : t('health.pending', { count: String(queue.pendingCount) })}
+              </span>
+            </li>
+            {queue.needsReviewCount > 0 ? (
+              <li className={cn(styles.item)}>
+                <span>{t('health.reviewTitle')}</span>
+                <span className={cn(styles.itemName, styles.warning)}>
+                  {t('health.needsReview', { count: String(queue.needsReviewCount) })}
+                </span>
+              </li>
+            ) : null}
+          </ul>
+        </Card>
 
-      <section className={cn(styles.section)} aria-labelledby="health-app-title">
-        <h2 id="health-app-title">{t('health.appTitle')}</h2>
-        <p className={cn(styles.muted)}>{t('health.appVersion', { version: APP_VERSION })}</p>
-      </section>
-
-      <div className={cn(styles.actions)}>
-        <Button onClick={() => void health.refetch()} disabled={health.isFetching}>
-          {health.isFetching ? t('health.refreshing') : t('health.refresh')}
-        </Button>
+        <Card
+          as="section"
+          tint="cream"
+          variant="tinted"
+          className={cn(styles.section)}
+          aria-labelledby="health-app-title"
+        >
+          <h2 id="health-app-title">{t('health.appTitle')}</h2>
+          <p className={cn(styles.muted)}>{t('health.appVersion', { version: APP_VERSION })}</p>
+        </Card>
       </div>
     </div>
   );
@@ -123,7 +141,13 @@ function ServiceStatus({
   readonly components: readonly HealthComponentView[];
 }): JSX.Element {
   return (
-    <section className={cn(styles.section)} aria-labelledby="health-service-title">
+    <Card
+      as="section"
+      variant="tinted"
+      tint={isUp ? 'aqua' : 'coral'}
+      className={cn(styles.section)}
+      aria-labelledby="health-service-title"
+    >
       <h2 id="health-service-title">{t('health.serviceTitle')}</h2>
       <p className={cn(styles.status, isUp ? styles.good : styles.warning)}>
         {isUp ? (
@@ -154,7 +178,7 @@ function ServiceStatus({
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
 

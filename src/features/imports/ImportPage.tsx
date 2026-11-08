@@ -24,6 +24,8 @@ import { Button } from '../../ui/primitives/Button';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { FormFields } from '../../ui/primitives/FormFields';
 import { TextField } from '../../ui/primitives/TextField';
+import { Card } from '../../ui/cards/Card';
+import { PageHeader } from '../../ui/layout/PageHeader';
 import { cn } from '../../ui/styles/cn';
 import { sha256Hex } from '../../services/crypto/sha256Hex';
 import styles from './ImportPage.module.css';
@@ -143,89 +145,107 @@ export function ImportPage(): JSX.Element {
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.imports')}</ScreenTitle>
       <SimulatedDataBanner />
-      <p>{t('imports.intro')}</p>
-      <div className={cn(styles.field)}>
-        <label htmlFor="import-file" className={cn(styles.label)}>
-          {t('imports.fileLabel')}
-        </label>
-        <p className={cn(styles.hint)}>{t('imports.fileHint')}</p>
-        <input
-          id="import-file"
-          type="file"
-          accept=".csv,text/csv"
-          className={cn(styles.file)}
-          onChange={(event) => void onFile(event)}
-        />
-      </div>
-      {fileError === null ? null : <FormAlert message={fileError} />}
-      {preview === null ? null : (
-        <section aria-labelledby="import-preview-title" className={cn(styles.preview)}>
-          <h2 id="import-preview-title">
-            {t('imports.preview', { name: preview.fileName, count: String(preview.rows.length) })}
+      <PageHeader lead={t('imports.intro')} />
+      <div className={cn(styles.columns)}>
+        <Card as="section" aria-labelledby="import-file-title" className={cn(styles.column)}>
+          <h2 id="import-file-title" className={cn(styles.cardTitle)}>
+            {t('imports.stepFile')}
           </h2>
-          <TableScroll
-            label={t('imports.sampleCaption', { count: String(sample.length) })}
-            className={cn(styles.tableWrap)}
-          >
-            <table>
-              <caption>{t('imports.sampleCaption', { count: String(sample.length) })}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{t('imports.colTime')}</th>
-                  <th scope="col">{t('imports.colLevel')}</th>
-                  <th scope="col">{t('imports.colWater')}</th>
-                  <th scope="col">{t('imports.colDamage')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sample.map((row) => (
-                  <tr key={row.id}>
-                    <td>{timeText(row.observed_at)}</td>
-                    <td>{levelText(row.gauge_value)}</td>
-                    <td>{row.water_appearance_code}</td>
-                    <td>{row.damage_noticed === true ? t('imports.yes') : t('imports.no')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TableScroll>
-        </section>
-      )}
-      <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
-        <FormFields disabled={isSubmitting}>
-          <TextField
-            label={t('imports.scenarioLabel')}
-            autoComplete="off"
-            error={errors.scenario_name?.message}
-            {...register('scenario_name')}
-          />
-          <TextField
-            label={t('imports.seedLabel')}
-            inputMode="numeric"
-            autoComplete="off"
-            error={errors.seed?.message}
-            {...register('seed')}
-          />
-          <TextField
-            label={t('imports.versionLabel')}
-            autoComplete="off"
-            error={errors.simulator_version?.message}
-            {...register('simulator_version')}
-          />
-          <div className={cn(styles.actions)}>
-            <Button type="submit" variant="primary" disabled={preview === null || isSubmitting}>
-              {isSubmitting ? t('imports.sending') : t('imports.submit')}
-            </Button>
+          <div className={cn(styles.field)}>
+            <label htmlFor="import-file" className={cn(styles.label)}>
+              {t('imports.fileLabel')}
+            </label>
+            <p className={cn(styles.hint)}>{t('imports.fileHint')}</p>
+            <input
+              id="import-file"
+              type="file"
+              accept=".csv,text/csv"
+              className={cn(styles.file)}
+              onChange={(event) => void onFile(event)}
+            />
           </div>
-        </FormFields>
-      </form>
-      <p role="status" className={cn(styles.status)}>
-        {progress === null
-          ? ''
-          : t('imports.progress', { sent: String(progress.sent), total: String(progress.total) })}
-      </p>
-      {failure === null ? null : <FormAlert message={failure} />}
-      {summary === null ? null : <ImportResult summary={summary} />}
+          {fileError === null ? null : <FormAlert message={fileError} />}
+          {preview === null ? null : (
+            <section aria-labelledby="import-preview-title" className={cn(styles.preview)}>
+              <h2 id="import-preview-title">
+                {t('imports.preview', {
+                  name: preview.fileName,
+                  count: String(preview.rows.length),
+                })}
+              </h2>
+              <TableScroll
+                label={t('imports.sampleCaption', { count: String(sample.length) })}
+                className={cn(styles.tableWrap)}
+              >
+                <table>
+                  <caption>{t('imports.sampleCaption', { count: String(sample.length) })}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t('imports.colTime')}</th>
+                      <th scope="col">{t('imports.colLevel')}</th>
+                      <th scope="col">{t('imports.colWater')}</th>
+                      <th scope="col">{t('imports.colDamage')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sample.map((row) => (
+                      <tr key={row.id}>
+                        <td>{timeText(row.observed_at)}</td>
+                        <td>{levelText(row.gauge_value)}</td>
+                        <td>{row.water_appearance_code}</td>
+                        <td>{row.damage_noticed === true ? t('imports.yes') : t('imports.no')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </TableScroll>
+            </section>
+          )}
+        </Card>
+        <Card as="section" aria-labelledby="import-send-title" className={cn(styles.column)}>
+          <h2 id="import-send-title" className={cn(styles.cardTitle)}>
+            {t('imports.stepSend')}
+          </h2>
+          <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
+            <FormFields disabled={isSubmitting}>
+              <TextField
+                label={t('imports.scenarioLabel')}
+                autoComplete="off"
+                error={errors.scenario_name?.message}
+                {...register('scenario_name')}
+              />
+              <TextField
+                label={t('imports.seedLabel')}
+                inputMode="numeric"
+                autoComplete="off"
+                error={errors.seed?.message}
+                {...register('seed')}
+              />
+              <TextField
+                label={t('imports.versionLabel')}
+                autoComplete="off"
+                error={errors.simulator_version?.message}
+                {...register('simulator_version')}
+              />
+              <div className={cn(styles.actions)}>
+                <Button type="submit" variant="primary" disabled={preview === null || isSubmitting}>
+                  {isSubmitting ? t('imports.sending') : t('imports.submit')}
+                </Button>
+              </div>
+            </FormFields>
+          </form>
+          <p role="status" className={cn(styles.status)}>
+            {progress === null
+              ? ''
+              : t('imports.progress', {
+                  sent: String(progress.sent),
+                  total: String(progress.total),
+                })}
+          </p>
+          {failure === null ? null : <FormAlert message={failure} />}
+          {summary === null ? null : <ImportResult summary={summary} />}
+        </Card>
+      </div>
     </div>
   );
 }
