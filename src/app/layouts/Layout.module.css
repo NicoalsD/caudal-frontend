@@ -178,10 +178,18 @@
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     min-height: 100dvh;
+    /* The dark column and its level line run the full height of long pages. */
+    background:
+      linear-gradient(var(--color-brand-500), var(--color-brand-500))
+        calc(var(--sidebar-width) - var(--level-line-height)) 0 / var(--level-line-height) 100%
+        no-repeat,
+      linear-gradient(var(--color-brand-900), var(--color-brand-900)) 0 0 / var(--sidebar-width)
+        100% no-repeat;
   }
 
   .header {
     grid-row: 1 / -1;
+    align-self: start;
     position: sticky;
     inset-block-start: 0;
     flex-direction: column;
