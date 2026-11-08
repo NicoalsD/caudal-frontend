@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
+import { Clock } from 'lucide-react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import { formatTime } from '../../core/format/time';
@@ -11,7 +12,9 @@ import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
 import type { DayShiftView } from '../../services/api/views';
 import { FormAlert } from '../../ui/feedback/FormAlert';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
+import { Chip } from '../../ui/primitives/Chip';
 import { FormFields } from '../../ui/primitives/FormFields';
 import { formResolver } from '../../ui/primitives/formResolver';
 import { RadioGroupField } from '../../ui/primitives/RadioGroupField';
@@ -112,13 +115,21 @@ export function ShiftCard({
   const failure = record.isError ? errorText(record.error).message : null;
 
   return (
-    <section className={cn(styles.card)} aria-labelledby={`shift-${item.id}`}>
-      <h2 id={`shift-${item.id}`} className={cn(styles.cardTitle)}>
-        {sectorName}
-      </h2>
-      <p className={cn(styles.cardHours)}>
-        {t('closure.shiftHours', { start: startLabel, end: endLabel })}
-      </p>
+    <Card
+      variant={saved ? 'tinted' : 'plain'}
+      tint="mint"
+      as="section"
+      className={cn(styles.card)}
+      aria-labelledby={`shift-${item.id}`}
+    >
+      <div className={cn(styles.cardHead)}>
+        <h2 id={`shift-${item.id}`} className={cn(styles.cardTitle)}>
+          {sectorName}
+        </h2>
+        <Chip tone={saved ? 'plain' : 'aqua'} icon={<Clock aria-hidden="true" />}>
+          {t('closure.shiftHours', { start: startLabel, end: endLabel })}
+        </Chip>
+      </div>
       <form onSubmit={(event) => void submit(event)} noValidate className={cn(styles.form)}>
         <FormFields disabled={record.isPending}>
           <RadioGroupField
@@ -155,10 +166,18 @@ export function ShiftCard({
             {...register('note')}
           />
           {failure === null ? null : <FormAlert message={failure} />}
-          {saved ? <p role="status">{t('closure.saved')}</p> : null}
+          {saved ? (
+            <p role="status" className={cn(styles.notice)}>
+              {t('closure.saved')}
+            </p>
+          ) : null}
           {online ? null : <p role="status">{t('closure.offline')}</p>}
           <div>
-            <Button type="submit" disabled={!online || record.isPending}>
+            <Button
+              type="submit"
+              className={cn(styles.submit)}
+              disabled={!online || record.isPending}
+            >
               {record.isPending
                 ? t('closure.saving')
                 : executionId === null
@@ -168,6 +187,6 @@ export function ShiftCard({
           </div>
         </FormFields>
       </form>
-    </section>
+    </Card>
   );
 }

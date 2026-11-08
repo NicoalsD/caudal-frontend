@@ -85,16 +85,16 @@ export function DayClosurePage(): JSX.Element {
   }
   if (day.data === null) {
     return (
-      <>
+      <div className={cn(styles.stack)}>
         <ScreenTitle>{title}</ScreenTitle>
         <p>{t('closure.noPublished')}</p>
-      </>
+      </div>
     );
   }
 
   const online = connection === 'ONLINE';
   return (
-    <>
+    <div className={cn(styles.stack)}>
       <ScreenTitle>{title}</ScreenTitle>
       {items.length === 0 ? (
         <p>{t('closure.empty')}</p>
@@ -123,6 +123,6 @@ export function DayClosurePage(): JSX.Element {
           void closure.refetch();
         }}
       />
-    </>
+    </div>
   );
 }
