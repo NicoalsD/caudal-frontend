@@ -12,31 +12,32 @@ interface BrandLogoProps {
   readonly className?: string;
 }
 
+const PRINT_QUERY = 'print';
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+
 /**
- * The CAUDAL brand. Shows the official logo when its files exist (assets/brand/logo.ts) and a
- * typeset wordmark until then, so every screen already reserves the logo's place.
+ * The official CAUDAL logo. White on the deep brand field and in the dark theme, turquoise on
+ * light surfaces, and black when the page is printed.
  */
 export function BrandLogo({
   tone = 'onPage',
   size = 'compact',
   className,
 }: BrandLogoProps): JSX.Element {
-  if (LOGO !== null) {
-    return (
+  const main = tone === 'onBrand' ? LOGO.light : LOGO.color;
+  return (
+    <picture>
+      <source media={PRINT_QUERY} srcSet={LOGO.dark.srcSet} />
+      {tone === 'onPage' ? <source media={DARK_QUERY} srcSet={LOGO.light.srcSet} /> : null}
       <img
         className={cn(styles.image, styles[size], className)}
-        src={LOGO.src}
-        srcSet={LOGO.srcSet}
+        src={main.src}
+        srcSet={main.srcSet}
         width={LOGO.width}
         height={LOGO.height}
         alt={t('app.name')}
         decoding="async"
       />
-    );
-  }
-  return (
-    <span className={cn(styles.wordmark, styles[tone], styles[size], className)}>
-      {t('app.brandWordmark')}
-    </span>
+    </picture>
   );
 }
