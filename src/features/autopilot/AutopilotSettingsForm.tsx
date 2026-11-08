@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { JSX } from 'react';
 
 import {
-  AUTOPILOT_MODES,
   OPERATOR_ABSENCE_MINUTES_LIMITS,
   RESERVE_FLOOR_PCT_LIMITS,
   settingsErrors,
@@ -21,10 +20,11 @@ import { usePermission } from '../../state/hooks/usePermission';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { Button } from '../../ui/primitives/Button';
-import { RadioGroupField } from '../../ui/primitives/RadioGroupField';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { PERMISSION_ASSISTANT, PERMISSION_AUTOPILOT } from '../aqueduct/permissions';
+import { ModeCards } from './ModeCards';
+import { Card } from '../../ui/cards/Card';
 import styles from './Autopilot.module.css';
 
 /**
@@ -54,12 +54,12 @@ export function AutopilotSettingsForm(): JSX.Element | null {
     );
   }
   return (
-    <section className={cn(styles.section)} aria-labelledby="autopilot-settings-title">
+    <Card as="section" aria-labelledby="autopilot-settings-title" className={cn(styles.section)}>
       <h2 id="autopilot-settings-title" className={cn(styles.sectionTitle)}>
         {t('settings.title')}
       </h2>
       {body}
-    </section>
+    </Card>
   );
 }
 
@@ -115,23 +115,15 @@ function SettingsFields({
           }
         }}
       >
-        <RadioGroupField
-          legend={t('settings.mode')}
-          name="autopilot-mode"
-          stacked
-          disabled={!canConfigure}
-          options={AUTOPILOT_MODES.map((code) => ({
-            value: code,
-            label: `${t(`autopilot.mode.${lower(code)}`)}. ${
-              code === 'AUTOMATIC'
-                ? t('autopilot.modeHelp.automatic', { minutes: absence, floor })
-                : t(`autopilot.modeHelp.${lower(code)}`)
-            }`,
-          }))}
+        <ModeCards
           selected={mode}
-          onChange={(event) => {
-            setMode(event.currentTarget.value as AutopilotMode);
-          }}
+          disabled={!canConfigure}
+          helpOf={(code) =>
+            code === 'AUTOMATIC'
+              ? t('autopilot.modeHelp.automatic', { minutes: absence, floor })
+              : t(`autopilot.modeHelp.${lower(code)}`)
+          }
+          onChange={setMode}
         />
         <TextField
           label={t('settings.absenceLabel')}
@@ -180,6 +172,7 @@ function SettingsFields({
           <p className={cn(styles.quiet)}>{t('settings.runHint')}</p>
           <div className={cn(styles.actions)}>
             <Button
+              variant="secondary"
               disabled={run.isPending}
               onClick={() => {
                 run.mutate();

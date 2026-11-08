@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { JSX } from 'react';
 
 import { collectValves } from '../../core/devices/attachments';
+import type { DecisionStatus } from '../../core/autopilot/autopilotModel';
 import { formatDecimal } from '../../core/format/decimal';
 import { lower } from '../../i18n/lower';
 import { t } from '../../i18n/t';
@@ -9,8 +11,11 @@ import { useDecisions } from '../../state/hooks/useAutopilot';
 import { useNetwork } from '../../state/hooks/useNetwork';
 import { usePermission } from '../../state/hooks/usePermission';
 import { useSession } from '../../state/hooks/useSession';
-import { LoadingState } from '../../ui/feedback/LoadingState';
-import { TableScroll } from '../../ui/primitives/TableScroll';
+import { Card } from '../../ui/cards/Card';
+import { DataTable } from '../../ui/data/DataTable';
+import { Badge } from '../../ui/primitives/Badge';
+import type { BadgeTone } from '../../ui/primitives/Badge';
+import { tabPanelProps, TextTabs } from '../../ui/primitives/TextTabs';
 import { cn } from '../../ui/styles/cn';
 import { PERMISSION_ASSISTANT } from '../aqueduct/permissions';
 import { decisionDetailText, decisionStatusText } from './decisionText';
@@ -18,9 +23,28 @@ import styles from './Autopilot.module.css';
 
 const PERCENT = 100;
 const WHOLE = 0;
+const ID_PREFIX = 'pilot-history';
+
+type StateTab = 'all' | 'pending' | 'done' | 'other';
+
+const TAB_STATUSES: Readonly<Record<StateTab, readonly DecisionStatus[] | null>> = {
+  all: null,
+  pending: ['PENDING'],
+  done: ['ACCEPTED', 'EXECUTED'],
+  other: ['REJECTED', 'EXPIRED', 'SKIPPED'],
+};
+
+const STATUS_TONE: Readonly<Record<DecisionStatus, BadgeTone>> = {
+  PENDING: 'warning',
+  ACCEPTED: 'ok',
+  EXECUTED: 'ok',
+  REJECTED: 'neutral',
+  EXPIRED: 'neutral',
+  SKIPPED: 'info',
+};
 
 interface DecisionHistoryProps {
-  /** Shows only the newest decisions, without the confidence and the reason column (dashboard). */
+  /** Shows only the newest decisions, without the reason column or the state tabs (dashboard). */
   readonly compact?: boolean;
   readonly maxRows?: number;
   readonly headingId: string;
@@ -29,7 +53,8 @@ interface DecisionHistoryProps {
 
 /**
  * The record of what the autopilot decided: when, where it came from (language model or rules),
- * what, which valve, why, how it ended and who settled it. Read-only; needs ASSISTANT_USE.
+ * what, which valve, why, how it ended and who settled it. Read-only; needs ASSISTANT_USE. The
+ * full page filters by state with text tabs.
  */
 export function DecisionHistory({
   compact = false,
@@ -41,6 +66,7 @@ export function DecisionHistory({
   const decisions = useDecisions(undefined, allowed);
   const network = useNetwork();
   const session = useSession();
+  const [tab, setTab] = useState<StateTab>('all');
   const Heading = headingLevel;
   if (!allowed) {
     return null;
@@ -52,90 +78,126 @@ export function DecisionHistory({
     ),
   );
   const currentUserId = session.status === 'authenticated' ? session.user.userId : null;
-  const rows = (decisions.data ?? []).slice(0, maxRows);
+  const wanted = compact ? null : TAB_STATUSES[tab];
+  const rows = (decisions.data ?? [])
+    .filter((decision) => wanted === null || wanted.includes(decision.status))
+    .slice(0, maxRows);
+  const nameOf = (decision: AutopilotDecisionView): string =>
+    decision.valveId === null
+      ? t('history.noValve')
+      : (valveNames.get(decision.valveId) ?? t('history.noValve'));
 
   let body: JSX.Element;
-  if (decisions.isPending) {
-    body = <LoadingState message={t('history.loading')} />;
-  } else if (decisions.isError) {
+  if (decisions.isError) {
     body = <p role="alert">{t('history.error')}</p>;
-  } else if (rows.length === 0) {
-    body = <p className={cn(styles.quiet)}>{t('history.empty')}</p>;
   } else {
     body = (
-      <TableScroll label={t('history.title')} className={cn(styles.scroll)}>
-        <table className={cn(styles.table)}>
-          <thead>
-            <tr>
-              <th scope="col">{t('history.columns.when')}</th>
-              <th scope="col">{t('history.columns.source')}</th>
-              <th scope="col">{t('history.columns.action')}</th>
-              <th scope="col">{t('history.columns.valve')}</th>
-              {compact ? null : <th scope="col">{t('history.columns.reason')}</th>}
-              <th scope="col">{t('history.columns.status')}</th>
-              <th scope="col">{t('history.columns.decidedBy')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((decision) => (
-              <DecisionRow
-                key={decision.id}
-                decision={decision}
-                compact={compact}
-                valveName={
-                  decision.valveId === null ? null : (valveNames.get(decision.valveId) ?? null)
-                }
-                currentUserId={currentUserId}
-              />
-            ))}
-          </tbody>
-        </table>
-      </TableScroll>
+      <DataTable
+        caption={t('history.title')}
+        rows={rows}
+        loading={decisions.isPending}
+        getRowKey={(decision) => decision.id}
+        empty={{ title: t('history.empty') }}
+        columns={[
+          {
+            id: 'when',
+            header: t('history.columns.when'),
+            cell: (d) => <span className={cn(styles.nowrap)}>{d.createdAt.text}</span>,
+          },
+          {
+            id: 'source',
+            header: t('history.columns.source'),
+            cell: (d) => (
+              <>
+                {t(`assistant.source.${lower(d.source)}`)}
+                <span className={cn(styles.meta)}>
+                  {t('history.confidence', {
+                    percent: formatDecimal(d.confidence * PERCENT, WHOLE),
+                  })}
+                </span>
+              </>
+            ),
+          },
+          {
+            id: 'action',
+            header: t('history.columns.action'),
+            cell: (d) => t(`assistant.action.${lower(d.action)}`),
+          },
+          {
+            id: 'valve',
+            header: t('history.columns.valve'),
+            cell: (d) => <span className={cn(styles.nowrap)}>{nameOf(d)}</span>,
+          },
+          ...(compact
+            ? []
+            : [
+                {
+                  id: 'reason',
+                  header: t('history.columns.reason'),
+                  hideOnNarrow: true,
+                  cell: (d: AutopilotDecisionView) => (
+                    <span className={cn(styles.wrap)}>{d.reason}</span>
+                  ),
+                },
+              ]),
+          {
+            id: 'status',
+            header: t('history.columns.status'),
+            cell: (d) => {
+              const detail = decisionDetailText(d.statusDetail);
+              return (
+                <>
+                  <Badge tone={STATUS_TONE[d.status]}>{decisionStatusText(d.status)}</Badge>
+                  {detail === null ? null : <span className={cn(styles.meta)}>{detail}</span>}
+                </>
+              );
+            },
+          },
+          {
+            id: 'by',
+            header: t('history.columns.decidedBy'),
+            hideOnNarrow: true,
+            cell: (d) => deciderText(d, currentUserId),
+          },
+        ]}
+      />
     );
   }
 
-  return (
-    <section className={cn(styles.section)} aria-labelledby={headingId}>
-      <Heading id={headingId} className={cn(styles.sectionTitle)}>
-        {compact ? t('history.recentTitle') : t('history.title')}
-      </Heading>
-      {body}
-    </section>
+  const content = (
+    <>
+      <div className={cn(styles.sectionHead)}>
+        <Heading id={headingId} className={cn(styles.sectionTitle)}>
+          {compact ? t('history.recentTitle') : t('history.title')}
+        </Heading>
+        {compact ? null : (
+          <TextTabs
+            label={t('history.tabsLabel')}
+            idPrefix={ID_PREFIX}
+            value={tab}
+            onChange={(next) => {
+              setTab(next as StateTab);
+            }}
+            tabs={[
+              { id: 'all', label: t('history.tabs.all') },
+              { id: 'pending', label: t('history.tabs.pending') },
+              { id: 'done', label: t('history.tabs.done') },
+              { id: 'other', label: t('history.tabs.other') },
+            ]}
+          />
+        )}
+      </div>
+      <div {...(compact ? {} : tabPanelProps(ID_PREFIX, tab))}>{body}</div>
+    </>
   );
-}
-
-function DecisionRow({
-  decision,
-  compact,
-  valveName,
-  currentUserId,
-}: {
-  readonly decision: AutopilotDecisionView;
-  readonly compact: boolean;
-  readonly valveName: string | null;
-  readonly currentUserId: string | null;
-}): JSX.Element {
-  const detail = decisionDetailText(decision.statusDetail);
-  return (
-    <tr>
-      <td>{decision.createdAt.text}</td>
-      <td>
-        {t(`assistant.source.${lower(decision.source)}`)}
-        <span className={cn(styles.meta)}>
-          {t('history.confidence', {
-            percent: formatDecimal(decision.confidence * PERCENT, WHOLE),
-          })}
-        </span>
-      </td>
-      <td>{t(`assistant.action.${lower(decision.action)}`)}</td>
-      <td>{valveName ?? t('history.noValve')}</td>
-      {compact ? null : <td className={cn(styles.wrap)}>{decision.reason}</td>}
-      <td>
-        {decisionStatusText(decision.status)}
-        {detail === null ? null : <span className={cn(styles.meta)}>{detail}</span>}
-      </td>
-      <td>{deciderText(decision, currentUserId)}</td>
-    </tr>
+  return compact ? (
+    <section className={cn(styles.section)} aria-labelledby={headingId}>
+      {content}
+    </section>
+  ) : (
+    <Card as="section" aria-labelledby={headingId} className={cn(styles.section)}>
+      {content}
+    </Card>
   );
 }
 
