@@ -3666,6 +3666,104 @@
           }
         }
       }
+    },
+    "/api/v1/readings": {
+      "get": {
+        "operationId": "listReadings",
+        "summary": "Listar las lecturas de un tanque",
+        "description": "Permiso READING_VIEW. De la más reciente a la más antigua por observed_at; limit de 1 a 100 (20 por defecto) y cursor firmado.",
+        "parameters": [
+          {
+            "name": "tank_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "validation_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACCEPTED",
+                "FLAGGED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de lecturas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7460,6 +7558,90 @@
             "minimum": 1,
             "maximum": 3,
             "description": "Días a pronosticar. Sin él se usa forecast_horizon_days de la regla vigente."
+          }
+        }
+      },
+      "Reading": {
+        "type": "object",
+        "required": [
+          "id",
+          "tank_id",
+          "gauge_value",
+          "damage_noticed",
+          "observed_at",
+          "received_at",
+          "source",
+          "validation_status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gauge_value": {
+            "type": "number",
+            "format": "double"
+          },
+          "effective_gauge_value": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "correction_count": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "water_appearance_code": {
+            "type": "string"
+          },
+          "damage_noticed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string"
+          },
+          "validation_status": {
+            "type": "string"
+          },
+          "rule_set_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ReadingPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reading"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

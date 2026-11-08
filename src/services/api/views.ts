@@ -229,6 +229,26 @@ export interface ReadingCorrectionView {
 }
 
 /** The server's answer to a reading: what it stored and what it noticed. */
+/** One accepted reading of the tank history: the level now shown (after any correction). */
+export interface ReadingHistoryPointView {
+  readonly id: string;
+  readonly level: number;
+  readonly observedAt: TimestampView;
+}
+
+export interface ReadingHistoryQuery {
+  readonly tankId: string;
+  readonly from: Date;
+  readonly to: Date;
+  readonly limit: number;
+  readonly cursor?: string;
+}
+
+export interface ReadingHistoryPageView {
+  readonly items: readonly ReadingHistoryPointView[];
+  readonly nextCursor: string | null;
+}
+
 export interface ReadingResultView {
   readonly id: string;
   readonly gaugeValue: DecimalView;

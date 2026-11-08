@@ -2,12 +2,16 @@ import type { HttpClient } from '../../http/HttpClient';
 import type { ApiDtoAdapter } from '../adapters/ApiDtoAdapter';
 import { toReadingBatchResult } from '../adapters/ReadingsAdapter';
 import type { ReadingBatchResponseDto } from '../adapters/ReadingsAdapter';
+import { toReadingHistoryPage } from '../adapters/ReadingsAdapter';
+import type { ReadingPageDto } from '../adapters/ReadingsAdapter';
 import { toReadingCorrection } from '../adapters/ReadingsAdapter';
 import type { ReadingCorrectionResponseDto } from '../adapters/ReadingsAdapter';
 import { toReadingResult } from '../adapters/ReadingsAdapter';
 import type { ReadingResponseDto } from '../adapters/ReadingsAdapter';
 import type {
   ReadingBatchInput,
+  ReadingHistoryPageView,
+  ReadingHistoryQuery,
   ReadingBatchResultView,
   ReadingCorrectionInput,
   ReadingCorrectionView,
@@ -55,6 +59,26 @@ export class ReadingsApi {
       },
     });
     return toReadingCorrection(this.adapter, response.body);
+  }
+
+  /**
+   * GET /readings: accepted readings of one tank between two instants, newest first. Pass the
+   * previous `nextCursor` to get the next page.
+   */
+  async history(query: ReadingHistoryQuery): Promise<ReadingHistoryPageView> {
+    const response = await this.http.request<ReadingPageDto>({
+      method: 'GET',
+      path: '/readings',
+      query: {
+        tank_id: query.tankId,
+        from: query.from.toISOString(),
+        to: query.to.toISOString(),
+        validation_status: 'ACCEPTED',
+        limit: String(query.limit),
+        ...(query.cursor === undefined ? {} : { cursor: query.cursor }),
+      },
+    });
+    return toReadingHistoryPage(this.adapter, response.body);
   }
 
   async submitBatch(input: ReadingBatchInput): Promise<ReadingBatchResultView> {

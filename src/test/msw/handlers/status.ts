@@ -19,4 +19,13 @@ export const statusHandlers = [
       ? HttpResponse.json(buildForecastRun())
       : errorResponse(NOT_FOUND_STATUS, 'NOT_FOUND'),
   ),
+  http.get(apiUrl('/readings'), () =>
+    HttpResponse.json({
+      items: [
+        { id: 'h-2', gauge_value: 2.5, observed_at: '2026-10-13T13:00:00Z' },
+        { id: 'h-1', gauge_value: 2.7, observed_at: '2026-10-12T13:00:00Z' },
+      ],
+      next_cursor: null,
+    }),
+  ),
 ];

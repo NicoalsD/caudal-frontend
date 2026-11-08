@@ -104,3 +104,51 @@ describe('ReadingsApi.submitBatch', () => {
     });
   });
 });
+
+const EFFECTIVE_LEVEL = 2.2;
+const RAW_LEVEL = 2.6;
+
+describe('ReadingsApi.history', () => {
+  it('asks for accepted readings of the tank in the window and maps the effective level', async () => {
+    const http = new FakeHttpClient(
+      okResponse({
+        items: [
+          {
+            id: 'r-2',
+            gauge_value: 2.4,
+            effective_gauge_value: 2.2,
+            observed_at: '2026-10-14T13:00:00Z',
+          },
+          {
+            id: 'r-1',
+            gauge_value: 2.6,
+            effective_gauge_value: null,
+            observed_at: '2026-10-13T13:00:00Z',
+          },
+        ],
+        next_cursor: 'abc',
+      }),
+    );
+
+    const page = await new ReadingsApi(http, new ApiDtoAdapter()).history({
+      tankId: 't-1',
+      from: new Date('2026-10-01T00:00:00Z'),
+      to: new Date('2026-10-15T00:00:00Z'),
+      limit: 100,
+      cursor: 'prev',
+    });
+
+    expect(http.requests[0]).toMatchObject({ method: 'GET', path: '/readings' });
+    expect(http.requests[0]?.query).toEqual({
+      tank_id: 't-1',
+      from: '2026-10-01T00:00:00.000Z',
+      to: '2026-10-15T00:00:00.000Z',
+      validation_status: 'ACCEPTED',
+      limit: '100',
+      cursor: 'prev',
+    });
+    expect(page.nextCursor).toBe('abc');
+    expect(page.items.map((item) => item.level)).toEqual([EFFECTIVE_LEVEL, RAW_LEVEL]);
+    expect(page.items[0]?.observedAt.dayKey).toBe('2026-10-14');
+  });
+});
