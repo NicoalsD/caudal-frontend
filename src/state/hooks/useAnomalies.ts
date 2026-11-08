@@ -11,12 +11,13 @@ import { TANK_STATUS_SCOPE } from './useTankStatus';
 export const ANOMALIES_SCOPE = 'anomalies';
 
 /** Anomalies still waiting for a review (GET /anomalies?status=OPEN). */
-export function useOpenAnomalies(): UseQueryResult<AnomalyPageView> {
+export function useOpenAnomalies(enabled = true): UseQueryResult<AnomalyPageView> {
   const api = useCaudalApi();
   const aqueductId = useAqueductId();
   return useQuery({
     queryKey: aqueductKey(aqueductId, ANOMALIES_SCOPE, 'open'),
     queryFn: () => api.anomalies.list('OPEN'),
+    enabled,
     refetchOnWindowFocus: false,
   });
 }

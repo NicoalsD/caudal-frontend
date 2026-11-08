@@ -42,6 +42,7 @@ describe('login journey', () => {
     await services.session.restore();
     const user = userEvent.setup();
 
+    await user.click(await screen.findByRole('button', { name: /^Menú de / }));
     await user.click(await screen.findByRole('button', { name: t('auth.signOut') }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(ROUTE_PATHS.login);

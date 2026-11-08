@@ -1,5 +1,6 @@
 import { delay, http, HttpResponse } from 'msw';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { SubmitReadingCommand } from '../../core/commands/SubmitReadingCommand';
@@ -313,8 +314,7 @@ describe('OperatorHomePage (S07)', () => {
     renderHome();
 
     const header = await screen.findByRole('banner');
-    await waitFor(() => {
-      expect(within(header).getByRole('button', { name: t('auth.signOut') })).toBeVisible();
-    });
+    await userEvent.click(await within(header).findByRole('button', { name: /^Menú de / }));
+    expect(within(header).getByRole('button', { name: t('auth.signOut') })).toBeVisible();
   });
 });
