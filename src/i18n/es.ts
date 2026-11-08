@@ -1791,6 +1791,12 @@ export const strings = {
       closeDay: 'Cerró el día',
       createIncident: 'Registró un daño',
       updateIncidentStatus: 'Cambió el estado de un daño',
+      createManualValve: 'Envió un comando manual a una llave',
+      rotateDeviceKey: 'Rotó la clave de un dispositivo',
+      autopilotDecisionAccepted: 'Aceptó una recomendación del piloto',
+      autopilotDecisionRejected: 'Rechazó una recomendación del piloto',
+      autopilotExecuted: 'El piloto movió una llave',
+      autopilotSettingsChanged: 'Cambió los ajustes del piloto',
     },
     securityTypes: {
       accountLocked: 'Cuenta bloqueada',
