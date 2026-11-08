@@ -4,12 +4,13 @@ import { describe, expect, it } from 'vitest';
 
 import { SubmitReadingCommand } from '../../core/commands/SubmitReadingCommand';
 import type { SubmitReadingPayload } from '../../core/commands/SubmitReadingCommand';
+import { formatTime } from '../../core/format/time';
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { FakeClock } from '../../test/fakes/FakeClock';
 import { buildSessionUser } from '../../test/factories/session';
 import { buildTankStatus } from '../../test/factories/status';
-import { SEED_TANKS } from '../../test/factories/network';
+import { SEED_SECTORS_LIST, SEED_TANKS } from '../../test/factories/network';
 import { apiUrl } from '../../test/msw/apiUrl';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
@@ -20,6 +21,9 @@ const NOW_MS = Date.parse('2026-10-14T20:00:00Z');
 const TODAY = '2026-10-14';
 /** Long enough for the retries of a server error (RetryPolicy) to end. */
 const ERROR_TIMEOUT_MS = 10_000;
+/** The table rows: the header first, then one row per shift. */
+const HEADER_ROW = 1;
+const SHIFT_COUNT = 2;
 const YESTERDAY_READING = '2026-10-13T12:15:00-05:00';
 const YESTERDAY_READING_UTC = '2026-10-13T13:00:00.000Z';
 const OPERATOR = buildSessionUser({
@@ -79,7 +83,8 @@ describe('OperatorHomePage (S07)', () => {
     levelFromYesterday();
     renderHome();
 
-    expect(await screen.findByText(t('home.levelValue', { value: '2,3' }))).toBeVisible();
+    // The number shows twice on a wide screen (the gauge draws it too), so the first match is checked.
+    expect((await screen.findAllByText(t('home.levelValue', { value: '2,3' })))[0]).toBeVisible();
     const main = screen.getByRole('link', { name: t('home.newReading') });
     expect(main).toHaveAttribute('href', ROUTE_PATHS.operator.newReading);
     expect(main.className).toMatch(/primary/);
@@ -98,7 +103,8 @@ describe('OperatorHomePage (S07)', () => {
   it('shows the last level big, how old it is, and a link to the tank status', async () => {
     renderHome();
 
-    expect(await screen.findByText(t('home.levelValue', { value: '2,3' }))).toBeVisible();
+    // The number shows twice on a wide screen (the gauge draws it too), so the first match is checked.
+    expect((await screen.findAllByText(t('home.levelValue', { value: '2,3' })))[0]).toBeVisible();
     expect(screen.getByText(t('home.levelAge', { hours: '6' }))).toBeVisible();
     expect(screen.getByRole('link', { name: t('home.tankDetail') })).toHaveAttribute(
       'href',
@@ -220,6 +226,86 @@ describe('OperatorHomePage (S07)', () => {
       ),
     ).toBeVisible();
     expect(screen.getByRole('link', { name: t('home.seePending') })).toBeVisible();
+  });
+
+  it('shows the day in words as the only heading of the screen', async () => {
+    renderHome();
+
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: t('home.todayHeading', { date: 'miércoles 14 de octubre' }),
+      }),
+    ).toBeVisible();
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+  });
+
+  it('shows the published shifts of today in sequence order, with sector names and times', async () => {
+    const [firstSector, secondSector] = SEED_SECTORS_LIST;
+    server.use(
+      http.get(apiUrl(`/days/${TODAY}/schedule`), () =>
+        HttpResponse.json({
+          service_date: TODAY,
+          proposal_id: '0190f3a2-0000-7000-8000-0000000000f1',
+          published_at: '2026-10-13T18:00:00-05:00',
+          items: [
+            {
+              id: 'item-late',
+              sector_id: secondSector?.id ?? '',
+              sequence: 2,
+              start_at: `${TODAY}T14:00:00-05:00`,
+              end_at: `${TODAY}T22:00:00-05:00`,
+            },
+            {
+              id: 'item-early',
+              sector_id: firstSector?.id ?? '',
+              sequence: 1,
+              start_at: `${TODAY}T06:00:00-05:00`,
+              end_at: `${TODAY}T14:00:00-05:00`,
+            },
+          ],
+        }),
+      ),
+    );
+    renderHome();
+
+    const table = await screen.findByRole('table', { name: t('home.shiftsTitle') });
+    const rows = within(table).getAllByRole('row');
+    expect(rows).toHaveLength(HEADER_ROW + SHIFT_COUNT);
+    expect(rows[HEADER_ROW]).toHaveTextContent(firstSector?.name ?? '');
+    expect(rows[HEADER_ROW]).toHaveTextContent(formatTime(`${TODAY}T06:00:00-05:00`));
+    expect(rows[HEADER_ROW + 1]).toHaveTextContent(secondSector?.name ?? '');
+    expect(rows[HEADER_ROW + 1]).toHaveTextContent(formatTime(`${TODAY}T14:00:00-05:00`));
+  });
+
+  it('says there are no shifts published for today when the day has no schedule', async () => {
+    server.use(
+      http.get(apiUrl(`/days/${TODAY}/schedule`), () =>
+        HttpResponse.json({ error: { code: 'NOT_FOUND', message: 'x' } }, { status: 404 }),
+      ),
+    );
+    renderHome();
+
+    expect(await screen.findByText(t('home.shiftsEmpty'))).toBeVisible();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: t('home.damage') })[0]).toBeVisible();
+  });
+
+  it('shows the short stale note when today has no reading yet', async () => {
+    server.use(
+      http.get(apiUrl(`/tanks/${TANK_ID}/status`), () =>
+        HttpResponse.json(
+          buildTankStatus({
+            level: { value: 2.3, observed_at: YESTERDAY_READING, hours_ago: 26 },
+            stale: { is_stale: true, stale_after_hours: 12 },
+          }),
+        ),
+      ),
+    );
+    renderHome();
+
+    expect(await screen.findByText(t('home.staleShort', { hours: '12' }))).toBeVisible();
+    expect(screen.queryByText(t('home.stale', { hours: '12' }))).not.toBeInTheDocument();
   });
 
   it('lets the person sign out from the header', async () => {

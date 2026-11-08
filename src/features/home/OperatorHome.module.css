@@ -1,13 +1,27 @@
-.stack {
+/* Mobile first: one column in the order of the DOM. Desktop (>= 64rem) places the blocks in a
+   grid: the day and the damage report on top, the actions and shifts on the left, the tank on the
+   right, as tall as the left column. */
+
+.page {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  max-width: var(--content-max);
 }
 
-.primaryAction > * {
-  width: 100%;
-  min-height: calc(var(--target-min) * 1.5);
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.titleRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.greeting {
+  margin: 0;
 }
 
 .card {
@@ -18,6 +32,11 @@
   background: var(--color-raised);
   border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-surface);
+}
+
+.primaryAction > * {
+  width: 100%;
+  min-height: calc(var(--target-min) * 1.5);
 }
 
 .checklist {
@@ -63,6 +82,21 @@
   color: var(--color-water-800);
 }
 
+/* Notes under the 3D tank, on its deep field. */
+.stageNotes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--font-size-small);
+}
+
+.stageStale {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
 .stale {
   font-weight: var(--font-weight-bold);
   color: var(--color-ochre-800);
@@ -74,4 +108,105 @@
 
 .secondary > * {
   width: 100%;
+}
+
+.lineWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.table th {
+  font-weight: var(--font-weight-bold);
+  background: var(--color-sand-200);
+}
+
+/* Desktop: the layout grid, the subtle card border and the tall gauge. */
+@media (min-width: 64rem) {
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-areas:
+      'head damage'
+      'action tank'
+      'today tank'
+      'shifts tank';
+    /* The spare height of the tall tank goes to the last row, not between the sections. */
+    grid-template-rows: auto auto auto 1fr;
+    align-items: start;
+    column-gap: var(--space-5);
+    row-gap: var(--space-5);
+  }
+
+  .head {
+    grid-area: head;
+  }
+
+  .damageArea {
+    grid-area: damage;
+    justify-self: end;
+    width: auto;
+  }
+
+  .damageArea > * {
+    width: auto;
+  }
+
+  .primaryAction {
+    grid-area: action;
+    justify-self: start;
+  }
+
+  .primaryAction > * {
+    width: auto;
+  }
+
+  .todayArea {
+    grid-area: today;
+  }
+
+  .shiftsArea {
+    grid-area: shifts;
+  }
+
+  .card {
+    border: 1px solid var(--color-border-subtle);
+  }
+
+  /* The tank column spans the whole left column. */
+  .tankArea {
+    grid-area: tank;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 40rem;
+  }
+
+  .tankCard {
+    flex: 1 1 auto;
+  }
 }
