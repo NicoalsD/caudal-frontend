@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { JSX } from 'react';
+import { CircleCheck } from 'lucide-react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
@@ -17,6 +18,7 @@ import { useFormSchema } from '../../state/hooks/useFormSchema';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
 import { LinkButton } from '../../ui/primitives/LinkButton';
 import { ROUTE_PATHS } from '../../core/session/routes';
@@ -33,6 +35,7 @@ import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
 import { resolveGauge } from './gaugeRule';
 
 const GAUGE_DISPLAY_DIGITS = 2;
+const STEP_COUNT = 3;
 const NO_BANDS: readonly { code: string; from: number; to: number }[] = [];
 
 interface ReadingFormValues {
@@ -175,8 +178,20 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
 
   if (saved !== null) {
     return (
-      <section className={cn(styles.confirmation)} role="status" aria-labelledby="reading-saved">
-        <h2 id="reading-saved">{t('readings.savedTitle')}</h2>
+      <Card
+        variant="tinted"
+        tint="mint"
+        as="section"
+        className={cn(styles.confirmation)}
+        role="status"
+        aria-labelledby="reading-saved"
+      >
+        <div className={cn(styles.confirmationHead)}>
+          <span className={cn(styles.confirmationIcon)}>
+            <CircleCheck aria-hidden="true" />
+          </span>
+          <h2 id="reading-saved">{t('readings.savedTitle')}</h2>
+        </div>
         <p>{saved.sendingNow ? t('readings.savedQueued') : t('readings.savedOffline')}</p>
         <p className={cn(styles.savedValue)}>
           {t('readings.savedValue', { value: formatDecimal(saved.value, GAUGE_DISPLAY_DIGITS) })}
@@ -208,7 +223,7 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
             <LinkButton to={closeToday}>{t('home.closeDay')}</LinkButton>
           )}
         </div>
-      </section>
+      </Card>
     );
   }
 
@@ -220,92 +235,101 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
     <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
       <FormFields disabled={isSubmitting}>
         {saveFailed ? <FormAlert message={t('readings.serverError')} /> : null}
-        <div className={cn(styles.levelRow)}>
-          <div className={cn(styles.levelField)}>
-            <TextField
-              label={t('readings.gaugeLabel')}
-              hint={t('readings.gaugeHint', {
-                min: formatDecimal(tank.gaugeMin, GAUGE_DISPLAY_DIGITS),
-                max: formatDecimal(tank.gaugeMax, GAUGE_DISPLAY_DIGITS),
-              })}
-              inputMode="decimal"
-              autoComplete="off"
-              placeholder={toInputText(tank.gaugeMin)}
-              error={errors.gauge_value?.message}
-              className={cn(styles.gaugeInput)}
-              {...register(FIELD.gaugeValue)}
-            />
-            {gauge === null ? null : (
-              <input
-                type="range"
-                className={cn(styles.levelSlider)}
-                min={gauge.min}
-                max={gauge.max}
-                step={gauge.step}
-                value={typedLevel ?? gauge.min}
-                aria-label={t('readings.sliderLabel')}
-                aria-valuetext={
-                  typedLevel === null
-                    ? t('readings.gaugeNoValue')
-                    : t('readings.gaugeValueText', {
-                        value: formatDecimal(typedLevel, sliderDecimals),
-                      })
-                }
-                onChange={(event) => {
-                  moveSlider(Number(event.currentTarget.value));
-                }}
+        <Card variant="tinted" tint="aqua" className={cn(styles.step)}>
+          <StepHead step={1} />
+          <div className={cn(styles.levelRow)}>
+            <div className={cn(styles.levelField)}>
+              <TextField
+                label={t('readings.gaugeLabel')}
+                hint={t('readings.gaugeHint', {
+                  min: formatDecimal(tank.gaugeMin, GAUGE_DISPLAY_DIGITS),
+                  max: formatDecimal(tank.gaugeMax, GAUGE_DISPLAY_DIGITS),
+                })}
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder={toInputText(tank.gaugeMin)}
+                error={errors.gauge_value?.message}
+                className={cn(styles.gaugeInput)}
+                {...register(FIELD.gaugeValue)}
               />
-            )}
-          </div>
-          {gauge === null ? null : (
-            <div className={cn(styles.levelPreview)}>
-              {typedLevel === null ? (
-                <p className={cn(styles.noValue)}>{t('readings.gaugeNoValue')}</p>
-              ) : (
-                <TankGauge
-                  level={typedLevel}
-                  gaugeMin={gauge.min}
-                  gaugeMax={gauge.max}
-                  bands={bands}
-                  reserveLevel={reserveLevel}
+              {gauge === null ? null : (
+                <input
+                  type="range"
+                  className={cn(styles.levelSlider)}
+                  min={gauge.min}
+                  max={gauge.max}
+                  step={gauge.step}
+                  value={typedLevel ?? gauge.min}
+                  aria-label={t('readings.sliderLabel')}
+                  aria-valuetext={
+                    typedLevel === null
+                      ? t('readings.gaugeNoValue')
+                      : t('readings.gaugeValueText', {
+                          value: formatDecimal(typedLevel, sliderDecimals),
+                        })
+                  }
+                  onChange={(event) => {
+                    moveSlider(Number(event.currentTarget.value));
+                  }}
                 />
               )}
             </div>
-          )}
-        </div>
-        {appearances.isError ? (
-          <FormAlert message={t('readings.appearanceLoadError')} />
-        ) : (
-          <RadioGroupField
-            legend={t('readings.appearanceLegend')}
-            options={options}
-            error={errors.water_appearance_code?.message}
-            {...register(FIELD.waterAppearance)}
-          />
-        )}
-        <details
-          className={cn(styles.optional)}
-          open={showOptional}
-          onToggle={(event) => {
-            setOptionalOpen(event.currentTarget.open);
-          }}
-        >
-          <summary className={cn(styles.summary)}>{t('readings.optionalSummary')}</summary>
-          <div className={cn(styles.optionalBody)}>
-            <CheckboxField label={t('readings.damageLabel')} {...register(FIELD.damageNoticed)} />
-            <TextAreaField
-              label={t('readings.noteLabel')}
-              hint={t('readings.noteHint')}
-              length={typedNote.length}
-              maxLength={noteMax}
-              counterText={(length, max) =>
-                t('readings.noteCounter', { length: String(length), max: String(max) })
-              }
-              error={errors.note?.message}
-              {...register(FIELD.note)}
-            />
+            {gauge === null ? null : (
+              <div className={cn(styles.levelPreview)}>
+                {typedLevel === null ? (
+                  <p className={cn(styles.noValue)}>{t('readings.gaugeNoValue')}</p>
+                ) : (
+                  <TankGauge
+                    level={typedLevel}
+                    gaugeMin={gauge.min}
+                    gaugeMax={gauge.max}
+                    bands={bands}
+                    reserveLevel={reserveLevel}
+                  />
+                )}
+              </div>
+            )}
           </div>
-        </details>
+        </Card>
+        <Card className={cn(styles.step)}>
+          <StepHead step={2} />
+          {appearances.isError ? (
+            <FormAlert message={t('readings.appearanceLoadError')} />
+          ) : (
+            <RadioGroupField
+              legend={t('readings.appearanceLegend')}
+              options={options}
+              error={errors.water_appearance_code?.message}
+              {...register(FIELD.waterAppearance)}
+            />
+          )}
+        </Card>
+        <Card className={cn(styles.step)}>
+          <StepHead step={3} />
+          <details
+            className={cn(styles.optional)}
+            open={showOptional}
+            onToggle={(event) => {
+              setOptionalOpen(event.currentTarget.open);
+            }}
+          >
+            <summary className={cn(styles.summary)}>{t('readings.optionalSummary')}</summary>
+            <div className={cn(styles.optionalBody)}>
+              <CheckboxField label={t('readings.damageLabel')} {...register(FIELD.damageNoticed)} />
+              <TextAreaField
+                label={t('readings.noteLabel')}
+                hint={t('readings.noteHint')}
+                length={typedNote.length}
+                maxLength={noteMax}
+                counterText={(length, max) =>
+                  t('readings.noteCounter', { length: String(length), max: String(max) })
+                }
+                error={errors.note?.message}
+                {...register(FIELD.note)}
+              />
+            </div>
+          </details>
+        </Card>
         <div className={cn(styles.actions)}>
           <Button type="submit" variant="primary" className={cn(styles.submit)}>
             {isSubmitting ? t('readings.submitting') : t('readings.submit')}
@@ -313,5 +337,16 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
         </div>
       </FormFields>
     </form>
+  );
+}
+
+function StepHead({ step }: { readonly step: number }): JSX.Element {
+  return (
+    <p className={cn(styles.stepHead)}>
+      <span className={cn(styles.stepNumber)} aria-hidden="true">
+        {step}
+      </span>
+      {t('readings.step', { n: String(step), total: String(STEP_COUNT) })}
+    </p>
   );
 }

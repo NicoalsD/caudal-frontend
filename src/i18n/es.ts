@@ -407,6 +407,13 @@ export const strings = {
     },
   },
   network: {
+    tilesLabel: 'Cifras de la red',
+    tiles: {
+      tanks: 'Tanques de la red',
+      sectors: 'Sectores de la red',
+      valves: 'Válvulas activas',
+      households: 'Viviendas atendidas',
+    },
     summary:
       '{tanks} tanques, {sectors} sectores, {valves} válvulas ({active} activas) y {households} viviendas',
     tanksTitle: 'Tanques',
@@ -544,6 +551,7 @@ export const strings = {
     readOnlyNotice: 'Puedes ver este borrador, pero no editarlo con tu rol.',
   },
   pending: {
+    chipOffline: 'Sin conexión',
     pageSummary: '{count} lecturas por enviar en este celular.',
     pageSummaryOne: '1 lectura por enviar en este celular.',
     offlineSummary: 'Sin conexión. {count} lecturas en el celular.',
@@ -570,6 +578,7 @@ export const strings = {
     loading: 'Cargando el tanque...',
     noTank: 'Todavía no hay un tanque activo. Avisa a la Junta.',
     tankLabel: 'Tanque',
+    step: 'Paso {n} de {total}',
     gaugeLabel: 'Nivel en la regla',
     gaugeHint: 'Escribe lo que marca la regla pintada, de {min} a {max}. Puedes usar coma.',
     sliderLabel: 'Mover el nivel con el deslizador',
@@ -784,6 +793,8 @@ export const strings = {
     pillBand: 'Rango probable',
   },
   imports: {
+    stepFile: '1. Elige el archivo',
+    stepSend: '2. Describe el escenario y envía',
     intro:
       'Carga el historial simulado del acueducto demo. Sirve para probar pronósticos y turnos con datos de varias semanas. Solo funciona en el acueducto de demostración.',
     fileLabel: 'Archivo CSV de lecturas simuladas',
@@ -1126,6 +1137,7 @@ export const strings = {
       'Sin conexión. Este reporte no se guarda sin señal: intenta de nuevo cuando tengas conexión.',
   },
   health: {
+    lead: 'Cómo está el servicio, esta conexión y la cola de envíos. Solo lectura.',
     loading: 'Consultando la salud del sistema...',
     errorBody: 'No se pudo consultar la salud del sistema.',
     refresh: 'Actualizar',
@@ -1227,6 +1239,7 @@ export const strings = {
       'No pudimos cargar los límites del motivo. Conéctate a internet para descartar una anomalía.',
   },
   incidents: {
+    lead: 'Los daños que reportan las familias y el fontanero. Avanza cada uno con una nota.',
     loading: 'Cargando reportes...',
     errorBody: 'No pudimos cargar los reportes. Intenta de nuevo.',
     empty: 'No hay reportes abiertos.',
@@ -1295,6 +1308,7 @@ export const strings = {
     unavailable: 'No pudimos preparar el formulario. Revisa tu conexión e intenta de nuevo.',
   },
   minutes: {
+    lead: 'Las actas de la Junta: genera una por periodo y revisa sus cuatro secciones.',
     loading: 'Cargando las actas...',
     errorBody: 'No pudimos cargar las actas. Intenta de nuevo.',
     empty: 'Todavía no hay actas. Genera la primera cuando la necesites.',
@@ -1350,6 +1364,8 @@ export const strings = {
     dismissed: 'Descartado',
   },
   publicTracking: {
+    stepDone: 'Listo',
+    stepPending: 'Pendiente',
     title: 'Consultar un reporte',
     intro: 'Escribe el código que te dimos al reportar.',
     codeLabel: 'Código de seguimiento',
@@ -1373,6 +1389,7 @@ export const strings = {
     errorBody: 'No pudimos consultar el reporte. Intenta de nuevo.',
   },
   proposals: {
+    lead: 'La propuesta de turnos de cada día: revísala, apruébala o modifícala y publícala.',
     loading: 'Cargando propuestas...',
     loadError: 'No pudimos cargar las propuestas. Intenta de nuevo.',
     today: 'Propuesta de hoy',
@@ -1549,6 +1566,7 @@ export const strings = {
     },
   },
   entities: {
+    lead: 'Los resúmenes que la Junta autoriza a las entidades de apoyo, con su periodo.',
     loading: 'Cargando las autorizaciones...',
     empty: 'Ninguna entidad tiene un resumen autorizado.',
     create: 'Autorizar resumen',
@@ -1587,8 +1605,17 @@ export const strings = {
     empty: 'Aún no hay usuarios. Crea el primero.',
     create: 'Crear usuario',
     loadMore: 'Ver más',
-    roleLine: 'Rol: {role}',
-    statusLine: 'Estado: {status}',
+    lead: 'Las cuentas del acueducto, su rol y su estado. Aquí das de alta, cambias roles y entregas códigos.',
+    tilesLabel: 'Resumen de cuentas',
+    tiles: { total: 'Cuentas', active: 'Activas', blocked: 'Bloqueadas o desactivadas' },
+    columns: {
+      person: 'Persona',
+      role: 'Rol',
+      status: 'Estado',
+      activity: 'Actividad',
+      actions: 'Acciones',
+    },
+    noActions: 'Sin acciones',
     noRole: 'Sin rol vigente',
     passwordPending: 'Debe fijar su contraseña',
     changeRole: 'Cambiar rol',
@@ -1708,6 +1735,25 @@ export const strings = {
   audit: {
     tabAudit: 'Auditoría',
     tabSecurity: 'Eventos de seguridad',
+    lead: 'Quién hizo qué y cuándo, y lo que el sistema detectó en seguridad. Solo lectura.',
+    tilesLabel: 'Resumen de lo cargado',
+    tiles: {
+      loaded: 'Registros cargados',
+      users: 'De personas',
+      devices: 'De dispositivos',
+      system: 'Del sistema',
+      loadedEvents: 'Eventos cargados',
+      severe: 'Altos o críticos',
+      minor: 'Bajos o medios',
+    },
+    columns: {
+      action: 'Acción',
+      when: 'Cuándo',
+      actor: 'Quién',
+      object: 'Objeto',
+      event: 'Evento',
+      severity: 'Gravedad',
+    },
     from: 'Desde',
     to: 'Hasta',
     action: 'Acción',
@@ -1774,6 +1820,14 @@ export const strings = {
     loading: 'Cargando dispositivos...',
     empty: 'Aún no hay dispositivos registrados.',
     register: 'Registrar dispositivo',
+    lead: 'Sensores, motores y puertas del acueducto: su estado, su último mensaje y su clave.',
+    tilesLabel: 'Resumen de dispositivos',
+    tiles: {
+      total: 'Dispositivos',
+      active: 'Activos',
+      suspended: 'Suspendidos',
+      retired: 'Retirados',
+    },
     loadMore: 'Ver más',
     offlineReadOnly:
       'Sin conexión: solo puedes ver la lista. Conéctate para cambiar un dispositivo.',

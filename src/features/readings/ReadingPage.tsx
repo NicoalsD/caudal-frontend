@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
+import { Droplets } from 'lucide-react';
 
 import { t } from '../../i18n/t';
 import { useTanks } from '../../state/hooks/useTanks';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Chip } from '../../ui/primitives/Chip';
 import { cn } from '../../ui/styles/cn';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ReadingForm } from './ReadingForm';
@@ -35,7 +37,7 @@ export function ReadingPage(): JSX.Element {
       ) : (
         <>
           {active.length > 1 ? (
-            <label>
+            <label className={cn(styles.tankLine)}>
               {t('readings.tankLabel')}{' '}
               <select
                 className={cn(styles.select)}
@@ -52,7 +54,11 @@ export function ReadingPage(): JSX.Element {
               </select>
             </label>
           ) : (
-            <p>{t('readings.tankLine', { name: tank.name })}</p>
+            <p className={cn(styles.tankLine)}>
+              <Chip tone="aqua" icon={<Droplets aria-hidden="true" />}>
+                {t('readings.tankLine', { name: tank.name })}
+              </Chip>
+            </p>
           )}
           <ReadingForm key={tank.id} tank={tank} />
         </>

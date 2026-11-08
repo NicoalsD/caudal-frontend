@@ -1,7 +1,6 @@
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { JSX, ReactNode, RefObject } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { TriangleAlert } from 'lucide-react';
 
 import type { OutboxItemSummary } from '../../core/commands/summarizeOutbox';
 import type { RejectionDetails } from '../../core/commands/OutboxRecord';
@@ -26,6 +25,8 @@ import { useTanks } from '../../state/hooks/useTanks';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
+import { Card } from '../../ui/cards/Card';
+import { Badge } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
 import { Dialog } from '../../ui/primitives/Dialog';
 import { formResolver } from '../../ui/primitives/formResolver';
@@ -36,8 +37,6 @@ import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
 import { gaugeDecimalRule, resolveGauge } from './gaugeRule';
 import { useDiscardRejectedReading, useResendRejectedReading } from './readingQueries';
-
-const ICON_SIZE = 20;
 
 /**
  * The plain-language text of a refusal: the server code is mapped in es.ts (errors.api). The gauge
@@ -80,16 +79,23 @@ export function ReadingIssueCard({ item }: ReadingIssueCardProps): JSX.Element {
       ? t('readings.review.unknownDate')
       : t('readings.review.observedAt', { date: formatDateTime(item.observedAt) });
   return (
-    <article className={cn(styles.issue)} aria-labelledby={headingId}>
-      <h3 id={headingId} className={cn(styles.issueTitle)}>
-        {dateText}
-      </h3>
-      <p className={cn(styles.issueStatus)}>
-        <TriangleAlert aria-hidden="true" size={ICON_SIZE} />
-        <span>{t('readings.review.needsReview')}</span>
-      </p>
+    <Card
+      variant="tinted"
+      tint="coral"
+      as="article"
+      className={cn(styles.item)}
+      aria-labelledby={headingId}
+    >
+      <div className={cn(styles.itemHead)}>
+        <h3 id={headingId} className={cn(styles.issueTitle)}>
+          {dateText}
+        </h3>
+        <Badge tone="error">{t('readings.review.needsReview')}</Badge>
+      </div>
       {item.gaugeValue === null ? null : (
-        <p>{t('pending.value', { value: formatDecimal(item.gaugeValue) })}</p>
+        <p className={cn(styles.itemValue)}>
+          {t('pending.value', { value: formatDecimal(item.gaugeValue) })}
+        </p>
       )}
       <p>{refusalMessage(item.lastErrorCode ?? '', item.lastErrorDetails ?? {}, gauge)}</p>
       <div className={cn(styles.actions)}>
@@ -107,7 +113,7 @@ export function ReadingIssueCard({ item }: ReadingIssueCardProps): JSX.Element {
           trigger={<Button>{t('readings.review.discard')}</Button>}
         />
       </div>
-    </article>
+    </Card>
   );
 }
 
