@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { JSX } from 'react';
 import {
   Area,
@@ -28,6 +29,7 @@ const MEDIAN_STROKE_WIDTH = 3;
 const EDGE_STROKE_WIDTH = 1;
 const BAND_FILL_OPACITY = 0.6;
 const MARKER_RADIUS = 3;
+const ACTIVE_RADIUS = 6;
 const AXIS_TICK = { fontSize: 14 } as const;
 const AXIS_WIDTH = 48;
 const CHART_MARGIN = { top: 8, right: 16, bottom: 8, left: 0 } as const;
@@ -72,6 +74,43 @@ function Swatch({ className }: { readonly className: string }): JSX.Element {
   return <span aria-hidden="true" className={cn(styles.swatch, className)} />;
 }
 
+interface PillPayload {
+  readonly payload?: ForecastRow;
+}
+
+/** Dark pill over the hovered day: the level read, or the likely level with its range. */
+function LevelPill({
+  active,
+  payload,
+  label,
+}: {
+  readonly active?: boolean | undefined;
+  readonly payload?: readonly PillPayload[] | undefined;
+  readonly label?: string | number | undefined;
+}): JSX.Element | null {
+  const row = payload?.find((item) => item.payload !== undefined)?.payload;
+  if (active !== true || row === undefined) {
+    return null;
+  }
+  return (
+    <div className={cn(styles.pill)}>
+      {row.observed === undefined ? null : (
+        <strong>{t('forecast.pillRead', { level: formatLevel(row.observed) })}</strong>
+      )}
+      {row.p50 === undefined || row.p10 === undefined || row.p90 === undefined ? null : (
+        <strong>
+          {t('forecast.pillEstimate', {
+            median: formatLevel(row.p50),
+            low: formatLevel(row.p10),
+            high: formatLevel(row.p90),
+          })}
+        </strong>
+      )}
+      <span>{formatDayKey(String(label ?? row.dayKey))}</span>
+    </div>
+  );
+}
+
 /**
  * The level read in the last days (a line), the expected level per day (p50) with its likely range
  * (p10 to p90), the reserve and the band limits over the tank's gauge. The same numbers are in a
@@ -87,18 +126,31 @@ export function ForecastChart({
 }: ForecastChartProps): JSX.Element {
   const source = forecastSourceState(isFallback ?? false).presentation;
   const tokens = ACCENT_TOKENS[source.accent];
-  const lineDash = source.lineDashed ? SOURCE_DASH : undefined;
+  const lineDash = SOURCE_DASH;
   const hasForecast = rows.some((row) => row.p50 !== undefined);
+  const gradientId = useId();
   return (
     <div className={cn(styles.chartBlock)}>
       <div className={cn(styles.chartWrap)} role="img" aria-label={t('forecast.chartLabel')}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={rows.map((row) => ({ ...row }))} margin={CHART_MARGIN}>
-            <CartesianGrid stroke="var(--color-border-subtle)" strokeDasharray="3 3" />
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" className={cn(styles.stopTop)} />
+                <stop offset="100%" className={cn(styles.stopBottom)} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              vertical={false}
+              className={cn(styles.chartGrid)}
+              strokeDasharray="3 6"
+            />
             <XAxis
               dataKey="dayKey"
               tickFormatter={(value: string) => formatDayKey(value)}
-              stroke="var(--color-text-secondary)"
+              tickLine={false}
+              axisLine={false}
+              className={cn(styles.axis)}
               tick={AXIS_TICK}
               interval="preserveStartEnd"
               minTickGap={MIN_TICK_GAP}
@@ -108,26 +160,25 @@ export function ForecastChart({
               ticks={wholeMeters(tank.gaugeMin, tank.gaugeMax)}
               tick={AXIS_TICK}
               tickFormatter={(value: number) => formatLevel(value)}
-              stroke="var(--color-text-secondary)"
+              tickLine={false}
+              axisLine={false}
+              className={cn(styles.axis)}
               width={AXIS_WIDTH}
             />
             <Tooltip
-              labelFormatter={(value) => formatDayKey(String(value))}
-              formatter={(value) =>
-                Array.isArray(value)
-                  ? `${formatLevel(Number(value[0]))} - ${formatLevel(Number(value[1]))}`
-                  : formatLevel(Number(value))
-              }
-              contentStyle={{
-                background: 'var(--color-raised)',
-                border: '1px solid var(--color-border-strong)',
-                color: 'var(--color-text-primary)',
-              }}
+              cursor={{ className: styles.cursor ?? '' }}
+              content={(props) => (
+                <LevelPill
+                  active={props.active}
+                  payload={props.payload as readonly PillPayload[] | undefined}
+                  label={props.label}
+                />
+              )}
             />
             <Area
               dataKey="observed"
               stroke="none"
-              fill="var(--color-water-300)"
+              fill={`url(#${gradientId})`}
               fillOpacity={1}
               connectNulls
               legendType="none"
@@ -214,10 +265,11 @@ export function ForecastChart({
             <Line
               dataKey="observed"
               name={t('forecast.observed')}
-              stroke="var(--color-text-primary)"
+              stroke="var(--chart-line)"
               strokeWidth={MEDIAN_STROKE_WIDTH}
               connectNulls
-              dot={{ r: MARKER_RADIUS, fill: 'var(--color-text-primary)' }}
+              dot={false}
+              activeDot={{ r: ACTIVE_RADIUS, className: styles.activeDot ?? '' }}
               isAnimationActive={false}
             />
           </ComposedChart>

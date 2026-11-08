@@ -1,17 +1,19 @@
+/* Shared by the tank screen (/tanque) and the Board's panorama: tokens only. */
 .stack {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  min-width: 0;
 }
 
-.card {
+.head {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--color-raised);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-surface);
+  gap: var(--space-2);
+}
+
+.head h1 {
+  margin: 0;
 }
 
 .picker {
@@ -21,14 +23,19 @@
 }
 
 .picker select {
-  min-height: 48px;
+  min-height: var(--target-min);
   font: inherit;
 }
 
-.trend {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
 }
 
 .icon {
@@ -38,64 +45,84 @@
 }
 
 .muted {
+  margin: 0;
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
 }
 
-.summary {
-  margin: 0;
-  padding-inline-start: var(--space-5);
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The tank screen: hero tank at the left, tiles and chart at the right. */
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.tankCard {
+  min-width: 0;
+}
+
+.tankColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-4);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .overview {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+  }
+
+  .tankColumn {
+    position: sticky;
+    inset-block-start: var(--space-4);
+  }
+}
+
+/* What the level means, how it moves and when it was read. */
+.facts {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.chartWrap {
-  width: 100%;
-  height: 18rem;
+.facts p {
+  margin: 0;
 }
 
-.pointsTable {
-  width: 100%;
-  border-collapse: collapse;
+.meaning {
+  font-weight: var(--font-weight-bold);
 }
 
-.pointsTable th,
-.pointsTable td {
-  padding: var(--space-2) var(--space-3);
-  text-align: start;
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.pointsTable th {
-  font-size: var(--font-size-small);
-  color: var(--color-text-secondary);
-}
-
-.swatchMedian.swatchEstimate {
-  border-top-color: var(--color-ochre-700);
-  border-top-style: dashed;
-}
-
-.swatchRange.swatchEstimate {
-  background: var(--color-ochre-100);
-  outline: 1px dashed var(--color-ochre-700);
-}
-
-.notice {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
-  border: 2px solid var(--color-water-700);
-  background: var(--color-water-100);
-}
-
-.noticeEstimate {
-  border-color: var(--color-ochre-700);
-  background: var(--color-ochre-100);
-}
-
-.noticeEstimate strong {
-  color: var(--color-ochre-800);
+.trendLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .stale {
@@ -103,9 +130,8 @@
   gap: var(--space-3);
   align-items: flex-start;
   padding: var(--space-3) var(--space-4);
-  background: var(--color-ochre-100);
+  background: var(--color-tint-sand);
   color: var(--color-text-primary);
-  border: 2px solid var(--color-ochre-700);
   border-radius: var(--radius-control);
 }
 
@@ -117,25 +143,32 @@
   margin: 0;
 }
 
-.anomalyList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-soft);
 }
 
-.anomaly {
+.notice p {
+  margin: 0;
+}
+
+.noticeEstimate {
+  background: var(--color-tint-sand);
+}
+
+.noticeEstimate strong {
+  color: var(--color-ochre-800);
+}
+
+.summary {
+  margin: 0;
+  padding-inline-start: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding-block-end: var(--space-3);
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.anomaly p {
-  margin: 0;
+  font-size: var(--font-size-small);
 }
 
 .runAction {
@@ -152,48 +185,71 @@
 }
 
 .actions > * {
-  min-height: 48px;
+  min-height: var(--target-min);
 }
 
-.facts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.facts p {
-  margin: 0;
-}
-
-.meaning {
-  font-weight: var(--font-weight-bold);
-}
-
-.trendLine {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.gaugeSlot {
-  display: flex;
-  flex-direction: column;
-}
-
-.overview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.tankCard {
-  min-width: 0;
-}
-
+/* The chart. */
 .chartBlock {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.chartWrap {
+  width: 100%;
+  height: 20rem;
+}
+
+.chartWrap text {
+  fill: var(--color-text-secondary);
+}
+
+.chartGrid line {
+  stroke: var(--chart-grid);
+}
+
+.axis text {
+  fill: var(--color-text-secondary);
+}
+
+.stopTop {
+  stop-color: var(--color-brand-500);
+  stop-opacity: 0.45;
+}
+
+.stopBottom {
+  stop-color: var(--color-brand-500);
+  stop-opacity: 0.03;
+}
+
+.cursor {
+  stroke: var(--color-border-strong);
+  stroke-dasharray: 3 4;
+}
+
+.activeDot {
+  fill: var(--color-water-700);
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+}
+
+.pill {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-inverse-bg);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-inverse-fg);
+  font-size: var(--font-size-small);
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pill span {
+  font-size: 0.8125rem;
+  opacity: 0.8;
 }
 
 .legend {
@@ -217,16 +273,16 @@
   flex: none;
   width: 1.5rem;
   height: 0;
-  border-top: 3px solid var(--color-text-primary);
+  border-top: 3px solid var(--chart-line);
 }
 
 .swatchRead {
-  border-top-color: var(--color-text-primary);
+  border-top-color: var(--chart-line);
 }
 
 .swatchMedian {
   border-top-color: var(--color-water-700);
-  border-top-style: solid;
+  border-top-style: dashed;
 }
 
 .swatchRange {
@@ -246,6 +302,15 @@
   border-top-style: dashed;
 }
 
+.swatchMedian.swatchEstimate {
+  border-top-color: var(--color-ochre-700);
+}
+
+.swatchRange.swatchEstimate {
+  background: var(--color-ochre-100);
+  outline: 1px dashed var(--color-ochre-700);
+}
+
 .numbers summary {
   min-height: var(--target-min);
   display: flex;
@@ -255,12 +320,31 @@
   font-weight: var(--font-weight-bold);
 }
 
-.review {
-  gap: var(--space-3);
+.pointsTable {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.reviewTitle {
+.pointsTable th,
+.pointsTable td {
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.pointsTable th {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.empty {
   margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Anomalies to review. */
+.review {
+  gap: var(--space-3);
 }
 
 .reviewColumns {
@@ -283,52 +367,29 @@
   margin: 0;
 }
 
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+.anomalyList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anomaly {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-control);
+}
+
+.anomaly p {
+  margin: 0;
 }
 
 @media (min-width: 64rem) {
-  .stack {
-    max-width: none;
-  }
-
-  .overview {
-    display: grid;
-    grid-template-columns: 5fr 7fr;
-    grid-template-areas:
-      'tank facts'
-      'tank chart';
-    grid-template-rows: auto 1fr;
-    align-items: stretch;
-    gap: var(--space-5);
-  }
-
-  /* The tank keeps its size and stays in view while the longer column beside it scrolls. */
-  .tankCard {
-    grid-area: tank;
-    position: sticky;
-    inset-block-start: var(--space-4);
-    align-self: start;
-  }
-
-  .factsCard {
-    grid-area: facts;
-  }
-
-  .overview > section:last-child {
-    grid-area: chart;
-  }
-
-  .gaugeSlot {
-    flex: 1;
-    min-height: 30rem;
-  }
-
   .chartWrap {
     height: 22rem;
   }
@@ -346,148 +407,5 @@
 
   .anomaly > p:first-child {
     flex: 1 1 14rem;
-  }
-}
-
-.head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.head h1 {
-  margin: 0;
-}
-
-.console {
-  display: block;
-}
-
-.rail {
-  display: none;
-}
-
-.center {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  min-width: 0;
-}
-
-@media (min-width: 64rem) {
-  .head {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-5);
-  }
-
-  .head > :not(h1):not(title) {
-    flex: 1;
-    max-width: 54rem;
-  }
-
-  .stackConsole {
-    gap: var(--space-3);
-  }
-
-  .console {
-    display: grid;
-    grid-template-columns: 17rem minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-4);
-  }
-
-  .rail {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-
-  .center {
-    gap: var(--space-4);
-  }
-
-  .overviewConsole {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
-  }
-
-  .overviewConsole .stale {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-small);
-  }
-
-  .overviewConsole .notice {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-small);
-  }
-
-  .overviewConsole .chartWrap {
-    height: 17rem;
-  }
-
-  /* In the console the slider walks the days: only the farthest one is spelled out. */
-  .overviewConsole .summary {
-    padding: 0;
-    list-style: none;
-    font-size: var(--font-size-small);
-  }
-
-  .overviewConsole .summary li:not(:last-child) {
-    display: none;
-  }
-
-  .overviewConsole .factsCard {
-    padding-block: var(--space-3);
-    gap: var(--space-2);
-  }
-
-  .overviewConsole .factsCard h2 {
-    font-size: var(--font-size-small);
-  }
-}
-
-/*
- * Under the console: one dense grid that the anomalies, today's shifts and the overview cards
- * share, so no row leaves a hole. One column on a phone, two on a laptop, three on a wide screen.
- */
-.lower {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-auto-flow: dense;
-  gap: var(--space-4);
-  align-items: stretch;
-}
-
-.lower > :empty {
-  display: none;
-}
-
-@media (min-width: 64rem) {
-  .lower {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .lowerFull,
-  .lowerWide {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (min-width: 90rem) {
-  .lower {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 64rem) {
-  .rail {
-    align-self: stretch;
-  }
-
-  /* The rail is shorter than the tank: its last panel takes the rest of the height. */
-  .rail > :last-child {
-    flex: 1;
   }
 }

@@ -13,47 +13,28 @@ import { AnomalyList } from './AnomalyList';
 import { TankOverview } from './TankOverview';
 import styles from './TankStatus.module.css';
 
-interface ReviewSlot {
-  readonly extra: ReactNode;
-  readonly extraHasItems: boolean;
-}
-
-/** What a slot of the Board console receives once the tank and its status are known. */
+/** What the Board's panel receives once the tank and its status are known. */
 export interface ConsoleContext {
   readonly tank: TankView;
   readonly status: TankStatusView;
 }
 
-/** The Board's console: a rail of panels beside the tank, and more rows under it. */
-export interface ConsoleSlots {
-  /** Full width, above the rail and the tank (the KPI row). */
-  readonly top?: (context: ConsoleContext) => ReactNode;
-  /** Cells of the dense grid under the console, one column on a phone (the overview cards). */
-  readonly below?: (context: ConsoleContext) => ReactNode;
-  readonly rail: (context: ConsoleContext) => ReactNode;
-  readonly after: (context: ConsoleContext) => ReactNode;
-}
-
 interface TankStatusPageProps {
-  readonly console?: ConsoleSlots;
+  /** Draws the body once the tank and its status are known (the Board's panel); default: the tank screen. */
+  readonly panel?: (context: ConsoleContext) => ReactNode;
   /** The h1. The Board passes today's date; everyone else keeps the screen name. */
   readonly title?: string;
   /** Shown right under the h1 (the Board's day guide). */
   readonly guide?: ReactNode;
-  /** More to review next to the anomalies (the Board's open damage reports). */
-  readonly reviewExtra?: ReactNode;
-  readonly reviewExtraHasItems?: boolean;
 }
 
 /** The status of one tank, with its own loading and error states. */
 function TankStatusSection({
   tank,
-  review,
-  console: consoleSlots,
+  panel,
 }: {
   readonly tank: TankView;
-  readonly review: ReviewSlot;
-  readonly console: ConsoleSlots | undefined;
+  readonly panel: TankStatusPageProps['panel'];
 }): JSX.Element {
   const status = useTankStatus(tank.id);
   if (status.isPending) {
@@ -68,43 +49,19 @@ function TankStatusSection({
       />
     );
   }
-  if (consoleSlots !== undefined) {
-    const context = { tank, status: status.data };
-    return (
-      <>
-        {consoleSlots.top?.(context)}
-        <div className={cn(styles.console)}>
-          <aside className={cn(styles.rail)}>{consoleSlots.rail(context)}</aside>
-          <div className={cn(styles.center)}>
-            <TankOverview tank={tank} status={status.data} variant="console" />
-          </div>
-        </div>
-        <div className={cn(styles.lower)}>
-          <div className={cn(styles.lowerFull)}>
-            <AnomalyList hideWhenEmpty />
-          </div>
-          <div className={cn(styles.lowerWide)}>{consoleSlots.after(context)}</div>
-          {consoleSlots.below?.(context)}
-        </div>
-      </>
-    );
+  if (panel !== undefined) {
+    return <>{panel({ tank, status: status.data })}</>;
   }
   return (
     <>
       <TankOverview tank={tank} status={status.data} />
-      <AnomalyList extra={review.extra} extraHasItems={review.extraHasItems} />
+      <AnomalyList />
     </>
   );
 }
 
 /** Screen S12 (status block): the active tank, or a picker when the aqueduct has several. */
-export function TankStatusPage({
-  console: consoleSlots,
-  title,
-  guide,
-  reviewExtra,
-  reviewExtraHasItems = false,
-}: TankStatusPageProps = {}): JSX.Element {
+export function TankStatusPage({ panel, title, guide }: TankStatusPageProps = {}): JSX.Element {
   const tanks = useTanks();
   const pickerId = useId();
   const [pickedId, setPickedId] = useState<string | null>(null);
@@ -144,19 +101,14 @@ export function TankStatusPage({
               </select>
             </div>
           ) : null}
-          <TankStatusSection
-            key={selected.id}
-            tank={selected}
-            review={{ extra: reviewExtra, extraHasItems: reviewExtraHasItems }}
-            console={consoleSlots}
-          />
+          <TankStatusSection key={selected.id} tank={selected} panel={panel} />
         </>
       );
     }
   }
 
   return (
-    <div className={cn(styles.stack, consoleSlots !== undefined && styles.stackConsole)}>
+    <div className={cn(styles.stack)}>
       <div className={cn(styles.head)}>
         <ScreenTitle>{title ?? t('screens.tankStatus')}</ScreenTitle>
         {guide}

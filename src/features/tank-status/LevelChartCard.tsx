@@ -1,20 +1,21 @@
 import type { JSX } from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
 
 import { DomainError } from '../../core/errors/DomainError';
 import { formatDecimal } from '../../core/format/decimal';
 import { formatDayKey } from '../../core/format/time';
 import { t } from '../../i18n/t';
-import type { ForecastView, RuleSetView, TankView } from '../../services/api/views';
 import { usePermission } from '../../state/hooks/usePermission';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
+import { ChartCard } from '../../ui/data/ChartCard';
 import { cn } from '../../ui/styles/cn';
 import { ForecastChart } from './ForecastChart';
-import type { ForecastRow } from './forecastRows';
 import { ForecastRunAction } from './ForecastRunAction';
 import { ForecastSourceNotice } from './ForecastSourceNotice';
+import { LevelTimeline } from './LevelTimeline';
+import { TankFacts } from './TankFacts';
 import styles from './TankStatus.module.css';
+import type { TankDay } from './useTankDay';
 
 const NOT_FOUND_CODE = 'NOT_FOUND';
 const LEVEL_DIGITS = 2;
@@ -24,28 +25,29 @@ const SUMMARY_DAYS = 3;
 /** A line needs two days to be a line. */
 const MIN_CHART_ROWS = 2;
 
-interface ForecastSectionProps {
-  readonly tank: TankView;
-  readonly forecast: UseQueryResult<ForecastView>;
-  readonly historyFailed: boolean;
-  readonly rows: readonly ForecastRow[];
-  readonly rules: RuleSetView | undefined;
-  readonly selectedDayKey: string | null;
+interface LevelChartCardProps {
+  readonly day: TankDay;
+  /** The slider of days. The tank screen keeps it under the tank, the Board's under the chart. */
+  readonly withTimeline?: boolean;
+  /** The Board never registers readings: its facts ask the plumber. */
+  readonly askPlumber?: boolean;
+  /** Shows the meaning, trend and reading age under the chart. */
+  readonly withFacts?: boolean;
 }
 
 /**
- * How the level is coming: the history and the forecast in one chart, the forecast in plain
- * sentences and, for whoever has FORECAST_RUN, the button that asks the AI for a new run.
+ * How the level is coming, as the hero card of the screen: the history and the forecast in one
+ * chart with its pill tooltip, the source of the forecast, the plain sentences, the slider and,
+ * for whoever has FORECAST_RUN, the button that asks the AI for a new run.
  */
-export function ForecastSection({
-  tank,
-  forecast,
-  historyFailed,
-  rows,
-  rules,
-  selectedDayKey,
-}: ForecastSectionProps): JSX.Element {
+export function LevelChartCard({
+  day,
+  withTimeline = false,
+  askPlumber = false,
+  withFacts = true,
+}: LevelChartCardProps): JSX.Element {
   const canRun = usePermission(RUN_PERMISSION);
+  const { forecast, rows, rules, tank, status } = day;
   const data = forecast.data;
   const hasPoints = data !== undefined && data.points.length > 0;
   const missing =
@@ -66,16 +68,28 @@ export function ForecastSection({
     );
   } else if (!hasPoints) {
     notice = (
-      <p>{rows.length >= MIN_CHART_ROWS ? t('forecast.noForecastYet') : t('forecast.none')}</p>
+      <p className={cn(styles.empty)}>
+        {rows.length >= MIN_CHART_ROWS ? t('forecast.noForecastYet') : t('forecast.none')}
+      </p>
     );
   }
+  const level = status.level?.value.value ?? null;
 
   return (
-    <section className={cn(styles.card)} aria-labelledby="forecast-title">
-      <h2 id="forecast-title">{t('forecast.title')}</h2>
+    <ChartCard
+      title={t('forecast.title')}
+      value={
+        level === null
+          ? t('board.kpis.noLevel')
+          : t('tankStatus.levelValue', { value: formatDecimal(level, LEVEL_DIGITS) })
+      }
+      caption={t('tankStatus.stageTitle')}
+    >
       {notice}
       {hasPoints ? <ForecastSourceNotice forecast={data} /> : null}
-      {historyFailed ? <p className={cn(styles.muted)}>{t('tankStatus.historyError')}</p> : null}
+      {day.historyFailed ? (
+        <p className={cn(styles.muted)}>{t('tankStatus.historyError')}</p>
+      ) : null}
       {rows.length >= MIN_CHART_ROWS ? (
         <ForecastChart
           tank={tank}
@@ -83,7 +97,16 @@ export function ForecastSection({
           isFallback={hasPoints ? data.isFallback : null}
           bands={rules?.bands ?? []}
           reserveLevel={rules?.reserveLevel ?? null}
-          selectedDayKey={selectedDayKey}
+          selectedDayKey={day.selectedDayKey}
+        />
+      ) : null}
+      {withTimeline ? (
+        <LevelTimeline
+          rows={rows}
+          index={day.index}
+          defaultIndex={day.defaultIndex}
+          todayIndex={day.todayIndex}
+          onChange={day.onPick}
         />
       ) : null}
       {hasPoints ? (
@@ -100,7 +123,8 @@ export function ForecastSection({
           ))}
         </ul>
       ) : null}
+      {withFacts ? <TankFacts status={status} rules={rules} askPlumber={askPlumber} /> : null}
       {canRun ? <ForecastRunAction tankId={tank.id} /> : null}
-    </section>
+    </ChartCard>
   );
 }
