@@ -61,6 +61,8 @@ export interface AqueductSceneOptions {
   readonly colors: SceneColors;
   /** Without motion nothing animates: each change is drawn once, at once. */
   readonly animate: boolean;
+  /** The small look-only scene: the camera starts closer. */
+  readonly compact?: boolean;
   readonly onSelect: (valveId: string) => void;
   readonly onHover: (valveId: string | null) => void;
 }

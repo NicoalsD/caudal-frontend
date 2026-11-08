@@ -87,6 +87,7 @@ export function AqueductCanvas({
           labelHost: element,
           colors: readColors(element),
           animate: !matchesMedia(REDUCED_MOTION_QUERY),
+          compact: readOnly,
           onSelect: (id) => {
             select.current?.(id);
           },
@@ -125,7 +126,7 @@ export function AqueductCanvas({
       created?.dispose();
       setScene(null);
     };
-  }, []);
+  }, [readOnly]);
 
   useEffect(() => {
     scene?.update(frame);

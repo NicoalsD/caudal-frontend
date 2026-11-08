@@ -63,9 +63,18 @@ const PIPE_END = 3.8;
 const VALVE_DISTANCE = 2.2;
 const DROP_LENGTH = PIPE_HEIGHT + 0.02;
 const HOUSE_DISTANCE = 4.7;
-const MAX_HALF_SPAN = (110 * Math.PI) / 180;
-const SPAN_PER_VALVE = (28 * Math.PI) / 180;
+const MAX_HALF_SPAN = (100 * Math.PI) / 180;
+const SPAN_PER_VALVE = (40 * Math.PI) / 180;
 const MIN_HALF_SPAN = (24 * Math.PI) / 180;
+/* Neighbour labels alternate between two heights and distances so they never sit on each other. */
+const LABEL_LOW = 0.5;
+const LABEL_HIGH = 2.4;
+const LABEL_NEAR = 0.15;
+const LABEL_FAR = 1.3;
+/* The small scene (look only) comes closer so the tank and the valves fill the card. */
+const COMPACT_DISTANCE = 1.15;
+const COMPACT_TARGET_Y = 1.9;
+const WIDE_ASPECT = 1.5;
 
 /* Particles. */
 const OUTLET_PARTICLES = 46;
@@ -520,7 +529,7 @@ class ValveRig {
     );
 
     this.label = makeLabel('valve');
-    this.label.object.position.set(0, 1.05, PIPE_END + 0.15);
+    this.setSlot(0);
 
     this.root.add(
       pipe,
@@ -535,6 +544,16 @@ class ValveRig {
       this.label.object,
     );
     this.apply(data, 0);
+  }
+
+  /** Neighbouring valves alternate the height and distance of their label. */
+  setSlot(slot: number): void {
+    const high = slot % 2 === 1;
+    this.label.object.position.set(
+      0,
+      high ? LABEL_HIGH : LABEL_LOW,
+      PIPE_END + (high ? LABEL_FAR : LABEL_NEAR),
+    );
   }
 
   setPalette(palette: Palette, waterLight: Color): void {
@@ -559,7 +578,10 @@ class ValveRig {
     this.stream.targetSpeed = (next.flow * FULL_FLOW_SPEED) / (PIPE_END - PIPE_START + DROP_LENGTH);
     this.label.element.dataset.state = next.state.toLowerCase();
     this.label.element.dataset.command = next.command?.toLowerCase() ?? '';
-    setLines(this.label.element, [next.title, next.stateText, next.flowText]);
+    setLines(
+      this.label.element,
+      [next.title, next.stateText, next.flowText].filter((line) => line !== ''),
+    );
     if (this.first) {
       this.handleAngle = this.targetHandle();
       this.rise = this.targetRise();
@@ -636,7 +658,7 @@ class ValveRig {
 
 /** Throws when the browser cannot draw WebGL; the caller keeps the lists and says so. */
 export function createAqueductScene(options: AqueductSceneOptions): AqueductScene {
-  const { canvas, labelHost, animate } = options;
+  const { canvas, labelHost, animate, compact = false } = options;
   let palette = paletteOf(options.colors);
   const waterLight = new Color(options.colors.waterLight);
 
@@ -662,7 +684,7 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
   scene.add(sun);
 
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 1.3, 0.9);
+  controls.target.set(0, compact ? COMPACT_TARGET_Y : 1.3, 0.9);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 4;
@@ -933,6 +955,7 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
       }
       const t = count === 1 ? 0 : (index / (count - 1)) * 2 - 1;
       rig.root.rotation.y = t * half;
+      rig.setSlot(index);
     });
   };
 
@@ -1158,7 +1181,12 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
       camera.aspect = width / height;
       if (firstSize) {
         // A narrow screen starts farther away, so the whole scene fits.
-        const scale = camera.aspect < 1.5 ? Math.min(2.4, 1.5 / camera.aspect) : 1;
+        const scale =
+          camera.aspect < WIDE_ASPECT
+            ? Math.min(2.4, WIDE_ASPECT / camera.aspect)
+            : compact
+              ? COMPACT_DISTANCE
+              : 1;
         camera.position.sub(controls.target).multiplyScalar(scale).add(controls.target);
         firstSize = false;
       }

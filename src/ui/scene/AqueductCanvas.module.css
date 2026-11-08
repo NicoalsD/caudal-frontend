@@ -47,6 +47,11 @@
   transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
+.host[data-readonly='true'] [data-scene-label] {
+  padding: 0.15rem 0.375rem;
+  font-size: 0.8125rem;
+}
+
 .host [data-scene-label] > span:first-child {
   font-weight: var(--font-weight-bold);
 }

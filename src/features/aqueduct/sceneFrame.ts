@@ -41,8 +41,8 @@ export function toSceneFrame(aqueduct: LiveAqueduct): SceneFrame {
       command: valve.command?.status ?? null,
       flow: valve.flow,
       title: t('valves.sector', { sector: valve.sectorName }),
-      stateText: valveStateText(valve),
-      flowText: valveFlowText(valve),
+      stateText: valve.state === 'UNKNOWN' ? t('scene.stateUnknown') : valveStateText(valve),
+      flowText: valve.state === 'UNKNOWN' ? '' : valveFlowText(valve),
     })),
     parts: {
       intake: t('scene.parts.intake'),

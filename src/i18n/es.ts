@@ -813,6 +813,7 @@ export const strings = {
     },
     flow: 'Caudal {percent} %',
     flowNone: 'Sin caudal',
+    stateUnknown: 'Estado desconocido',
     liveLost:
       'No pudimos leer el estado en vivo de las llaves. Se muestran como "sin dato" hasta que vuelva.',
   },
