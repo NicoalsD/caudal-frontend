@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 import { formatDecimal } from '../../core/format/decimal';
 import { t } from '../../i18n/t';
 import type { RuleSetView } from '../../services/api/views';
+import { Card } from '../../ui/cards/Card';
 import { cn } from '../../ui/styles/cn';
 import { useSectors } from '../../state/hooks/useSectors';
 import { buildSectorRows } from '../../core/rules/sectorOrder';
@@ -28,8 +29,12 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
   );
 
   return (
-    <div className={cn(styles.stack)}>
-      <section className={cn(styles.section)} aria-labelledby="rules-bands-title">
+    <div className={cn(styles.overview)}>
+      <Card
+        as="section"
+        className={cn(styles.section, styles.wide)}
+        aria-labelledby="rules-bands-title"
+      >
         <h2 id="rules-bands-title">{t('rules.bandsTitle')}</h2>
         <p>
           {t('rules.gaugeRange', {
@@ -65,38 +70,50 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
           </table>
         </TableScroll>
         <p className={cn(styles.note)}>{t('rules.upperBandIncludesMax')}</p>
-      </section>
+      </Card>
 
-      <section className={cn(styles.section)} aria-labelledby="rules-parameters-title">
+      <Card as="section" className={cn(styles.section)} aria-labelledby="rules-parameters-title">
         <h2 id="rules-parameters-title">{t('rules.parametersTitle')}</h2>
-        <dl className={cn(styles.definitions)}>
-          <dt>{t('rules.reserveLevel')}</dt>
-          <dd>{level(rules.reserveLevel)}</dd>
-          <dt>{t('rules.maxDailyServiceHours')}</dt>
-          <dd>{formatDecimal(rules.maxDailyServiceHours, LEVEL_DIGITS)}</dd>
-          <dt>{t('rules.minShiftHours')}</dt>
-          <dd>{formatDecimal(rules.minShiftHours, LEVEL_DIGITS)}</dd>
-          <dt>{t('rules.maxShiftHours')}</dt>
-          <dd>{formatDecimal(rules.maxShiftHours, LEVEL_DIGITS)}</dd>
-          <dt>{t('rules.staleReadingHours')}</dt>
-          <dd>{formatDecimal(rules.staleReadingHours, 0)}</dd>
-          <dt>{t('rules.trendThresholdPerDay')}</dt>
-          <dd>{formatDecimal(rules.trendThresholdPerDay, LEVEL_DIGITS)}</dd>
+        <dl className={cn(styles.tileList)}>
+          <div className={cn(styles.tileRow)}>
+            <dt>{t('rules.reserveLevel')}</dt>
+            <dd>{level(rules.reserveLevel)}</dd>
+          </div>
+          <div className={cn(styles.tileRow)}>
+            <dt>{t('rules.maxDailyServiceHours')}</dt>
+            <dd>{formatDecimal(rules.maxDailyServiceHours, LEVEL_DIGITS)}</dd>
+          </div>
+          <div className={cn(styles.tileRow)}>
+            <dt>{t('rules.minShiftHours')}</dt>
+            <dd>{formatDecimal(rules.minShiftHours, LEVEL_DIGITS)}</dd>
+          </div>
+          <div className={cn(styles.tileRow)}>
+            <dt>{t('rules.maxShiftHours')}</dt>
+            <dd>{formatDecimal(rules.maxShiftHours, LEVEL_DIGITS)}</dd>
+          </div>
+          <div className={cn(styles.tileRow)}>
+            <dt>{t('rules.staleReadingHours')}</dt>
+            <dd>{formatDecimal(rules.staleReadingHours, 0)}</dd>
+          </div>
+          <div className={cn(styles.tileRow)}>
+            <dt>{t('rules.trendThresholdPerDay')}</dt>
+            <dd>{formatDecimal(rules.trendThresholdPerDay, LEVEL_DIGITS)}</dd>
+          </div>
         </dl>
-      </section>
+      </Card>
 
       <SectorsOverview rules={rules} />
 
-      <section className={cn(styles.section)} aria-labelledby="rules-windows-title">
+      <Card as="section" className={cn(styles.section)} aria-labelledby="rules-windows-title">
         <h2 id="rules-windows-title">{t('rules.windowsTitle')}</h2>
         {windows.length === 0 ? (
           <p>{t('rules.noWindows')}</p>
         ) : (
-          <dl className={cn(styles.definitions)}>
+          <dl className={cn(styles.tileList)}>
             {windows.map((window) => (
               <div
                 key={`${String(window.dayOfWeek)}-${window.start}`}
-                className={cn(styles.definitionRow)}
+                className={cn(styles.tileRow)}
               >
                 <dt>{dayLabel(window.dayOfWeek)}</dt>
                 <dd>{windowRangeLabel(window)}</dd>
@@ -104,7 +121,7 @@ export function RuleSetOverview({ rules }: RuleSetOverviewProps): JSX.Element {
             ))}
           </dl>
         )}
-      </section>
+      </Card>
     </div>
   );
 }
@@ -117,7 +134,7 @@ function SectorsOverview({ rules }: RuleSetOverviewProps): JSX.Element {
   const ranks = new Map(rules.sectors.map((setting) => [setting.sectorId, setting.priorityRank]));
 
   return (
-    <section className={cn(styles.section)} aria-labelledby="rules-sectors-title">
+    <Card as="section" className={cn(styles.section)} aria-labelledby="rules-sectors-title">
       <h2 id="rules-sectors-title">{t('rules.sectorsOverviewTitle')}</h2>
       {rows.length === 0 ? (
         <p>{t('rules.noSectors')}</p>
@@ -132,7 +149,7 @@ function SectorsOverview({ rules }: RuleSetOverviewProps): JSX.Element {
               state = t('rules.sectorPriorityRank', { rank: String(rank) });
             }
             return (
-              <li key={row.sectorId}>
+              <li key={row.sectorId} className={cn(styles.sectorRow)}>
                 {names.get(row.sectorId) ?? t('rules.sectorUnknown')}
                 {': '}
                 {state}
@@ -141,6 +158,6 @@ function SectorsOverview({ rules }: RuleSetOverviewProps): JSX.Element {
           })}
         </ol>
       )}
-    </section>
+    </Card>
   );
 }

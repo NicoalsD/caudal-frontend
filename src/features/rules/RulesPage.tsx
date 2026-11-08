@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { History, PenLine } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { DomainError } from '../../core/errors/DomainError';
 import { ROUTE_PATHS } from '../../core/session/routes';
@@ -8,7 +9,11 @@ import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
 import { usePermission } from '../../state/hooks/usePermission';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import { PageHeader } from '../../ui/layout/PageHeader';
+import { Badge } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
+import { LinkButton } from '../../ui/primitives/LinkButton';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { RuleSetOverview } from './RuleSetOverview';
 import styles from './Rules.module.css';
@@ -69,17 +74,24 @@ export function RulesPage(): JSX.Element {
   } else {
     body = (
       <>
-        <p>
-          <span className={cn(styles.status)}>{t('rules.status.active')}</span>{' '}
-          {t('rules.versionLine', { version: String(current.data.version) })}
-          {current.data.validFrom === null
-            ? null
-            : `. ${t('rules.activeSince', { date: current.data.validFrom.text })}`}
-        </p>
+        <PageHeader
+          lead={
+            <>
+              <Badge tone="ok">{t('rules.status.active')}</Badge>{' '}
+              {t('rules.versionLine', { version: String(current.data.version) })}
+              {current.data.validFrom === null
+                ? null
+                : `. ${t('rules.activeSince', { date: current.data.validFrom.text })}`}
+            </>
+          }
+          actions={
+            <LinkButton to={historyPath(current.data.id)} variant="secondary">
+              <History aria-hidden="true" />
+              {t('rules.viewHistory')}
+            </LinkButton>
+          }
+        />
         <RuleSetOverview rules={current.data} />
-        <p>
-          <Link to={historyPath(current.data.id)}>{t('rules.viewHistory')}</Link>
-        </p>
       </>
     );
   }
@@ -92,14 +104,25 @@ export function RulesPage(): JSX.Element {
         <p role="status">{t('rules.activated', { version: String(activatedVersion) })}</p>
       )}
       {body}
-      <section className={cn(styles.section)} aria-labelledby="rules-draft-title">
+      <Card
+        as="section"
+        variant="tinted"
+        tint="cream"
+        className={cn(styles.section)}
+        aria-labelledby="rules-draft-title"
+      >
         <h2 id="rules-draft-title">{t('rules.draftTitle')}</h2>
         {openDraft === null ? (
           <p>{canDraft ? t('rules.noDraft') : t('rules.noDraftReadOnly')}</p>
         ) : (
           <>
             <p>{t('rules.draftOpen', { version: String(openDraft.version) })}</p>
-            <Link to={draftPath(openDraft.id)}>{t('rules.editDraft')}</Link>
+            <div className={cn(styles.actions)}>
+              <LinkButton to={draftPath(openDraft.id)} variant="primary">
+                <PenLine aria-hidden="true" />
+                {t('rules.editDraft')}
+              </LinkButton>
+            </div>
           </>
         )}
         {createDraft.isError ? (
@@ -112,7 +135,7 @@ export function RulesPage(): JSX.Element {
             </Button>
           </div>
         ) : null}
-      </section>
+      </Card>
     </div>
   );
 }
