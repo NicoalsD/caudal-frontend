@@ -21,7 +21,7 @@ test.describe('Escena 3D del fontanero', () => {
     });
     await openOperatorPanel(page);
 
-    await page.getByRole('button', { name: `Mover la llave ${HIGH_VALVE_NAME}` }).click();
+    await page.getByRole('button', { name: `Abrir la llave ${HIGH_VALVE_NAME}` }).click();
     const dialog = page.getByRole('dialog', { name: `Llave ${HIGH_VALVE_NAME}` });
     await expect(dialog).toBeVisible();
     await dialog.getByLabel(strings.valveControl.reasonLabel).fill(REASON);
