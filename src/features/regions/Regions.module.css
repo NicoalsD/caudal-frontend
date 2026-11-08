@@ -1,0 +1,116 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.intro {
+  margin: 0;
+  max-width: 48rem;
+  color: var(--color-text-secondary);
+}
+
+.card,
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+  max-width: 36rem;
+}
+
+.cardTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-h2);
+}
+
+.card .cardTitle {
+  margin: 0;
+}
+
+.tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tree .tree {
+  margin-block-start: var(--space-2);
+  margin-inline-start: var(--space-5);
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--color-border-subtle);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.inactive {
+  opacity: 0.7;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+}
+
+@media (min-width: 64rem) {
+  .row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-weight: var(--font-weight-bold);
+}
+
+.kind,
+.meta {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.rowActions,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.rowActions > *,
+.actions > * {
+  min-height: 48px;
+}
+
+.selectField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.selectField select {
+  min-height: 48px;
+}
