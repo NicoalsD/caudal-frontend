@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -44,6 +44,20 @@ describe('ReadingPage (S02)', () => {
 
     const gauge = await screen.findByRole('textbox', { name: t('readings.gaugeLabel') });
     expect(gauge).toHaveAttribute('inputmode', 'decimal');
+  });
+
+  it('leaves the level empty until the person types or moves the slider', async () => {
+    renderReading();
+
+    const field = await screen.findByRole('textbox', { name: t('readings.gaugeLabel') });
+    const slider = screen.getByRole('slider', { name: t('readings.sliderLabel') });
+    expect(field).toHaveValue('');
+    expect(screen.getByText(t('readings.gaugeNoValue'))).toBeVisible();
+
+    fireEvent.change(slider, { target: { value: '2.5' } });
+
+    expect(field).toHaveValue('2,5');
+    expect(screen.queryByText(t('readings.gaugeNoValue'))).not.toBeInTheDocument();
   });
 
   it('keeps the note and the damage behind a disclosure until the person opens it', async () => {

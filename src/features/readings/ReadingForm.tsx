@@ -5,10 +5,11 @@ import { useForm, useWatch } from 'react-hook-form';
 import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
 import type { DecimalRule } from '../../core/forms/FormSchemaBuilder';
 import { FIELD, readingEntrySchema } from '../../core/forms/formSchemas';
-import { formatDecimal, toInputText } from '../../core/format/decimal';
+import { formatDecimal, parseDecimalInput, toInputText } from '../../core/format/decimal';
 import { toBogotaDateKey } from '../../core/format/time';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { gaugeDecimals } from '../../core/rules/bandCoverage';
+import { TankGauge } from '../../ui/tank/TankGauge';
 import { t } from '../../i18n/t';
 import type { TankView } from '../../services/api/views';
 import { useOfflineServices } from '../../state/hooks/offlineContext';
@@ -29,8 +30,10 @@ import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
 import { useSaveReading, useWaterAppearances } from './readingQueries';
 import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
+import { resolveGauge } from './gaugeRule';
 
 const GAUGE_DISPLAY_DIGITS = 2;
+const NO_BANDS: readonly { code: string; from: number; to: number }[] = [];
 
 interface ReadingFormValues {
   gauge_value: string;
@@ -118,6 +121,7 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
     handleSubmit,
     control,
     reset: resetForm,
+    setValue,
     formState,
   } = useForm<ReadingFormValues, unknown, ReadingFormOutput>({
     resolver: formResolver<ReadingFormValues, ReadingFormOutput>(schema),
@@ -125,6 +129,25 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
     defaultValues: { gauge_value: '', water_appearance_code: '', damage_noticed: false, note: '' },
   });
   const typedNote = useWatch({ control, name: FIELD.note });
+  const typedGauge = useWatch({ control, name: FIELD.gaugeValue });
+  // The number typed in the field is the source of truth; the slider and the gauge only follow it.
+  const typedLevel = parseDecimalInput(typedGauge);
+  const gauge = resolveGauge(ruleSet.data?.gauge, tank);
+  const bands =
+    ruleSet.data?.bands.map((item) => ({
+      code: item.band,
+      from: item.minLevel,
+      to: item.maxLevel,
+    })) ?? NO_BANDS;
+  const reserveLevel = ruleSet.data?.reserveLevel ?? null;
+  const sliderDecimals = gauge === null ? 0 : gaugeDecimals(gauge);
+  /** The slider moves the field, with the same text the person would type. Nothing else writes it. */
+  const moveSlider = (value: number) => {
+    setValue(FIELD.gaugeValue, toInputText(Number(value.toFixed(sliderDecimals))), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
   const { errors, isSubmitting } = formState;
   // The optional fields open on their own when they hold an error, so the error is never hidden.
   const showOptional = optionalOpen || errors.note !== undefined;
@@ -197,19 +220,59 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
     <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
       <FormFields disabled={isSubmitting}>
         {saveFailed ? <FormAlert message={t('readings.serverError')} /> : null}
-        <TextField
-          label={t('readings.gaugeLabel')}
-          hint={t('readings.gaugeHint', {
-            min: formatDecimal(tank.gaugeMin, GAUGE_DISPLAY_DIGITS),
-            max: formatDecimal(tank.gaugeMax, GAUGE_DISPLAY_DIGITS),
-          })}
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder={toInputText(tank.gaugeMin)}
-          error={errors.gauge_value?.message}
-          className={cn(styles.gaugeInput)}
-          {...register(FIELD.gaugeValue)}
-        />
+        <div className={cn(styles.levelRow)}>
+          <div className={cn(styles.levelField)}>
+            <TextField
+              label={t('readings.gaugeLabel')}
+              hint={t('readings.gaugeHint', {
+                min: formatDecimal(tank.gaugeMin, GAUGE_DISPLAY_DIGITS),
+                max: formatDecimal(tank.gaugeMax, GAUGE_DISPLAY_DIGITS),
+              })}
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder={toInputText(tank.gaugeMin)}
+              error={errors.gauge_value?.message}
+              className={cn(styles.gaugeInput)}
+              {...register(FIELD.gaugeValue)}
+            />
+            {gauge === null ? null : (
+              <input
+                type="range"
+                className={cn(styles.levelSlider)}
+                min={gauge.min}
+                max={gauge.max}
+                step={gauge.step}
+                value={typedLevel ?? gauge.min}
+                aria-label={t('readings.sliderLabel')}
+                aria-valuetext={
+                  typedLevel === null
+                    ? t('readings.gaugeNoValue')
+                    : t('readings.gaugeValueText', {
+                        value: formatDecimal(typedLevel, sliderDecimals),
+                      })
+                }
+                onChange={(event) => {
+                  moveSlider(Number(event.currentTarget.value));
+                }}
+              />
+            )}
+          </div>
+          {gauge === null ? null : (
+            <div className={cn(styles.levelPreview)}>
+              {typedLevel === null ? (
+                <p className={cn(styles.noValue)}>{t('readings.gaugeNoValue')}</p>
+              ) : (
+                <TankGauge
+                  level={typedLevel}
+                  gaugeMin={gauge.min}
+                  gaugeMax={gauge.max}
+                  bands={bands}
+                  reserveLevel={reserveLevel}
+                />
+              )}
+            </div>
+          )}
+        </div>
         {appearances.isError ? (
           <FormAlert message={t('readings.appearanceLoadError')} />
         ) : (
