@@ -291,6 +291,53 @@ export class ApiMock {
         },
       };
     }
+    if (method === 'POST' && path === '/autopilot/run') {
+      return { status: OK, body: { items: [] } };
+    }
+    if (method === 'GET' && path === '/reports') {
+      return {
+        status: OK,
+        body: {
+          from: '2026-10-09T05:00:00Z',
+          to: '2026-11-08T05:00:00Z',
+          aggregates: {
+            levels: { readings: 3, min_level: 1.2, max_level: 2.2, avg_level: 1.7 },
+            shifts_by_sector: [
+              {
+                sector: 'Sector Alto',
+                planned: 2,
+                planned_hours: 4,
+                completed: 1,
+                partial: 0,
+                not_executed: 1,
+              },
+            ],
+            valve_commands: [{ origin: 'MANUAL', status: 'ACKED', total: 1 }],
+            autopilot_decisions: [{ source: 'RULES', action: 'OPEN', status: 'EXPIRED', total: 2 }],
+            incidents: [],
+            anomalies: [],
+          },
+        },
+      };
+    }
+    if (method === 'POST' && path === '/reports/narrative') {
+      return {
+        status: OK,
+        body: {
+          source: 'RULES',
+          model: 'rules-v1',
+          generated_at: '2026-11-08T10:00:00Z',
+          title: 'Reporte del periodo',
+          summary: 'El tanque se mantuvo estable.',
+          findings: [],
+          recommendations: [],
+          markdown: '# Reporte\n\nEl tanque se mantuvo **estable**.\n\n- Un hallazgo',
+        },
+      };
+    }
+    if (method === 'GET' && path === '/devices') {
+      return { status: OK, body: { items: [], next_cursor: null } };
+    }
     if (method === 'GET' && path === '/anomalies') {
       return { status: OK, body: { items: [], next_cursor: null } };
     }
