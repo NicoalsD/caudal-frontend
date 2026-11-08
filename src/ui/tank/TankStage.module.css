@@ -1,0 +1,103 @@
+.stage {
+  --tank-mark-color: var(--color-on-brand);
+  /* The figures above already say the level: the flat tank does not repeat it. */
+  --tank-value-display: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-brand-900);
+  color: var(--color-on-brand);
+  border-radius: var(--radius-surface);
+}
+
+.heading {
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-h3);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+}
+
+.figure dt {
+  font-size: var(--font-size-small);
+  color: color-mix(in srgb, var(--color-on-brand) 82%, transparent);
+}
+
+.figure dd {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.figureMain dd {
+  font-size: 2.5rem;
+}
+
+.gauge {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.stage :focus-visible {
+  outline-color: var(--color-on-brand);
+}
+
+@media (min-width: 64rem) {
+  .stage {
+    container-type: inline-size;
+    height: 100%;
+    padding: var(--space-5);
+  }
+
+  .body {
+    flex: 1;
+    min-height: 30rem;
+  }
+
+  .figures {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--space-3);
+  }
+}
+
+/* A wide panel has room for the figures beside the tank; a narrow one puts them above it. */
+@container (min-width: 44rem) {
+  .body {
+    flex-direction: row;
+    gap: var(--space-5);
+  }
+
+  .figures {
+    flex: none;
+    grid-template-columns: auto;
+    align-content: start;
+    justify-content: start;
+    width: 11rem;
+    gap: var(--space-5);
+  }
+}
