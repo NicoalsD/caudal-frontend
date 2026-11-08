@@ -85,6 +85,21 @@
   outline-color: var(--color-on-brand);
 }
 
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* Below the sidebar the groups dissolve: the links read as one list, as they always did. */
+.navGroup {
+  display: contents;
+}
+
+.navGroupLabel {
+  display: none;
+}
+
 .navList {
   display: flex;
   flex-wrap: wrap;
@@ -142,6 +157,120 @@
   padding: var(--space-5) var(--space-4) var(--space-7);
 }
 
+/* Only the sidebar and the bottom tab bar carry icons; the "Menú" fold and the top bar do not. */
+@media (max-width: 63.99rem) {
+  .shell[data-tab-bar='false'] .navIcon {
+    display: none;
+  }
+}
+
+/*
+ * Desktop: the header turns into a fixed left sidebar. The content column keeps its narrow measure
+ * for forms and lists; a dashboard route asks for the wide work area with `handle: { wide: true }`.
+ */
+@media (min-width: 64rem) {
+  .shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    min-height: 100dvh;
+  }
+
+  .header {
+    grid-row: 1 / -1;
+    position: sticky;
+    inset-block-start: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--space-5);
+    height: 100dvh;
+    padding: var(--space-4) var(--space-3);
+    overflow-y: auto;
+    font-size: var(--font-size-small);
+  }
+
+  /* The level line runs down the edge of the sidebar instead of along the bottom. */
+  .header::after {
+    inset-block: 0;
+    inset-inline: auto 0;
+    width: var(--level-line-height);
+    height: auto;
+  }
+
+  .brand {
+    padding-inline: var(--space-3);
+  }
+
+  .menu {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .nav {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: var(--space-4);
+  }
+
+  .navGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .navGroupLabel {
+    display: block;
+    padding-inline: var(--space-3);
+    color: color-mix(in srgb, var(--color-on-brand) 72%, transparent);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-bold);
+  }
+
+  .navList {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 2px;
+  }
+
+  .navLink {
+    width: 100%;
+    min-height: 2.5rem;
+    color: var(--color-on-brand);
+  }
+
+  .navLink[aria-current='page'] {
+    background: color-mix(in srgb, var(--color-on-brand) 16%, transparent);
+  }
+
+  .navLink[aria-current='page']::after {
+    display: none;
+  }
+
+  .navIcon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .signOut > * {
+    width: 100%;
+  }
+
+  .main {
+    width: 100%;
+    padding: var(--space-6) var(--space-6) var(--space-7);
+  }
+
+  .main[data-wide='true'] {
+    max-width: var(--content-wide);
+    margin-inline: 0;
+    font-size: var(--font-size-body);
+  }
+}
+
 @media (max-width: 48rem) {
   .menuToggle {
     display: inline-flex;
@@ -156,6 +285,11 @@
 
   .menu[data-open='false'] {
     display: none;
+  }
+
+  .nav {
+    flex-direction: column;
+    gap: 0;
   }
 
   .navList {
@@ -188,6 +322,10 @@
     padding-block-end: env(safe-area-inset-bottom, 0);
     background: var(--color-raised);
     border-top: 1px solid var(--color-border-subtle);
+  }
+
+  .shell[data-tab-bar='true'] .navGroup {
+    display: block;
   }
 
   .shell[data-tab-bar='true'] .navList {

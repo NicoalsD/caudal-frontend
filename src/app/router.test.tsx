@@ -11,7 +11,7 @@ function renderAt(path: string, role?: Role) {
   return renderApp(path, role === undefined ? {} : { user: buildSessionUser({ role }) }).router;
 }
 
-const heading = (name: string) => screen.getByRole('heading', { level: 1, name });
+const heading = (name: string | RegExp) => screen.getByRole('heading', { level: 1, name });
 
 describe('role router', () => {
   it('shows the public schedule without a session', async () => {
@@ -53,7 +53,7 @@ describe('role router', () => {
     expect(screen.getByRole('navigation', { name: t('app.mainNavigation') })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: t('nav.newReading') })).toBeInTheDocument();
     expect(screen.getByRole('main')).toBeInTheDocument();
-    expect(heading(t('screens.operatorHome'))).toBeInTheDocument();
+    expect(heading(new RegExp(`^${t('home.todayHeading', { date: '' })}`))).toBeInTheDocument();
   });
 
   it('shows the 403 page when a role opens another role area', () => {

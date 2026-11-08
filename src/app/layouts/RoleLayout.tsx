@@ -2,7 +2,7 @@ import { useId, useState } from 'react';
 import type { JSX } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Menu, X } from 'lucide-react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useMatches } from 'react-router';
 
 import { SignOutButton } from '../../features/auth/SignOutButton';
 import { SyncStatus } from '../../features/sync';
@@ -14,8 +14,35 @@ import styles from './Layout.module.css';
 export interface NavItem {
   readonly to: string;
   readonly label: string;
-  /** Needed only by layouts that show the bottom tab bar. */
+  /** Always shown in the desktop sidebar and in the bottom tab bar; hidden in the "Menú" fold. */
   readonly icon?: LucideIcon;
+  /** Heading of the sidebar group. Consecutive items with the same one stay together. */
+  readonly group?: string;
+}
+
+interface NavGroup {
+  readonly label: string | null;
+  readonly items: readonly NavItem[];
+}
+
+/** Keeps the order of the items: a group starts each time the heading changes. */
+function groupNavItems(items: readonly NavItem[]): readonly NavGroup[] {
+  const groups: { label: string | null; items: NavItem[] }[] = [];
+  for (const item of items) {
+    const label = item.group ?? null;
+    const last = groups[groups.length - 1];
+    if (last?.label === label) {
+      last.items.push(item);
+    } else {
+      groups.push({ label, items: [item] });
+    }
+  }
+  return groups;
+}
+
+/** A route opts in to the wide work area with `handle: { wide: true }` (dashboards only). */
+function isWideHandle(handle: unknown): boolean {
+  return typeof handle === 'object' && handle !== null && 'wide' in handle && handle.wide === true;
 }
 
 interface RoleLayoutProps {
@@ -32,11 +59,13 @@ export const MAIN_CONTENT_ID = 'main-content';
 /**
  * Shared shell for authenticated areas: skip link, brand header, navigation and main landmark. On
  * a narrow screen the links fold behind a "Menú" button (or move to a bottom tab bar), so the
- * screen starts with its content and not with a wall of links.
+ * screen starts with its content and not with a wall of links. On a desktop the header becomes a
+ * left sidebar with the links grouped, so a long list never wraps over the work area.
  */
 export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.Element {
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
+  const wide = useMatches().some((match) => isWideHandle(match.handle));
   return (
     <div className={cn(styles.shell)} data-tab-bar={tabBar}>
       {/* Screens behind a session are not for search engines (robots.txt says the same). */}
@@ -62,22 +91,29 @@ export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.E
         )}
         <div id={menuId} className={cn(styles.menu)} data-open={menuOpen}>
           <nav aria-label={t('app.mainNavigation')} className={cn(styles.nav)}>
-            <ul className={cn(styles.navList)}>
-              {navItems.map(({ to, label, icon: Icon }) => (
-                <li key={to}>
-                  <NavLink
-                    className={cn(styles.navLink)}
-                    to={to}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {tabBar && Icon !== undefined && (
-                      <Icon className={cn(styles.navIcon)} aria-hidden="true" />
-                    )}
-                    <span>{label}</span>
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            {groupNavItems(navItems).map((group) => (
+              <div key={group.label ?? 'main'} className={cn(styles.navGroup)}>
+                {group.label === null ? null : (
+                  <p className={cn(styles.navGroupLabel)}>{group.label}</p>
+                )}
+                <ul className={cn(styles.navList)}>
+                  {group.items.map(({ to, label, icon: Icon }) => (
+                    <li key={to}>
+                      <NavLink
+                        className={cn(styles.navLink)}
+                        to={to}
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        {Icon !== undefined && (
+                          <Icon className={cn(styles.navIcon)} aria-hidden="true" />
+                        )}
+                        <span>{label}</span>
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </nav>
           <div className={cn(styles.signOut)}>
             <SignOutButton />
@@ -85,7 +121,7 @@ export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.E
         </div>
       </header>
       <SyncStatus />
-      <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
+      <main id={MAIN_CONTENT_ID} className={cn(styles.main)} data-wide={wide}>
         <Outlet />
       </main>
     </div>

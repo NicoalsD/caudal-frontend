@@ -12,7 +12,7 @@ import { PendingReadingsPage, ReadingPage } from '../features/readings';
 import { TankStatusPage } from '../features/tank-status';
 import { IncidentsPage, OperatorDamagePage } from '../features/incidents';
 import { DamageReportPage, PublicSchedulePage, PublicTrackingPage } from '../features/public';
-import { BoardDayGuide } from '../features/board/BoardDayGuide';
+import { BoardDashboardPage } from '../features/board/BoardDashboardPage';
 import {
   ProposalDetailPage,
   ProposalEditorPage,
@@ -78,7 +78,7 @@ const operatorRoutes: RouteObject = {
     {
       element: <OperatorLayout />,
       children: [
-        { path: ROUTE_PATHS.operator.home, element: <OperatorHomePage /> },
+        { path: ROUTE_PATHS.operator.home, handle: { wide: true }, element: <OperatorHomePage /> },
         { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
         { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
         { path: ROUTE_PATHS.operator.dayClosure, element: <DayClosurePage /> },
@@ -96,12 +96,8 @@ const boardRoutes: RouteObject = {
       children: [
         {
           path: ROUTE_PATHS.board.tank,
-          element: (
-            <>
-              <BoardDayGuide />
-              <TankStatusPage />
-            </>
-          ),
+          handle: { wide: true },
+          element: <BoardDashboardPage />,
         },
         { path: ROUTE_PATHS.board.proposals, element: <ProposalListPage /> },
         { path: ROUTE_PATHS.board.proposalDetail, element: <ProposalDetailPage /> },
@@ -184,7 +180,7 @@ const sharedRoutes: RouteObject = {
   children: [
     {
       element: <SharedLayout />,
-      children: [{ path: ROUTE_PATHS.tank, element: <TankStatusPage /> }],
+      children: [{ path: ROUTE_PATHS.tank, handle: { wide: true }, element: <TankStatusPage /> }],
     },
   ],
 };
