@@ -136,7 +136,7 @@ function PilotCard(): JSX.Element | null {
     return null;
   }
   return (
-    <section className={cn(styles.card, styles.wide)} aria-labelledby="board-pilot-title">
+    <section className={cn(styles.card, styles.wide, styles.pilotCard)} aria-labelledby="board-pilot-title">
       <h2 id="board-pilot-title" className={cn(styles.cardTitle)}>
         {t('board.pilot.title')}
       </h2>
@@ -167,7 +167,7 @@ function AssistantCard({
     return null;
   }
   return (
-    <div className={cn(styles.card)}>
+    <div className={cn(styles.card, styles.assistantCard)}>
       <AutopilotModeControl />
       <AssistantPanel valves={valves} />
     </div>

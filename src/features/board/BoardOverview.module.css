@@ -62,14 +62,37 @@
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  gap: var(--space-4);
-  align-items: start;
+  display: contents;
 }
 
 .wide {
   grid-column: 1 / -1;
+}
+
+.sceneCard {
+  grid-column: 1 / -1;
+}
+
+.assistantCard {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .assistantCard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 90rem) {
+  .sceneCard {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
 }
 
 .stack {
@@ -88,10 +111,17 @@
   min-height: 48px;
 }
 
-.miniScene {
-  height: 22rem;
+.sceneCard .miniScene {
+  position: relative;
+  flex: 1;
+  min-height: 28rem;
   overflow: hidden;
   border-radius: var(--radius-control);
+}
+
+.miniScene > * {
+  position: absolute;
+  inset: 0;
 }
 
 .bigScene {

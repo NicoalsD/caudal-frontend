@@ -28,7 +28,7 @@ export interface ConsoleContext {
 export interface ConsoleSlots {
   /** Full width, above the rail and the tank (the KPI row). */
   readonly top?: (context: ConsoleContext) => ReactNode;
-  /** Full width, under the console, one column on a phone (the overview grid). */
+  /** Cells of the dense grid under the console, one column on a phone (the overview cards). */
   readonly below?: (context: ConsoleContext) => ReactNode;
   readonly rail: (context: ConsoleContext) => ReactNode;
   readonly after: (context: ConsoleContext) => ReactNode;
@@ -77,11 +77,15 @@ function TankStatusSection({
           <aside className={cn(styles.rail)}>{consoleSlots.rail(context)}</aside>
           <div className={cn(styles.center)}>
             <TankOverview tank={tank} status={status.data} variant="console" />
-            <AnomalyList hideWhenEmpty />
-            {consoleSlots.after(context)}
           </div>
         </div>
-        {consoleSlots.below?.(context)}
+        <div className={cn(styles.lower)}>
+          <div className={cn(styles.lowerFull)}>
+            <AnomalyList hideWhenEmpty />
+          </div>
+          <div className={cn(styles.lowerWide)}>{consoleSlots.after(context)}</div>
+          {consoleSlots.below?.(context)}
+        </div>
       </>
     );
   }

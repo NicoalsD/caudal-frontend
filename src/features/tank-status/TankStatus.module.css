@@ -447,3 +447,48 @@
     font-size: var(--font-size-small);
   }
 }
+
+/*
+ * Under the console: one dense grid that the anomalies, today's shifts and the overview cards
+ * share, so no row leaves a hole. One column on a phone, two on a laptop, three on a wide screen.
+ */
+.lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-flow: dense;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.lower > :empty {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .lower {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lowerFull,
+  .lowerWide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 90rem) {
+  .lower {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+@media (min-width: 64rem) {
+  .rail {
+    align-self: stretch;
+  }
+
+  /* The rail is shorter than the tank: its last panel takes the rest of the height. */
+  .rail > :last-child {
+    flex: 1;
+  }
+}
