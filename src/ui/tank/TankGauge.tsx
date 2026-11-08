@@ -3,6 +3,7 @@ import type { CSSProperties, JSX, RefObject } from 'react';
 
 import { formatDecimal } from '../../core/format/decimal';
 import { t } from '../../i18n/t';
+import { DARK_QUERY, hasWebGl, matchesMedia, REDUCED_MOTION_QUERY } from '../scene/webgl';
 import { cn } from '../styles/cn';
 import type { TankAnchor, TankScene, TankSceneColors } from './tankScene';
 import styles from './TankGauge.module.css';
@@ -30,10 +31,6 @@ const EMPTY = 0;
 const PERCENT = 100;
 /** The ruler shows a mark per meter; a very tall gauge gets fewer marks. */
 const MAX_RULER_MARKS = 10;
-/** Same breakpoint as the desktop layout: phones never download three.js. */
-const DESKTOP_QUERY = '(min-width: 64rem)';
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-const DARK_QUERY = '(prefers-color-scheme: dark)';
 
 function shortBandText(code: string): string {
   switch (code) {
@@ -61,10 +58,6 @@ function rulerMarks(min: number, max: number): number[] {
   return marks;
 }
 
-function matches(query: string): boolean {
-  return typeof window.matchMedia === 'function' && window.matchMedia(query).matches;
-}
-
 function readSceneColors(element: Element): TankSceneColors {
   const style = getComputedStyle(element);
   const token = (name: string): string => style.getPropertyValue(name).trim();
@@ -75,7 +68,7 @@ function readSceneColors(element: Element): TankSceneColors {
   };
 }
 
-/** Draws the 3D tank on desktop. Null until it is ready, or forever when it cannot be drawn. */
+/** Draws the 3D tank wherever WebGL works. Null until it is ready, or forever when it cannot be drawn. */
 function useTankScene(
   container: RefObject<HTMLDivElement | null>,
   canvas: RefObject<HTMLCanvasElement | null>,
@@ -86,7 +79,7 @@ function useTankScene(
   useEffect(() => {
     const host = container.current;
     const target = canvas.current;
-    if (host === null || target === null || !matches(DESKTOP_QUERY)) {
+    if (host === null || target === null || !hasWebGl()) {
       return undefined;
     }
     let cancelled = false;
@@ -105,7 +98,7 @@ function useTankScene(
         const next = createTankScene({
           canvas: target,
           colors: readSceneColors(host),
-          animate: !matches(REDUCED_MOTION_QUERY),
+          animate: !matchesMedia(REDUCED_MOTION_QUERY),
         });
         created = next;
         const fit = (): void => {
@@ -143,8 +136,7 @@ function useTankScene(
 }
 
 /**
- * The tank: a 3D cylinder with moving water on desktop, and the flat drawing on a phone or when
- * WebGL is missing. Either way it shows the ruler in meters, the limits of the bands with their
+ * The tank: a 3D cylinder with moving water, and the flat drawing when WebGL is missing. Either way it shows the ruler in meters, the limits of the bands with their
  * names and the reserve, and it fills the height of its container.
  */
 export function TankGauge({

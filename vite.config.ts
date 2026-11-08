@@ -50,6 +50,8 @@ export default defineConfig({
           '**/gsap*.js',
           '**/ScrollTrigger-*.js',
           '**/tankScene-*.js',
+          '**/tankParts-*.js',
+          '**/AqueductScene-*.js',
           '**/three*.js',
         ],
         navigateFallback: '/index.html',
@@ -66,6 +68,13 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
   build: {
+    rollupOptions: {
+      output: {
+        // three.js shared by the tank and the scene goes to a chunk named "three", which the
+        // service worker leaves out of the precache (globIgnores above).
+        manualChunks: (id: string) => (id.includes('/node_modules/three/') ? 'three' : undefined),
+      },
+    },
     // Never inline fonts as data: URIs; the CSP only allows font-src 'self'.
     assetsInlineLimit: 0,
   },
