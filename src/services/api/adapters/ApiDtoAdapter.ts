@@ -564,6 +564,7 @@ export class ApiDtoAdapter {
       parentSectorId: dto.parent_sector_id ?? null,
       householdsCount: dto.households_count,
       isActive: dto.is_active,
+      isRegion: dto.is_region,
     };
   }
 

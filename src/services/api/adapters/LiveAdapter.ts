@@ -99,6 +99,7 @@ export function toAutopilotDecision(
     decidedBy: dto.decided_by ?? null,
     decidedAt: dto.decided_at ? adapter.toTimestamp('decided_at', dto.decided_at) : null,
     valveCommandId: dto.valve_command_id ?? null,
+    statusDetail: dto.status_detail ?? null,
   };
 }
 

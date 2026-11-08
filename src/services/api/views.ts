@@ -22,6 +22,7 @@ import type {
   DecisionAction,
   DecisionStatus,
 } from '../../core/autopilot/autopilotModel';
+import type { ReportAggregates } from '../../core/reports/reportModel';
 import type {
   CommandOrigin,
   CommandStatus,
@@ -166,6 +167,8 @@ export interface SectorView {
   readonly parentSectorId: string | null;
   readonly householdsCount: number;
   readonly isActive: boolean;
+  /** A root sector: a region of the aqueduct. */
+  readonly isRegion: boolean;
 }
 
 export interface TankView {
@@ -818,6 +821,8 @@ export interface AutopilotDecisionView {
   readonly decidedBy: string | null;
   readonly decidedAt: TimestampView | null;
   readonly valveCommandId: string | null;
+  /** Why it was skipped or rejected, or a code such as RESERVE_FLOOR; null otherwise. */
+  readonly statusDetail: string | null;
 }
 
 export interface AssistantAnswerView {
@@ -825,4 +830,22 @@ export interface AssistantAnswerView {
   readonly model: string;
   readonly answer: string;
   readonly generatedAt: TimestampView;
+}
+
+/** The numbers of a period (GET /reports). `from` and `to` are the instants the server used. */
+export interface ReportView extends ReportAggregates {
+  readonly from: TimestampView;
+  readonly to: TimestampView;
+}
+
+/** The narrative report of a period (POST /reports/narrative). The markdown is plain text. */
+export interface NarrativeReportView {
+  readonly source: AnswerSource;
+  readonly model: string;
+  readonly generatedAt: TimestampView;
+  readonly title: string;
+  readonly summary: string;
+  readonly findings: readonly string[];
+  readonly recommendations: readonly string[];
+  readonly markdown: string;
 }

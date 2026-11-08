@@ -641,6 +641,73 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createSector",
+        "summary": "Crear un sector o una región",
+        "description": "Permiso NETWORK_MANAGE. Sin parent_sector_id crea una región. API.md sección 5.4.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sector creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sector"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: código repetido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/tanks": {
@@ -701,6 +768,94 @@
           },
           "404": {
             "description": "El sector no existe (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createValve",
+        "summary": "Crear una válvula en un sector",
+        "description": "Permiso NETWORK_MANAGE. API.md sección 5.7.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateValveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Válvula creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Valve"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: código repetido en el sector.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1406,8 +1561,8 @@
               }
             }
           },
-          "422": {
-            "description": "REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW.",
+          "409": {
+            "description": "CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1416,8 +1571,8 @@
               }
             }
           },
-          "409": {
-            "description": "CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION.",
+          "422": {
+            "description": "REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1466,8 +1621,8 @@
               }
             }
           },
-          "422": {
-            "description": "REASON_REQUIRED.",
+          "409": {
+            "description": "CONFLICT o INVALID_STATE_TRANSITION.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1476,8 +1631,8 @@
               }
             }
           },
-          "409": {
-            "description": "CONFLICT o INVALID_STATE_TRANSITION.",
+          "422": {
+            "description": "REASON_REQUIRED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2250,16 +2405,6 @@
               }
             }
           },
-          "422": {
-            "description": "REASON_REQUIRED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "404": {
             "description": "NOT_FOUND.",
             "content": {
@@ -2272,6 +2417,16 @@
           },
           "409": {
             "description": "INVALID_STATE_TRANSITION: cuenta desactivada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3442,8 +3597,8 @@
               }
             }
           },
-          "404": {
-            "description": "NOT_FOUND.",
+          "403": {
+            "description": "FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3452,8 +3607,8 @@
               }
             }
           },
-          "403": {
-            "description": "FORBIDDEN.",
+          "404": {
+            "description": "NOT_FOUND.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3502,6 +3657,16 @@
               }
             }
           },
+          "403": {
+            "description": "FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "NOT_FOUND.",
             "content": {
@@ -3524,16 +3689,6 @@
           },
           "422": {
             "description": "INVALID_KEY.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3574,6 +3729,16 @@
           "204": {
             "description": "Clave revocada."
           },
+          "403": {
+            "description": "FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "NOT_FOUND.",
             "content": {
@@ -3586,16 +3751,6 @@
           },
           "409": {
             "description": "CONFLICT: la clave ya estaba revocada.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3946,6 +4101,16 @@
               }
             }
           },
+          "400": {
+            "description": "VALIDATION_ERROR: valores fuera de rango.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Sesión no válida (UNAUTHORIZED).",
             "content": {
@@ -3958,16 +4123,6 @@
           },
           "403": {
             "description": "FORBIDDEN: falta el permiso.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "VALIDATION_ERROR: valores fuera de rango.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4222,6 +4377,16 @@
               }
             }
           },
+          "400": {
+            "description": "VALIDATION_ERROR: pregunta vacía o de más de 500 caracteres.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Sesión no válida (UNAUTHORIZED).",
             "content": {
@@ -4242,8 +4407,58 @@
               }
             }
           },
+          "429": {
+            "description": "RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sectors/{id}": {
+      "patch": {
+        "operationId": "updateSector",
+        "summary": "Renombrar o mover un sector",
+        "description": "Permiso NETWORK_MANAGE. API.md sección 5.5.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sector actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sector"
+                }
+              }
+            }
+          },
           "400": {
-            "description": "VALIDATION_ERROR: pregunta vacía o de más de 500 caracteres.",
+            "description": "VALIDATION_ERROR.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4252,8 +4467,234 @@
               }
             }
           },
-          "429": {
-            "description": "RATE_LIMITED.",
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/run": {
+      "post": {
+        "operationId": "runAutopilot",
+        "summary": "Forzar un ciclo del piloto",
+        "description": "Permiso AUTOPILOT_CONFIGURE. Para la demostración. API.md sección 20.7.",
+        "responses": {
+          "200": {
+            "description": "Decisiones del ciclo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecisionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/recommendations": {
+      "get": {
+        "operationId": "listAutopilotRecommendations",
+        "summary": "Recomendaciones pendientes",
+        "description": "Permiso ASSISTANT_USE. Atajo de GET /autopilot/decisions?status=PENDING.",
+        "responses": {
+          "200": {
+            "description": "Decisiones pendientes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecisionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports": {
+      "get": {
+        "operationId": "getReport",
+        "summary": "Números del periodo",
+        "description": "Permiso REPORT_VIEW. from inclusive y to exclusivo. API.md sección 20.9.",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agregados del periodo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/narrative": {
+      "post": {
+        "operationId": "createNarrativeReport",
+        "summary": "Reporte narrativo del periodo",
+        "description": "Permiso REPORT_VIEW. Lo escribe el asistente o, si falla, una plantilla. API.md sección 20.10.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NarrativeReportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reporte narrativo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NarrativeReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5038,7 +5479,8 @@
           "code",
           "name",
           "households_count",
-          "is_active"
+          "is_active",
+          "is_region"
         ],
         "description": "Sector de la red. Sin datos personales (API.md sección 5.3).",
         "properties": {
@@ -5064,6 +5506,10 @@
           },
           "is_active": {
             "type": "boolean"
+          },
+          "is_region": {
+            "type": "boolean",
+            "description": "Verdadero si es un sector raíz, es decir, una región."
           }
         }
       },
@@ -8472,6 +8918,11 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
+          },
+          "status_detail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nulo, RESERVE_FLOOR, COMMAND_REFUSED, OPERATOR_ACTIVE o el motivo del rechazo."
           }
         }
       },
@@ -8541,6 +8992,380 @@
           "generated_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "CreateSectorRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 20,
+            "pattern": "^[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "parent_sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "households_count": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "UpdateSectorRequest": {
+        "type": "object",
+        "description": "Todos los campos son opcionales. parent_sector_id no se combina con is_region.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "households_count": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "parent_sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "is_region": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateValveRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20,
+            "pattern": "^[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "location_hint": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "is_motorized": {
+            "type": "boolean"
+          },
+          "fail_safe_position": {
+            "type": "string",
+            "enum": [
+              "KEEP",
+              "OPEN",
+              "CLOSED"
+            ]
+          }
+        }
+      },
+      "ReportLevels": {
+        "type": "object",
+        "required": [
+          "readings"
+        ],
+        "properties": {
+          "readings": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "min_level": {
+            "type": "number",
+            "nullable": true
+          },
+          "max_level": {
+            "type": "number",
+            "nullable": true
+          },
+          "avg_level": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ReportShiftsRow": {
+        "type": "object",
+        "required": [
+          "sector",
+          "planned"
+        ],
+        "properties": {
+          "sector": {
+            "type": "string",
+            "description": "Nombre del sector."
+          },
+          "planned": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "planned_hours": {
+            "type": "number",
+            "nullable": true
+          },
+          "completed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partial": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "not_executed": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportCommandRow": {
+        "type": "object",
+        "required": [
+          "origin",
+          "status",
+          "total"
+        ],
+        "properties": {
+          "origin": {
+            "type": "string",
+            "enum": [
+              "SCHEDULE",
+              "MANUAL",
+              "AUTOPILOT"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportDecisionRow": {
+        "type": "object",
+        "required": [
+          "source",
+          "action",
+          "status",
+          "total"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "action": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportIncidentRow": {
+        "type": "object",
+        "required": [
+          "category",
+          "status",
+          "total"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportAnomalyRow": {
+        "type": "object",
+        "required": [
+          "kind",
+          "total"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportAggregates": {
+        "type": "object",
+        "required": [
+          "levels",
+          "shifts_by_sector",
+          "valve_commands",
+          "autopilot_decisions",
+          "incidents",
+          "anomalies"
+        ],
+        "properties": {
+          "levels": {
+            "$ref": "#/components/schemas/ReportLevels"
+          },
+          "shifts_by_sector": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportShiftsRow"
+            }
+          },
+          "valve_commands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportCommandRow"
+            }
+          },
+          "autopilot_decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportDecisionRow"
+            }
+          },
+          "incidents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportIncidentRow"
+            }
+          },
+          "anomalies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportAnomalyRow"
+            }
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "aggregates"
+        ],
+        "description": "Datos del periodo; el periodo dura como máximo 92 días.",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aggregates": {
+            "$ref": "#/components/schemas/ReportAggregates"
+          }
+        }
+      },
+      "NarrativeReportRequest": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NarrativeReport": {
+        "type": "object",
+        "required": [
+          "source",
+          "model",
+          "generated_at",
+          "title",
+          "summary",
+          "findings",
+          "recommendations",
+          "markdown"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "markdown": {
+            "type": "string"
           }
         }
       }

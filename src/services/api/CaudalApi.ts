@@ -24,6 +24,7 @@ import { DevicesApi } from './endpoints/DevicesApi';
 import { EvaluationApi } from './endpoints/EvaluationApi';
 import { AutopilotApi } from './endpoints/AutopilotApi';
 import { ValvesLiveApi } from './endpoints/ValvesLiveApi';
+import { ReportsApi } from './endpoints/ReportsApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -70,6 +71,8 @@ export class CaudalApi {
   readonly autopilot: AutopilotApi;
   /** The valves as they are now and the manual commands to them. */
   readonly valvesLive: ValvesLiveApi;
+  /** The numbers of a period and its narrative (API.md 20.9 and 20.10). */
+  readonly reports: ReportsApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -97,5 +100,6 @@ export class CaudalApi {
     this.evaluation = new EvaluationApi(http);
     this.autopilot = new AutopilotApi(http, adapter);
     this.valvesLive = new ValvesLiveApi(http, adapter);
+    this.reports = new ReportsApi(http, adapter);
   }
 }

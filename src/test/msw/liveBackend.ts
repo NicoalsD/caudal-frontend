@@ -47,6 +47,7 @@ export function createLiveBackend(
     accepted: [] as string[],
     rejected: [] as string[],
     questions: [] as string[],
+    runs: 0,
     settingsPuts: [] as AutopilotSettingsDto[],
     failNextCommand: false,
     willFail: false,
@@ -139,6 +140,10 @@ export function createLiveBackend(
       state.rejected.push(found.id);
       found.status = 'REJECTED';
       return HttpResponse.json(found);
+    }),
+    http.post(apiUrl('/autopilot/run'), () => {
+      state.runs += 1;
+      return HttpResponse.json({ items: decisions.filter((item) => item.status === 'PENDING') });
     }),
     http.post(apiUrl('/assistant/ask'), async ({ request }) => {
       const body = (await request.json()) as { question: string };

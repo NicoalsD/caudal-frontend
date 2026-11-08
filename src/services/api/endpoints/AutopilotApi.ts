@@ -92,6 +92,16 @@ export class AutopilotApi {
     return toAutopilotDecision(this.adapter, response.body);
   }
 
+  /** POST /autopilot/run (AUTOPILOT_CONFIGURE): forces a cycle now and returns its decisions. */
+  async run(): Promise<AutopilotDecisionView[]> {
+    const response = await this.http.request<DecisionListDto>({
+      method: 'POST',
+      path: '/autopilot/run',
+      body: {},
+    });
+    return response.body.items.map((item) => toAutopilotDecision(this.adapter, item));
+  }
+
   /** POST /assistant/ask (ASSISTANT_USE): the answer says whether the LLM or the rules wrote it. */
   async ask(question: string): Promise<AssistantAnswerView> {
     const response = await this.http.request<AnswerDto>({
