@@ -1,44 +1,26 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 
 import { collectValves } from '../../core/devices/attachments';
 import type { ValveOption } from '../../core/devices/attachments';
 import type { DeviceStatus } from '../../core/devices/deviceModel';
 import type { RegisterDeviceInput } from '../../services/api/endpoints/DevicesApi';
-import type {
-  DevicePageView,
-  DeviceView,
-  RotatedDeviceKeyView,
-  TankView,
-} from '../../services/api/views';
+import type { DeviceView, RotatedDeviceKeyView, TankView } from '../../services/api/views';
 import { useCaudalApi } from '../../state/hooks/apiContext';
 import { useAqueductId } from '../../state/hooks/useAqueductId';
 import { useNetwork } from '../../state/hooks/useNetwork';
 import { useTanks } from '../../state/hooks/useTanks';
 import { aqueductKey } from '../../state/queryKeys';
 
-const DEVICES_SCOPE = 'devices';
+import { DEVICES_SCOPE, useDevices } from '../../state/hooks/useDevices';
+
+export { useDevices };
 
 /**
  * Key mutations hand a public key to the server: the cache must not keep their variables (gcTime 0),
  * the same rule as the one-time codes of the users screen.
  */
 const NO_CACHE_MS = 0;
-
-/** GET /devices, page by page. */
-export function useDevices(): UseInfiniteQueryResult<{
-  readonly pages: readonly DevicePageView[];
-}> {
-  const api = useCaudalApi();
-  const key = aqueductKey(useAqueductId(), DEVICES_SCOPE);
-  return useInfiniteQuery({
-    queryKey: key,
-    queryFn: ({ pageParam }) => api.devices.listDevices(pageParam),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (last) => last.nextCursor ?? undefined,
-    refetchOnWindowFocus: false,
-  });
-}
 
 export interface Attachments {
   readonly isPending: boolean;

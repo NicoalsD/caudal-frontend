@@ -12,6 +12,7 @@ import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
+import { TeamDashboard } from './TeamDashboard';
 import { EvaluationMetrics } from './EvaluationMetrics';
 import { HorizonSkillTable } from './HorizonSkillTable';
 import { horizonLabel } from './horizonLabel';
@@ -46,6 +47,7 @@ export function EvaluationPage(): JSX.Element {
       ) : (
         <EvaluationPanel horizons={horizonsUpTo(rules.data.forecastHorizonDays)} />
       )}
+      <TeamDashboard />
     </>
   );
 }

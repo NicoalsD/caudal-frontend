@@ -42,7 +42,7 @@ describe('EvaluationPage (S23)', () => {
     );
     renderApp(ROUTE_PATHS.team.evaluation, { user: TEAM });
 
-    const table = await screen.findByRole('table');
+    const table = await screen.findByRole('table', { name: t('evaluation.skillCaption') });
     expect(
       within(table).getByRole('columnheader', { name: t('evaluation.skillColumn') }),
     ).toBeVisible();
