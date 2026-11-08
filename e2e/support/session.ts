@@ -31,3 +31,11 @@ export async function goToNavLink(page: Page, name: string): Promise<void> {
     .getByRole('link', { name })
     .click();
 }
+
+/** On a phone the operator panel is a folded sheet: open it so its links and buttons can be used. */
+export async function openOperatorPanel(page: Page): Promise<void> {
+  const handle = page.getByRole('button', { name: strings.operatorHome.panelOpen });
+  if (await handle.isVisible()) {
+    await handle.click();
+  }
+}

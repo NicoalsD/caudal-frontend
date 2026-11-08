@@ -2,7 +2,7 @@ import { strings } from '../src/i18n/es';
 import { OPERATOR_USERNAME, SEED_PASSWORD } from './support/constants';
 import { setConnection } from './support/api';
 import { expect, test } from './support/fixtures';
-import { goToNavLink, signIn } from './support/session';
+import { goToNavLink, openOperatorPanel, signIn } from './support/session';
 
 const HOME = /\/operador\/inicio$/;
 const NEW_READING = /\/operador\/lectura\/nueva$/;
@@ -18,6 +18,7 @@ test.describe('Fontanero', () => {
     api,
   }) => {
     await signIn(page, OPERATOR_USERNAME, SEED_PASSWORD, HOME);
+    await openOperatorPanel(page);
 
     // Open the form while online, so its options (the water appearance catalog) are loaded.
     await page.getByRole('link', { name: strings.home.newReading }).click();
