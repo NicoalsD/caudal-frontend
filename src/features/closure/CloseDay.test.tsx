@@ -90,7 +90,7 @@ describe('DayClosurePage closure (S10, operator)', () => {
     const { router } = renderApp(ROUTE_PATHS.operator.home, { user: operator() });
 
     // The checklist is complete once the level has loaded; clicking before that would miss it.
-    await screen.findByText(t('home.levelValue', { value: '2,3' }));
+    await screen.findAllByText(t('home.levelValue', { value: '2,3' }));
     const link = screen.getByRole('link', { name: t('home.dayClosure') });
     await userEvent.click(link);
 

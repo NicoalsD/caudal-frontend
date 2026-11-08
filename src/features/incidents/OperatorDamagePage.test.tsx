@@ -120,7 +120,12 @@ describe('OperatorDamagePage (S11)', () => {
     await userEvent.click(saveButton());
 
     expect(await screen.findByRole('status')).toHaveTextContent(SENT_TEXT);
-    expect(screen.getByRole('heading', { name: t('screens.operatorHome') })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        level: 1,
+        name: new RegExp(`^${t('home.todayHeading', { date: '' })}`),
+      }),
+    ).toBeInTheDocument();
   });
 
   it('keeps the text typed and says there is no connection when the request fails', async () => {

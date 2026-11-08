@@ -212,7 +212,10 @@ describe('401 and expiry during use', () => {
     server.use(...backend.handlers);
     const { services, router } = renderApp(ROUTE_PATHS.operator.home);
     await services.session.restore();
-    await screen.findByRole('heading', { level: 1, name: t('screens.operatorHome') });
+    await screen.findByRole('heading', {
+      level: 1,
+      name: new RegExp(`^${t('home.todayHeading', { date: '' })}`),
+    });
     backend.expireAccessTokens();
     backend.dropCookie();
 

@@ -8,7 +8,7 @@ const BOARD_TANK = /\/junta\/tanque$/;
 test.describe('Junta', () => {
   test('revisa la propuesta del tanque, la aprueba y la publica', async ({ page, api }) => {
     await signIn(page, BOARD_ADMIN_USERNAME, SEED_PASSWORD, BOARD_TANK);
-    await expect(page.getByRole('heading', { name: strings.screens.tankStatus })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Hoy, / })).toBeVisible();
 
     // The day's next step leads to the proposal of today.
     await page.getByRole('button', { name: strings.proposals.guide.review }).click();
