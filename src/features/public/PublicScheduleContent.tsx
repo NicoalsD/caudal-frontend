@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import type { JSX } from 'react';
 import { generatePath, Link } from 'react-router';
+import { Clock } from 'lucide-react';
 
 import { resolveChosenSector, turnsForSector } from '../../core/public/sectorChoice';
 import { formatServiceDate } from '../../core/format/serviceDate';
@@ -10,6 +11,8 @@ import type { PublicScheduleItemView, PublicScheduleView } from '../../services/
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { SimulatedDataBanner } from '../../ui/feedback/SimulatedDataBanner';
 import { useChosenSector } from '../../state/hooks/useChosenSector';
+import { Card } from '../../ui/cards/Card';
+import { Chip } from '../../ui/primitives/Chip';
 import { cn } from '../../ui/styles/cn';
 import styles from './PublicSchedule.module.css';
 import { PosterLink } from './PosterLink';
@@ -44,22 +47,27 @@ export function PublicScheduleContent({
   const chosenTurns = chosen === null ? [] : turnsForSector(schedule.items, chosen);
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       {schedule.isDemo ? <SimulatedDataBanner /> : null}
       <ScreenTitle>{t('publicSchedule.title', { name: schedule.aqueductName })}</ScreenTitle>
-      <p className={cn(styles.serviceDay)}>
-        <time dateTime={schedule.serviceDate}>
-          {t('publicSchedule.serviceDay', { date: formatServiceDate(schedule.serviceDate) })}
-        </time>
-      </p>
-      <p className={cn(styles.published)}>
-        {t('publicSchedule.publishedAt', { date: schedule.publishedAt.text })}
-      </p>
-
-      {schedule.items.length === 0 ? (
-        <p>{t('publicSchedule.empty')}</p>
-      ) : (
-        <>
+      <Card variant="hero" className={cn(styles.hero)}>
+        <p className={cn(styles.serviceDay)}>
+          <time dateTime={schedule.serviceDate}>
+            {t('publicSchedule.serviceDay', { date: formatServiceDate(schedule.serviceDate) })}
+          </time>
+        </p>
+        <p className={cn(styles.published)}>
+          <Chip
+            tone="plain"
+            icon={<Clock aria-hidden="true" />}
+            className={cn(styles.publishedChip)}
+          >
+            {t('publicSchedule.publishedAt', { date: schedule.publishedAt.text })}
+          </Chip>
+        </p>
+        {schedule.items.length === 0 ? (
+          <p className={cn(styles.message)}>{t('publicSchedule.empty')}</p>
+        ) : (
           <section aria-labelledby="public-my-sector-heading" className={cn(styles.mySector)}>
             <h2 id="public-my-sector-heading">{t('publicSchedule.mySector.heading')}</h2>
             <div className={cn(styles.selectField)}>
@@ -93,7 +101,7 @@ export function PublicScheduleContent({
               ) : chosenTurns.length === 0 ? (
                 <p className={cn(styles.message)}>{t('publicSchedule.mySector.noTurn')}</p>
               ) : (
-                <div className={cn(styles.turn)}>
+                <Card variant="tinted" tint="mint" className={cn(styles.turn)}>
                   <p className={cn(styles.turnSector)}>{chosen}</p>
                   {chosenTurns.map((turn, index) => (
                     <p key={`${index}-${turn.startTime}`} className={cn(styles.turnHours)}>
@@ -102,41 +110,41 @@ export function PublicScheduleContent({
                       </time>
                     </p>
                   ))}
-                </div>
+                </Card>
               )}
             </div>
           </section>
+        )}
+      </Card>
 
-          <section aria-labelledby="public-schedule-sectors">
-            <h2 id="public-schedule-sectors">{t('publicSchedule.sectorsHeading')}</h2>
-            <ul className={cn(styles.sectorList)}>
-              {schedule.items.map((item, index) => {
-                const isChosen = item.sectorName === chosen;
-                return (
-                  <li
-                    key={`${index}-${item.sectorName}`}
-                    className={cn(styles.sectorRow, isChosen && styles.sectorRowChosen)}
-                  >
-                    <span className={cn(styles.sectorName)}>
-                      {item.sectorName}
-                      {isChosen ? (
-                        <span className={cn(styles.chosenTag)}>
-                          {t('publicSchedule.chosenTag')}
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className={cn(styles.hours)}>
-                      {t('publicSchedule.range', {
-                        start: item.startTime,
-                        end: item.endTime,
-                      })}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        </>
+      {schedule.items.length === 0 ? null : (
+        <section aria-labelledby="public-schedule-sectors" className={cn(styles.sectors)}>
+          <h2 id="public-schedule-sectors">{t('publicSchedule.sectorsHeading')}</h2>
+          <ul className={cn(styles.sectorList)}>
+            {schedule.items.map((item, index) => {
+              const isChosen = item.sectorName === chosen;
+              return (
+                <li
+                  key={`${index}-${item.sectorName}`}
+                  className={cn(styles.sectorRow, isChosen && styles.sectorRowChosen)}
+                >
+                  <span className={cn(styles.sectorName)}>
+                    {item.sectorName}
+                    {isChosen ? (
+                      <span className={cn(styles.chosenTag)}>{t('publicSchedule.chosenTag')}</span>
+                    ) : null}
+                  </span>
+                  <span className={cn(styles.hours)}>
+                    {t('publicSchedule.range', {
+                      start: item.startTime,
+                      end: item.endTime,
+                    })}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       <section aria-labelledby="public-share-heading" className={cn(styles.more)}>
@@ -155,6 +163,6 @@ export function PublicScheduleContent({
           {t('publicSchedule.trackReport')}
         </Link>
       </section>
-    </>
+    </div>
   );
 }
