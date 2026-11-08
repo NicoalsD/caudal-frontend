@@ -7,10 +7,10 @@ import { cn } from '../../ui/styles/cn';
 import styles from './Layout.module.css';
 import { MAIN_CONTENT_ID } from './RoleLayout';
 
-/** Layout without session bar, for the public page, login and session screens. */
+/** Layout without session bar, for the public pages: the tinted canvas and one white sheet. */
 export function PublicLayout(): JSX.Element {
   return (
-    <>
+    <div className={cn(styles.page)}>
       <a className={cn(styles.skipLink)} href={`#${MAIN_CONTENT_ID}`}>
         {t('app.skipToContent')}
       </a>
@@ -22,6 +22,6 @@ export function PublicLayout(): JSX.Element {
       <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
         <Outlet />
       </main>
-    </>
+    </div>
   );
 }

@@ -1,8 +1,38 @@
 .shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
-  background: var(--color-page);
+  padding: var(--space-4);
+  overflow: hidden;
+  background: var(--color-canvas);
+  isolation: isolate;
+}
+
+/* Lines of water along the bottom edge: faint, so the card stays the only thing to read. */
+.waves {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: -1;
+  width: 100%;
+  height: 55%;
+  pointer-events: none;
+}
+
+.waves path {
+  stroke: var(--color-brand-500);
+  stroke-width: 1.5;
+  opacity: 0.35;
+  vector-effect: non-scaling-stroke;
+}
+
+.waves path:nth-child(2) {
+  opacity: 0.25;
+}
+
+.waves path:nth-child(n + 3) {
+  opacity: 0.15;
 }
 
 .skipLink {
@@ -22,19 +52,15 @@
   color: var(--color-raised);
 }
 
-.formSide {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding: var(--space-4);
-}
-
 .header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
 }
 
 .brand {
@@ -55,8 +81,18 @@
   align-items: center;
   gap: var(--space-2);
   min-height: var(--target-min);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  transition: box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.back:hover {
+  box-shadow: var(--shadow-lift);
 }
 
 .back svg {
@@ -68,15 +104,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: var(--space-5);
   width: 100%;
-  max-width: 28rem;
-  margin-inline: auto;
-  padding-block: var(--space-7);
+  padding-block: var(--space-6);
+}
+
+.card {
+  width: 100%;
+  max-width: 30rem;
+  padding: var(--space-5);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--shadow-frame);
 }
 
 .card h1 {
-  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-size: var(--font-size-page-title);
   line-height: var(--line-height-tight);
   letter-spacing: var(--tracking-display);
 }
@@ -85,7 +129,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-subtle);
   color: var(--color-text-secondary);
@@ -100,88 +144,42 @@
   margin-top: 0.15rem;
 }
 
-/*
- * The panel: the style tile's deep teal field. The brand gradient lives here, on a surface with no
- * controls, and the concentric rings of the tile ripple out from the lower corner.
- */
-.panel {
-  position: relative;
-  display: flex;
+.points {
+  display: none;
   flex-direction: column;
-  overflow: hidden;
-  background:
-    repeating-radial-gradient(
-      circle at 100% 100%,
-      transparent 0 22px,
-      color-mix(in srgb, var(--color-on-brand) 9%, transparent) 22px 23px
-    ),
-    linear-gradient(160deg, var(--color-brand-900) 30%, var(--color-water-800) 100%);
-  color: var(--color-on-brand);
-}
-
-.panelInner {
-  flex: 1;
-  justify-content: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  max-width: 32rem;
-  padding: var(--space-7);
-}
-
-.panelTitle {
-  font-family: var(--font-family-display);
-  font-size: clamp(2rem, 3.4vw, 3rem);
-  line-height: var(--line-height-tight);
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-
-.panelPoints {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.panelPoints li {
-  display: flex;
   align-items: center;
   gap: var(--space-3);
-  font-weight: var(--font-weight-bold);
+  text-align: center;
 }
 
-.panelPoints svg {
-  flex: none;
-  width: 1.5rem;
-  height: 1.5rem;
+.tagline {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
 }
 
-.panelTagline {
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-bold);
-}
-
-.panelLevel {
+.chips {
   display: flex;
-  align-items: flex-end;
-  flex: 0 0 30%;
-  padding: var(--space-6) var(--space-7);
-  background: transparent;
-  border-top: var(--level-line-height) solid var(--color-brand-500);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-@media (max-width: 56rem) {
+@media (min-width: 48rem) {
   .shell {
-    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-5) var(--space-6);
   }
 
-  .panel {
-    display: none;
+  .card {
+    padding: var(--space-6);
   }
 
-  .main {
-    justify-content: flex-start;
-    padding-block: var(--space-6);
+  .points {
+    display: flex;
   }
 }
