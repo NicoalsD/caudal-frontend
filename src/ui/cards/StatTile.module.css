@@ -1,0 +1,90 @@
+.tile {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'icon delta'
+    'value value'
+    'label label';
+  align-items: center;
+  gap: var(--space-3) var(--space-3);
+}
+
+.tile p {
+  max-inline-size: none;
+}
+
+.icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-text-primary);
+}
+
+.icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.value {
+  grid-area: value;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-stat);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h1);
+  letter-spacing: -0.02em;
+}
+
+.label {
+  grid-area: label;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.delta {
+  grid-area: delta;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.delta svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.good {
+  color: var(--color-paramo-800);
+}
+
+.bad {
+  color: var(--color-clay-700);
+}
+
+.warn {
+  color: var(--color-ochre-800);
+}
+
+.neutral {
+  color: var(--color-text-secondary);
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
