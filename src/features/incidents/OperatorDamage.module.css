@@ -1,6 +1,11 @@
 /* Signed-in damage report: one column, the same touch targets as the rest of the operator screens. */
 
+.card {
+  max-width: 44rem;
+}
+
 .label {
+  font-size: var(--font-size-label);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -13,11 +18,12 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
-  background: var(--color-raised);
+  background: var(--color-surface-sunken);
   border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-control);
 }
 
 .submit {
-  align-self: flex-start;
+  width: 100%;
+  min-height: calc(var(--target-min) * 1.25);
 }
