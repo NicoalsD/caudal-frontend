@@ -7,6 +7,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
+import { BarChart, SERIES_COLOR, SERIES_TOKENS } from '../../ui/charts/BarChart';
 import { cn } from '../../ui/styles/cn';
 import { summaryScopeText } from '../entities/summaryScope';
 import styles from './EntitySummaries.module.css';
@@ -48,11 +49,14 @@ export function EntitySummariesPage(): JSX.Element {
       {items.length === 0 ? (
         <p>{t('entitySummaries.empty')}</p>
       ) : (
-        <ul className={cn(styles.list)}>
-          {items.map((summary) => (
-            <SummaryItem key={summary.summaryShareId} summary={summary} />
-          ))}
-        </ul>
+        <>
+          <SummariesChart items={items} />
+          <ul className={cn(styles.list)}>
+            {items.map((summary) => (
+              <SummaryItem key={summary.summaryShareId} summary={summary} />
+            ))}
+          </ul>
+        </>
       )}
       {summaries.hasNextPage ? (
         <Button
@@ -65,6 +69,27 @@ export function EntitySummariesPage(): JSX.Element {
         </Button>
       ) : null}
     </>
+  );
+}
+
+/** The four counts of every summary side by side; the table under it has the same numbers. */
+function SummariesChart({ items }: { readonly items: readonly SummaryView[] }): JSX.Element {
+  return (
+    <BarChart
+      label={t('entitySummaries.chart')}
+      rows={items.map((summary, index) => ({
+        name: `${summaryScopeText(summary.scope)} ${t('entities.period', {
+          from: formatDayKey(summary.periodFrom),
+          to: formatDayKey(summary.periodTo),
+        })} (${String(index + 1)})`,
+        values: { ...summary.content },
+      }))}
+      series={SECTION_KEYS.map((key, index) => ({
+        key,
+        label: SECTION_TEXT[key],
+        token: SERIES_TOKENS.at(index) ?? SERIES_COLOR.water,
+      }))}
+    />
   );
 }
 
