@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
-import { Circle, CircleCheck, CircleX } from 'lucide-react';
+import { Circle, CircleCheck, CircleX, Power, PowerOff } from 'lucide-react';
 
 import { isCommandInFlight, oppositeAction } from '../../core/valves/valveModel';
 import type { CommandStatus, ValveAction } from '../../core/valves/valveModel';
@@ -11,7 +11,9 @@ import { useConstraints } from '../../state/hooks/useConstraints';
 import { usePermission } from '../../state/hooks/usePermission';
 import { useSendValveCommand } from '../../state/hooks/useValveCommand';
 import { FormAlert } from '../../ui/feedback/FormAlert';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
+import { Chip } from '../../ui/primitives/Chip';
 import { Dialog } from '../../ui/primitives/Dialog';
 import { TextAreaField } from '../../ui/primitives/TextAreaField';
 import { cn } from '../../ui/styles/cn';
@@ -21,6 +23,13 @@ import { valveStateText } from './valveText';
 
 const REASON_CONSTRAINT = 'reason';
 const ICON_SIZE = 20;
+/** Measures of the valve drawing, in its own 120 by 64 units. */
+const PIPE_FULL = 120;
+const PIPE_CUT = 52;
+const GATE_UP_Y = 4;
+const GATE_DOWN_Y = 14;
+const GATE_UP_HEIGHT = 20;
+const GATE_DOWN_HEIGHT = 38;
 
 interface ValveControlDialogProps {
   /** The valve with its live data, or null when the dialog is closed. */
@@ -147,22 +156,41 @@ function ControlBody({
         );
       }}
     >
+      <div className={cn(styles.beforeAfter)}>
+        <ValveGraphic open={valve.state === 'OPEN'} caption={t('valveControl.stateNow')} />
+        <ValveGraphic
+          open={action === 'OPEN'}
+          caption={
+            action === 'OPEN' ? t('valveControl.stateAfterOpen') : t('valveControl.stateAfterClose')
+          }
+          accent
+        />
+      </div>
       <fieldset className={cn(styles.actionGroup)}>
         <legend>{t('valveControl.actionLegend')}</legend>
-        {(['OPEN', 'CLOSE'] as const).map((item) => (
-          <label key={item} className={cn(styles.actionOption)}>
-            <input
-              type="radio"
-              name="valve-action"
-              value={item}
-              checked={action === item}
-              onChange={() => {
-                setAction(item);
-              }}
-            />
-            <span>{item === 'OPEN' ? t('valveControl.open') : t('valveControl.close')}</span>
-          </label>
-        ))}
+        <div className={cn(styles.actionTiles)}>
+          {(['OPEN', 'CLOSE'] as const).map((item) => {
+            const Icon = item === 'OPEN' ? Power : PowerOff;
+            return (
+              <label key={item} className={cn(styles.actionOption)}>
+                <input
+                  type="radio"
+                  name="valve-action"
+                  value={item}
+                  checked={action === item}
+                  className={cn(styles.actionInput)}
+                  onChange={() => {
+                    setAction(item);
+                  }}
+                />
+                <span className={cn(styles.actionFace)}>
+                  <Icon aria-hidden="true" />
+                  {item === 'OPEN' ? t('valveControl.open') : t('valveControl.close')}
+                </span>
+              </label>
+            );
+          })}
+        </div>
       </fieldset>
       <TextAreaField
         label={t('valveControl.reasonLabel')}
@@ -178,9 +206,11 @@ function ControlBody({
           setReason(event.currentTarget.value);
         }}
       />
-      <p className={cn(styles.summary)}>
-        {t(summaryKey, { valve: valve.name, sector: valve.sectorName })}
-      </p>
+      <Card variant="tinted" tint="aqua" className={cn(styles.summaryCard)}>
+        <p className={cn(styles.summary)}>
+          {t(summaryKey, { valve: valve.name, sector: valve.sectorName })}
+        </p>
+      </Card>
       {send.isError ? <FormAlert message={errorText(send.error).message} /> : null}
       <div className={cn(styles.actions)}>
         <Button type="submit" variant="primary" disabled={send.isPending}>
@@ -242,5 +272,59 @@ function CommandProgress({ status }: { readonly status: CommandStatus }): JSX.El
       </ol>
       <p role="status">{isCommandInFlight(status) ? '' : headline}</p>
     </section>
+  );
+}
+
+/**
+ * A drawing of the valve on its pipe: open, the pipe is whole and the water goes through; closed,
+ * the gate cuts it. The caption and the word say it too, so the drawing is only a help.
+ */
+function ValveGraphic({
+  open,
+  caption,
+  accent = false,
+}: {
+  readonly open: boolean;
+  readonly caption: string;
+  readonly accent?: boolean;
+}): JSX.Element {
+  return (
+    <figure className={cn(styles.graphic, accent && styles.graphicAccent)} data-open={open}>
+      <svg
+        viewBox="0 0 120 64"
+        aria-hidden="true"
+        focusable="false"
+        className={cn(styles.graphicArt)}
+      >
+        <rect x="0" y="26" width="120" height="14" rx="3" className={cn(styles.pipe)} />
+        <rect
+          x="0"
+          y="29"
+          width={open ? PIPE_FULL : PIPE_CUT}
+          height="8"
+          rx="2"
+          className={cn(styles.water)}
+        />
+        <rect x="46" y="14" width="28" height="38" rx="8" className={cn(styles.valveBody)} />
+        <rect
+          x="56"
+          y={open ? GATE_UP_Y : GATE_DOWN_Y}
+          width="8"
+          height={open ? GATE_UP_HEIGHT : GATE_DOWN_HEIGHT}
+          rx="3"
+          className={cn(styles.gate)}
+        />
+        <circle cx="60" cy="6" r="6" className={cn(styles.wheel)} />
+      </svg>
+      <figcaption className={cn(styles.graphicCaption)}>
+        <Chip
+          tone={open ? 'mint' : 'coral'}
+          icon={open ? <CircleCheck aria-hidden="true" /> : <CircleX aria-hidden="true" />}
+        >
+          {open ? t('valveControl.flowOn') : t('valveControl.flowOff')}
+        </Chip>
+        <span>{caption}</span>
+      </figcaption>
+    </figure>
   );
 }

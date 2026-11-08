@@ -63,7 +63,7 @@ describe('Live aqueduct on the plumber home', () => {
       const user = userEvent.setup();
 
       await user.click(
-        await screen.findByRole('button', { name: t('valves.move', { valve: HIGH_VALVE }) }),
+        await screen.findByRole('button', { name: t('valves.openNamed', { valve: HIGH_VALVE }) }),
       );
       const dialog = await screen.findByRole('dialog', {
         name: t('valveControl.title', { valve: HIGH_VALVE }),
@@ -89,7 +89,7 @@ describe('Live aqueduct on the plumber home', () => {
       const user = userEvent.setup();
 
       await user.click(
-        await screen.findByRole('button', { name: t('valves.move', { valve: HIGH_VALVE }) }),
+        await screen.findByRole('button', { name: t('valves.openNamed', { valve: HIGH_VALVE }) }),
       );
       const dialog = await screen.findByRole('dialog');
       await user.type(await within(dialog).findByLabelText(t('valveControl.reasonLabel')), REASON);
@@ -111,7 +111,7 @@ describe('Live aqueduct on the plumber home', () => {
     const user = userEvent.setup();
 
     await user.click(
-      await screen.findByRole('button', { name: t('valves.move', { valve: HIGH_VALVE }) }),
+      await screen.findByRole('button', { name: t('valves.openNamed', { valve: HIGH_VALVE }) }),
     );
     const dialog = await screen.findByRole('dialog');
     await user.type(await within(dialog).findByLabelText(t('valveControl.reasonLabel')), 'corto');
@@ -128,7 +128,7 @@ describe('Live aqueduct on the plumber home', () => {
     const user = userEvent.setup();
 
     await user.click(
-      await screen.findByRole('button', { name: t('valves.look', { valve: HIGH_VALVE }) }),
+      await screen.findByRole('button', { name: t('valves.lookNamed', { valve: HIGH_VALVE }) }),
     );
 
     expect(await screen.findByText(t('valveControl.noPermission'))).toBeVisible();
@@ -140,7 +140,7 @@ describe('Live aqueduct on the plumber home', () => {
     const user = userEvent.setup();
 
     await user.click(
-      await screen.findByRole('button', { name: t('valves.move', { valve: SCHOOL_VALVE }) }),
+      await screen.findByRole('button', { name: t('valves.closeNamed', { valve: SCHOOL_VALVE }) }),
     );
 
     expect(await screen.findByText(t('valveControl.handValve'))).toBeVisible();

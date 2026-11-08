@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { Bot, Hand, Sparkles } from 'lucide-react';
 
 import { isPlumberInControl, nextControlMode } from '../../core/autopilot/autopilotModel';
 import { errorText } from '../../i18n/errorText';
@@ -8,10 +9,13 @@ import { useAutopilotSettings, useUpdateAutopilotSettings } from '../../state/ho
 import { usePermission } from '../../state/hooks/usePermission';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import styles from './Aqueduct.module.css';
 import { PERMISSION_ASSISTANT, PERMISSION_AUTOPILOT } from './permissions';
+
+const MODE_ICON = { MANUAL: Hand, ASSISTED: Bot, AUTOMATIC: Sparkles } as const;
 
 /**
  * The mode of the autopilot and the button that takes control or gives it back. Changing the mode
@@ -35,12 +39,21 @@ export function AutopilotModeControl(): JSX.Element | null {
   } else {
     const current = settings.data;
     const next = nextControlMode(current.mode);
+    const ModeIcon = MODE_ICON[current.mode];
     body = (
       <>
-        <p className={cn(styles.modeName)}>
-          {t('autopilot.currentMode', { mode: t(`autopilot.mode.${lower(current.mode)}`) })}
-        </p>
-        <p className={cn(styles.meta)}>
+        <div className={cn(styles.modeHead)}>
+          <span className={cn(styles.modeIcon)}>
+            <ModeIcon aria-hidden="true" />
+          </span>
+          <div>
+            <p className={cn(styles.meta)}>{t('autopilot.modeCaption')}</p>
+            <p className={cn(styles.modeName)}>
+              {t('autopilot.currentMode', { mode: t(`autopilot.mode.${lower(current.mode)}`) })}
+            </p>
+          </div>
+        </div>
+        <p className={cn(styles.modeHelp)}>
           {current.mode === 'AUTOMATIC'
             ? t('autopilot.modeHelp.automatic', {
                 minutes: String(current.operatorAbsenceMinutes),
@@ -79,9 +92,17 @@ export function AutopilotModeControl(): JSX.Element | null {
     );
   }
   return (
-    <section className={cn(styles.modeBox)} aria-labelledby="autopilot-title">
-      <h3 id="autopilot-title">{t('autopilot.title')}</h3>
+    <Card
+      variant="tinted"
+      tint="cream"
+      as="section"
+      aria-labelledby="autopilot-title"
+      className={cn(styles.modeBox)}
+    >
+      <h3 id="autopilot-title" className={cn(styles.sectionTitle)}>
+        {t('autopilot.title')}
+      </h3>
       {body}
-    </section>
+    </Card>
   );
 }
