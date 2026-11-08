@@ -1,3 +1,4 @@
+import { CircleSlash, ShieldCheck, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { JSX } from 'react';
 
@@ -7,18 +8,27 @@ import { t } from '../../i18n/t';
 import type {
   CreatedUserView,
   ManagedMembershipView,
+  ManagedUserView,
   ResetGrantView,
 } from '../../services/api/views';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { StatTile } from '../../ui/cards/StatTile';
+import { DataTable } from '../../ui/data/DataTable';
+import type { DataColumn } from '../../ui/data/DataTable';
+import { PageHeader } from '../../ui/layout/PageHeader';
+import { Avatar } from '../../ui/primitives/Avatar';
+import { Badge } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
+import { Chip } from '../../ui/primitives/Chip';
 import { cn } from '../../ui/styles/cn';
 import { OneTimeCodeDialog } from './OneTimeCodeDialog';
 import type { IssuedCode } from './OneTimeCodeDialog';
 import styles from './Users.module.css';
 import { CreateUserDialog } from './UserDialogs';
-import { UserRow } from './UserRow';
+import { roleText } from './roleText';
+import { UserActions, statusText, statusTone } from './UserActions';
 import { useAllMemberships, useManagedUsers } from './userQueries';
 
 function toAccountRole(membership: ManagedMembershipView): AccountRole {
@@ -71,50 +81,135 @@ export function UsersPage(): JSX.Element {
   }
 
   const items = users.data.pages.flatMap((page) => page.items);
+  const activeCount = items.filter((user) => user.status === 'ACTIVE').length;
+  const blockedCount = items.filter((user) => user.status !== 'ACTIVE').length;
+  const issue = (title: string, description: string, code: string, expiresText: string): void => {
+    setNotice(null);
+    setIssued({ title, description, code, expiresText });
+  };
 
-  return (
-    <>
-      <ScreenTitle>{t('screens.users')}</ScreenTitle>
-      <div className={cn(styles.toolbar)}>
-        <CreateUserDialog
-          open={creating}
-          onOpenChange={setCreating}
-          trigger={<Button variant="primary">{t('users.create')}</Button>}
-          onCreated={(created: CreatedUserView) => {
-            setNotice(null);
-            setIssued({
-              title: t('users.codeTitle'),
-              description: t('users.codeDescription'),
-              code: created.activationCode,
-              expiresText: created.expiresAt.text,
-            });
+  const columns: readonly DataColumn<ManagedUserView>[] = [
+    {
+      id: 'person',
+      header: t('users.columns.person'),
+      cell: (user) => (
+        <span className={cn(styles.person)}>
+          <Avatar name={user.fullName} />
+          <span className={cn(styles.personText)}>
+            <strong className={cn(styles.name)}>{user.fullName}</strong>
+            <span className={cn(styles.muted)}>{user.username}</span>
+          </span>
+        </span>
+      ),
+    },
+    {
+      id: 'role',
+      header: t('users.columns.role'),
+      cell: (user) => {
+        const role = roleByUser.get(user.id) ?? null;
+        return (
+          <Chip tone={role === null ? 'sand' : 'aqua'}>
+            {role === null ? t('users.noRole') : roleText(role.roleCode)}
+          </Chip>
+        );
+      },
+    },
+    {
+      id: 'status',
+      header: t('users.columns.status'),
+      cell: (user) => (
+        <span className={cn(styles.statusCell)}>
+          <Badge tone={statusTone(user.status)}>{statusText(user.status)}</Badge>
+          {user.mustChangePassword ? (
+            <span className={cn(styles.muted)}>{t('users.passwordPending')}</span>
+          ) : null}
+        </span>
+      ),
+    },
+    {
+      id: 'activity',
+      header: t('users.columns.activity'),
+      hideOnNarrow: true,
+      cell: (user) => (
+        <span className={cn(styles.muted)}>
+          {user.lastLoginAt === null
+            ? t('users.neverLoggedIn')
+            : t('users.lastLogin', { date: user.lastLoginAt.text })}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: t('users.columns.actions'),
+      align: 'end',
+      cell: (user) => (
+        <UserActions
+          user={user}
+          role={roleByUser.get(user.id) ?? null}
+          onChanged={setNotice}
+          onIssued={(grant: ResetGrantView) => {
+            issue(
+              t('users.codeResetTitle'),
+              t('users.codeResetDescription'),
+              grant.code,
+              grant.expiresAt.text,
+            );
           }}
         />
-      </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className={cn(styles.page)}>
+      <ScreenTitle>{t('screens.users')}</ScreenTitle>
+      <PageHeader
+        lead={t('users.lead')}
+        actions={
+          <CreateUserDialog
+            open={creating}
+            onOpenChange={setCreating}
+            trigger={<Button variant="primary">{t('users.create')}</Button>}
+            onCreated={(created: CreatedUserView) => {
+              issue(
+                t('users.codeTitle'),
+                t('users.codeDescription'),
+                created.activationCode,
+                created.expiresAt.text,
+              );
+            }}
+          />
+        }
+      />
+      <ul className={cn(styles.tiles)} aria-label={t('users.tilesLabel')}>
+        <li>
+          <StatTile icon={Users} tint="aqua" label={t('users.tiles.total')} value={items.length} />
+        </li>
+        <li>
+          <StatTile
+            icon={ShieldCheck}
+            tint="mint"
+            label={t('users.tiles.active')}
+            value={activeCount}
+          />
+        </li>
+        <li>
+          <StatTile
+            icon={CircleSlash}
+            tint="sand"
+            label={t('users.tiles.blocked')}
+            value={blockedCount}
+          />
+        </li>
+      </ul>
       {notice === null ? null : <p role="status">{notice}</p>}
-      {items.length === 0 ? (
-        <p>{t('users.empty')}</p>
-      ) : (
-        <ul className={styles.list}>
-          {items.map((user) => (
-            <UserRow
-              key={user.id}
-              user={user}
-              role={roleByUser.get(user.id) ?? null}
-              onChanged={setNotice}
-              onIssued={(grant: ResetGrantView) => {
-                setNotice(null);
-                setIssued({
-                  title: t('users.codeResetTitle'),
-                  description: t('users.codeResetDescription'),
-                  code: grant.code,
-                  expiresText: grant.expiresAt.text,
-                });
-              }}
-            />
-          ))}
-        </ul>
-      )}
+      <DataTable
+        caption={t('screens.users')}
+        columns={columns}
+        rows={items}
+        getRowKey={(user) => user.id}
+        empty={{ title: t('users.empty') }}
+      />
       {users.hasNextPage ? (
         <Button
           disabled={users.isFetchingNextPage}
@@ -131,6 +226,6 @@ export function UsersPage(): JSX.Element {
           setIssued(null);
         }}
       />
-    </>
+    </div>
   );
 }
