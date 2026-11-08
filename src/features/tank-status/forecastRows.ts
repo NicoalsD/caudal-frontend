@@ -15,6 +15,13 @@ export interface ObservedLevel {
   readonly value: number;
 }
 
+/** A reading of the history; several can share one day. */
+export interface HistoryLevel {
+  readonly observedAt: Date;
+  readonly dayKey: string;
+  readonly value: number;
+}
+
 export interface ForecastDay {
   readonly dayKey: string;
   readonly p10: number;
@@ -30,10 +37,26 @@ export interface ForecastDay {
 export function toForecastRows(
   observed: ObservedLevel | null,
   points: readonly ForecastDay[],
+  history: readonly HistoryLevel[] = [],
 ): ForecastRow[] {
-  const rows: ForecastRow[] = [];
+  // One value per day for the daily axis: the last reading of that day.
+  const lastOfDay = new Map<string, HistoryLevel>();
+  for (const reading of history) {
+    const kept = lastOfDay.get(reading.dayKey);
+    if (
+      Number.isFinite(reading.value) &&
+      (kept === undefined || reading.observedAt.getTime() > kept.observedAt.getTime())
+    ) {
+      lastOfDay.set(reading.dayKey, reading);
+    }
+  }
+  const byDay = new Map<string, ForecastRow>();
+  for (const reading of lastOfDay.values()) {
+    byDay.set(reading.dayKey, { dayKey: reading.dayKey, observed: reading.value });
+  }
+  // The status level is the newest reading: it wins over the history of its own day.
   if (observed !== null && Number.isFinite(observed.value)) {
-    rows.push({ dayKey: observed.dayKey, observed: observed.value });
+    byDay.set(observed.dayKey, { dayKey: observed.dayKey, observed: observed.value });
   }
   for (const point of points) {
     if (![point.p10, point.p50, point.p90].every(Number.isFinite)) {
@@ -41,7 +64,8 @@ export function toForecastRows(
     }
     const low = Math.min(point.p10, point.p90);
     const high = Math.max(point.p10, point.p90);
-    rows.push({
+    byDay.set(point.dayKey, {
+      ...byDay.get(point.dayKey),
       dayKey: point.dayKey,
       p10: low,
       p50: point.p50,
@@ -49,5 +73,5 @@ export function toForecastRows(
       range: [low, high],
     });
   }
-  return rows.sort((a, b) => a.dayKey.localeCompare(b.dayKey));
+  return [...byDay.values()].sort((a, b) => a.dayKey.localeCompare(b.dayKey));
 }

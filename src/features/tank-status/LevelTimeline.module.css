@@ -1,0 +1,107 @@
+.timeline {
+  --timeline-ink: var(--color-text-primary);
+  --timeline-quiet: var(--color-text-secondary);
+  --timeline-track: var(--color-water-300);
+  --timeline-thumb: var(--color-water-700);
+  --timeline-ring: var(--color-raised);
+  color: var(--timeline-ink);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.onDark {
+  --timeline-ink: var(--color-on-brand);
+  --timeline-quiet: color-mix(in srgb, var(--color-on-brand) 82%, transparent);
+  --timeline-track: color-mix(in srgb, var(--color-on-brand) 45%, transparent);
+  --timeline-thumb: var(--color-on-brand);
+  --timeline-ring: var(--color-brand-900);
+}
+
+.range {
+  width: 100%;
+  min-height: var(--target-min);
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  accent-color: var(--color-water-700);
+  cursor: pointer;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  background: var(--timeline-track);
+  border-radius: var(--radius-chip);
+}
+
+.range::-moz-range-track {
+  height: 0.5rem;
+  background: var(--timeline-track);
+  border-radius: var(--radius-chip);
+}
+
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--target-min);
+  height: var(--target-min);
+  margin-top: calc((0.5rem - var(--target-min)) / 2);
+  background: var(--timeline-thumb);
+  border: 3px solid var(--timeline-ring);
+  border-radius: var(--radius-chip);
+}
+
+.range::-moz-range-thumb {
+  width: var(--target-min);
+  height: var(--target-min);
+  background: var(--timeline-thumb);
+  border: 3px solid var(--timeline-ring);
+  border-radius: var(--radius-chip);
+}
+
+.range:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.scale {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  /* Two lines: the ends of the slider, and under them "Hoy", which can land beside an end. */
+  min-height: 3rem;
+  font-size: var(--font-size-small);
+  color: var(--timeline-quiet);
+}
+
+.today {
+  position: absolute;
+  inset-block-start: 1.5rem;
+  transform: translateX(-50%);
+  font-weight: var(--font-weight-bold);
+  color: var(--timeline-ink);
+}
+
+.sentence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ochre-800);
+  background: var(--color-ochre-100);
+  border-radius: var(--radius-chip);
+}
+
+.chipIcon {
+  width: 1rem;
+  height: 1rem;
+}

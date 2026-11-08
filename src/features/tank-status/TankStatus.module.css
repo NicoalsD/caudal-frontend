@@ -26,36 +26,6 @@
   font: inherit;
 }
 
-.level {
-  display: flex;
-  flex-direction: column;
-}
-
-.levelValue {
-  font-size: var(--font-size-display);
-  line-height: var(--line-height-display);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-water-700);
-}
-
-.facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-  gap: var(--space-4);
-  margin: 0;
-}
-
-.fact dt {
-  font-size: var(--font-size-small);
-  color: var(--color-text-secondary);
-}
-
-.fact dd {
-  margin: 0;
-  font-weight: var(--font-weight-bold);
-}
-
 .trend {
   display: inline-flex;
   align-items: center;
@@ -101,6 +71,16 @@
 .pointsTable th {
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
+}
+
+.swatchMedian.swatchEstimate {
+  border-top-color: var(--color-ochre-700);
+  border-top-style: dashed;
+}
+
+.swatchRange.swatchEstimate {
+  background: var(--color-ochre-100);
+  outline: 1px dashed var(--color-ochre-700);
 }
 
 .notice {
@@ -151,8 +131,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding-block-end: var(--space-4);
+  padding-block-end: var(--space-3);
   border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.anomaly p {
+  margin: 0;
 }
 
 .runAction {
@@ -164,9 +148,303 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
 }
 
 .actions > * {
   min-height: 48px;
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.facts p {
+  margin: 0;
+}
+
+.meaning {
+  font-weight: var(--font-weight-bold);
+}
+
+.trendLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gaugeSlot {
+  display: flex;
+  flex-direction: column;
+}
+
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.tankCard {
+  min-width: 0;
+}
+
+.chartBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-small);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 1.5rem;
+  height: 0;
+  border-top: 3px solid var(--color-text-primary);
+}
+
+.swatchRead {
+  border-top-color: var(--color-text-primary);
+}
+
+.swatchMedian {
+  border-top-color: var(--color-water-700);
+  border-top-style: solid;
+}
+
+.swatchRange {
+  height: 0.75rem;
+  border-top: 0;
+  background: var(--color-water-300);
+}
+
+.swatchReserve {
+  border-top-color: var(--color-clay-700);
+  border-top-style: dashed;
+}
+
+.swatchLimit {
+  border-top-width: 1px;
+  border-top-color: var(--color-border-strong);
+  border-top-style: dashed;
+}
+
+.numbers summary {
+  min-height: var(--target-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-water-700);
+  font-weight: var(--font-weight-bold);
+}
+
+.review {
+  gap: var(--space-3);
+}
+
+.reviewTitle {
+  margin: 0;
+}
+
+.reviewColumns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+.reviewColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reviewColumn h3 {
+  margin: 0;
+}
+
+.reviewEmpty p {
+  margin: 0;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 64rem) {
+  .stack {
+    max-width: none;
+  }
+
+  .overview {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    grid-template-areas:
+      'tank facts'
+      'tank chart';
+    grid-template-rows: auto 1fr;
+    align-items: stretch;
+    gap: var(--space-5);
+  }
+
+  /* The tank keeps its size and stays in view while the longer column beside it scrolls. */
+  .tankCard {
+    grid-area: tank;
+    position: sticky;
+    inset-block-start: var(--space-4);
+    align-self: start;
+  }
+
+  .factsCard {
+    grid-area: facts;
+  }
+
+  .overview > section:last-child {
+    grid-area: chart;
+  }
+
+  .gaugeSlot {
+    flex: 1;
+    min-height: 30rem;
+  }
+
+  .chartWrap {
+    height: 22rem;
+  }
+
+  .reviewColumns {
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  }
+
+  .anomaly {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .anomaly > p:first-child {
+    flex: 1 1 14rem;
+  }
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.head h1 {
+  margin: 0;
+}
+
+.console {
+  display: block;
+}
+
+.rail {
+  display: none;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .head {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .head > :not(h1):not(title) {
+    flex: 1;
+    max-width: 54rem;
+  }
+
+  .stackConsole {
+    gap: var(--space-3);
+  }
+
+  .console {
+    display: grid;
+    grid-template-columns: 17rem minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4);
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .center {
+    gap: var(--space-4);
+  }
+
+  .overviewConsole {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+
+  .overviewConsole .stale {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-small);
+  }
+
+  .overviewConsole .notice {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-small);
+  }
+
+  .overviewConsole .chartWrap {
+    height: 17rem;
+  }
+
+  /* In the console the slider walks the days: only the farthest one is spelled out. */
+  .overviewConsole .summary {
+    padding: 0;
+    list-style: none;
+    font-size: var(--font-size-small);
+  }
+
+  .overviewConsole .summary li:not(:last-child) {
+    display: none;
+  }
+
+  .overviewConsole .factsCard {
+    padding-block: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .overviewConsole .factsCard h2 {
+    font-size: var(--font-size-small);
+  }
 }

@@ -101,11 +101,11 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
     renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
     const user = userEvent.setup();
 
-    expect(await screen.findByText(t('forecast.none'))).toBeVisible();
+    expect(await screen.findByText(t('forecast.noForecastYet'))).toBeVisible();
     await user.click(await runButton());
 
     expect(await screen.findByText(t('forecast.runDoneAi'))).toBeVisible();
-    expect(screen.queryByText(t('forecast.none'))).not.toBeInTheDocument();
+    expect(screen.queryByText(t('forecast.noForecastYet'))).not.toBeInTheDocument();
   });
 
   it('says how long to wait when the hourly limit is reached', async () => {
