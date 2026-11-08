@@ -84,8 +84,19 @@
   --radius-chip: 999px;
   --target-min: 3rem;
   --field-height: 3.25rem;
-  --content-max: 45rem;
-  --content-wide: 92rem;
+  /* The 3D scene is always drawn on the deep brand field, in light and dark mode alike. */
+  --scene-field-top: #0f4a49;
+  --scene-field-bottom: #04100f;
+  --scene-open: #4fd1a5;
+  --scene-closed: #ec7a62;
+  --scene-unknown: #b8c4c3;
+  --scene-pending: #f2b84b;
+  --scene-delivered: #6cc4ff;
+  --scene-failed: #ff5d5d;
+  --scene-pipe: #8fb8b6;
+  --scene-ground: #0b3d3b;
+  --measure-prose: 70ch;
+  --dialog-width: 32rem;
   --sidebar-width: 15rem;
   --focus-ring-width: 3px;
   --focus-ring-offset: 2px;

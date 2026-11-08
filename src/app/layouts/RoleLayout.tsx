@@ -2,7 +2,7 @@ import { useId, useState } from 'react';
 import type { JSX } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Menu, X } from 'lucide-react';
-import { NavLink, Outlet, useMatches } from 'react-router';
+import { NavLink, Outlet } from 'react-router';
 
 import { SignOutButton } from '../../features/auth/SignOutButton';
 import { SyncStatus } from '../../features/sync';
@@ -40,11 +40,6 @@ function groupNavItems(items: readonly NavItem[]): readonly NavGroup[] {
   return groups;
 }
 
-/** A route opts in to the wide work area with `handle: { wide: true }` (dashboards only). */
-function isWideHandle(handle: unknown): boolean {
-  return typeof handle === 'object' && handle !== null && 'wide' in handle && handle.wide === true;
-}
-
 interface RoleLayoutProps {
   readonly navItems: readonly NavItem[];
   /**
@@ -65,7 +60,6 @@ export const MAIN_CONTENT_ID = 'main-content';
 export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.Element {
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
-  const wide = useMatches().some((match) => isWideHandle(match.handle));
   return (
     <div className={cn(styles.shell)} data-tab-bar={tabBar}>
       {/* Screens behind a session are not for search engines (robots.txt says the same). */}
@@ -121,7 +115,7 @@ export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.E
         </div>
       </header>
       <SyncStatus />
-      <main id={MAIN_CONTENT_ID} className={cn(styles.main)} data-wide={wide}>
+      <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
         <Outlet />
       </main>
     </div>

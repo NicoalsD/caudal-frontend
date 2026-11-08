@@ -78,7 +78,7 @@ const operatorRoutes: RouteObject = {
     {
       element: <OperatorLayout />,
       children: [
-        { path: ROUTE_PATHS.operator.home, handle: { wide: true }, element: <OperatorHomePage /> },
+        { path: ROUTE_PATHS.operator.home, element: <OperatorHomePage /> },
         { path: ROUTE_PATHS.operator.newReading, element: <ReadingPage /> },
         { path: ROUTE_PATHS.operator.pending, element: <PendingReadingsPage /> },
         { path: ROUTE_PATHS.operator.dayClosure, element: <DayClosurePage /> },
@@ -96,7 +96,7 @@ const boardRoutes: RouteObject = {
       children: [
         {
           path: ROUTE_PATHS.board.tank,
-          handle: { wide: true },
+
           element: <BoardDashboardPage />,
         },
         { path: ROUTE_PATHS.board.proposals, element: <ProposalListPage /> },
@@ -180,7 +180,7 @@ const sharedRoutes: RouteObject = {
   children: [
     {
       element: <SharedLayout />,
-      children: [{ path: ROUTE_PATHS.tank, handle: { wide: true }, element: <TankStatusPage /> }],
+      children: [{ path: ROUTE_PATHS.tank, element: <TankStatusPage /> }],
     },
   ],
 };

@@ -119,7 +119,7 @@ En escritorio, `body` sube a 20 px. El texto se define en `rem`, para que respet
 | `--radius-chip` | 999 px | Chips de estado |
 | `--target-min` | 48 px | Tamaño mínimo de objetivo táctil |
 | `--field-height` | 52 px | Altura de campos de texto |
-| `--content-max` | 720 px | Ancho máximo del contenido (escritorio) |
+| `--measure-prose` | 70ch | Medida de la prosa larga; el resto usa todo el ancho |
 
 La jerarquía se da con color de superficie y con borde (`--color-border-subtle` para separar, `--color-border-strong` para controles). La única sombra de las pantallas de tareas es la del botón principal: corta, con desplazamiento y teñida del turquesa profundo, como los botones del style tile.
 

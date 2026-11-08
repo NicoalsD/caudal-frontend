@@ -152,9 +152,14 @@
 }
 
 .main {
-  max-width: var(--content-max);
-  margin-inline: auto;
+  width: 100%;
+  min-width: 0;
   padding: var(--space-5) var(--space-4) var(--space-7);
+}
+
+/* Only long prose keeps a reading measure; everything else uses the whole width. */
+.main p {
+  max-inline-size: var(--measure-prose);
 }
 
 /* Only the sidebar and the bottom tab bar carry icons; the "Menú" fold and the top bar do not. */
@@ -165,8 +170,7 @@
 }
 
 /*
- * Desktop: the header turns into a fixed left sidebar. The content column keeps its narrow measure
- * for forms and lists; a dashboard route asks for the wide work area with `handle: { wide: true }`.
+ * Desktop: the header turns into a fixed left sidebar. The content column uses the whole width.
  */
 @media (min-width: 64rem) {
   .shell {
@@ -262,12 +266,6 @@
   .main {
     width: 100%;
     padding: var(--space-6) var(--space-6) var(--space-7);
-  }
-
-  .main[data-wide='true'] {
-    max-width: var(--content-wide);
-    margin-inline: 0;
-    font-size: var(--font-size-body);
   }
 }
 
