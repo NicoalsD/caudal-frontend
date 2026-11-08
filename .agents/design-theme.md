@@ -221,6 +221,20 @@ La página de presentación (`src/features/landing`) es donde la marca se expres
 - **Un momento de desplazamiento con GSAP** (`heroMotion.ts`, `ScrollTrigger`): al bajar, los tres teléfonos suben a distinta velocidad y la foto se desplaza. El resto de entradas son CSS (`useReveal`), una sola vez.
 - **Carga diferida y PWA:** GSAP se importa con `import()` solo desde la landing (`useHeroMotion.ts`). `vite.config.ts` lo excluye del precache (`globIgnores`), así un fontanero que instala la PWA con mala señal nunca lo descarga.
 - **Movimiento reducido:** con `prefers-reduced-motion: reduce` GSAP no se carga y nada se mueve.
+
+### Tanque 3D de los paneles
+
+Excepción pedida por el equipo a los fondos planos de las pantallas de tareas: en escritorio (≥ 64rem), el tanque del panel de la Junta, del inicio del fontanero, de `/tanque` y de la lectura nueva es un cilindro 3D con three.js (`src/ui/tank/tankScene.ts`) sobre el campo `brand-900`.
+
+- **Colores:** salen de los tokens (`water-300`, `brand-500`, `on-brand`); la escena no tiene colores propios.
+- **Carga:** `tankScene` y three.js se importan con `import()` solo en escritorio y están fuera del precache (`globIgnores`). El celular nunca los descarga.
+- **Respaldo:** en celular, sin WebGL o sin conexión se ve el tanque plano (`TankGauge`), con la misma información.
+- **Movimiento:** con `prefers-reduced-motion: reduce` el agua no se mueve y cada cambio se dibuja una vez. La animación se detiene cuando el tanque no está en pantalla.
+- **Litros:** `TankStage` los calcula con la capacidad del tanque suponiendo paredes rectas, por eso dice "aprox.". Sin capacidad registrada no se muestran.
+
+### Logo
+
+`BrandLogo` usa los archivos oficiales de `src/assets/brand`: blanco sobre el campo de marca y en modo oscuro, turquesa sobre superficies claras y negro al imprimir.
 - **Fotografía:** paisajes reales de Nariño en WebP con `srcset` (960, 1600 y 2400 px) desde Wikimedia Commons, con créditos en el pie: volcán Galeras y la Laguna Verde del Azufral, vecino de Guaitarilla. En Commons no hay fotos de Guaitarilla con la resolución suficiente; cuando el equipo tenga fotos propias del municipio, reemplazan a estas.
 - **Escala de display:** tokens propios de la landing en `tokens.css` (`--font-size-hero`, `--font-size-statement`, `--font-size-lead`, `--tracking-*`, `--space-8`, `--space-9`, `--landing-max`, `--duration-reveal`, `--duration-fill`, `--duration-step`, `--ease-out-expo`).
 - **Sin llamadas a la API:** la landing no depende del backend; las pantallas de muestra llevan la marca "Datos simulados".
