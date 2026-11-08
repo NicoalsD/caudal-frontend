@@ -70,11 +70,13 @@ const MIN_HALF_SPAN = (24 * Math.PI) / 180;
 const LABEL_LOW = 0.5;
 const LABEL_HIGH = 2.4;
 const LABEL_NEAR = 0.15;
-const LABEL_FAR = 1.3;
+const LABEL_FAR = 0.6;
 /* The small scene (look only) comes closer so the tank and the valves fill the card. */
 const COMPACT_DISTANCE = 1.15;
 const COMPACT_TARGET_Y = 1.9;
 const WIDE_ASPECT = 1.5;
+/* The full scene starts a little farther so the outer valve labels stay inside the frame. */
+const FULL_DISTANCE = 1.12;
 
 /* Particles. */
 const OUTLET_PARTICLES = 46;
@@ -1181,12 +1183,8 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
       camera.aspect = width / height;
       if (firstSize) {
         // A narrow screen starts farther away, so the whole scene fits.
-        const scale =
-          camera.aspect < WIDE_ASPECT
-            ? Math.min(2.4, WIDE_ASPECT / camera.aspect)
-            : compact
-              ? COMPACT_DISTANCE
-              : 1;
+        const fit = camera.aspect < WIDE_ASPECT ? Math.min(2.4, WIDE_ASPECT / camera.aspect) : 1;
+        const scale = fit * (compact ? COMPACT_DISTANCE : FULL_DISTANCE);
         camera.position.sub(controls.target).multiplyScalar(scale).add(controls.target);
         firstSize = false;
       }
