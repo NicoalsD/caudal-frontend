@@ -136,7 +136,10 @@ function PilotCard(): JSX.Element | null {
     return null;
   }
   return (
-    <section className={cn(styles.card, styles.wide, styles.pilotCard)} aria-labelledby="board-pilot-title">
+    <section
+      className={cn(styles.card, styles.wide, styles.pilotCard)}
+      aria-labelledby="board-pilot-title"
+    >
       <h2 id="board-pilot-title" className={cn(styles.cardTitle)}>
         {t('board.pilot.title')}
       </h2>
