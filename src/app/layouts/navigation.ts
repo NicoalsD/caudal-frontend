@@ -9,7 +9,9 @@ import {
   Cpu,
   Droplets,
   FileText,
+  Bot,
   GitFork,
+  Network,
   HeartPulse,
   House,
   LayoutDashboard,
@@ -65,6 +67,18 @@ export const BOARD_NAV: readonly NavItem[] = [
     group: BOARD_DAY_GROUP,
   },
   {
+    to: ROUTE_PATHS.board.autopilot,
+    label: t('nav.autopilot'),
+    icon: Bot,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.reports,
+    label: t('nav.reports'),
+    icon: FileText,
+    group: BOARD_DAY_GROUP,
+  },
+  {
     to: ROUTE_PATHS.board.rules,
     label: t('nav.rules'),
     icon: SlidersHorizontal,
@@ -80,6 +94,12 @@ export const BOARD_NAV: readonly NavItem[] = [
 
 /** Extra items only for BOARD_ADMIN: accounts, entities, devices, the audit log and the AI evaluation. */
 export const BOARD_ADMIN_NAV: readonly NavItem[] = [
+  {
+    to: ROUTE_PATHS.board.regions,
+    label: t('nav.regions'),
+    icon: Network,
+    group: BOARD_ADMIN_GROUP,
+  },
   { to: ROUTE_PATHS.board.users, label: t('nav.users'), icon: Users, group: BOARD_ADMIN_GROUP },
   {
     to: ROUTE_PATHS.board.entities,

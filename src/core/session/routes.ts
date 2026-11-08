@@ -39,6 +39,9 @@ export const ROUTE_PATHS = {
     incidents: '/junta/incidentes',
     entities: '/junta/entidades',
     users: '/junta/usuarios',
+    autopilot: '/junta/piloto',
+    regions: '/junta/regiones',
+    reports: '/junta/reportes',
   },
   team: {
     base: '/equipo',
@@ -86,6 +89,7 @@ export const ROLES_BY_AREA = {
 const ROLES_BY_PATH: readonly (readonly [string, readonly Role[]])[] = [
   [ROUTE_PATHS.board.users, ROLES_BY_AREA.boardAdmin],
   [ROUTE_PATHS.board.entities, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.regions, ROLES_BY_AREA.boardAdmin],
   [ROUTE_PATHS.board.base, ROLES_BY_AREA.board],
   [ROUTE_PATHS.team.evaluation, ROLES_BY_AREA.evaluation],
   [ROUTE_PATHS.team.audit, ROLES_BY_AREA.audit],

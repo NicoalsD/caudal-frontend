@@ -27,6 +27,9 @@ import { EntitySummariesPage } from '../features/entity-summaries';
 import { EvaluationPage } from '../features/evaluation';
 import { AuditPage } from '../features/audit';
 import { DevicesPage } from '../features/devices';
+import { AutopilotPage } from '../features/autopilot';
+import { RegionsPage } from '../features/regions';
+import { ReportsPage } from '../features/reports';
 import { AuditLayout } from './layouts/AuditLayout';
 import { EvaluationLayout } from './layouts/EvaluationLayout';
 import { RequireAuth } from './guards/RequireAuth';
@@ -109,11 +112,14 @@ const boardRoutes: RouteObject = {
         { path: ROUTE_PATHS.board.network, element: <NetworkPage /> },
         { path: ROUTE_PATHS.board.minutes, element: <MinutesPage /> },
         { path: ROUTE_PATHS.board.incidents, element: <IncidentsPage /> },
+        { path: ROUTE_PATHS.board.autopilot, element: <AutopilotPage /> },
+        { path: ROUTE_PATHS.board.reports, element: <ReportsPage /> },
         {
           element: <RequireRole roles={ROLES_BY_AREA.boardAdmin} />,
           children: [
             { path: ROUTE_PATHS.board.users, element: <UsersPage /> },
             { path: ROUTE_PATHS.board.entities, element: <EntitiesPage /> },
+            { path: ROUTE_PATHS.board.regions, element: <RegionsPage /> },
           ],
         },
       ],
