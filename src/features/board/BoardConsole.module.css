@@ -1,0 +1,132 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-surface);
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: var(--space-1) var(--space-2);
+  text-align: start;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.table td {
+  white-space: nowrap;
+}
+
+/* A shift ("9:00 a. m. a 1:00 p. m.") is longer than the rail is wide. */
+.table td.wrap {
+  white-space: normal;
+}
+
+.table th[scope='row'] {
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+}
+
+.now {
+  background: var(--color-water-100);
+}
+
+.nowTag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-water-700);
+}
+
+.tagIcon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.quiet {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.allClear {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-paramo-800);
+  font-weight: var(--font-weight-bold);
+}
+
+.counts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.counts li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2rem;
+}
+
+.count {
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  position: relative;
+  height: 0.75rem;
+  background: var(--color-sand-200);
+  border-radius: var(--radius-chip);
+}
+
+.fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--color-water-700);
+  border-radius: var(--radius-chip);
+}
+
+.barColumn {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .barColumn {
+    display: table-cell;
+    width: 55%;
+  }
+}

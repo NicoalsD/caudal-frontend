@@ -85,18 +85,30 @@ export function BoardDayGuide(): JSX.Element | null {
     })),
   );
   const step = dayStepFor(current);
-  const guide = (children: JSX.Element) => (
+  const guide = (content: {
+    readonly currentIndex: number;
+    readonly explain: string | null;
+    readonly action: JSX.Element | null;
+    readonly notes?: JSX.Element | null;
+  }) => (
     <section className={cn(styles.guide)} aria-label={t('proposals.guide.heading')}>
       <h2 className={cn(styles.heading)}>{t('proposals.guide.heading')}</h2>
-      {children}
+      <div className={cn(styles.band)}>
+        <StepList currentIndex={content.currentIndex} />
+        {content.action === null ? null : (
+          <div className={cn(styles.actionSlot)}>{content.action}</div>
+        )}
+      </div>
+      {content.explain === null ? null : <p className={cn(styles.explain)}>{content.explain}</p>}
+      {content.notes}
     </section>
   );
 
   if (step === 'PUBLISHED') {
-    return guide(
-      <>
-        <StepList currentIndex={GUIDE_STEP_IDS.length} />
-        <p>{t('proposals.guide.published')}</p>
+    return guide({
+      currentIndex: GUIDE_STEP_IDS.length,
+      explain: t('proposals.guide.published'),
+      action: (
         <LinkButton
           variant="primary"
           className={cn(styles.action)}
@@ -104,58 +116,68 @@ export function BoardDayGuide(): JSX.Element | null {
         >
           {t('proposals.guide.publishedLink')}
         </LinkButton>
-      </>,
-    );
+      ),
+    });
   }
 
   const proposalId = current?.id ?? '';
-  return guide(
-    <>
-      <StepList currentIndex={GUIDE_STEP_IDS.indexOf(step)} />
-      {step === 'GENERATE' ? (
-        canGenerate ? (
-          <Button
-            variant="primary"
-            className={cn(styles.action)}
-            disabled={!online || generate.isPending}
-            onClick={() => {
-              generate.mutate(today);
-            }}
-          >
-            {generate.isPending ? t('proposals.generating') : t('proposals.generate')}
-          </Button>
-        ) : (
-          <p>{t('proposals.guide.noPermission')}</p>
-        )
-      ) : null}
-      {step === 'REVIEW' ? (
-        <Button
-          variant="primary"
-          className={cn(styles.action)}
-          onClick={() => {
-            void navigate(proposalDetailPath(proposalId));
-          }}
-        >
-          {t('proposals.guide.review')}
-        </Button>
-      ) : null}
-      {step === 'PUBLISH' ? (
-        <Button
-          variant="primary"
-          className={cn(styles.action)}
-          onClick={() => {
-            void navigate(publicationPath(proposalId));
-          }}
-        >
-          {t('proposals.guide.publish')}
-        </Button>
-      ) : null}
-      {step === 'GENERATE' && !online ? <p>{t('proposals.offline')}</p> : null}
-      {step === 'GENERATE' && generate.isError ? (
-        <FormAlert message={errorText(generate.error).message} />
-      ) : null}
-    </>,
-  );
+  let action: JSX.Element | null = null;
+  let explain: string;
+  if (step === 'GENERATE') {
+    explain = t('proposals.guide.explainGenerate');
+    action = canGenerate ? (
+      <Button
+        variant="primary"
+        className={cn(styles.action)}
+        disabled={!online || generate.isPending}
+        onClick={() => {
+          generate.mutate(today);
+        }}
+      >
+        {generate.isPending ? t('proposals.generating') : t('proposals.generate')}
+      </Button>
+    ) : null;
+  } else if (step === 'REVIEW') {
+    explain = t('proposals.guide.explainReview');
+    action = (
+      <Button
+        variant="primary"
+        className={cn(styles.action)}
+        onClick={() => {
+          void navigate(proposalDetailPath(proposalId));
+        }}
+      >
+        {t('proposals.guide.review')}
+      </Button>
+    );
+  } else {
+    explain = t('proposals.guide.explainPublish');
+    action = (
+      <Button
+        variant="primary"
+        className={cn(styles.action)}
+        onClick={() => {
+          void navigate(publicationPath(proposalId));
+        }}
+      >
+        {t('proposals.guide.publish')}
+      </Button>
+    );
+  }
+  return guide({
+    currentIndex: GUIDE_STEP_IDS.indexOf(step),
+    explain,
+    action,
+    notes: (
+      <>
+        {step === 'GENERATE' && !canGenerate ? <p>{t('proposals.guide.noPermission')}</p> : null}
+        {step === 'GENERATE' && !online ? <p>{t('proposals.offline')}</p> : null}
+        {step === 'GENERATE' && generate.isError ? (
+          <FormAlert message={errorText(generate.error).message} />
+        ) : null}
+      </>
+    ),
+  });
 }
 
 interface StepListProps {
@@ -175,7 +197,12 @@ function StepList({ currentIndex }: StepListProps): JSX.Element {
             className={cn(styles.step, styles[state])}
             aria-current={state === 'current' ? 'step' : undefined}
           >
-            <Icon aria-hidden="true" size={ICON_SIZE} className={cn(styles.icon)} />
+            <span className={cn(styles.marker)}>
+              <Icon aria-hidden="true" size={ICON_SIZE} className={cn(styles.icon)} />
+              {index < GUIDE_STEP_IDS.length - 1 ? (
+                <span aria-hidden="true" className={cn(styles.line)} />
+              ) : null}
+            </span>
             <span className={cn(styles.label)}>{t(STEP_KEY[id])}</span>
             <span className={cn(styles.state)}>{t(STATE_KEY[state])}</span>
           </li>

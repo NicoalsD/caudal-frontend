@@ -7,12 +7,22 @@
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
+.guide p {
+  margin: 0;
+}
+
 .heading {
   margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-small);
   line-height: var(--line-height-small);
   font-weight: var(--font-weight-bold);
+}
+
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .steps {
@@ -32,6 +42,15 @@
   color: var(--color-text-secondary);
 }
 
+.marker {
+  display: inline-flex;
+  align-items: center;
+}
+
+.line {
+  display: none;
+}
+
 .done {
   color: var(--color-paramo-800);
 }
@@ -45,10 +64,6 @@
   flex: none;
 }
 
-.label {
-  flex: 1;
-}
-
 .state {
   color: var(--color-text-secondary);
   font-size: var(--font-size-small);
@@ -57,6 +72,11 @@
 
 .action {
   width: 100%;
+}
+
+.explain {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
 }
 
 @media (min-width: 40rem) {
@@ -72,5 +92,70 @@
   .action {
     width: auto;
     align-self: flex-start;
+  }
+}
+
+@media (min-width: 64rem) {
+  .guide {
+    gap: var(--space-2);
+    padding-block: var(--space-3);
+  }
+
+  .heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .band {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .steps {
+    flex: 1;
+    max-width: 44rem;
+    gap: 0;
+  }
+
+  .step {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    justify-items: start;
+    align-items: start;
+    flex: 1;
+    gap: 0;
+  }
+
+  .step:last-child {
+    flex: none;
+    min-width: 8rem;
+  }
+
+  .marker {
+    display: flex;
+    width: 100%;
+    gap: var(--space-2);
+  }
+
+  .line {
+    display: block;
+    flex: 1;
+    height: 0;
+    margin-inline-end: var(--space-2);
+    border-top: 2px solid var(--color-border-strong);
+  }
+
+  .done .line {
+    border-top-color: var(--color-paramo-800);
+  }
+
+  .actionSlot {
+    flex: none;
   }
 }
