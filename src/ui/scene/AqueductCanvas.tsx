@@ -8,7 +8,9 @@ import styles from './AqueductCanvas.module.css';
 
 export interface AqueductCanvasProps {
   readonly frame: SceneFrame;
-  readonly onSelectValve: (valveId: string) => void;
+  readonly onSelectValve?: (valveId: string) => void;
+  /** Look only: a click on a valve does nothing (the Board's small scene). */
+  readonly readOnly?: boolean;
   /** A valve lit from outside the canvas (the focused row of the valve list). */
   readonly highlightedValveId?: string | null;
   /** Shown when WebGL is missing or the scene fails to start. */
@@ -44,6 +46,7 @@ function readColors(element: Element): SceneColors {
 export function AqueductCanvas({
   frame,
   onSelectValve,
+  readOnly = false,
   highlightedValveId = null,
   fallback,
   className,
@@ -51,13 +54,13 @@ export function AqueductCanvas({
 }: AqueductCanvasProps): JSX.Element {
   const host = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const select = useRef(onSelectValve);
+  const select = useRef(readOnly ? undefined : onSelectValve);
   const hover = useRef(onHoverValve);
   const [scene, setScene] = useState<AqueductScene | null>(null);
   const [failed, setFailed] = useState(!hasWebGl());
 
   useEffect(() => {
-    select.current = onSelectValve;
+    select.current = readOnly ? undefined : onSelectValve;
     hover.current = onHoverValve;
   });
 
@@ -85,7 +88,7 @@ export function AqueductCanvas({
           colors: readColors(element),
           animate: !matchesMedia(REDUCED_MOTION_QUERY),
           onSelect: (id) => {
-            select.current(id);
+            select.current?.(id);
           },
           onHover: (id) => {
             hover.current?.(id);
@@ -137,6 +140,7 @@ export function AqueductCanvas({
       ref={host}
       className={cn(styles.host, className)}
       data-ready={scene !== null}
+      data-readonly={readOnly}
       data-testid="aqueduct-scene"
     >
       {failed ? null : <canvas ref={canvas} className={cn(styles.canvas)} aria-hidden="true" />}

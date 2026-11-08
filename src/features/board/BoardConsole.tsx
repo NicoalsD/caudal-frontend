@@ -212,7 +212,7 @@ function ReviewWithIncidents(): JSX.Element {
   return <ReviewCounts incidents={incidents.isSuccess ? open : null} />;
 }
 
-function ReviewPanel(): JSX.Element {
+export function ReviewPanel(): JSX.Element {
   const canSeeIncidents = usePermission(INCIDENT_PERMISSION);
   return canSeeIncidents ? <ReviewWithIncidents /> : <ReviewCounts incidents={null} />;
 }

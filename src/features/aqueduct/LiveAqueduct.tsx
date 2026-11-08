@@ -28,6 +28,8 @@ export type LiveStatus =
   | { readonly status: 'error'; readonly retry: () => void };
 
 interface LiveAqueductProps {
+  /** Look only: no dialog, no command, and the list does not open one (the Board's overview). */
+  readonly readOnly?: boolean;
   /**
    * Lays out the parts. It always runs, so the rest of the screen shows even when there is no tank
    * to draw: `parts` is null until the aqueduct is ready, and `live` says why. The dialog of the
@@ -40,11 +42,11 @@ interface LiveAqueductProps {
  * The live aqueduct: the 3D scene of the tank and its valves, the list that says the same in
  * words, and the dialog that moves a valve. Data comes every 2 seconds from useLiveAqueduct.
  */
-export function LiveAqueduct({ children }: LiveAqueductProps): JSX.Element {
+export function LiveAqueduct({ children, readOnly = false }: LiveAqueductProps): JSX.Element {
   const live = useLiveAqueduct();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lit, setLit] = useState<string | null>(null);
-  const canControl = usePermission(PERMISSION_VALVE_COMMAND);
+  const canControl = usePermission(PERMISSION_VALVE_COMMAND) && !readOnly;
 
   const aqueduct = live.status === 'ready' ? live.aqueduct : null;
   const frame = useMemo(() => (aqueduct === null ? null : toSceneFrame(aqueduct)), [aqueduct]);
@@ -60,10 +62,11 @@ export function LiveAqueduct({ children }: LiveAqueductProps): JSX.Element {
         frame={frame}
         highlightedValveId={lit}
         onSelectValve={setSelectedId}
+        readOnly={readOnly}
         onHoverValve={setLit}
         fallback={<p>{t('scene.noWebGl')}</p>}
       />
-      <p className={cn(styles.sceneHint)}>{t('scene.hint')}</p>
+      <p className={cn(styles.sceneHint)}>{readOnly ? t('scene.hintReadOnly') : t('scene.hint')}</p>
       {aqueduct.valvesAreLive ? null : (
         <p role="status" className={cn(styles.sceneNote)}>
           {t('scene.liveLost')}
@@ -82,12 +85,14 @@ export function LiveAqueduct({ children }: LiveAqueductProps): JSX.Element {
   return (
     <>
       {children({ aqueduct, scene, valveList }, { status: 'ready' })}
-      <ValveControlDialog
-        valve={selected}
-        onClose={() => {
-          setSelectedId(null);
-        }}
-      />
+      {readOnly ? null : (
+        <ValveControlDialog
+          valve={selected}
+          onClose={() => {
+            setSelectedId(null);
+          }}
+        />
+      )}
     </>
   );
 }

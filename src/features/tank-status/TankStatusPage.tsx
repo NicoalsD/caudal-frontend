@@ -26,6 +26,10 @@ export interface ConsoleContext {
 
 /** The Board's console: a rail of panels beside the tank, and more rows under it. */
 export interface ConsoleSlots {
+  /** Full width, above the rail and the tank (the KPI row). */
+  readonly top?: (context: ConsoleContext) => ReactNode;
+  /** Full width, under the console, one column on a phone (the overview grid). */
+  readonly below?: (context: ConsoleContext) => ReactNode;
   readonly rail: (context: ConsoleContext) => ReactNode;
   readonly after: (context: ConsoleContext) => ReactNode;
 }
@@ -67,14 +71,18 @@ function TankStatusSection({
   if (consoleSlots !== undefined) {
     const context = { tank, status: status.data };
     return (
-      <div className={cn(styles.console)}>
-        <aside className={cn(styles.rail)}>{consoleSlots.rail(context)}</aside>
-        <div className={cn(styles.center)}>
-          <TankOverview tank={tank} status={status.data} variant="console" />
-          <AnomalyList hideWhenEmpty />
-          {consoleSlots.after(context)}
+      <>
+        {consoleSlots.top?.(context)}
+        <div className={cn(styles.console)}>
+          <aside className={cn(styles.rail)}>{consoleSlots.rail(context)}</aside>
+          <div className={cn(styles.center)}>
+            <TankOverview tank={tank} status={status.data} variant="console" />
+            <AnomalyList hideWhenEmpty />
+            {consoleSlots.after(context)}
+          </div>
         </div>
-      </div>
+        {consoleSlots.below?.(context)}
+      </>
     );
   }
   return (
