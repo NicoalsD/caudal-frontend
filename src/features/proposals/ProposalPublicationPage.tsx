@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
+import { Send } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 
 import { formatServiceDate } from '../../core/format/serviceDate';
@@ -19,6 +20,8 @@ import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import { EmptyPanel } from '../../ui/layout/EmptyPanel';
 import { Button } from '../../ui/primitives/Button';
 import { Dialog } from '../../ui/primitives/Dialog';
 import { LinkButton } from '../../ui/primitives/LinkButton';
@@ -77,16 +80,15 @@ export function ProposalPublicationPage(): JSX.Element {
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.publication')}</ScreenTitle>
       {proposal === null ? (
-        <div className={cn(styles.section)}>
-          <p>{t('proposals.publication.empty')}</p>
-          <LinkButton
-            variant="primary"
-            className={cn(styles.wide)}
-            to={ROUTE_PATHS.board.proposals}
-          >
-            {t('proposals.publication.toProposals')}
-          </LinkButton>
-        </div>
+        <EmptyPanel
+          icon={Send}
+          title={t('proposals.publication.empty')}
+          action={
+            <LinkButton variant="primary" to={ROUTE_PATHS.board.proposals}>
+              {t('proposals.publication.toProposals')}
+            </LinkButton>
+          }
+        />
       ) : (
         <PublicationStatus proposal={proposal} />
       )}
@@ -116,7 +118,13 @@ function PublicationStatus({
   const publishable = isPublishable(proposal.status);
 
   return (
-    <section className={cn(styles.section)} aria-labelledby="publication-state-title">
+    <Card
+      as="section"
+      variant="tinted"
+      tint="hero"
+      className={cn(styles.section)}
+      aria-labelledby="publication-state-title"
+    >
       <h2 id="publication-state-title" className={cn(styles.heading)}>
         {formatServiceDate(proposal.serviceDate)}
       </h2>
@@ -192,6 +200,6 @@ function PublicationStatus({
           {t('proposals.publication.reviewLink')}
         </Link>
       )}
-    </section>
+    </Card>
   );
 }
