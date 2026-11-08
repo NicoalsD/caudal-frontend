@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
 
-import { aiVerdict, horizonsUpTo } from '../../core/evaluation/forecastEvaluation';
+import { Gauge, Target } from 'lucide-react';
+
+import { formatDecimal } from '../../core/format/decimal';
+import {
+  aiVerdict,
+  formatPercent,
+  formatSignedPercent,
+  horizonsUpTo,
+} from '../../core/evaluation/forecastEvaluation';
 import type { AiVerdict } from '../../core/evaluation/forecastEvaluation';
 import { t } from '../../i18n/t';
 import type { ForecastEvaluationView } from '../../services/api/views';
@@ -9,10 +17,14 @@ import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
-import { Button } from '../../ui/primitives/Button';
+import { Card } from '../../ui/cards/Card';
+import { StatTile } from '../../ui/cards/StatTile';
+import { AreaTrend } from '../../ui/data/AreaTrend';
+import { ChartCard } from '../../ui/data/ChartCard';
+import { SegmentedControl } from '../../ui/primitives/SegmentedControl';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
-import { TeamDashboard } from './TeamDashboard';
+import { TeamDashboard, TeamTiles } from './TeamDashboard';
 import { EvaluationMetrics } from './EvaluationMetrics';
 import { HorizonSkillTable } from './HorizonSkillTable';
 import { horizonLabel } from './horizonLabel';
@@ -102,23 +114,97 @@ function EvaluationResult({
   const verdict: AiVerdict = aiVerdict(evaluations.map((item) => ({ helps: item.helps })));
   const current = evaluations.find((item) => item.horizonDays === selected) ?? evaluations[0];
   if (current === undefined || evaluations.every((item) => item.n === 0)) {
-    return <p>{t('evaluation.empty')}</p>;
+    return (
+      <>
+        <div className={cn(styles.tiles)}>
+          <TeamTiles />
+        </div>
+        <p>{t('evaluation.empty')}</p>
+      </>
+    );
   }
+  const points = evaluations.flatMap((item) =>
+    item.maeIa === null ? [] : [{ label: horizonLabel(item.horizonDays), value: item.maeIa }],
+  );
   return (
     <>
       <HorizonPicker horizons={horizons} selected={current.horizonDays} onSelect={onSelect} />
-      <h2 className={cn(styles.headline)}>{headlineText(verdict)}</h2>
+      <div className={cn(styles.tiles)}>
+        <EvaluationTiles evaluation={current} />
+        <TeamTiles />
+      </div>
+      <div className={cn(styles.overview)}>
+        <ChartCard
+          title={t('evaluation.errorChartTitle')}
+          caption={t('evaluation.errorChartCaption')}
+          className={cn(styles.chart)}
+        >
+          <AreaTrend title={t('evaluation.errorChartTitle')} data={points} formatValue={meters} />
+        </ChartCard>
+        <Card
+          variant="dark"
+          as="section"
+          aria-labelledby="evaluation-verdict"
+          className={cn(styles.verdict)}
+        >
+          <h2 id="evaluation-verdict" className={cn(styles.headline)}>
+            {headlineText(verdict)}
+          </h2>
+          {current.helps === null ? (
+            <p>{t('evaluation.insufficient', { count: current.n })}</p>
+          ) : (
+            <p>{t('evaluation.evaluatedCount', { count: current.n })}</p>
+          )}
+        </Card>
+      </div>
       <HorizonSkillTable evaluations={evaluations} />
-      {current.helps === null ? (
-        <p>{t('evaluation.insufficient', { count: current.n })}</p>
-      ) : (
-        <>
-          <p className={cn(styles.count)}>{t('evaluation.evaluatedCount', { count: current.n })}</p>
-          <EvaluationMetrics evaluation={current} />
-        </>
-      )}
+      {current.helps === null ? null : <EvaluationMetrics evaluation={current} />}
     </>
   );
+}
+
+/** The first two pastel tiles: the model's error against the simple estimate, and the range coverage. */
+function EvaluationTiles({
+  evaluation,
+}: {
+  readonly evaluation: ForecastEvaluationView;
+}): JSX.Element {
+  const skill = evaluation.skill;
+  return (
+    <>
+      <StatTile
+        icon={Target}
+        tint="aqua"
+        label={t('evaluation.tileError')}
+        value={evaluation.maeIa === null ? t('evaluation.noValue') : meters(evaluation.maeIa)}
+        delta={
+          skill === null
+            ? undefined
+            : {
+                text: formatSignedPercent(skill),
+                trend: skill > 0 ? 'up' : skill < 0 ? 'down' : 'flat',
+                tone: skill > 0 ? 'good' : skill < 0 ? 'bad' : 'neutral',
+              }
+        }
+      />
+      <StatTile
+        icon={Gauge}
+        tint="cream"
+        label={t('evaluation.tileCoverage')}
+        value={
+          evaluation.coverage80 === null
+            ? t('evaluation.noValue')
+            : formatPercent(evaluation.coverage80)
+        }
+      />
+    </>
+  );
+}
+
+const METER_DIGITS = 2;
+
+function meters(value: number): string {
+  return t('evaluation.meters', { value: formatDecimal(value, METER_DIGITS) });
 }
 
 function headlineText(verdict: AiVerdict): string {
@@ -180,19 +266,15 @@ function HorizonPicker({
   readonly onSelect: (days: number) => void;
 }): JSX.Element {
   return (
-    <div className={cn(styles.horizons)} role="group" aria-label={t('evaluation.horizonPicker')}>
-      {horizons.map((days) => (
-        <Button
-          key={days}
-          aria-pressed={days === selected}
-          variant={days === selected ? 'primary' : 'secondary'}
-          onClick={() => {
-            onSelect(days);
-          }}
-        >
-          {horizonLabel(days)}
-        </Button>
-      ))}
+    <div className={cn(styles.horizons)}>
+      <SegmentedControl
+        label={t('evaluation.horizonPicker')}
+        value={String(selected)}
+        onChange={(value) => {
+          onSelect(Number(value));
+        }}
+        options={horizons.map((days) => ({ value: String(days), label: horizonLabel(days) }))}
+      />
     </div>
   );
 }

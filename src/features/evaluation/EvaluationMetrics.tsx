@@ -4,6 +4,7 @@ import { formatDecimal } from '../../core/format/decimal';
 import { formatPercent } from '../../core/evaluation/forecastEvaluation';
 import { t } from '../../i18n/t';
 import type { ForecastEvaluationView } from '../../services/api/views';
+import { Card } from '../../ui/cards/Card';
 import { cn } from '../../ui/styles/cn';
 import styles from './EvaluationPage.module.css';
 
@@ -18,7 +19,7 @@ interface EvaluationMetricsProps {
 export function EvaluationMetrics({ evaluation }: EvaluationMetricsProps): JSX.Element {
   return (
     <ul className={cn(styles.metrics)}>
-      <li className={cn(styles.metric)}>
+      <Card variant="tinted" tint="aqua" as="li" className={cn(styles.metric)}>
         <h3 className={cn(styles.metricTitle)}>{t('evaluation.maeTitle')}</h3>
         <p className={cn(styles.explanation)}>{t('evaluation.maeExplanation')}</p>
         <dl className={cn(styles.values)}>
@@ -27,8 +28,8 @@ export function EvaluationMetrics({ evaluation }: EvaluationMetricsProps): JSX.E
           <dt>{t('evaluation.simple')}</dt>
           <dd>{meters(evaluation.maeSimple)}</dd>
         </dl>
-      </li>
-      <li className={cn(styles.metric)}>
+      </Card>
+      <Card variant="tinted" tint="sand" as="li" className={cn(styles.metric)}>
         <h3 className={cn(styles.metricTitle)}>{t('evaluation.wqlTitle')}</h3>
         <p className={cn(styles.explanation)}>{t('evaluation.wqlExplanation')}</p>
         <dl className={cn(styles.values)}>
@@ -37,8 +38,8 @@ export function EvaluationMetrics({ evaluation }: EvaluationMetricsProps): JSX.E
           <dt>{t('evaluation.simple')}</dt>
           <dd>{t('evaluation.notApplicable')}</dd>
         </dl>
-      </li>
-      <li className={cn(styles.metric)}>
+      </Card>
+      <Card variant="tinted" tint="mint" as="li" className={cn(styles.metric)}>
         <h3 className={cn(styles.metricTitle)}>{t('evaluation.coverageTitle')}</h3>
         <p className={cn(styles.explanation)}>{t('evaluation.coverageExplanation')}</p>
         <dl className={cn(styles.values)}>
@@ -51,7 +52,7 @@ export function EvaluationMetrics({ evaluation }: EvaluationMetricsProps): JSX.E
           <dt>{t('evaluation.simple')}</dt>
           <dd>{t('evaluation.notApplicable')}</dd>
         </dl>
-      </li>
+      </Card>
     </ul>
   );
 }
