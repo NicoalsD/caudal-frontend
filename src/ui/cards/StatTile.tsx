@@ -21,8 +21,10 @@ interface StatTileProps {
   readonly label: string;
   /** The main figure, already formatted with its unit. */
   readonly value: ReactNode;
-  readonly delta?: StatDelta;
+  readonly delta?: StatDelta | undefined;
   readonly tint?: Tint;
+  /** Extra lines under the label (a small list of regions, a hint). Keep it short. */
+  readonly footer?: ReactNode;
   readonly className?: string;
 }
 
@@ -39,6 +41,7 @@ export function StatTile({
   value,
   delta,
   tint = 'aqua',
+  footer,
   className,
 }: StatTileProps): JSX.Element {
   const TrendIcon = delta === undefined ? null : TREND_ICON[delta.trend];
@@ -56,6 +59,7 @@ export function StatTile({
           {delta.text}
         </p>
       )}
+      {footer !== undefined && <div className={cn(styles.footer)}>{footer}</div>}
     </Card>
   );
 }
