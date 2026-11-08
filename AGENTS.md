@@ -18,6 +18,7 @@ CAUDAL es "el cuaderno del acueducto, pero digital" para las veredas de Guaitari
 Este repositorio es la **PWA en React 19 + Vite + TypeScript**:
 - **Fontanero:** registra lecturas del tanque desde el celular, también sin señal (cola offline), y hace el cierre del día.
 - **Junta:** ve el estado y el pronóstico del tanque, revisa y aprueba o modifica la propuesta de turnos (con motivo), publica, gestiona reglas, sectores, usuarios y actas.
+- **Junta (v2):** panorama en `/junta/tanque` (KPIs, escena 3D de solo lectura, registro del piloto, reporte, asistente), ajustes e historial del piloto en `/junta/piloto`, reportes con vista narrativa e impresión en `/junta/reportes` y editor de regiones en `/junta/regiones` (solo `BOARD_ADMIN`). Detalle: [`docs/Version-2.0.0.md`](docs/Version-2.0.0.md).
 - **Público:** horario por sector sin datos personales, reporte de daños con código de seguimiento.
 - **Equipo y entidades:** evaluación IA vs estimación simple; resúmenes autorizados.
 
