@@ -83,8 +83,9 @@ describe('OperatorHomePage (S07)', () => {
     levelFromYesterday();
     renderHome();
 
-    // The number shows twice on a wide screen (the gauge draws it too), so the first match is checked.
-    expect((await screen.findAllByText(t('home.levelValue', { value: '2,3' })))[0]).toBeVisible();
+    expect(
+      await screen.findByText(t('operatorHome.tankFacts', { level: '2,3', hours: '26' })),
+    ).toBeVisible();
     const main = screen.getByRole('link', { name: t('home.newReading') });
     expect(main).toHaveAttribute('href', ROUTE_PATHS.operator.newReading);
     expect(main.className).toMatch(/primary/);
@@ -103,9 +104,9 @@ describe('OperatorHomePage (S07)', () => {
   it('shows the last level big, how old it is, and a link to the tank status', async () => {
     renderHome();
 
-    // The number shows twice on a wide screen (the gauge draws it too), so the first match is checked.
-    expect((await screen.findAllByText(t('home.levelValue', { value: '2,3' })))[0]).toBeVisible();
-    expect(screen.getByText(t('home.levelAge', { hours: '6' }))).toBeVisible();
+    expect(
+      await screen.findByText(t('operatorHome.tankFacts', { level: '2,3', hours: '6' })),
+    ).toBeVisible();
     expect(screen.getByRole('link', { name: t('home.tankDetail') })).toHaveAttribute(
       'href',
       ROUTE_PATHS.tank,

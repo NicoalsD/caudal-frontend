@@ -1,6 +1,5 @@
-/* Mobile first: one column in the order of the DOM. Desktop (>= 64rem) places the blocks in a
-   grid: the day and the damage report on top, the actions and shifts on the left, the tank on the
-   right, as tall as the left column. */
+/* Mobile first: the 3D scene fills the screen and the panel is a sheet that rises from the tab
+   bar. Desktop (>= 64rem): the scene on the left, the panel as a column on the right. */
 
 .page {
   display: flex;
@@ -82,21 +81,6 @@
   color: var(--color-water-800);
 }
 
-/* Notes under the 3D tank, on its deep field. */
-.stageNotes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  font-size: var(--font-size-small);
-}
-
-.stageStale {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: var(--font-weight-bold);
-}
-
 .stale {
   font-weight: var(--font-weight-bold);
   color: var(--color-ochre-800);
@@ -145,68 +129,131 @@
   background: var(--color-sand-200);
 }
 
-/* Desktop: the layout grid, the subtle card border and the tall gauge. */
+.layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.scenePane {
+  height: 68dvh;
+  min-height: 24rem;
+  overflow: hidden;
+  border-radius: var(--radius-surface);
+  background: var(--scene-field-bottom);
+}
+
+.sceneMessage {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  padding: var(--space-4);
+  color: var(--color-on-brand);
+  text-align: center;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.block h3 {
+  margin: 0;
+}
+
+.muted {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.strong {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.panel {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: calc(4rem + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  max-height: 70dvh;
+  background: var(--color-raised);
+  border: 2px solid var(--color-border-strong);
+  border-bottom: 0;
+  border-radius: var(--radius-surface) var(--radius-surface) 0 0;
+}
+
+.sheetHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.chevron {
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.panel[data-open='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+.panelBody {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.panel[data-open='true'] .panelBody {
+  display: flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
 @media (min-width: 64rem) {
-  .page {
+  .layout {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    grid-template-areas:
-      'head damage'
-      'action tank'
-      'today tank'
-      'shifts tank';
-    /* The spare height of the tall tank goes to the last row, not between the sections. */
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-columns: minmax(0, 1fr) 26rem;
+    gap: var(--space-5);
     align-items: start;
-    column-gap: var(--space-5);
-    row-gap: var(--space-5);
   }
 
-  .head {
-    grid-area: head;
+  .scenePane {
+    height: calc(100dvh - 11rem);
+    min-height: 34rem;
   }
 
-  .damageArea {
-    grid-area: damage;
-    justify-self: end;
-    width: auto;
-  }
-
-  .damageArea > * {
-    width: auto;
-  }
-
-  .primaryAction {
-    grid-area: action;
-    justify-self: start;
-  }
-
-  .primaryAction > * {
-    width: auto;
-  }
-
-  .todayArea {
-    grid-area: today;
-  }
-
-  .shiftsArea {
-    grid-area: shifts;
-  }
-
-  .card {
+  .panel {
+    position: static;
+    max-height: calc(100dvh - 11rem);
+    min-height: 34rem;
     border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-surface);
   }
 
-  /* The tank column spans the whole left column. */
-  .tankArea {
-    grid-area: tank;
-    align-self: stretch;
+  .sheetHandle {
+    display: none;
+  }
+
+  .panelBody {
     display: flex;
-    flex-direction: column;
-    min-height: 40rem;
-  }
-
-  .tankCard {
-    flex: 1 1 auto;
+    padding-block-start: var(--space-4);
   }
 }

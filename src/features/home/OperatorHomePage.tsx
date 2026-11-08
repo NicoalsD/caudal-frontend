@@ -1,11 +1,12 @@
+import { useEffect, useState } from 'react';
 import type { JSX } from 'react';
 import { useLocation } from 'react-router';
-import { CircleCheck, Clock, Circle, TriangleAlert } from 'lucide-react';
+import { ChevronUp, CircleCheck, Clock, Circle, TriangleAlert } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { UseQueryResult } from '@tanstack/react-query';
 
-import type { SectorView, TankStatusView, TankView } from '../../services/api/views';
+import type { SectorView, TankView } from '../../services/api/views';
 import type { OutboxSummary } from '../../core/commands/summarizeOutbox';
+import { minutesUntil, pickShifts } from '../../core/schedule/pickShifts';
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { formatDecimal } from '../../core/format/decimal';
 import { formatTime, toBogotaDateKey } from '../../core/format/time';
@@ -17,10 +18,11 @@ import { useActiveTank, useTankStatus } from '../../state/hooks/useTankStatus';
 import { useOfflineServices } from '../../state/hooks/offlineContext';
 import { useSectors } from '../../state/hooks/useSectors';
 import { useSession } from '../../state/hooks/useSession';
-import { TankStage } from '../../ui/tank/TankStage';
-import { useIsDesktop } from '../../ui/tank/useIsDesktop';
 import { useSyncQueue } from '../../state/hooks/useSyncQueue';
 import { useDaySchedule } from '../closure/closureQueries';
+import { AssistantPanel } from '../aqueduct/AssistantPanel';
+import { AutopilotModeControl } from '../aqueduct/AutopilotModeControl';
+import { LiveAqueduct, SceneMessage } from '../aqueduct/LiveAqueduct';
 import { Button } from '../../ui/primitives/Button';
 import { LinkButton } from '../../ui/primitives/LinkButton';
 import { LoadingState } from '../../ui/feedback/LoadingState';
@@ -31,6 +33,7 @@ import styles from './OperatorHome.module.css';
 /** Hours shown without decimals: the age of a level is a rough figure for the plumber. */
 const HOURS_DECIMALS = 0;
 const ICON_SIZE = 20;
+const PANEL_BODY_ID = 'operator-panel-body';
 const NO_PENDING = 0;
 const ONE_PENDING = 1;
 /** Bogotá has no daylight saving time, so its offset is fixed; noon keeps the day stable. */
@@ -70,10 +73,11 @@ interface TodayFacts {
 }
 
 /**
- * Screen S07, the plumber's home. The day in words at the top, then the next step of the day
- * (one main action), the day's checklist and today's shifts, and the level of the tank at a
- * glance. Every state has an icon and a text, never the color alone. The phone's queue and the
- * actions show even when the tank does not load: the plumber must see what is pending.
+ * Screen S07, the plumber's home. The live 3D scene of the aqueduct fills the screen: the tank, the
+ * pipes with their flow and the valves, which can be pressed. Beside it (a bottom sheet on a
+ * phone) go the current and next shift, the autopilot mode, the assistant, the valve list and the
+ * day's checklist. Every state has an icon and a text, never the color alone. The phone's queue and
+ * the actions show even when the tank does not load: the plumber must see what is pending.
  */
 export function OperatorHomePage(): JSX.Element {
   const location = useLocation();
@@ -81,19 +85,9 @@ export function OperatorHomePage(): JSX.Element {
   const active = useActiveTank();
   const offline = useOfflineServices();
   const summary = useSyncQueue();
+  const [panelOpen, setPanelOpen] = useState(false);
   const name = session.status === 'authenticated' ? session.user.displayName : '';
   const facts = todayFacts(summary, toBogotaDateKey(new Date(offline.clock.nowMs()).toISOString()));
-
-  let tank: JSX.Element;
-  if (active.status === 'loading') {
-    tank = <LoadingState message={t('tankStatus.loading')} />;
-  } else if (active.status === 'error') {
-    tank = <p role="alert">{t('home.statusError')}</p>;
-  } else if (active.status === 'empty') {
-    tank = <p>{t('tankStatus.noTank')}</p>;
-  } else {
-    tank = <></>;
-  }
 
   return (
     <div className={cn(styles.page)}>
@@ -104,18 +98,60 @@ export function OperatorHomePage(): JSX.Element {
         </div>
         {readDamageSent(location.state) ? <p role="status">{t('home.damageSent')}</p> : null}
       </div>
-      {active.status === 'ready' ? (
-        <TankToday tank={active.tank} facts={facts} />
-      ) : (
-        <>
-          <TodayChecklist facts={facts} readingLine={null} />
-          <div className={cn(styles.tankArea)}>{tank}</div>
-        </>
-      )}
-      <DayShifts day={facts.today} />
-      <div className={cn(styles.secondary, styles.damageArea)}>
-        <LinkButton to={ROUTE_PATHS.operator.damage}>{t('home.damage')}</LinkButton>
-      </div>
+      <LiveAqueduct>
+        {(parts, live) => (
+          <div className={cn(styles.layout)}>
+            <section className={cn(styles.scenePane)} aria-label={t('operatorHome.sceneRegion')}>
+              {parts === null ? (
+                <div className={cn(styles.sceneMessage)}>
+                  <SceneMessage live={live} />
+                </div>
+              ) : (
+                parts.scene
+              )}
+            </section>
+            <aside
+              className={cn(styles.panel)}
+              data-open={panelOpen}
+              aria-label={t('operatorHome.panelTitle')}
+            >
+              <button
+                type="button"
+                className={cn(styles.sheetHandle)}
+                aria-expanded={panelOpen}
+                aria-controls={PANEL_BODY_ID}
+                onClick={() => {
+                  setPanelOpen((open) => !open);
+                }}
+              >
+                <ChevronUp aria-hidden="true" size={ICON_SIZE} className={cn(styles.chevron)} />
+                {panelOpen ? t('operatorHome.panelClose') : t('operatorHome.panelOpen')}
+              </button>
+              <div id={PANEL_BODY_ID} className={cn(styles.panelBody)}>
+                <ShiftsNow />
+                <AutopilotModeControl />
+                <AssistantPanel valves={parts?.aqueduct.valves ?? []} />
+                {parts === null ? null : (
+                  <section className={cn(styles.block)} aria-labelledby="home-valves-title">
+                    <h3 id="home-valves-title">{t('valves.listTitle')}</h3>
+                    <p className={cn(styles.muted)}>{t('valves.listHint')}</p>
+                    {parts.valveList}
+                  </section>
+                )}
+                {active.status === 'ready' ? (
+                  <TankToday tank={active.tank} facts={facts} />
+                ) : (
+                  <TodayChecklist facts={facts} readingLine={null} />
+                )}
+                <DayShifts day={facts.today} />
+                <div className={cn(styles.secondary)}>
+                  <LinkButton to={ROUTE_PATHS.operator.damage}>{t('home.damage')}</LinkButton>
+                </div>
+              </div>
+            </aside>
+          </div>
+        )}
+      </LiveAqueduct>
     </div>
   );
 }
@@ -170,8 +206,8 @@ function todayFacts(summary: OutboxSummary, today: string): TodayFacts {
 }
 
 /**
- * The home with the tank: its level decides whether today has a reading. While the level loads
- * the checklist still shows, with the reading line as "loading", so no action is hidden.
+ * The checklist with the tank: its level decides whether today has a reading. While the level
+ * loads the checklist still shows, with the reading line as "loading", so no action is hidden.
  */
 function TankToday({
   tank,
@@ -181,10 +217,9 @@ function TankToday({
   readonly facts: TodayFacts;
 }): JSX.Element {
   const status = useTankStatus(tank.id);
+  const rules = useCurrentRuleSet();
   const levelToday = status.data?.level?.observedAt.dayKey === facts.today;
   const readingDone = facts.queuedToday || levelToday;
-  // Same condition as the "missing" line of the checklist: the tank answered and has no reading.
-  const readingMissing = !readingDone && status.isSuccess;
 
   let readingLine: ChecklistLine;
   if (readingDone) {
@@ -197,10 +232,64 @@ function TankToday({
     readingLine = { tone: 'missing', icon: Circle, text: t('home.todayReadingMissing') };
   }
 
+  const level = status.data?.level ?? null;
+  const band = status.data?.band ?? null;
+  const ruleBand =
+    band === null ? undefined : rules.data?.bands.find((item) => item.band === band.code);
+  const serviceHours = band?.serviceHours ?? ruleBand?.dailyServiceHours ?? null;
+  let meaning: string | null = null;
+  if (band !== null && rules.data !== undefined) {
+    meaning =
+      serviceHours === null
+        ? t('home.bandNoHours', { band: bandLabel(band.code) })
+        : t('home.bandMeaning', {
+            band: bandLabel(band.code),
+            hours: formatDecimal(serviceHours, HOURS_DECIMALS),
+          });
+  }
+  const readingMissing = !readingDone && status.isSuccess;
+  const staleNote = status.data?.stale.isStale
+    ? readingMissing
+      ? t('home.staleShort', {
+          hours: formatDecimal(status.data.stale.staleAfterHours, HOURS_DECIMALS),
+        })
+      : t('home.stale', {
+          hours: formatDecimal(status.data.stale.staleAfterHours, HOURS_DECIMALS),
+        })
+    : null;
+
   return (
     <>
+      <section className={cn(styles.block)} aria-labelledby="home-tank-title">
+        <h3 id="home-tank-title">{t('home.tankTitle')}</h3>
+        {status.isError ? (
+          <div>
+            <p role="alert">{t('home.statusError')}</p>
+            <Button onClick={() => void status.refetch()}>{t('common.retry')}</Button>
+          </div>
+        ) : null}
+        {status.data === undefined ? null : level === null ? (
+          <p>{t('tankStatus.noLevel')}</p>
+        ) : (
+          <>
+            <p>
+              {t('operatorHome.tankFacts', {
+                level: formatDecimal(level.value.value),
+                hours: formatDecimal(level.hoursAgo, HOURS_DECIMALS),
+              })}
+            </p>
+            {meaning === null ? null : <p>{meaning}</p>}
+          </>
+        )}
+        {staleNote === null ? null : (
+          <p className={cn(styles.stale, styles.lineWithIcon)}>
+            <Clock aria-hidden="true" size={ICON_SIZE} />
+            {staleNote}
+          </p>
+        )}
+        <LinkButton to={ROUTE_PATHS.tank}>{t('home.tankDetail')}</LinkButton>
+      </section>
       <TodayChecklist facts={facts} readingLine={readingLine} readingDone={readingDone} />
-      <TankGlance tank={tank} status={status} readingMissing={readingMissing} />
     </>
   );
 }
@@ -232,7 +321,7 @@ function TodayChecklist({
   return (
     <>
       <div className={cn(styles.primaryAction)}>{main}</div>
-      <section className={cn(styles.card, styles.todayArea)} aria-labelledby="home-today-title">
+      <section className={cn(styles.card)} aria-labelledby="home-today-title">
         <h2 id="home-today-title">{t('home.todayTitle')}</h2>
         <ul className={cn(styles.checklist)}>
           {readingLine === null ? null : (
@@ -337,115 +426,68 @@ function DayShifts({ day }: { readonly day: string }): JSX.Element {
   }
 
   return (
-    <section className={cn(styles.card, styles.shiftsArea)} aria-labelledby="home-shifts-title">
+    <section className={cn(styles.card)} aria-labelledby="home-shifts-title">
       <h2 id="home-shifts-title">{t('home.shiftsTitle')}</h2>
       {body}
     </section>
   );
 }
 
-/**
- * The last level of the tank, big, with its age, the gauge beside it (desktop only), what the
- * level means for the service, and a link to the full status. It gets the query from the panel:
- * a second observer would refetch an errored query on mount and loop. The gauge and the sentence
- * wait for the rules; until they load, only the number shows.
- */
-function TankGlance({
-  tank,
-  status,
-  readingMissing,
-}: {
-  readonly tank: TankView;
-  readonly status: UseQueryResult<TankStatusView>;
-  readonly readingMissing: boolean;
-}): JSX.Element {
-  const rules = useCurrentRuleSet();
-  const level = status.data?.level ?? null;
-  const band = status.data?.band ?? null;
-  const ruleBand =
-    band === null ? undefined : rules.data?.bands.find((item) => item.band === band.code);
-  const serviceHours = band?.serviceHours ?? ruleBand?.dailyServiceHours ?? null;
+/** How often the countdown is recomputed; the minute is the finest thing it shows. */
+const COUNTDOWN_TICK_MS = 15_000;
 
-  let meaning: string | null = null;
-  if (band !== null && rules.data !== undefined) {
-    meaning =
-      serviceHours === null
-        ? t('home.bandNoHours', { band: bandLabel(band.code) })
-        : t('home.bandMeaning', {
-            band: bandLabel(band.code),
-            hours: formatDecimal(serviceHours, HOURS_DECIMALS),
-          });
-  }
-
-  const desktop = useIsDesktop();
-  const staleNote = status.data?.stale.isStale
-    ? readingMissing
-      ? t('home.staleShort', {
-          hours: formatDecimal(status.data.stale.staleAfterHours, HOURS_DECIMALS),
-        })
-      : t('home.stale', {
-          hours: formatDecimal(status.data.stale.staleAfterHours, HOURS_DECIMALS),
-        })
-    : null;
-
-  // On a desktop the tank leads the column, as soon as the level and the rules are in.
-  if (desktop && level !== null && rules.data !== undefined) {
-    return (
-      <div className={cn(styles.tankArea)}>
-        <TankStage
-          heading={t('home.tankTitle')}
-          level={level.value.value}
-          gaugeMin={tank.gaugeMin}
-          gaugeMax={tank.gaugeMax}
-          capacityLiters={tank.capacityLiters}
-          bands={rules.data.bands.map((item) => ({
-            code: item.band,
-            from: item.minLevel,
-            to: item.maxLevel,
-          }))}
-          reserveLevel={rules.data.reserveLevel}
-        >
-          <div className={cn(styles.stageNotes)}>
-            {meaning === null ? null : <p>{meaning}</p>}
-            <p>{t('home.levelAge', { hours: formatDecimal(level.hoursAgo, HOURS_DECIMALS) })}</p>
-            {staleNote === null ? null : (
-              <p className={cn(styles.stageStale)}>
-                <Clock aria-hidden="true" size={ICON_SIZE} />
-                {staleNote}
-              </p>
-            )}
-            <LinkButton to={ROUTE_PATHS.tank}>{t('home.tankDetail')}</LinkButton>
-          </div>
-        </TankStage>
-      </div>
-    );
-  }
-
+/** The shift running now (with a countdown to its end) and the next one. */
+function ShiftsNow(): JSX.Element {
+  const offline = useOfflineServices();
+  const [nowMs, setNowMs] = useState(() => offline.clock.nowMs());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNowMs(offline.clock.nowMs());
+    }, COUNTDOWN_TICK_MS);
+    return () => {
+      clearInterval(timer);
+    };
+  }, [offline]);
+  const day = toBogotaDateKey(new Date(nowMs).toISOString());
+  const schedule = useDaySchedule(day);
+  const sectors = useSectors();
+  const sectorName = (sectorId: string): string =>
+    sectors.data?.find((sector: SectorView) => sector.id === sectorId)?.name ??
+    t('home.shiftSectorUnknown');
+  const spans = (schedule.data?.items ?? []).map((item) => ({
+    sectorId: item.sectorId,
+    startMs: item.startAt.date.getTime(),
+    endMs: item.endAt.date.getTime(),
+  }));
+  const { current, next } = pickShifts(spans, nowMs);
+  const line = (shift: { sectorId: string; startMs: number; endMs: number }): string =>
+    t('operatorHome.shiftLine', {
+      sector: sectorName(shift.sectorId),
+      start: formatTime(new Date(shift.startMs).toISOString()),
+      end: formatTime(new Date(shift.endMs).toISOString()),
+    });
   return (
-    <div className={cn(styles.tankArea)}>
-      <section className={cn(styles.card, styles.tankCard)} aria-labelledby="home-tank-title">
-        <h2 id="home-tank-title">{t('home.tankTitle')}</h2>
-        {status.isPending ? <LoadingState message={t('tankStatus.loading')} /> : null}
-        {status.isError ? (
-          <div>
-            <p role="alert">{t('home.statusError')}</p>
-            <Button onClick={() => void status.refetch()}>{t('common.retry')}</Button>
-          </div>
-        ) : null}
-        {status.data === undefined ? null : level === null ? (
-          <p>{t('tankStatus.noLevel')}</p>
-        ) : (
-          <>
-            <p className={cn(styles.level)}>
-              {t('home.levelValue', { value: formatDecimal(level.value.value) })}
-            </p>
-            {meaning === null ? null : <p>{meaning}</p>}
-            <p>{t('home.levelAge', { hours: formatDecimal(level.hoursAgo, HOURS_DECIMALS) })}</p>
-          </>
-        )}
-        {staleNote === null ? null : <p className={cn(styles.stale)}>{staleNote}</p>}
-        <LinkButton to={ROUTE_PATHS.tank}>{t('home.tankDetail')}</LinkButton>
-      </section>
-    </div>
+    <section className={cn(styles.block)} aria-labelledby="home-shift-now-title">
+      <h3 id="home-shift-now-title">{t('operatorHome.shiftNow')}</h3>
+      {current === null ? (
+        <p>{t('operatorHome.shiftNoneNow')}</p>
+      ) : (
+        <>
+          <p className={cn(styles.strong)}>{line(current)}</p>
+          <p>{t('operatorHome.endsIn', { minutes: String(minutesUntil(current.endMs, nowMs)) })}</p>
+        </>
+      )}
+      <h3>{t('operatorHome.shiftNext')}</h3>
+      {next === null ? (
+        <p>{t('operatorHome.shiftNoneNext')}</p>
+      ) : (
+        <>
+          <p className={cn(styles.strong)}>{line(next)}</p>
+          <p>
+            {t('operatorHome.startsIn', { minutes: String(minutesUntil(next.startMs, nowMs)) })}
+          </p>
+        </>
+      )}
+    </section>
   );
 }
