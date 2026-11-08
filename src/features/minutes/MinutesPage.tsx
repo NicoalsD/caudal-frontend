@@ -1,3 +1,4 @@
+import { FileText, FilePlus } from 'lucide-react';
 import { useState } from 'react';
 import type { JSX } from 'react';
 
@@ -10,6 +11,9 @@ import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import { EmptyPanel } from '../../ui/layout/EmptyPanel';
+import { PageHeader } from '../../ui/layout/PageHeader';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import { MinutesDetail } from './MinutesDetail';
@@ -51,12 +55,37 @@ export function MinutesPage(): JSX.Element {
   const generateFailure = generate.isError ? errorText(generate.error).message : null;
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       <ScreenTitle>{t('screens.minutes')}</ScreenTitle>
+      <PageHeader
+        lead={t('minutes.lead')}
+        actions={
+          choosing ? undefined : (
+            <Button
+              variant="primary"
+              disabled={!online}
+              onClick={() => {
+                setChoosing(true);
+              }}
+            >
+              <FilePlus aria-hidden="true" />
+              {t('minutes.generate')}
+            </Button>
+          )
+        }
+      />
       {online ? null : <p role="status">{t('minutes.offline')}</p>}
       {choosing ? (
-        <section aria-labelledby="minutes-period-title" className={cn(styles.stack)}>
-          <h2 id="minutes-period-title">{t('minutes.periodTitle')}</h2>
+        <Card
+          as="section"
+          variant="tinted"
+          tint="hero"
+          aria-labelledby="minutes-period-title"
+          className={cn(styles.stack)}
+        >
+          <h2 id="minutes-period-title" className={cn(styles.cardTitle)}>
+            {t('minutes.periodTitle')}
+          </h2>
           <PeriodForm
             isSaving={generate.isPending}
             failure={generateFailure}
@@ -72,24 +101,12 @@ export function MinutesPage(): JSX.Element {
               setChoosing(false);
             }}
           />
-        </section>
-      ) : (
-        <div className={cn(styles.actions)}>
-          <Button
-            variant="primary"
-            disabled={!online}
-            onClick={() => {
-              setChoosing(true);
-            }}
-          >
-            {t('minutes.generate')}
-          </Button>
-        </div>
-      )}
+        </Card>
+      ) : null}
       {generate.isPending && !choosing ? <LoadingState message={t('minutes.generating')} /> : null}
       {generateFailure !== null && !choosing ? <FormAlert message={generateFailure} /> : null}
       {items.length === 0 ? (
-        <p>{t('minutes.empty')}</p>
+        <EmptyPanel icon={FileText} title={t('minutes.empty')} />
       ) : (
         <ul className={cn(styles.list)}>
           {items.map((item) => (
@@ -114,7 +131,7 @@ export function MinutesPage(): JSX.Element {
         </Button>
       ) : null}
       {selectedId === null ? null : <MinutesDetail key={selectedId} id={selectedId} />}
-    </>
+    </div>
   );
 }
 
@@ -131,9 +148,12 @@ function MinutesRow({
   });
   const status = item.status === 'FINAL' ? t('minutes.statusFinal') : t('minutes.statusDraft');
   return (
-    <li className={cn(styles.listItem)}>
-      <span>{t('minutes.rowSummary', { period, status })}</span>
+    <Card as="li" interactive className={cn(styles.listItem)}>
+      <span className={cn(styles.docIcon)}>
+        <FileText aria-hidden="true" />
+      </span>
+      <span className={cn(styles.rowText)}>{t('minutes.rowSummary', { period, status })}</span>
       <Button onClick={onOpen}>{t('minutes.view')}</Button>
-    </li>
+    </Card>
   );
 }

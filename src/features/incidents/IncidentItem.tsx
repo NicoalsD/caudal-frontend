@@ -11,6 +11,7 @@ import { useConstraints } from '../../state/hooks/useConstraints';
 import { useFormSchema } from '../../state/hooks/useFormSchema';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { ReportStatusBadge } from '../../ui/feedback/ReportStatusBadge';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import { IncidentDismissForm } from './IncidentDismissForm';
@@ -64,7 +65,7 @@ export function IncidentItem({ incident, categoryLabel }: IncidentItemProps): JS
   };
 
   return (
-    <li className={cn(styles.item)}>
+    <Card as="li" className={cn(styles.item)}>
       <h2 className={cn(styles.category)}>{categoryLabel}</h2>
       <ReportStatusBadge status={incident.status} />
       <p>{t('incidents.receivedOn', { date: incident.reportedAt.text })}</p>
@@ -110,6 +111,6 @@ export function IncidentItem({ incident, categoryLabel }: IncidentItemProps): JS
       ) : null}
       {failure === null || dismissing ? null : <FormAlert message={failure} />}
       <p role="status">{change.isSuccess && !change.isPending ? t('incidents.updated') : ''}</p>
-    </li>
+    </Card>
   );
 }
