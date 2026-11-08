@@ -3,6 +3,7 @@ import { authHandlers } from './auth';
 import { catalogHandlers } from './catalogs';
 import { evaluationHandlers } from './evaluation';
 import { incidentsHandlers } from './incidents';
+import { liveHandlers } from './live';
 import { scheduleHandlers } from './schedule';
 import { metaHandlers } from './meta';
 import { networkHandlers } from './network';
@@ -25,4 +26,5 @@ export const handlers = [
   ...scheduleHandlers,
   ...proposalsHandlers,
   ...evaluationHandlers,
+  ...liveHandlers,
 ];

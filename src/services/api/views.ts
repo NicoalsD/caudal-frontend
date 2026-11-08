@@ -16,6 +16,18 @@ import type { ReportStatus } from '../../core/incidents/reportStatus';
 import type { ProposalStatus } from '../../core/proposal/proposalDay';
 import type { Role } from '../../core/session/roles';
 import type { DeviceKind, DeviceStatus } from '../../core/devices/deviceModel';
+import type {
+  AnswerSource,
+  AutopilotMode,
+  DecisionAction,
+  DecisionStatus,
+} from '../../core/autopilot/autopilotModel';
+import type {
+  CommandOrigin,
+  CommandStatus,
+  ValveAction,
+  ValveState,
+} from '../../core/valves/valveModel';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
 
@@ -754,4 +766,63 @@ export interface DevicePageView {
 export interface RotatedDeviceKeyView {
   readonly keyId: string;
   readonly activatedAt: TimestampView;
+}
+
+/** The last command sent to a valve (GET /valves/live). */
+export interface ValveLiveCommandView {
+  readonly id: string;
+  readonly action: ValveAction;
+  readonly status: CommandStatus;
+  readonly origin: CommandOrigin;
+  readonly createdAt: TimestampView;
+  readonly updatedAt: TimestampView;
+}
+
+/** A valve as it is now in the field: its state and its last command. */
+export interface ValveLiveView {
+  readonly valveId: string;
+  readonly sectorId: string;
+  readonly state: ValveState;
+  readonly lastCommand: ValveLiveCommandView | null;
+}
+
+/** A manual command just created (POST /valve-commands/manual). */
+export interface ValveCommandView {
+  readonly id: string;
+  readonly valveId: string;
+  readonly action: ValveAction;
+  readonly status: CommandStatus;
+  readonly notBefore: TimestampView;
+  readonly expiresAt: TimestampView;
+}
+
+export interface AutopilotSettingsView {
+  readonly mode: AutopilotMode;
+  readonly operatorAbsenceMinutes: number;
+  readonly reserveFloorPct: number;
+  readonly updatedAt: TimestampView | null;
+}
+
+/** One decision of the autopilot, or one recommendation of the assistant. */
+export interface AutopilotDecisionView {
+  readonly id: string;
+  readonly createdAt: TimestampView;
+  readonly source: AnswerSource;
+  readonly model: string;
+  readonly action: DecisionAction;
+  readonly valveId: string | null;
+  readonly reason: string;
+  /** From 0 to 1. */
+  readonly confidence: number;
+  readonly status: DecisionStatus;
+  readonly decidedBy: string | null;
+  readonly decidedAt: TimestampView | null;
+  readonly valveCommandId: string | null;
+}
+
+export interface AssistantAnswerView {
+  readonly source: AnswerSource;
+  readonly model: string;
+  readonly answer: string;
+  readonly generatedAt: TimestampView;
 }
