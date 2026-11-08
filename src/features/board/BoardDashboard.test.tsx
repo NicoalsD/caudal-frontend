@@ -34,14 +34,11 @@ describe('Board dashboard (overview)', () => {
     });
 
     const group = await screen.findByRole('group', { name: t('board.kpis.label') });
-    expect(
-      await within(group).findByRole('heading', { name: t('board.kpis.level') }),
-    ).toBeVisible();
-    expect(within(group).getByRole('heading', { name: t('board.kpis.reserve') })).toBeVisible();
+    expect(await within(group).findByText(t('board.kpis.level'))).toBeVisible();
+    expect(within(group).getByText(t('board.kpis.reserve'))).toBeVisible();
     expect(await within(group).findByText(/Sector Escuela: 75 %/)).toBeVisible();
-    expect(
-      await within(group).findByRole('heading', { name: t('board.kpis.incidents') }),
-    ).toBeVisible();
+    expect(await within(group).findByText(t('board.kpis.incidents'))).toBeVisible();
+    expect(await within(group).findByText(t('board.kpis.coverage'))).toBeVisible();
   });
 
   it('shows the pilot record, the assistant and the report card, and asks for the narrative on demand', async () => {
@@ -49,9 +46,11 @@ describe('Board dashboard (overview)', () => {
     const user = userEvent.setup();
     renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
 
-    const pilot = await screen.findByRole('region', { name: t('board.pilot.title') });
+    await user.click(await screen.findByRole('tab', { name: t('board.history.pilot') }));
+    const pilot = await screen.findByRole('region', { name: t('history.recentTitle') });
     expect(await within(pilot).findByRole('table')).toBeVisible();
-    expect(await screen.findByRole('heading', { name: t('assistant.title') })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: t('board.stack.title') })).toBeVisible();
+    expect(await screen.findByRole('heading', { name: t('assistant.askTitle') })).toBeVisible();
 
     const card = screen.getByRole('region', { name: t('board.report.title') });
     expect(within(card).queryByRole('status')).not.toBeInTheDocument();
@@ -74,11 +73,10 @@ describe('Board dashboard (overview)', () => {
   it('leaves out what the person cannot read', async () => {
     renderApp(ROUTE_PATHS.board.tank, { user: BARE });
 
-    expect(await screen.findByRole('heading', { name: t('board.kpis.level') })).toBeVisible();
-    expect(
-      screen.queryByRole('heading', { name: t('board.kpis.coverage') }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: t('board.pilot.title') })).not.toBeInTheDocument();
+    expect(await screen.findByText(t('board.kpis.level'))).toBeVisible();
+    expect(screen.queryByText(t('board.kpis.coverage'))).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: t('board.history.pilot') })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: t('board.stack.title') })).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: t('board.report.title') })).not.toBeInTheDocument();
   });
 });
