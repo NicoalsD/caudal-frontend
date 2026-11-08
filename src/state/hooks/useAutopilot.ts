@@ -96,3 +96,18 @@ export function useAskAssistant(): UseMutationResult<AssistantAnswerView, Error,
   const api = useCaudalApi();
   return useMutation({ mutationFn: (question: string) => api.autopilot.ask(question) });
 }
+
+/** POST /autopilot/run (AUTOPILOT_CONFIGURE): forces a cycle; the decisions are read again. */
+export function useRunAutopilot(): UseMutationResult<AutopilotDecisionView[], Error, void> {
+  const api = useCaudalApi();
+  const aqueductId = useAqueductId();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.autopilot.run(),
+    onSuccess: async () => {
+      await client.invalidateQueries({
+        queryKey: aqueductKey(aqueductId, AUTOPILOT_SCOPE, 'decisions'),
+      });
+    },
+  });
+}
