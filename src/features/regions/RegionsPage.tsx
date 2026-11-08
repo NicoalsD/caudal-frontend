@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import type { JSX } from 'react';
+import { Droplets, MapPin, Move, Pencil, Plus, Wrench } from 'lucide-react';
 
 import { buildRegionTree, parentOptions } from '../../core/network/regionTree';
 import type { RegionSector, RegionTreeNode } from '../../core/network/regionTree';
@@ -15,7 +16,12 @@ import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import type { Tint } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
+import { Chip } from '../../ui/primitives/Chip';
+import { Dialog } from '../../ui/primitives/Dialog';
+import { IconButton } from '../../ui/primitives/IconButton';
 import { cn } from '../../ui/styles/cn';
 import { RenameForm, SectorForm, ValveForm } from './RegionForms';
 import styles from './Regions.module.css';
@@ -92,59 +98,73 @@ export function RegionsPage(): JSX.Element {
     <div className={cn(styles.page)}>
       <ScreenTitle>{t('screens.regions')}</ScreenTitle>
       <p className={cn(styles.intro)}>{t('regions.intro')}</p>
-      {canManage ? (
-        <section className={cn(styles.card)} aria-labelledby="regions-create-title">
-          <h2 id="regions-create-title" className={cn(styles.cardTitle)}>
-            {t('regions.createTitle')}
+      <div className={cn(styles.layout)}>
+        <section aria-labelledby="regions-tree-title" className={cn(styles.treeColumn)}>
+          <h2 id="regions-tree-title" className={cn(styles.cardTitle)}>
+            {t('regions.treeTitle')}
           </h2>
-          <SectorForm
-            legend={t('regions.createTitle')}
-            submitLabel={t('regions.createSubmit')}
-            busyLabel={t('regions.saving')}
-            error={actions.createSector.isError ? actions.createSector.error : null}
-            onSubmit={(values) =>
-              actions.createSector.mutateAsync({ code: values.code, name: values.name })
-            }
-            onCancel={() => {
-              actions.createSector.reset();
-            }}
-          />
+          {tree.length === 0 ? (
+            <p>{t('regions.empty')}</p>
+          ) : (
+            <ul className={cn(styles.tree)}>
+              {tree.map((node, position) => (
+                <TreeRow
+                  key={node.sector.id}
+                  node={node}
+                  depth={0}
+                  tint={REGION_TINTS[position % REGION_TINTS.length] ?? 'mint'}
+                  sectors={sectors}
+                  valves={valves}
+                  canManage={canManage}
+                />
+              ))}
+            </ul>
+          )}
         </section>
-      ) : null}
-      <section aria-labelledby="regions-tree-title">
-        <h2 id="regions-tree-title" className={cn(styles.cardTitle)}>
-          {t('regions.treeTitle')}
-        </h2>
-        {tree.length === 0 ? (
-          <p>{t('regions.empty')}</p>
-        ) : (
-          <ul className={cn(styles.tree)}>
-            {tree.map((node) => (
-              <TreeRow
-                key={node.sector.id}
-                node={node}
-                depth={0}
-                sectors={sectors}
-                valves={valves}
-                canManage={canManage}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
+        {canManage ? (
+          <Card
+            variant="tinted"
+            tint="hero"
+            as="section"
+            className={cn(styles.createCard)}
+            aria-labelledby="regions-create-title"
+          >
+            <h2 id="regions-create-title" className={cn(styles.cardTitle)}>
+              {t('regions.createTitle')}
+            </h2>
+            <SectorForm
+              legend={t('regions.createTitle')}
+              submitLabel={t('regions.createSubmit')}
+              busyLabel={t('regions.saving')}
+              error={actions.createSector.isError ? actions.createSector.error : null}
+              onSubmit={(values) =>
+                actions.createSector.mutateAsync({ code: values.code, name: values.name })
+              }
+              onCancel={() => {
+                actions.createSector.reset();
+              }}
+            />
+          </Card>
+        ) : null}
+      </div>
     </div>
   );
 }
 
+/** Pastel of each region, in turn; the sectors inside are white cards on top of it. */
+const REGION_TINTS: readonly Tint[] = ['mint', 'aqua', 'sand', 'lavender'];
+
 function TreeRow({
   node,
   depth,
+  tint,
   sectors,
   valves,
   canManage,
 }: {
   readonly node: RegionTreeNode;
   readonly depth: number;
+  readonly tint: Tint;
   readonly sectors: readonly RegionSector[];
   readonly valves: ReadonlyMap<string, readonly string[]>;
   readonly canManage: boolean;
@@ -157,66 +177,105 @@ function TreeRow({
   const close = (): void => {
     setMode(null);
   };
-  const toggle = (next: EditMode): void => {
-    setMode((current) => (current === next ? null : next));
-  };
   const nameId = useId();
+  const KindIcon = isRegion ? MapPin : Droplets;
 
   return (
     <li className={cn(styles.item, !sector.isActive && styles.inactive)}>
-      <div className={cn(styles.row)}>
-        <div className={cn(styles.rowInfo)}>
-          <span id={nameId} className={cn(styles.name)}>
-            {`${sector.name} (${sector.code})`}
+      <Card
+        variant={isRegion ? 'tinted' : 'plain'}
+        tint={tint}
+        interactive
+        className={cn(styles.regionCard)}
+      >
+        <div className={cn(styles.row)}>
+          <span className={cn(styles.kindIcon)}>
+            <KindIcon aria-hidden="true" />
           </span>
-          <span className={cn(styles.kind)}>
-            {isRegion ? t('regions.kindRegion') : t('regions.kindSector')}
-          </span>
-          <span className={cn(styles.meta)}>
-            {valveNames.length === 0
-              ? t('regions.noValves')
-              : t('regions.valves', { names: valveNames.join(', ') })}
-          </span>
-        </div>
-        {canManage ? (
-          <div className={cn(styles.rowActions)} role="group" aria-labelledby={nameId}>
-            <Button
-              aria-expanded={mode === 'rename'}
-              onClick={() => {
-                toggle('rename');
-              }}
-            >
-              {t('regions.rename')}
-            </Button>
-            <Button
-              aria-expanded={mode === 'move'}
-              onClick={() => {
-                toggle('move');
-              }}
-            >
-              {t('regions.move')}
-            </Button>
-            <Button
-              aria-expanded={mode === 'child'}
-              onClick={() => {
-                toggle('child');
-              }}
-            >
-              {t('regions.addChild')}
-            </Button>
-            <Button
-              aria-expanded={mode === 'valve'}
-              onClick={() => {
-                toggle('valve');
-              }}
-            >
-              {t('regions.addValve')}
-            </Button>
+          <div className={cn(styles.rowInfo)}>
+            <span id={nameId} className={cn(styles.name)}>
+              {`${sector.name} (${sector.code})`}
+            </span>
+            <span className={cn(styles.chips)}>
+              <Chip tone={isRegion ? 'plain' : 'aqua'}>
+                {isRegion ? t('regions.kindRegion') : t('regions.kindSector')}
+              </Chip>
+              {sector.isActive ? null : <Chip tone="sand">{t('regions.inactive')}</Chip>}
+            </span>
+            <span className={cn(styles.meta)}>
+              {valveNames.length === 0
+                ? t('regions.noValves')
+                : t('regions.valves', { names: valveNames.join(', ') })}
+            </span>
           </div>
-        ) : null}
-      </div>
-      {mode === 'rename' ? (
-        <div className={cn(styles.panel)}>
+          {canManage ? (
+            <div className={cn(styles.rowActions)} role="group" aria-labelledby={nameId}>
+              <IconButton
+                label={t('regions.rename')}
+                tone={isRegion ? 'plain' : 'soft'}
+                onClick={() => {
+                  setMode('rename');
+                }}
+              >
+                <Pencil aria-hidden="true" />
+              </IconButton>
+              <IconButton
+                label={t('regions.move')}
+                tone={isRegion ? 'plain' : 'soft'}
+                onClick={() => {
+                  setMode('move');
+                }}
+              >
+                <Move aria-hidden="true" />
+              </IconButton>
+              <IconButton
+                label={t('regions.addChild')}
+                tone={isRegion ? 'plain' : 'soft'}
+                onClick={() => {
+                  setMode('child');
+                }}
+              >
+                <Plus aria-hidden="true" />
+              </IconButton>
+              <IconButton
+                label={t('regions.addValve')}
+                tone={isRegion ? 'plain' : 'soft'}
+                onClick={() => {
+                  setMode('valve');
+                }}
+              >
+                <Wrench aria-hidden="true" />
+              </IconButton>
+            </div>
+          ) : null}
+        </div>
+        {node.children.length === 0 ? null : (
+          <ul className={cn(styles.tree, styles.nested)}>
+            {node.children.map((child) => (
+              <TreeRow
+                key={child.sector.id}
+                node={child}
+                depth={depth + 1}
+                tint={tint}
+                sectors={sectors}
+                valves={valves}
+                canManage={canManage}
+              />
+            ))}
+          </ul>
+        )}
+      </Card>
+      <Dialog
+        open={mode !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            close();
+          }
+        }}
+        title={dialogTitle(mode, sector.name)}
+        description={t('regions.dialogHint')}
+      >
+        {mode === 'rename' ? (
           <RenameForm
             legend={t('regions.renameTitle', { name: sector.name })}
             initialName={sector.name}
@@ -232,26 +291,24 @@ function TreeRow({
             }}
             onCancel={close}
           />
-        </div>
-      ) : null}
-      {mode === 'move' ? (
-        <MovePanel
-          sector={sector}
-          sectors={sectors}
-          error={actions.updateSector.isError ? actions.updateSector.error : null}
-          busy={actions.updateSector.isPending}
-          onMove={async (parentId) => {
-            await actions.updateSector.mutateAsync({
-              id: sector.id,
-              input: parentId === NO_PARENT ? { isRegion: true } : { parentSectorId: parentId },
-            });
-            close();
-          }}
-          onCancel={close}
-        />
-      ) : null}
-      {mode === 'child' ? (
-        <div className={cn(styles.panel)}>
+        ) : null}
+        {mode === 'move' ? (
+          <MovePanel
+            sector={sector}
+            sectors={sectors}
+            error={actions.updateSector.isError ? actions.updateSector.error : null}
+            busy={actions.updateSector.isPending}
+            onMove={async (parentId) => {
+              await actions.updateSector.mutateAsync({
+                id: sector.id,
+                input: parentId === NO_PARENT ? { isRegion: true } : { parentSectorId: parentId },
+              });
+              close();
+            }}
+            onCancel={close}
+          />
+        ) : null}
+        {mode === 'child' ? (
           <SectorForm
             legend={t('regions.childTitle', { name: sector.name })}
             submitLabel={t('regions.childSubmit')}
@@ -267,10 +324,8 @@ function TreeRow({
             }}
             onCancel={close}
           />
-        </div>
-      ) : null}
-      {mode === 'valve' ? (
-        <div className={cn(styles.panel)}>
+        ) : null}
+        {mode === 'valve' ? (
           <ValveForm
             legend={t('regions.valveTitle', { name: sector.name })}
             submitLabel={t('regions.valveSubmit')}
@@ -289,24 +344,25 @@ function TreeRow({
             }}
             onCancel={close}
           />
-        </div>
-      ) : null}
-      {node.children.length === 0 ? null : (
-        <ul className={cn(styles.tree)}>
-          {node.children.map((child) => (
-            <TreeRow
-              key={child.sector.id}
-              node={child}
-              depth={depth + 1}
-              sectors={sectors}
-              valves={valves}
-              canManage={canManage}
-            />
-          ))}
-        </ul>
-      )}
+        ) : null}
+      </Dialog>
     </li>
   );
+}
+
+function dialogTitle(mode: EditMode | null, name: string): string {
+  switch (mode) {
+    case 'rename':
+      return t('regions.renameTitle', { name });
+    case 'move':
+      return t('regions.moveTitle', { name });
+    case 'child':
+      return t('regions.childTitle', { name });
+    case 'valve':
+      return t('regions.valveTitle', { name });
+    case null:
+      return '';
+  }
 }
 
 function MovePanel({
