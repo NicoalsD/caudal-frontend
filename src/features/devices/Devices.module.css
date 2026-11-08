@@ -1,13 +1,21 @@
-.toolbar {
+.page {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: var(--space-4) 0;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   gap: var(--space-4);
   margin: 0;
   padding: 0;
@@ -17,10 +25,34 @@
 .item {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border-subtle);
+  gap: var(--space-4);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.headText {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.kindIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--target-min);
+  height: var(--target-min);
+  border-radius: var(--radius-control);
+  background: var(--color-tint-aqua);
+}
+
+.kindIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .name {
@@ -31,12 +63,44 @@
 
 .meta {
   margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-small);
+}
+
+.facts li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.facts svg {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-block-start: 0.1rem;
+  color: var(--color-text-secondary);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  margin-block-start: auto;
+}
+
+.actions button {
+  flex: 1 1 auto;
+  padding-inline: var(--space-3);
 }
 
 .field {
@@ -53,35 +117,4 @@
 .error {
   margin: 0;
   font-weight: 600;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: var(--space-2) 0;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-chip);
-  font-weight: var(--font-weight-bold);
-}
-
-.icon {
-  flex-shrink: 0;
-  width: var(--font-size-h2);
-  height: var(--font-size-h2);
-}
-
-.active {
-  color: var(--color-water-800);
-  background: var(--color-water-100);
-}
-
-.suspended {
-  color: var(--color-ochre-800);
-  background: var(--color-ochre-100);
-}
-
-.retired {
-  color: var(--color-paramo-800);
-  background: var(--color-paramo-100);
 }

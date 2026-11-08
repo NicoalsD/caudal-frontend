@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
-import { Archive, CircleCheck, CirclePause } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Cpu, KeyRound, Link2, Radio, Waves } from 'lucide-react';
 
 import type { ValveOption } from '../../core/devices/attachments';
 import { describeLastSeen } from '../../core/devices/lastSeen';
@@ -10,6 +9,9 @@ import type { DeviceStatus } from '../../core/devices/deviceModel';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
 import type { DeviceView, TankView } from '../../services/api/views';
+import { Card } from '../../ui/cards/Card';
+import { Badge } from '../../ui/primitives/Badge';
+import type { BadgeTone } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import styles from './Devices.module.css';
@@ -17,17 +19,10 @@ import { StatusConfirmDialog, RotateKeyDialog } from './DeviceDialogs';
 import { kindText, statusText } from './deviceText';
 import { useChangeDeviceStatus } from './deviceQueries';
 
-/** The icon of each status. The word carries the meaning; the icon only supports it. */
-const ICON_BY_STATUS: Readonly<Record<DeviceStatus, LucideIcon>> = {
-  ACTIVE: CircleCheck,
-  SUSPENDED: CirclePause,
-  RETIRED: Archive,
-};
-
-const TONE_CLASS_BY_STATUS: Readonly<Record<DeviceStatus, string | undefined>> = {
-  ACTIVE: styles.active,
-  SUSPENDED: styles.suspended,
-  RETIRED: styles.retired,
+const TONE_BY_STATUS: Readonly<Record<DeviceStatus, BadgeTone>> = {
+  ACTIVE: 'ok',
+  SUSPENDED: 'warning',
+  RETIRED: 'neutral',
 };
 
 interface DeviceRowProps {
@@ -53,21 +48,37 @@ export function DeviceRow({
   const [confirming, setConfirming] = useState<DeviceStatus | null>(null);
   const [rotating, setRotating] = useState(false);
   const change = useChangeDeviceStatus();
-  const Icon = ICON_BY_STATUS[device.status];
   const targets = statusTargets(device.status);
   const canAct = canChange && device.status !== 'RETIRED';
 
   return (
-    <li className={cn(styles.item)}>
-      <h3 className={cn(styles.name)}>{device.name}</h3>
-      <p className={cn(styles.meta)}>{t('devices.kindLine', { kind: kindText(device.kind) })}</p>
-      <p className={cn(styles.badge, TONE_CLASS_BY_STATUS[device.status])}>
-        <Icon aria-hidden="true" className={cn(styles.icon)} />
-        <span>{statusText(device.status)}</span>
-      </p>
-      <p className={cn(styles.meta)}>{lastSeenText(device, nowMs)}</p>
-      <p className={cn(styles.meta)}>{attachmentText(device, tanks, valves)}</p>
-      <p className={cn(styles.meta)}>{keyText(device)}</p>
+    <Card as="li" className={cn(styles.item)}>
+      <div className={cn(styles.head)}>
+        <span className={cn(styles.kindIcon)}>
+          <Cpu aria-hidden="true" />
+        </span>
+        <div className={cn(styles.headText)}>
+          <h3 className={cn(styles.name)}>{device.name}</h3>
+          <p className={cn(styles.meta)}>
+            {t('devices.kindLine', { kind: kindText(device.kind) })}
+          </p>
+        </div>
+        <Badge tone={TONE_BY_STATUS[device.status]}>{statusText(device.status)}</Badge>
+      </div>
+      <ul className={cn(styles.facts)}>
+        <li>
+          <Radio aria-hidden="true" />
+          <span>{lastSeenText(device, nowMs)}</span>
+        </li>
+        <li>
+          {device.valveId === null ? <Waves aria-hidden="true" /> : <Link2 aria-hidden="true" />}
+          <span>{attachmentText(device, tanks, valves)}</span>
+        </li>
+        <li>
+          <KeyRound aria-hidden="true" />
+          <span>{keyText(device)}</span>
+        </li>
+      </ul>
       {canAct ? (
         <div className={cn(styles.actions)}>
           {targets.map((target) =>
@@ -94,6 +105,7 @@ export function DeviceRow({
             ) : (
               <Button
                 key={target}
+                variant="ghost"
                 onClick={() => {
                   setConfirming(target);
                 }}
@@ -125,7 +137,7 @@ export function DeviceRow({
         />
       )}
       <RotateKeyDialog device={device} open={rotating} onOpenChange={setRotating} onDone={onDone} />
-    </li>
+    </Card>
   );
 }
 
