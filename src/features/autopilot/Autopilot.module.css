@@ -13,7 +13,7 @@
 
 @media (min-width: 64rem) {
   .columns {
-    grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   }
 }
 
@@ -84,4 +84,9 @@
 .meta {
   display: block;
   color: var(--color-text-secondary);
+}
+
+.scroll {
+  max-width: 100%;
+  overflow-x: auto;
 }

@@ -63,7 +63,7 @@ export function DecisionHistory({
     body = <p className={cn(styles.quiet)}>{t('history.empty')}</p>;
   } else {
     body = (
-      <TableScroll label={t('history.title')}>
+      <TableScroll label={t('history.title')} className={cn(styles.scroll)}>
         <table className={cn(styles.table)}>
           <thead>
             <tr>

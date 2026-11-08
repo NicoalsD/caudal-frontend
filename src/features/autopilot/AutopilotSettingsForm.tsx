@@ -118,6 +118,7 @@ function SettingsFields({
         <RadioGroupField
           legend={t('settings.mode')}
           name="autopilot-mode"
+          stacked
           disabled={!canConfigure}
           options={AUTOPILOT_MODES.map((code) => ({
             value: code,

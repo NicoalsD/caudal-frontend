@@ -22,6 +22,10 @@
   gap: var(--space-3);
 }
 
+.stacked {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .option {
   display: flex;
   align-items: center;
