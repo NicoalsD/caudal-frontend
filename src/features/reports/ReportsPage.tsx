@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { Activity, Bot, TriangleAlert, Waves } from 'lucide-react';
 import type { JSX } from 'react';
 
 import {
   DEFAULT_REPORT_DAYS,
+  WEEK_DAYS,
   lastDays,
   periodProblem,
   reportInstants,
@@ -17,12 +19,17 @@ import type { ReportView } from '../../services/api/views';
 import { useNarrativeReport, useReport } from '../../state/hooks/useReports';
 import { useSectors } from '../../state/hooks/useSectors';
 import { useServiceToday } from '../../state/hooks/useServiceToday';
+import { Card } from '../../ui/cards/Card';
+import { StatTile } from '../../ui/cards/StatTile';
 import { BarChart, SERIES_COLOR } from '../../ui/charts/BarChart';
+import { ChartCard } from '../../ui/data/ChartCard';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { Button } from '../../ui/primitives/Button';
+import { Chip } from '../../ui/primitives/Chip';
+import { SegmentedControl } from '../../ui/primitives/SegmentedControl';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { MarkdownView } from './MarkdownView';
@@ -31,6 +38,12 @@ import styles from './Reports.module.css';
 const LEVEL_DIGITS = 2;
 const WHOLE = 0;
 const PERCENT = 100;
+const FORTNIGHT_DAYS = 14;
+const PRESETS = [
+  { value: String(WEEK_DAYS), days: WEEK_DAYS, label: 'reports.range.week' },
+  { value: String(FORTNIGHT_DAYS), days: FORTNIGHT_DAYS, label: 'reports.range.fortnight' },
+  { value: String(DEFAULT_REPORT_DAYS), days: DEFAULT_REPORT_DAYS, label: 'reports.range.month' },
+] as const;
 
 /**
  * The report of a period: the numbers as charts (each with its table), and the narrative the
@@ -46,35 +59,62 @@ export function ReportsPage(): JSX.Element {
   const report = useReport(period);
   const narrative = useNarrativeReport();
 
+  const preset =
+    PRESETS.find((option) => {
+      const days = lastDays(today, option.days);
+      return days !== null && days.from === fromDay && days.to === toDay;
+    })?.value ?? '';
+
   return (
     <div className={cn(styles.page)}>
       <ScreenTitle>{t('screens.reports')}</ScreenTitle>
-      <form
-        className={cn(styles.filters)}
-        data-print-hide=""
-        onSubmit={(event) => {
-          event.preventDefault();
-        }}
-      >
-        <TextField
-          label={t('reports.from')}
-          type="date"
-          value={fromDay}
-          onChange={(event) => {
-            setFromDay(event.target.value);
-            narrative.reset();
+      <Card as="div" className={cn(styles.head)} data-print-hide="">
+        <SegmentedControl
+          label={t('reports.range.label')}
+          value={preset}
+          options={PRESETS.map((option) => ({ value: option.value, label: t(option.label) }))}
+          onChange={(next) => {
+            const days = lastDays(today, Number(next));
+            if (days !== null) {
+              setFromDay(days.from);
+              setToDay(days.to);
+              narrative.reset();
+            }
           }}
         />
-        <TextField
-          label={t('reports.to')}
-          type="date"
-          value={toDay}
-          onChange={(event) => {
-            setToDay(event.target.value);
-            narrative.reset();
+        <form
+          className={cn(styles.filters)}
+          onSubmit={(event) => {
+            event.preventDefault();
           }}
-        />
-      </form>
+        >
+          <TextField
+            label={t('reports.from')}
+            type="date"
+            value={fromDay}
+            onChange={(event) => {
+              setFromDay(event.target.value);
+              narrative.reset();
+            }}
+          />
+          <TextField
+            label={t('reports.to')}
+            type="date"
+            value={toDay}
+            onChange={(event) => {
+              setToDay(event.target.value);
+              narrative.reset();
+            }}
+          />
+        </form>
+        <Button
+          onClick={() => {
+            window.print();
+          }}
+        >
+          {t('reports.print')}
+        </Button>
+      </Card>
       {problem === null ? null : (
         <p role="alert" className={cn(styles.problem)}>
           {t(`reports.problem.${problem}`)}
@@ -83,45 +123,6 @@ export function ReportsPage(): JSX.Element {
       <p className={cn(styles.printOnly)}>
         {t('reports.printPeriod', { from: fromDay, to: toDay })}
       </p>
-
-      <div className={cn(styles.actions)} data-print-hide="">
-        <Button
-          variant="primary"
-          disabled={period === null || narrative.isPending}
-          onClick={() => {
-            if (period !== null) {
-              narrative.mutate(period);
-            }
-          }}
-        >
-          {narrative.isPending ? t('reports.generating') : t('reports.generate')}
-        </Button>
-        <Button
-          onClick={() => {
-            window.print();
-          }}
-        >
-          {t('reports.print')}
-        </Button>
-      </div>
-
-      {narrative.isError ? (
-        <FormAlert
-          message={t('reports.narrativeError')}
-          detail={errorText(narrative.error).message}
-        />
-      ) : null}
-      {narrative.isSuccess ? (
-        <article className={cn(styles.narrative)} aria-labelledby="report-narrative-title">
-          <h2 id="report-narrative-title">{narrative.data.title}</h2>
-          <p className={cn(styles.source)} role="status">
-            {t('reports.sourceLine', {
-              source: t(`assistant.source.${lower(narrative.data.source)}`),
-            })}
-          </p>
-          <MarkdownView source={narrative.data.markdown} />
-        </article>
-      ) : null}
 
       {period === null ? null : report.isPending ? (
         <LoadingState message={t('reports.loading')} />
@@ -134,8 +135,103 @@ export function ReportsPage(): JSX.Element {
           }}
         />
       ) : (
-        <ReportCharts report={report.data} />
+        <ReportTiles report={report.data} />
       )}
+
+      <Card
+        variant="dark"
+        as={narrative.isSuccess ? 'article' : 'section'}
+        aria-labelledby="report-narrative-title"
+        className={cn(styles.narrative)}
+      >
+        <div className={cn(styles.narrativeBody)}>
+          <div className={cn(styles.narrativeHead)}>
+            <h2 id="report-narrative-title" className={cn(styles.narrativeTitle)}>
+              {narrative.isSuccess ? narrative.data.title : t('reports.narrativeTitle')}
+            </h2>
+            {narrative.isSuccess ? (
+              <Chip tone="aqua" icon={<Bot aria-hidden="true" />}>
+                {t(`reports.badge.${lower(narrative.data.source) as 'llm'}`)}
+              </Chip>
+            ) : null}
+          </div>
+          {narrative.isSuccess ? (
+            <>
+              <p className={cn(styles.source)} role="status">
+                {t('reports.sourceLine', {
+                  source: t(`assistant.source.${lower(narrative.data.source)}`),
+                })}
+              </p>
+              <div className={cn(styles.markdown)}>
+                <MarkdownView source={narrative.data.markdown} />
+              </div>
+            </>
+          ) : (
+            <p className={cn(styles.source)}>{t('reports.narrativeHint')}</p>
+          )}
+          {narrative.isError ? (
+            <FormAlert
+              message={t('reports.narrativeError')}
+              detail={errorText(narrative.error).message}
+            />
+          ) : null}
+          <div className={cn(styles.actions)} data-print-hide="">
+            <Button
+              variant="onDark"
+              disabled={period === null || narrative.isPending}
+              onClick={() => {
+                if (period !== null) {
+                  narrative.mutate(period);
+                }
+              }}
+            >
+              {narrative.isPending ? t('reports.generating') : t('reports.generate')}
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {period === null || !report.isSuccess ? null : <ReportCharts report={report.data} />}
+    </div>
+  );
+}
+
+function ReportTiles({ report }: { readonly report: ReportView }): JSX.Element {
+  const decisions = llmShare(report.decisions);
+  const decided = decisions.llm + decisions.rules;
+  return (
+    <div className={cn(styles.tiles)} role="group" aria-label={t('reports.tiles.label')}>
+      <StatTile
+        icon={Waves}
+        tint="aqua"
+        label={t('reports.tiles.commands')}
+        value={String(totalOf(report.commands))}
+      />
+      <StatTile
+        icon={Bot}
+        tint="lavender"
+        label={t('reports.tiles.decisions')}
+        value={String(decided)}
+        {...(decided === 0
+          ? {}
+          : {
+              footer: t('reports.tiles.llmShare', {
+                percent: formatDecimal((decisions.llm / decided) * PERCENT, WHOLE),
+              }),
+            })}
+      />
+      <StatTile
+        icon={TriangleAlert}
+        tint="coral"
+        label={t('reports.tiles.incidents')}
+        value={String(totalOf(report.incidents))}
+      />
+      <StatTile
+        icon={Activity}
+        tint="sand"
+        label={t('reports.tiles.anomalies')}
+        value={String(totalOf(report.anomalies))}
+      />
     </div>
   );
 }
@@ -150,7 +246,13 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
   const anomalies = report.anomalies;
   return (
     <div className={cn(styles.grid)}>
-      <section className={cn(styles.card)} aria-labelledby="rep-levels">
+      <Card
+        variant="tinted"
+        tint="aqua"
+        as="section"
+        aria-labelledby="rep-levels"
+        className={cn(styles.card)}
+      >
         <h2 id="rep-levels" className={cn(styles.cardTitle)}>
           {t('reports.levels.title')}
         </h2>
@@ -168,11 +270,8 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
             <dd>{String(levels.readings)}</dd>
           </dl>
         )}
-      </section>
-      <section className={cn(styles.card)} aria-labelledby="rep-coverage">
-        <h2 id="rep-coverage" className={cn(styles.cardTitle)}>
-          {t('reports.coverage.title')}
-        </h2>
+      </Card>
+      <ChartCard title={t('reports.coverage.title')}>
         <BarChart
           label={t('reports.coverage.chart')}
           rows={coverage.map((row) => ({
@@ -195,11 +294,8 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
             )
             .join('. ')}
         </p>
-      </section>
-      <section className={cn(styles.card)} aria-labelledby="rep-commands">
-        <h2 id="rep-commands" className={cn(styles.cardTitle)}>
-          {t('reports.commands.title', { total: String(totalOf(report.commands)) })}
-        </h2>
+      </ChartCard>
+      <ChartCard title={t('reports.commands.title', { total: String(totalOf(report.commands)) })}>
         <BarChart
           label={t('reports.commands.chart')}
           rows={origin.map((entry) => ({
@@ -210,11 +306,8 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
             { key: 'total', label: t('reports.commands.series'), token: SERIES_COLOR.water },
           ]}
         />
-      </section>
-      <section className={cn(styles.card)} aria-labelledby="rep-decisions">
-        <h2 id="rep-decisions" className={cn(styles.cardTitle)}>
-          {t('reports.decisions.title')}
-        </h2>
+      </ChartCard>
+      <ChartCard title={t('reports.decisions.title')}>
         <BarChart
           label={t('reports.decisions.chart')}
           rows={
@@ -233,11 +326,8 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
           ]}
           stacked
         />
-      </section>
-      <section className={cn(styles.card)} aria-labelledby="rep-incidents">
-        <h2 id="rep-incidents" className={cn(styles.cardTitle)}>
-          {t('reports.incidents.title')}
-        </h2>
+      </ChartCard>
+      <ChartCard title={t('reports.incidents.title')}>
         <BarChart
           label={t('reports.incidents.chart')}
           rows={incidents.map((entry) => ({ name: entry.key, values: { total: entry.total } }))}
@@ -245,11 +335,8 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
             { key: 'total', label: t('reports.incidents.series'), token: SERIES_COLOR.clay },
           ]}
         />
-      </section>
-      <section className={cn(styles.card)} aria-labelledby="rep-anomalies">
-        <h2 id="rep-anomalies" className={cn(styles.cardTitle)}>
-          {t('reports.anomalies.title')}
-        </h2>
+      </ChartCard>
+      <ChartCard title={t('reports.anomalies.title')}>
         <BarChart
           label={t('reports.anomalies.chart')}
           rows={anomalies.map((row) => ({ name: row.kind, values: { total: row.total } }))}
@@ -257,7 +344,7 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
             { key: 'total', label: t('reports.anomalies.series'), token: SERIES_COLOR.paramo },
           ]}
         />
-      </section>
+      </ChartCard>
     </div>
   );
 }

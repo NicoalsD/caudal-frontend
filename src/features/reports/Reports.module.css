@@ -1,12 +1,21 @@
 .page {
   display: flex;
   flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* Period header: presets, dates and print. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: var(--space-4);
 }
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 14rem));
+  grid-template-columns: repeat(2, minmax(9rem, 12rem));
   gap: var(--space-3);
   align-items: end;
 }
@@ -18,7 +27,7 @@
 }
 
 .actions > * {
-  min-height: 48px;
+  min-height: var(--target-min);
 }
 
 .problem {
@@ -32,30 +41,66 @@
   margin: 0;
 }
 
-.narrative {
-  max-width: 52rem;
-  padding: var(--space-4);
-  background: var(--color-raised);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-surface);
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-4);
 }
 
-.narrative h2,
-.narrative h3,
-.narrative h4 {
-  margin-block: var(--space-3) var(--space-1);
+/* The narrative: a dark card with a quiet, readable column of text. */
+.narrative {
+  min-width: 0;
+}
+
+.narrativeBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.narrativeHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.narrativeTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
 }
 
 .source {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: color-mix(in srgb, var(--color-on-brand) 88%, transparent);
   font-size: var(--font-size-small);
+}
+
+.markdown {
+  max-width: 52rem;
+}
+
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  margin-block: var(--space-4) var(--space-1);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+}
+
+.markdown p,
+.markdown li {
+  color: var(--color-on-brand);
 }
 
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 @media (min-width: 48rem) {
@@ -70,21 +115,20 @@
   }
 }
 
+.grid > * {
+  min-width: 0;
+  break-inside: avoid;
+}
+
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-raised);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-surface);
-  break-inside: avoid;
+  gap: var(--space-3);
 }
 
 .cardTitle {
   margin: 0;
-  font-size: var(--font-size-h3, 1.125rem);
+  font-size: var(--font-size-h2);
 }
 
 .quiet {
@@ -96,14 +140,17 @@
 .facts {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--space-1) var(--space-3);
+  gap: var(--space-2) var(--space-4);
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
 
 .facts dd {
   margin: 0;
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-stat);
+  font-weight: var(--font-weight-display);
+  line-height: 1;
 }
 
 @media print {
@@ -115,15 +162,32 @@
     display: block;
   }
 
-  .narrative,
-  .card {
-    border: 0;
-    padding: 0;
+  /* Ink on paper: the dark card becomes a plain sheet without its wave art or shadows. */
+  .narrative {
     background: none;
-    max-width: none;
+    border: 0;
+    box-shadow: none;
+    color: var(--color-text-primary);
+  }
+
+  .narrative > svg {
+    display: none;
+  }
+
+  .narrative .source,
+  .markdown p,
+  .markdown li {
+    color: var(--color-text-primary);
   }
 
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid > *,
+  .tiles > * {
+    background: none;
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: none;
   }
 }
