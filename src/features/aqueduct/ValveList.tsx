@@ -23,7 +23,7 @@ interface ValveListProps {
 
 const STATE_LOOK: Readonly<Record<LiveValve['state'], { icon: LucideIcon; tone: ChipTone }>> = {
   OPEN: { icon: CircleCheck, tone: 'mint' },
-  CLOSED: { icon: CircleX, tone: 'coral' },
+  CLOSED: { icon: CircleX, tone: 'aqua' },
   UNKNOWN: { icon: CircleHelp, tone: 'sand' },
 };
 
@@ -72,7 +72,7 @@ export function ValveList({
           >
             <Card
               variant="tinted"
-              tint={valve.state === 'OPEN' ? 'mint' : valve.state === 'CLOSED' ? 'coral' : 'sand'}
+              tint={valve.state === 'OPEN' ? 'mint' : valve.state === 'CLOSED' ? 'aqua' : 'sand'}
               interactive
               className={cn(styles.valveCard)}
             >

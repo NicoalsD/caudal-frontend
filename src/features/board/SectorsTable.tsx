@@ -21,7 +21,7 @@ const SECTION_ID = 'board-sectors-title';
 
 const STATE_LOOK: Readonly<Record<LiveValve['state'], { icon: LucideIcon; tone: ChipTone }>> = {
   OPEN: { icon: CircleCheck, tone: 'mint' },
-  CLOSED: { icon: CircleX, tone: 'coral' },
+  CLOSED: { icon: CircleX, tone: 'aqua' },
   UNKNOWN: { icon: CircleHelp, tone: 'sand' },
 };
 
