@@ -3764,6 +3764,506 @@
           }
         }
       }
+    },
+    "/api/v1/valves/live": {
+      "get": {
+        "operationId": "listValvesLive",
+        "summary": "Estado en vivo de las llaves",
+        "description": "Permiso NETWORK_VIEW. Contrato v2, sección B.",
+        "responses": {
+          "200": {
+            "description": "Llaves con su estado y su último comando.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValveLiveList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/valve-commands/manual": {
+      "post": {
+        "operationId": "createManualValveCommand",
+        "summary": "Enviar un comando manual a una llave",
+        "description": "Permiso VALVE_COMMAND_MANUAL. API.md 16.6. El motivo es obligatorio (10 a 500).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateManualValveCommandRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comando creado en PENDING.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValveCommand"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: llave sin actuador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: ya hay un comando activo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED: falta el motivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/settings": {
+      "get": {
+        "operationId": "getAutopilotSettings",
+        "summary": "Ajustes del piloto",
+        "description": "Permiso ASSISTANT_USE.",
+        "responses": {
+          "200": {
+            "description": "Ajustes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateAutopilotSettings",
+        "summary": "Cambiar los ajustes del piloto",
+        "description": "Permiso AUTOPILOT_CONFIGURE.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAutopilotSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ajustes guardados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: valores fuera de rango.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/decisions": {
+      "get": {
+        "operationId": "listAutopilotDecisions",
+        "summary": "Decisiones del piloto",
+        "description": "Permiso ASSISTANT_USE. De la más nueva a la más vieja.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "ACCEPTED",
+                "REJECTED",
+                "EXECUTED",
+                "EXPIRED",
+                "SKIPPED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decisiones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecisionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/decisions/{id}/accept": {
+      "post": {
+        "operationId": "acceptAutopilotDecision",
+        "summary": "Aceptar una decisión",
+        "description": "Permiso VALVE_COMMAND_MANUAL. Crea el comando.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decisión aceptada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecision"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: la decisión ya no está pendiente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/decisions/{id}/reject": {
+      "post": {
+        "operationId": "rejectAutopilotDecision",
+        "summary": "Rechazar una decisión",
+        "description": "Permiso ASSISTANT_USE.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decisión rechazada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecision"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: la decisión ya no está pendiente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assistant/ask": {
+      "post": {
+        "operationId": "askAssistant",
+        "summary": "Preguntarle al asistente",
+        "description": "Permiso ASSISTANT_USE.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantAskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAnswer"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: pregunta vacía o de más de 500 caracteres.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7642,6 +8142,405 @@
           "next_cursor": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ValveLiveCommand": {
+        "type": "object",
+        "required": [
+          "id",
+          "action",
+          "status",
+          "origin",
+          "created_at",
+          "updated_at"
+        ],
+        "description": "Último comando de una válvula (contrato v2, sección B).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "DELIVERED",
+              "ACKED",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "SCHEDULE",
+              "MANUAL",
+              "AUTOPILOT"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValveLive": {
+        "type": "object",
+        "required": [
+          "valve_id",
+          "sector_id",
+          "state"
+        ],
+        "description": "Estado en vivo de una válvula (GET /valves/live).",
+        "properties": {
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSED",
+              "UNKNOWN"
+            ]
+          },
+          "last_command": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ValveLiveCommand"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "ValveLiveList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Estado en vivo de las válvulas.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValveLive"
+            }
+          }
+        }
+      },
+      "CreateManualValveCommandRequest": {
+        "type": "object",
+        "required": [
+          "valve_id",
+          "command",
+          "manual_reason",
+          "not_before",
+          "expires_at"
+        ],
+        "description": "Comando manual de una válvula (API.md 16.6).",
+        "properties": {
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "command": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE"
+            ]
+          },
+          "manual_reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "not_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValveCommand": {
+        "type": "object",
+        "required": [
+          "id",
+          "valve_id",
+          "command",
+          "status",
+          "not_before",
+          "expires_at"
+        ],
+        "description": "Comando de una válvula con su estado.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "command": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "DELIVERED",
+              "ACKED",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "not_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AutopilotSettings": {
+        "type": "object",
+        "required": [
+          "mode",
+          "operator_absence_minutes",
+          "reserve_floor_pct"
+        ],
+        "description": "Ajustes del piloto automático.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "ASSISTED",
+              "AUTOMATIC"
+            ]
+          },
+          "operator_absence_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "reserve_floor_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateAutopilotSettingsRequest": {
+        "type": "object",
+        "required": [
+          "mode",
+          "operator_absence_minutes",
+          "reserve_floor_pct"
+        ],
+        "description": "Cambio de los ajustes del piloto.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "ASSISTED",
+              "AUTOMATIC"
+            ]
+          },
+          "operator_absence_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "reserve_floor_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "AutopilotDecision": {
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "source",
+          "model",
+          "action",
+          "reason",
+          "confidence",
+          "status"
+        ],
+        "description": "Decisión del piloto o recomendación del asistente.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE",
+              "WAIT",
+              "INSPECT"
+            ]
+          },
+          "valve_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "REJECTED",
+              "EXECUTED",
+              "EXPIRED",
+              "SKIPPED"
+            ]
+          },
+          "decided_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "valve_command_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "AutopilotDecisionList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Decisiones, de la más nueva a la más vieja.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutopilotDecision"
+            }
+          }
+        }
+      },
+      "RejectDecisionRequest": {
+        "type": "object",
+        "required": [],
+        "description": "Rechazo de una decisión, con motivo opcional.",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AssistantAskRequest": {
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "description": "Pregunta al asistente.",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "AssistantAnswer": {
+        "type": "object",
+        "required": [
+          "source",
+          "model",
+          "answer",
+          "generated_at"
+        ],
+        "description": "Respuesta del asistente.",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

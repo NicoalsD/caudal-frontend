@@ -1279,6 +1279,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/valves/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado en vivo de las llaves
+         * @description Permiso NETWORK_VIEW. Contrato v2, sección B.
+         */
+        get: operations["listValvesLive"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/valve-commands/manual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enviar un comando manual a una llave
+         * @description Permiso VALVE_COMMAND_MANUAL. API.md 16.6. El motivo es obligatorio (10 a 500).
+         */
+        post: operations["createManualValveCommand"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autopilot/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ajustes del piloto
+         * @description Permiso ASSISTANT_USE.
+         */
+        get: operations["getAutopilotSettings"];
+        /**
+         * Cambiar los ajustes del piloto
+         * @description Permiso AUTOPILOT_CONFIGURE.
+         */
+        put: operations["updateAutopilotSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autopilot/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Decisiones del piloto
+         * @description Permiso ASSISTANT_USE. De la más nueva a la más vieja.
+         */
+        get: operations["listAutopilotDecisions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autopilot/decisions/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Aceptar una decisión
+         * @description Permiso VALVE_COMMAND_MANUAL. Crea el comando.
+         */
+        post: operations["acceptAutopilotDecision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/autopilot/decisions/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rechazar una decisión
+         * @description Permiso ASSISTANT_USE.
+         */
+        post: operations["rejectAutopilotDecision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assistant/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preguntarle al asistente
+         * @description Permiso ASSISTANT_USE.
+         */
+        post: operations["askAssistant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2479,6 +2623,123 @@ export interface components {
         ReadingPage: {
             items: components["schemas"]["Reading"][];
             next_cursor: string | null;
+        };
+        /** @description Último comando de una válvula (contrato v2, sección B). */
+        ValveLiveCommand: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            action: "OPEN" | "CLOSE";
+            /** @enum {string} */
+            status: "PENDING" | "DELIVERED" | "ACKED" | "FAILED" | "EXPIRED";
+            /** @enum {string} */
+            origin: "SCHEDULE" | "MANUAL" | "AUTOPILOT";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        /** @description Estado en vivo de una válvula (GET /valves/live). */
+        ValveLive: {
+            /** Format: uuid */
+            valve_id: string;
+            /** Format: uuid */
+            sector_id: string;
+            /** @enum {string} */
+            state: "OPEN" | "CLOSED" | "UNKNOWN";
+            last_command?: components["schemas"]["ValveLiveCommand"] | null;
+        };
+        /** @description Estado en vivo de las válvulas. */
+        ValveLiveList: {
+            items: components["schemas"]["ValveLive"][];
+        };
+        /** @description Comando manual de una válvula (API.md 16.6). */
+        CreateManualValveCommandRequest: {
+            /** Format: uuid */
+            valve_id: string;
+            /** @enum {string} */
+            command: "OPEN" | "CLOSE";
+            manual_reason: string;
+            /** Format: date-time */
+            not_before: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Comando de una válvula con su estado. */
+        ValveCommand: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            valve_id: string;
+            /** @enum {string} */
+            command: "OPEN" | "CLOSE";
+            /** @enum {string} */
+            status: "PENDING" | "DELIVERED" | "ACKED" | "FAILED" | "EXPIRED";
+            /** Format: date-time */
+            not_before: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /** @description Ajustes del piloto automático. */
+        AutopilotSettings: {
+            /** @enum {string} */
+            mode: "MANUAL" | "ASSISTED" | "AUTOMATIC";
+            operator_absence_minutes: number;
+            reserve_floor_pct: number;
+            /** Format: date-time */
+            updated_at?: string | null;
+        };
+        /** @description Cambio de los ajustes del piloto. */
+        UpdateAutopilotSettingsRequest: {
+            /** @enum {string} */
+            mode: "MANUAL" | "ASSISTED" | "AUTOMATIC";
+            operator_absence_minutes: number;
+            reserve_floor_pct: number;
+        };
+        /** @description Decisión del piloto o recomendación del asistente. */
+        AutopilotDecision: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            created_at: string;
+            /** @enum {string} */
+            source: "LLM" | "RULES";
+            model: string;
+            /** @enum {string} */
+            action: "OPEN" | "CLOSE" | "WAIT" | "INSPECT";
+            /** Format: uuid */
+            valve_id?: string | null;
+            reason: string;
+            confidence: number;
+            /** @enum {string} */
+            status: "PENDING" | "ACCEPTED" | "REJECTED" | "EXECUTED" | "EXPIRED" | "SKIPPED";
+            /** Format: uuid */
+            decided_by?: string | null;
+            /** Format: date-time */
+            decided_at?: string | null;
+            /** Format: uuid */
+            valve_command_id?: string | null;
+        };
+        /** @description Decisiones, de la más nueva a la más vieja. */
+        AutopilotDecisionList: {
+            items: components["schemas"]["AutopilotDecision"][];
+        };
+        /** @description Rechazo de una decisión, con motivo opcional. */
+        RejectDecisionRequest: {
+            reason?: string | null;
+        };
+        /** @description Pregunta al asistente. */
+        AssistantAskRequest: {
+            question: string;
+        };
+        /** @description Respuesta del asistente. */
+        AssistantAnswer: {
+            /** @enum {string} */
+            source: "LLM" | "RULES";
+            model: string;
+            answer: string;
+            /** Format: date-time */
+            generated_at: string;
         };
     };
     responses: never;
@@ -5260,6 +5521,423 @@ export interface operations {
             };
             /** @description NOT_FOUND: el tanque no existe. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listValvesLive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Llaves con su estado y su último comando. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValveLiveList"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    createManualValveCommand: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManualValveCommandRequest"];
+            };
+        };
+        responses: {
+            /** @description Comando creado en PENDING. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValveCommand"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND: llave sin actuador. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: ya hay un comando activo. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description REASON_REQUIRED: falta el motivo. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getAutopilotSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ajustes. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutopilotSettings"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    updateAutopilotSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAutopilotSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Ajustes guardados. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutopilotSettings"];
+                };
+            };
+            /** @description VALIDATION_ERROR: valores fuera de rango. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listAutopilotDecisions: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "ACCEPTED" | "REJECTED" | "EXECUTED" | "EXPIRED" | "SKIPPED";
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Decisiones. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutopilotDecisionList"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    acceptAutopilotDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Decisión aceptada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutopilotDecision"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: la decisión ya no está pendiente. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    rejectAutopilotDecision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Decisión rechazada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutopilotDecision"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description CONFLICT: la decisión ya no está pendiente. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    askAssistant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantAskRequest"];
+            };
+        };
+        responses: {
+            /** @description Respuesta. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantAnswer"];
+                };
+            };
+            /** @description VALIDATION_ERROR: pregunta vacía o de más de 500 caracteres. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Sesión no válida (UNAUTHORIZED). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN: falta el permiso. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description RATE_LIMITED. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
