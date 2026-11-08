@@ -36,3 +36,10 @@ textarea {
   font: inherit;
   color: inherit;
 }
+
+/* Anything marked data-print-hide stays on the screen and out of the printed page. */
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+}

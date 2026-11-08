@@ -114,7 +114,9 @@ export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.E
           </div>
         </div>
       </header>
-      <SyncStatus />
+      <div data-print-hide="">
+        <SyncStatus />
+      </div>
       <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
         <Outlet />
       </main>

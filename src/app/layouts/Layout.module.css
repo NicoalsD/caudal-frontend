@@ -365,3 +365,17 @@
     padding-block-end: calc(4rem + var(--space-7) + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Paper shows the content only: no sidebar, menu or sync bar, and the page uses the full sheet. */
+@media print {
+  .skipLink,
+  .header {
+    display: none;
+  }
+
+  .shell {
+    display: block;
+    min-height: 0;
+    background: #fff;
+  }
+}
