@@ -47,6 +47,36 @@
   /* Phone bezel of the landing frames: dark glass in both themes. */
   --color-bezel: #0c1a1a;
 
+  /* Shell: tinted canvas, dark frame and rail, white surface (redesign v2). */
+  --color-canvas: #d6e9e7;
+  --color-frame: #0b3333;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #eef5f4;
+  --color-rail-fg: #b9d6d4;
+  --color-rail-active: #1a4a4a;
+  --color-inverse-bg: #0b3333;
+  --color-inverse-fg: #f2fbfa;
+
+  /* Pastel tints of the teal family plus sand, cream and coral. Text on them is always dark. */
+  --color-tint-mint: #d6efe4;
+  --color-tint-aqua: #d3ecec;
+  --color-tint-sand: #f3e6c9;
+  --color-tint-cream: #fbf3dc;
+  --color-tint-coral: #f7ddd4;
+  --color-tint-lavender: #e4e1f2;
+  --color-tint-hero: #e3f2f1;
+
+  /* Promotional dark card (AI assistant, report). */
+  --color-promo-bg: #0b3333;
+  --color-promo-art: #5fb8b4;
+
+  /* Charts */
+  --chart-line: var(--color-water-700);
+  --chart-fill-top: color-mix(in srgb, var(--color-brand-500) 42%, transparent);
+  --chart-fill-bottom: color-mix(in srgb, var(--color-brand-500) 3%, transparent);
+  --chart-grid: var(--color-border-subtle);
+
   /* Typography */
   /* Style tile: Montserrat Medium for text, Montserrat Bold for subtitles, Barlow ExtraBold for titles. */
   --font-family-base:
@@ -57,6 +87,9 @@
   --font-weight-bold: 700;
   --font-weight-display: 800;
   --font-size-display: 3rem;
+  --font-size-page-title: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem);
+  --font-size-section: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem);
+  --font-size-stat: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
   --font-size-h1: 1.75rem;
   --font-size-h2: 1.375rem;
   --font-size-h3: 1.25rem;
@@ -79,8 +112,12 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-  --radius-control: 0.5rem;
-  --radius-surface: 0.75rem;
+  --radius-control: 0.875rem;
+  --radius-surface: 1.25rem;
+  --radius-tile: 1.25rem;
+  --radius-card: 1.5rem;
+  --radius-frame: 2rem;
+  --radius-pill: 999px;
   --radius-chip: 999px;
   --target-min: 3rem;
   --field-height: 3.25rem;
@@ -98,16 +135,30 @@
   --measure-prose: 70ch;
   --dialog-width: 32rem;
   --sidebar-width: 15rem;
+  --rail-width: 5rem;
+  --rail-width-open: 16rem;
+  --topbar-height: 4.5rem;
+  --canvas-gutter: 1.25rem;
+  --popover-width: 20rem;
   --focus-ring-width: 3px;
   --focus-ring-offset: 2px;
   --level-line-height: 2px;
   /* Wide tracking for codes people copy by hand (tracking codes). */
   --tracking-code: 0.08em;
 
+  /* Elevation: soft, tinted by the brand teal. */
+  --shadow-soft: 0 1px 2px rgb(11 51 51 / 0.06), 0 8px 24px -12px rgb(11 51 51 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(11 51 51 / 0.08), 0 16px 32px -14px rgb(11 51 51 / 0.32);
+  --shadow-frame: 0 30px 60px -30px rgb(11 51 51 / 0.45);
+  --shadow-pop: 0 4px 8px rgb(11 51 51 / 0.1), 0 20px 40px -12px rgb(11 51 51 / 0.35);
+  --shadow-press: 0 1px 2px rgb(11 51 51 / 0.2), 0 6px 14px -8px rgb(11 51 51 / 0.55);
+
   /* Motion */
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-slow: 400ms;
+  --lift: -2px;
 
   /*
    * Landing only (design-theme.md section 12). Display type, wide measures and the authored
@@ -137,8 +188,8 @@
   :root:not([data-theme='light']) {
     color-scheme: dark;
 
-    --color-page: #0b1c1c;
-    --color-raised: #112626;
+    --color-page: #0a1a1a;
+    --color-raised: #163030;
     --color-sand-200: #1a3332;
     --color-text-primary: #e4f1f0;
     --color-text-secondary: #a5c1bf;
@@ -168,6 +219,31 @@
     --color-brand-200: #1e4847;
     --color-on-brand: #f2fbfa;
 
+    --color-canvas: #050f0f;
+    --color-frame: #081818;
+    --color-surface: #102626;
+    --color-surface-raised: #183434;
+    --color-surface-sunken: #0c1f1f;
+    --color-rail-fg: #a5c1bf;
+    --color-rail-active: #1d4747;
+    --color-inverse-bg: #e4f1f0;
+    --color-inverse-fg: #0b1c1c;
+
+    --color-tint-mint: #1b3d34;
+    --color-tint-aqua: #1a3d3d;
+    --color-tint-sand: #433717;
+    --color-tint-cream: #3d3519;
+    --color-tint-coral: #4a2a22;
+    --color-tint-lavender: #2f2d47;
+    --color-tint-hero: #163636;
+
+    --color-promo-bg: #1b4a49;
+    --color-promo-art: #7fd0cc;
+    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 32px -14px rgb(0 0 0 / 0.7);
+    --shadow-frame: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+    --shadow-pop: 0 4px 8px rgb(0 0 0 / 0.4), 0 20px 40px -12px rgb(0 0 0 / 0.8);
+
     --color-bezel: #0c1a1a;
   }
 }
@@ -175,8 +251,8 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --color-page: #0b1c1c;
-  --color-raised: #112626;
+  --color-page: #0a1a1a;
+  --color-raised: #163030;
   --color-sand-200: #1a3332;
   --color-text-primary: #e4f1f0;
   --color-text-secondary: #a5c1bf;
@@ -205,6 +281,31 @@
   --color-brand-400: #669999;
   --color-brand-200: #1e4847;
   --color-on-brand: #f2fbfa;
+
+  --color-canvas: #050f0f;
+  --color-frame: #081818;
+  --color-surface: #102626;
+  --color-surface-raised: #183434;
+  --color-surface-sunken: #0c1f1f;
+  --color-rail-fg: #a5c1bf;
+  --color-rail-active: #1d4747;
+  --color-inverse-bg: #e4f1f0;
+  --color-inverse-fg: #0b1c1c;
+
+  --color-tint-mint: #1b3d34;
+  --color-tint-aqua: #1a3d3d;
+  --color-tint-sand: #433717;
+  --color-tint-cream: #3d3519;
+  --color-tint-coral: #4a2a22;
+  --color-tint-lavender: #2f2d47;
+  --color-tint-hero: #163636;
+
+  --color-promo-bg: #1b4a49;
+  --color-promo-art: #7fd0cc;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 32px -14px rgb(0 0 0 / 0.7);
+  --shadow-frame: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+  --shadow-pop: 0 4px 8px rgb(0 0 0 / 0.4), 0 20px 40px -12px rgb(0 0 0 / 0.8);
 
   --color-bezel: #0c1a1a;
 }
