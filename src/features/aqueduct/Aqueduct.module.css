@@ -436,7 +436,7 @@
   flex: 1 1 auto;
 }
 
-.sceneHint {
+.sceneWrap .sceneHint {
   position: absolute;
   z-index: 4;
   inset-inline-end: var(--space-5);
@@ -469,7 +469,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .sceneHint {
+  .sceneWrap .sceneHint {
     display: none;
   }
 
