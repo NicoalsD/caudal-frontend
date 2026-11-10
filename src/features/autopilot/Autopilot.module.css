@@ -13,7 +13,7 @@
 
 @media (min-width: 64rem) {
   .columns {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
   }
 }
 
@@ -47,6 +47,7 @@
 .wrap {
   display: block;
   min-width: 12rem;
+  max-width: 32rem;
   white-space: normal;
 }
 
@@ -188,6 +189,16 @@
   color: var(--color-text-secondary);
 }
 
+.decision {
+  display: block;
+  white-space: nowrap;
+}
+
+.when {
+  display: block;
+  min-width: 7.5rem;
+}
+
 .meta {
   display: block;
   color: var(--color-text-secondary);
@@ -196,4 +207,15 @@
 .scroll {
   max-width: 100%;
   overflow-x: auto;
+}
+
+@media (max-width: 47.99rem) {
+  /* On a phone the decision wraps, so its state stays closer to the first screen of the table. */
+  .decision {
+    white-space: normal;
+  }
+
+  .when {
+    min-width: 5.5rem;
+  }
 }

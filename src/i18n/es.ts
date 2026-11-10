@@ -19,6 +19,7 @@ export const strings = {
   common: {
     retry: 'Reintentar',
     cancel: 'Cancelar',
+    loadingScreen: 'Abriendo la pantalla...',
     simulatedData: 'Datos simulados',
   },
   shell: {
@@ -1935,12 +1936,9 @@ export const strings = {
     empty: 'El piloto todavía no ha tomado decisiones.',
     columns: {
       when: 'Cuándo',
-      source: 'Origen',
-      action: 'Acción',
-      valve: 'Llave',
+      decision: 'Decisión',
       reason: 'Motivo',
       status: 'Estado',
-      decidedBy: 'Quién',
     },
     status: {
       pending: 'Pendiente',
@@ -1963,6 +1961,8 @@ export const strings = {
       other: 'Rechazadas y vencidas',
     },
     confidence: 'Confianza {percent} %',
+    decision: '{action}: {valve}',
+    sourceLine: '{source} · {confidence}',
     noValve: 'Sin llave',
     byYou: 'Tú',
     byPerson: 'Una persona de la Junta',

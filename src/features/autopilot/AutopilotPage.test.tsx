@@ -90,7 +90,9 @@ describe('Autopilot page (settings and history)', () => {
     expect(await within(table).findByText(t('history.status.skipped'))).toBeVisible();
     expect(within(table).getByText(t('history.detail.reserveFloor'))).toBeVisible();
     expect(within(table).getByText(t('history.byPilot'))).toBeVisible();
-    expect(within(table).getAllByText(t('assistant.source.llm')).length).toBeGreaterThan(0);
+    expect(
+      within(table).getAllByText(t('assistant.source.llm'), { exact: false }).length,
+    ).toBeGreaterThan(0);
   });
 
   it('lets a Board member read but not change the settings', async () => {
