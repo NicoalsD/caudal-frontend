@@ -81,6 +81,7 @@ export function SceneCard({
         onOpenChange={setBig}
         title={t('board.scene.title')}
         description={t('board.scene.description')}
+        size="wide"
       >
         <div className={cn(styles.bigScene)}>
           {big ? (

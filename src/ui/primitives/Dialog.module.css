@@ -1,6 +1,8 @@
 .overlay {
   position: fixed;
   inset: 0;
+  /* Above the whole shell: the top bar, the rail and the phone's menu and tab bar. */
+  z-index: 60;
   background: color-mix(in srgb, var(--color-brand-900) 55%, transparent);
   backdrop-filter: blur(4px);
 }
@@ -9,6 +11,7 @@
   position: fixed;
   inset-block-start: 50%;
   inset-inline-start: 50%;
+  z-index: 61;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -34,4 +37,9 @@
 .description {
   margin: 0;
   color: var(--color-text-secondary);
+}
+
+/* For content that needs the room: the 3D scene in large. */
+.wide {
+  --dialog-width: 72rem;
 }
