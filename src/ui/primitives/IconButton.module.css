@@ -113,3 +113,8 @@
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+/* Once the button has opened its menu, the tooltip would only cover it. */
+.button[aria-expanded='true'] .tip {
+  opacity: 0;
+}
