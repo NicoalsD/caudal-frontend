@@ -1,6 +1,50 @@
+/*
+ * When the table is wider than its box, the edge that hides more columns fades out, so a cut column
+ * reads as "scroll me" instead of as a broken layout. Browsers without scroll timelines skip it.
+ */
+@property --table-fade-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --table-fade-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0;
+}
+
 .scroll {
   overflow-x: auto;
   border-radius: var(--radius-card);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-brand-400) transparent;
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--table-fade-start),
+      black calc(100% - var(--table-fade-end)),
+      transparent
+    );
+    animation: table-edges linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+
+@keyframes table-edges {
+  from {
+    --table-fade-start: 0;
+    --table-fade-end: 3rem;
+  }
+
+  to {
+    --table-fade-start: 3rem;
+    --table-fade-end: 0;
+  }
 }
 
 .table {
@@ -28,16 +72,17 @@
 }
 
 .th {
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-bold);
   text-align: start;
-  white-space: nowrap;
+  vertical-align: bottom;
 }
 
 .td {
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-3);
   vertical-align: middle;
+  font-variant-numeric: tabular-nums;
   border-block: 1px solid transparent;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
