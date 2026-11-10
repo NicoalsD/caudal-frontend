@@ -1,9 +1,14 @@
+import { lazy, Suspense } from 'react';
 import type { JSX } from 'react';
 import { Navigate } from 'react-router';
 
-import { LandingPage } from '../../features/landing';
 import { useSession } from '../../state/hooks/useSession';
 import { HOME_PATH_BY_ROLE } from '../../core/session/routes';
+
+/** Only visitors without a session download the presentation page. */
+const LandingPage = lazy(async () => ({
+  default: (await import('../../features/landing')).LandingPage,
+}));
 
 /**
  * "/" sends each signed-in person to the first screen of their role. Everyone else sees the
@@ -14,5 +19,9 @@ export function RootRedirect(): JSX.Element {
   if (session.status === 'authenticated') {
     return <Navigate to={HOME_PATH_BY_ROLE[session.user.role]} replace />;
   }
-  return <LandingPage />;
+  return (
+    <Suspense fallback={null}>
+      <LandingPage />
+    </Suspense>
+  );
 }
