@@ -23,6 +23,7 @@ import { useAuditLog, useSecurityEvents } from './auditQueries';
 import {
   KNOWN_ACTION_CODES,
   actionLabel,
+  entityTypeLabel,
   actorTypeLabel,
   securityTypeLabel,
   severityLabel,
@@ -216,7 +217,7 @@ function AuditLogList({ filters }: { readonly filters: Filters }): JSX.Element {
       id: 'object',
       header: t('audit.columns.object'),
       hideOnNarrow: true,
-      cell: (entry) => <span className={cn(styles.meta)}>{entry.entityType}</span>,
+      cell: (entry) => <span className={cn(styles.meta)}>{entityTypeLabel(entry.entityType)}</span>,
     },
   ];
   return (
