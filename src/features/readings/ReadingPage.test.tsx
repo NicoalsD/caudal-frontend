@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 
+import { formatDecimal, parseDecimalInput } from '../../core/format/decimal';
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { FakeClock } from '../../test/fakes/FakeClock';
@@ -16,6 +17,8 @@ import { renderApp } from '../../test/renderApp';
 const NOW_MS = Date.parse('2026-10-14T20:00:00Z');
 const operator = () => buildSessionUser({ role: 'OPERATOR', permissions: ['READING_CREATE'] });
 const GAUGE_VALUE = '2,1';
+const START_LEVEL = 2.5;
+const RANGE_DIGITS = 2;
 
 /** How the water looks: the one catalog the form reads (GET /catalogs/WATER_APPEARANCE). */
 const APPEARANCES = {
@@ -52,12 +55,38 @@ describe('ReadingPage (S02)', () => {
     const field = await screen.findByRole('textbox', { name: t('readings.gaugeLabel') });
     const slider = screen.getByRole('slider', { name: t('readings.sliderLabel') });
     expect(field).toHaveValue('');
-    expect(screen.getByText(t('readings.gaugeNoValue'))).toBeVisible();
+    expect(screen.getByText(t('readings.meaningEmpty'))).toBeVisible();
 
     fireEvent.change(slider, { target: { value: '2.5' } });
 
     expect(field).toHaveValue('2,5');
-    expect(screen.queryByText(t('readings.gaugeNoValue'))).not.toBeInTheDocument();
+    expect(screen.queryByText(t('readings.meaningEmpty'))).not.toBeInTheDocument();
+  });
+
+  it('moves the level one step with the buttons and says when a number is off the ruler', async () => {
+    renderReading();
+    const user = userEvent.setup();
+
+    const field = await screen.findByRole('textbox', { name: t('readings.gaugeLabel') });
+    const slider = screen.getByRole('slider', { name: t('readings.sliderLabel') });
+    fireEvent.change(slider, { target: { value: String(START_LEVEL) } });
+    const step = Number(slider.getAttribute('step'));
+    await user.click(screen.getByRole('button', { name: /^Subir/ }));
+
+    expect(parseDecimalInput((field as HTMLInputElement).value)).toBeCloseTo(START_LEVEL + step);
+
+    await user.clear(field);
+    await user.type(field, '99');
+
+    const max = slider.getAttribute('max') ?? '';
+    expect(
+      screen.getByText(
+        t('readings.meaningOutside', {
+          min: formatDecimal(Number(slider.getAttribute('min')), RANGE_DIGITS),
+          max: formatDecimal(Number(max), RANGE_DIGITS),
+        }),
+      ),
+    ).toBeVisible();
   });
 
   it('keeps the note and the damage behind a disclosure until the person opens it', async () => {

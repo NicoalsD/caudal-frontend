@@ -1,0 +1,201 @@
+/*
+ * The drawn ruler. The slider lies over the whole drawing and is invisible; its thumb is as tall as
+ * --ruler-thumb, so the scale is inset by half of that and a level lines up with the finger.
+ */
+.ruler {
+  --ruler-thumb: 3rem;
+
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 19rem;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border-strong);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.ruler:hover {
+  border-color: var(--color-water-700);
+}
+
+.ruler:has(.input:focus-visible) {
+  outline: 3px solid var(--color-water-700);
+  outline-offset: 2px;
+}
+
+.scale {
+  --staff-width: 3rem;
+
+  position: absolute;
+  inset-block: calc(var(--ruler-thumb) / 2);
+  inset-inline: var(--space-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--staff-width);
+  gap: var(--space-2);
+}
+
+/* Zones of the rule set, beside the staff. The word says the zone; the tint only helps. */
+.zones {
+  position: relative;
+}
+
+.zone {
+  position: absolute;
+  inset-inline: 0;
+  display: grid;
+  place-items: end center;
+  padding-block-end: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+  box-shadow: inset 0 0 0 2px var(--color-surface-raised);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.1;
+}
+
+.zoneText {
+  padding-inline: var(--space-1);
+  text-align: center;
+}
+
+.bandCritical {
+  background: var(--color-tint-coral);
+}
+
+.bandLow {
+  background: var(--color-tint-sand);
+}
+
+.bandHigh {
+  background: var(--color-tint-mint);
+}
+
+/* The staff: a white board with marks, numbers and the water rising behind them. */
+.staff {
+  position: relative;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--color-border-subtle);
+}
+
+.water {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  border-radius: 0 0 var(--radius-control) var(--radius-control);
+  background: var(--color-water-300);
+  transition: block-size var(--duration-base) var(--ease-standard);
+}
+
+.mark {
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: 0.5rem;
+  block-size: 2px;
+  margin-block-end: -1px;
+  background: var(--color-text-secondary);
+}
+
+.markMajor {
+  inline-size: 0.875rem;
+  background: var(--color-text-primary);
+}
+
+.markText {
+  position: absolute;
+  inset-inline-start: 1.0625rem;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* The reserve: a dashed line across the zones and the staff, with its word sitting on it. */
+.reserve {
+  position: absolute;
+  inset-inline: 0;
+  block-size: 0;
+  border-block-start: 2px dashed var(--color-clay-700);
+}
+
+.reserveText {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: 2px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  color: var(--color-clay-700);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Where the level is: a line across the staff and the figure on a pill beside it. */
+.pointer {
+  position: absolute;
+  inset-inline-end: -0.25rem;
+  inline-size: calc(var(--staff-width) + 0.5rem);
+  block-size: 0;
+  border-block-start: 3px solid var(--color-brand-900);
+  transition: inset-block-end var(--duration-base) var(--ease-standard);
+}
+
+.pointerText {
+  position: absolute;
+  inset-inline-end: 100%;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-900);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-on-brand);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* The native slider, vertical, with the lowest value at the bottom. It is never drawn. */
+.input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  appearance: none;
+  background: transparent;
+  opacity: 0;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+/* Physical sizes on purpose: the slider is in a vertical writing mode, where logical ones swap. */
+.input::-webkit-slider-thumb {
+  appearance: none;
+  width: 100%;
+  height: var(--ruler-thumb);
+}
+
+.input::-moz-range-thumb {
+  width: 100%;
+  height: var(--ruler-thumb);
+  border: 0;
+}
+
+.input:disabled {
+  cursor: default;
+}

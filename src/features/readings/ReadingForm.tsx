@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { JSX } from 'react';
-import { CircleCheck } from 'lucide-react';
+import { CircleCheck, Minus, Plus } from 'lucide-react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import type { ConstraintsMap } from '../../core/forms/FieldConstraint';
@@ -10,7 +10,8 @@ import { formatDecimal, parseDecimalInput, toInputText } from '../../core/format
 import { toBogotaDateKey } from '../../core/format/time';
 import type { ValidationMessageFactory } from '../../core/forms/validationMessages';
 import { gaugeDecimals } from '../../core/rules/bandCoverage';
-import { TankGauge } from '../../ui/tank/TankGauge';
+import type { Gauge } from '../../core/rules/ruleSetParts';
+import { bandLabel } from '../../i18n/bandLabel';
 import { t } from '../../i18n/t';
 import type { TankView } from '../../services/api/views';
 import { useOfflineServices } from '../../state/hooks/offlineContext';
@@ -32,11 +33,16 @@ import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
 import { useSaveReading, useWaterAppearances } from './readingQueries';
 import { useCurrentRuleSet } from '../../state/hooks/useCurrentRuleSet';
+import { GaugeRuler } from './GaugeRuler';
+import type { RulerBand } from './GaugeRuler';
 import { resolveGauge } from './gaugeRule';
 
 const GAUGE_DISPLAY_DIGITS = 2;
 const STEP_COUNT = 3;
-const NO_BANDS: readonly { code: string; from: number; to: number }[] = [];
+const NO_BANDS: readonly RulerBand[] = [];
+const PERCENT = 100;
+const WHOLE = 0;
+const LAST = 1;
 
 interface ReadingFormValues {
   gauge_value: string;
@@ -133,7 +139,7 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
   });
   const typedNote = useWatch({ control, name: FIELD.note });
   const typedGauge = useWatch({ control, name: FIELD.gaugeValue });
-  // The number typed in the field is the source of truth; the slider and the gauge only follow it.
+  // The number typed in the field is the source of truth; the ruler and the buttons only follow it.
   const typedLevel = parseDecimalInput(typedGauge);
   const gauge = resolveGauge(ruleSet.data?.gauge, tank);
   const bands =
@@ -151,6 +157,15 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
       shouldValidate: true,
     });
   };
+  /** One step up or down from what is typed; from an empty field it starts at the lowest mark. */
+  const nudge = (delta: number) => {
+    if (gauge !== null) {
+      const from = typedLevel ?? gauge.min - delta;
+      moveSlider(Math.min(gauge.max, Math.max(gauge.min, from + delta)));
+    }
+  };
+  const stepText = gauge === null ? '' : formatDecimal(gauge.step, sliderDecimals);
+  const meaning = levelMeaning(typedLevel, gauge, bands);
   const { errors, isSubmitting } = formState;
   // The optional fields open on their own when they hold an error, so the error is never hidden.
   const showOptional = optionalOpen || errors.note !== undefined;
@@ -232,7 +247,12 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
     label: item.label,
   }));
   return (
-    <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
+    <form
+      className={cn(styles.readingForm)}
+      onSubmit={(event) => void submit(event)}
+      noValidate
+      aria-busy={isSubmitting}
+    >
       <FormFields disabled={isSubmitting}>
         {saveFailed ? <FormAlert message={t('readings.serverError')} /> : null}
         <Card variant="tinted" tint="aqua" className={cn(styles.step)}>
@@ -247,48 +267,53 @@ function ReadingFields({ tank, schema, noteMax }: ReadingFieldsProps): JSX.Eleme
                 })}
                 inputMode="decimal"
                 autoComplete="off"
-                placeholder={toInputText(tank.gaugeMin)}
+                placeholder={formatDecimal(tank.gaugeMin, sliderDecimals)}
                 error={errors.gauge_value?.message}
                 className={cn(styles.gaugeInput)}
                 {...register(FIELD.gaugeValue)}
               />
               {gauge === null ? null : (
-                <input
-                  type="range"
-                  className={cn(styles.levelSlider)}
-                  min={gauge.min}
-                  max={gauge.max}
-                  step={gauge.step}
-                  value={typedLevel ?? gauge.min}
-                  aria-label={t('readings.sliderLabel')}
-                  aria-valuetext={
-                    typedLevel === null
-                      ? t('readings.gaugeNoValue')
-                      : t('readings.gaugeValueText', {
-                          value: formatDecimal(typedLevel, sliderDecimals),
-                        })
-                  }
-                  onChange={(event) => {
-                    moveSlider(Number(event.currentTarget.value));
-                  }}
-                />
+                <div className={cn(styles.nudges)}>
+                  <Button
+                    className={cn(styles.nudge)}
+                    aria-label={t('readings.nudgeDown', { step: stepText })}
+                    disabled={typedLevel !== null && typedLevel <= gauge.min}
+                    onClick={() => {
+                      nudge(-gauge.step);
+                    }}
+                  >
+                    <Minus aria-hidden="true" />
+                    <span className={cn(styles.nudgeText)}>{t('readings.nudgeDownShort')}</span>
+                  </Button>
+                  <Button
+                    className={cn(styles.nudge)}
+                    aria-label={t('readings.nudgeUp', { step: stepText })}
+                    disabled={typedLevel !== null && typedLevel >= gauge.max}
+                    onClick={() => {
+                      nudge(gauge.step);
+                    }}
+                  >
+                    <Plus aria-hidden="true" />
+                    <span className={cn(styles.nudgeText)}>{t('readings.nudgeUpShort')}</span>
+                  </Button>
+                </div>
               )}
             </div>
             {gauge === null ? null : (
-              <div className={cn(styles.levelPreview)}>
-                {typedLevel === null ? (
-                  <p className={cn(styles.noValue)}>{t('readings.gaugeNoValue')}</p>
-                ) : (
-                  <TankGauge
-                    level={typedLevel}
-                    gaugeMin={gauge.min}
-                    gaugeMax={gauge.max}
-                    bands={bands}
-                    reserveLevel={reserveLevel}
-                  />
-                )}
+              <div className={cn(styles.levelRuler)}>
+                <GaugeRuler
+                  gauge={gauge}
+                  level={typedLevel}
+                  decimals={sliderDecimals}
+                  bands={bands}
+                  reserveLevel={reserveLevel}
+                  onChange={moveSlider}
+                />
               </div>
             )}
+            <p className={cn(styles.meaning)} aria-live="polite" data-warn={meaning.warn}>
+              {meaning.text}
+            </p>
           </div>
         </Card>
         <Card className={cn(styles.step)}>
@@ -349,4 +374,37 @@ function StepHead({ step }: { readonly step: number }): JSX.Element {
       {t('readings.step', { n: String(step), total: String(STEP_COUNT) })}
     </p>
   );
+}
+
+/**
+ * What the typed level means, said while the person types: the zone of the rule set and how full
+ * the tank is, or that the number is off the ruler. It catches a slip of the finger before saving.
+ */
+function levelMeaning(
+  level: number | null,
+  gauge: Gauge | null,
+  bands: readonly RulerBand[],
+): { readonly text: string; readonly warn: boolean } {
+  if (level === null || gauge === null) {
+    return { text: t('readings.meaningEmpty'), warn: false };
+  }
+  if (level < gauge.min || level > gauge.max) {
+    return {
+      text: t('readings.meaningOutside', {
+        min: formatDecimal(gauge.min, GAUGE_DISPLAY_DIGITS),
+        max: formatDecimal(gauge.max, GAUGE_DISPLAY_DIGITS),
+      }),
+      warn: true,
+    };
+  }
+  const percent = formatDecimal(((level - gauge.min) / (gauge.max - gauge.min)) * PERCENT, WHOLE);
+  const band =
+    bands.find((item) => level >= item.from && level < item.to) ?? bands[bands.length - LAST];
+  return {
+    text:
+      band === undefined
+        ? t('readings.meaningNoBand', { percent })
+        : t('readings.meaning', { band: bandLabel(band.code), percent }),
+    warn: false,
+  };
 }
