@@ -12,10 +12,12 @@ import {
 import { llmShare, sumBy, totalOf } from '../../core/reports/reportModel';
 import { coverageByRegion } from '../../core/reports/regionCoverage';
 import { formatDecimal } from '../../core/format/decimal';
+import { anomalyKindText } from '../../i18n/anomalyKindText';
 import { errorText } from '../../i18n/errorText';
 import { lower } from '../../i18n/lower';
 import { t } from '../../i18n/t';
 import type { ReportView } from '../../services/api/views';
+import { useDamageCategories } from '../../state/hooks/useDamageCategories';
 import { useNarrativeReport, useReport } from '../../state/hooks/useReports';
 import { useSectors } from '../../state/hooks/useSectors';
 import { useServiceToday } from '../../state/hooks/useServiceToday';
@@ -244,6 +246,10 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
   const decisions = llmShare(report.decisions);
   const incidents = sumBy(report.incidents, (row) => row.category);
   const anomalies = report.anomalies;
+  const categories = useDamageCategories();
+  const categoryLabels = new Map(
+    (categories.data ?? []).map((option) => [option.code, option.label] as const),
+  );
   return (
     <div className={cn(styles.grid)}>
       <Card
@@ -261,11 +267,23 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
         ) : (
           <dl className={cn(styles.facts)}>
             <dt>{t('reports.levels.min')}</dt>
-            <dd>{levels.min === null ? '-' : formatDecimal(levels.min, LEVEL_DIGITS)}</dd>
+            <dd>
+              {levels.min === null
+                ? '-'
+                : t('tankStatus.levelValue', { value: formatDecimal(levels.min, LEVEL_DIGITS) })}
+            </dd>
             <dt>{t('reports.levels.avg')}</dt>
-            <dd>{levels.avg === null ? '-' : formatDecimal(levels.avg, LEVEL_DIGITS)}</dd>
+            <dd>
+              {levels.avg === null
+                ? '-'
+                : t('tankStatus.levelValue', { value: formatDecimal(levels.avg, LEVEL_DIGITS) })}
+            </dd>
             <dt>{t('reports.levels.max')}</dt>
-            <dd>{levels.max === null ? '-' : formatDecimal(levels.max, LEVEL_DIGITS)}</dd>
+            <dd>
+              {levels.max === null
+                ? '-'
+                : t('tankStatus.levelValue', { value: formatDecimal(levels.max, LEVEL_DIGITS) })}
+            </dd>
             <dt>{t('reports.levels.readings')}</dt>
             <dd>{String(levels.readings)}</dd>
           </dl>
@@ -273,6 +291,7 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
       </Card>
       <ChartCard title={t('reports.coverage.title')}>
         <BarChart
+          hideCaption
           label={t('reports.coverage.chart')}
           rows={coverage.map((row) => ({
             name: row.region,
@@ -297,6 +316,7 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
       </ChartCard>
       <ChartCard title={t('reports.commands.title', { total: String(totalOf(report.commands)) })}>
         <BarChart
+          hideCaption
           label={t('reports.commands.chart')}
           rows={origin.map((entry) => ({
             name: t(`reports.origin.${lower(entry.key as 'SCHEDULE')}`),
@@ -309,6 +329,7 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
       </ChartCard>
       <ChartCard title={t('reports.decisions.title')}>
         <BarChart
+          hideCaption
           label={t('reports.decisions.chart')}
           rows={
             decisions.llm + decisions.rules === 0
@@ -329,8 +350,12 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
       </ChartCard>
       <ChartCard title={t('reports.incidents.title')}>
         <BarChart
+          hideCaption
           label={t('reports.incidents.chart')}
-          rows={incidents.map((entry) => ({ name: entry.key, values: { total: entry.total } }))}
+          rows={incidents.map((entry) => ({
+            name: categoryLabels.get(entry.key) ?? entry.key,
+            values: { total: entry.total },
+          }))}
           series={[
             { key: 'total', label: t('reports.incidents.series'), token: SERIES_COLOR.clay },
           ]}
@@ -338,8 +363,12 @@ function ReportCharts({ report }: { readonly report: ReportView }): JSX.Element 
       </ChartCard>
       <ChartCard title={t('reports.anomalies.title')}>
         <BarChart
+          hideCaption
           label={t('reports.anomalies.chart')}
-          rows={anomalies.map((row) => ({ name: row.kind, values: { total: row.total } }))}
+          rows={anomalies.map((row) => ({
+            name: anomalyKindText(row.kind as Parameters<typeof anomalyKindText>[0]) ?? row.kind,
+            values: { total: row.total },
+          }))}
           series={[
             { key: 'total', label: t('reports.anomalies.series'), token: SERIES_COLOR.paramo },
           ]}

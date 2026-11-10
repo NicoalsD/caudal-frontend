@@ -48,6 +48,8 @@ interface BarChartProps {
   readonly rows: readonly BarRow[];
   readonly series: readonly BarSeries[];
   readonly stacked?: boolean;
+  /** Keeps the name for assistive technology only, when a card title above already says it. */
+  readonly hideCaption?: boolean;
   /** Text for the numbers' table; defaults to "Ver los números". */
   readonly formatValue?: (value: number) => string;
 }
@@ -61,12 +63,15 @@ export function BarChart({
   rows,
   series,
   stacked = false,
+  hideCaption = false,
   formatValue = String,
 }: BarChartProps): JSX.Element {
   if (rows.length === 0) {
     return (
       <figure className={cn(styles.figure)}>
-        <figcaption className={cn(styles.caption)}>{label}</figcaption>
+        <figcaption className={cn(hideCaption ? styles.srOnly : styles.caption)}>
+          {label}
+        </figcaption>
         <p className={cn(styles.empty)}>{t('charts.noData')}</p>
       </figure>
     );
@@ -74,7 +79,7 @@ export function BarChart({
   const data = rows.map((row) => ({ name: row.name, ...row.values }));
   return (
     <figure className={cn(styles.figure)}>
-      <figcaption className={cn(styles.caption)}>{label}</figcaption>
+      <figcaption className={cn(hideCaption ? styles.srOnly : styles.caption)}>{label}</figcaption>
       <div className={cn(styles.plot)} role="img" aria-label={label}>
         <ResponsiveContainer width="100%" height={192}>
           <RechartsBarChart data={data} margin={MARGIN}>

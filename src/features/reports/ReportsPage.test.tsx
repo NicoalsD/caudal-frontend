@@ -29,7 +29,7 @@ describe('Reports page', () => {
     expect(tables.length).toBeGreaterThanOrEqual(MIN_TABLES);
     const shifts = screen.getByRole('table', { name: t('reports.coverage.chart'), hidden: true });
     expect(within(shifts).getByText('Sector Escuela')).toBeInTheDocument();
-    expect(screen.getByText('1,8')).toBeVisible();
+    expect(screen.getByText('1,8 m')).toBeVisible();
   });
 
   it('generates the narrative with its source and renders markdown without HTML', async () => {
