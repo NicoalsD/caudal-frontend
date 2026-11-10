@@ -36,6 +36,11 @@
   gap: var(--space-4);
 }
 
+/* On a phone the slot does not exist for the layout; on a desktop it is the track of the hero. */
+.heroSlot {
+  display: contents;
+}
+
 .hero {
   height: calc(100dvh - 22rem);
   min-height: 20rem;
@@ -436,11 +441,18 @@
     align-items: start;
   }
 
-  .layout > .hero {
-    position: sticky;
-    inset-block-start: var(--space-2);
+  /* The hero follows the scroll only beside the first column: its slot ends where the band of
+     cards below begins, so it never stays stuck over them. */
+  .heroSlot {
+    display: block;
     grid-column: 1;
     grid-row: 1;
+    align-self: stretch;
+  }
+
+  .heroSlot > .hero {
+    position: sticky;
+    inset-block-start: var(--space-2);
     height: calc(100dvh - 10rem);
     min-height: 34rem;
   }

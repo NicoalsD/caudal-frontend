@@ -85,15 +85,17 @@ export function OperatorHomePage(): JSX.Element {
       <LiveAqueduct>
         {(parts, live) => (
           <div className={cn(styles.layout)} data-view={view}>
-            <SceneHero aqueduct={parts?.aqueduct ?? null} label={t('operatorHome.sceneRegion')}>
-              {parts === null ? (
-                <div className={cn(styles.sceneMessage)}>
-                  <SceneMessage live={live} />
-                </div>
-              ) : (
-                parts.scene
-              )}
-            </SceneHero>
+            <div className={cn(styles.heroSlot)}>
+              <SceneHero aqueduct={parts?.aqueduct ?? null} label={t('operatorHome.sceneRegion')}>
+                {parts === null ? (
+                  <div className={cn(styles.sceneMessage)}>
+                    <SceneMessage live={live} />
+                  </div>
+                ) : (
+                  parts.scene
+                )}
+              </SceneHero>
+            </div>
             <aside
               className={cn(styles.panel)}
               data-open={panelOpen}
