@@ -23,8 +23,8 @@ const NETWORK_PERMISSION = 'NETWORK_VIEW';
 const DEFAULT_RANGE: PanoramaRange = 'week';
 
 /**
- * The Board's panel, in one grid: the panorama (range, day flow, chart and tiles), the sectors
- * and valves with the assistant beside them, the 3D scene with the fanned recommendations and
+ * The Board's panel, in one grid: the panorama (range, day flow, tiles), the chart with the
+ * assistant and its recommendations beside it, the sectors and valves, and the 3D scene next to
  * what is pending. Each block is left out when the person lacks the permission to read it.
  */
 export function BoardPanel({ tank, status }: ConsoleContext): JSX.Element {
@@ -40,6 +40,10 @@ export function BoardPanel({ tank, status }: ConsoleContext): JSX.Element {
     const valves = parts?.aqueduct.valves ?? [];
     return (
       <>
+        <div className={cn(styles.side)}>
+          <AssistantPromo valves={valves} />
+          <RecommendationStack valves={valves} />
+        </div>
         {canSeeNetwork ? (
           <SectorsTable
             valves={valves}
@@ -48,9 +52,7 @@ export function BoardPanel({ tank, status }: ConsoleContext): JSX.Element {
             loading={live.status === 'loading'}
           />
         ) : null}
-        <AssistantPromo valves={valves} />
         {canSeeNetwork ? <SceneCard parts={parts} live={live} /> : null}
-        <RecommendationStack valves={valves} />
       </>
     );
   };
@@ -74,10 +76,10 @@ export function BoardPanel({ tank, status }: ConsoleContext): JSX.Element {
         </div>
         <BoardDayGuide />
       </header>
+      <BoardKpis tank={tank} status={status} />
       <div className={cn(styles.chart)}>
         <LevelChartCard day={day} withTimeline askPlumber />
       </div>
-      <BoardKpis tank={tank} status={status} />
       <LiveAqueduct readOnly>{body}</LiveAqueduct>
       <HistoryPanel />
     </div>

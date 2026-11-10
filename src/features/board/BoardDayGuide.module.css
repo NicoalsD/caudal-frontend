@@ -130,6 +130,13 @@
     align-items: start;
     flex: 1;
     gap: 0;
+    padding-inline-end: var(--space-4);
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-small);
+  }
+
+  .step:last-child {
+    padding-inline-end: 0;
   }
 
   .step:last-child {
