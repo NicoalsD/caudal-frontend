@@ -451,6 +451,15 @@
   border-radius: var(--radius-control);
   opacity: 0.85;
   pointer-events: none;
+  /* The tip is read once; then it leaves the labels of the scene alone. */
+  animation: scene-hint-out var(--duration-slow) var(--ease-standard) 7s forwards;
+}
+
+@keyframes scene-hint-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .sceneNote {

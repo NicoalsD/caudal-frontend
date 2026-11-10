@@ -323,6 +323,140 @@ function makeLabel(kind: string): { object: CSS2DObject; element: HTMLDivElement
   return { object: new CSS2DObject(element), element };
 }
 
+/* Labels on screen: the tank and the valves always show; rings and parts give way. */
+const LABEL_RANK: Readonly<Record<string, number>> = { tank: 0, valve: 1, ring: 2, part: 3 };
+const LABEL_MUST_SHOW = 1;
+const LABEL_GAP = 4;
+const LABEL_EDGE = 6;
+const LABEL_MEASURE_EVERY = 30;
+
+interface LabelBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+function boxesTouch(a: LabelBox, b: LabelBox): boolean {
+  return (
+    a.left < b.left + b.width + LABEL_GAP &&
+    b.left < a.left + a.width + LABEL_GAP &&
+    a.top < b.top + b.height + LABEL_GAP &&
+    b.top < a.top + a.height + LABEL_GAP
+  );
+}
+
+/**
+ * Keeps the labels readable from any angle. CSS2DRenderer centers each label on its 3D anchor, so
+ * from some angles they pile up or leave the frame. Each frame this works on the projected boxes
+ * (no layout reads: the sizes are cached): a valve or the tank is pushed off whatever it covers and
+ * kept inside the frame; a ring or part label that would cover something simply fades out.
+ */
+class LabelDeclutter {
+  private readonly sizes = new Map<HTMLElement, { width: number; height: number }>();
+  private readonly anchor = new Vector3();
+  private framesToMeasure = 0;
+
+  /** Sizes are read again soon: after a text change or a resize. */
+  invalidate(): void {
+    this.framesToMeasure = 0;
+  }
+
+  run(
+    labels: readonly { object: CSS2DObject; element: HTMLElement }[],
+    camera: PerspectiveCamera,
+    width: number,
+    height: number,
+  ): void {
+    if (this.framesToMeasure <= 0) {
+      this.sizes.clear();
+      for (const { element } of labels) {
+        this.sizes.set(element, { width: element.offsetWidth, height: element.offsetHeight });
+      }
+      this.framesToMeasure = LABEL_MEASURE_EVERY;
+    }
+    this.framesToMeasure -= 1;
+
+    const ranked = labels
+      .map((label) => ({
+        ...label,
+        rank: LABEL_RANK[label.element.dataset.sceneLabel ?? ''] ?? LABEL_MUST_SHOW,
+      }))
+      .sort((a, b) => a.rank - b.rank);
+    const placed: LabelBox[] = [];
+    for (const { object, element, rank } of ranked) {
+      const size = this.sizes.get(element);
+      this.anchor.setFromMatrixPosition(object.matrixWorld).project(camera);
+      if (size === undefined || size.width === 0 || Math.abs(this.anchor.z) > 1) {
+        continue;
+      }
+      const box: LabelBox = {
+        left: (this.anchor.x * 0.5 + 0.5) * width - size.width * 0.5,
+        top: (-this.anchor.y * 0.5 + 0.5) * height - size.height * 0.5,
+        width: size.width,
+        height: size.height,
+      };
+      const origin = { left: box.left, top: box.top };
+      const clamp = (): void => {
+        box.left = Math.min(Math.max(box.left, LABEL_EDGE), width - LABEL_EDGE - box.width);
+        box.top = Math.min(Math.max(box.top, LABEL_EDGE), height - LABEL_EDGE - box.height);
+      };
+      let hidden = false;
+      if (rank > LABEL_MUST_SHOW) {
+        hidden =
+          box.left < 0 ||
+          box.top < 0 ||
+          box.left + box.width > width ||
+          box.top + box.height > height ||
+          placed.some((other) => boxesTouch(box, other));
+      } else {
+        clamp();
+        if (placed.some((other) => boxesTouch(box, other))) {
+          // Try the free spots right above, below and beside each label already placed, and take
+          // the one closest to the anchor.
+          const home = { left: box.left, top: box.top };
+          let best: { left: number; top: number; cost: number } | null = null;
+          for (const other of placed) {
+            const spots = [
+              { left: home.left, top: other.top + other.height + LABEL_GAP },
+              { left: home.left, top: other.top - LABEL_GAP - box.height },
+              { left: other.left + other.width + LABEL_GAP, top: home.top },
+              { left: other.left - LABEL_GAP - box.width, top: home.top },
+            ];
+            for (const spot of spots) {
+              box.left = spot.left;
+              box.top = spot.top;
+              clamp();
+              const cost = Math.abs(box.left - home.left) + Math.abs(box.top - home.top);
+              if (
+                (best === null || cost < best.cost) &&
+                !placed.some((candidate) => boxesTouch(box, candidate))
+              ) {
+                best = { left: box.left, top: box.top, cost };
+              }
+            }
+          }
+          box.left = best?.left ?? home.left;
+          box.top = best?.top ?? home.top;
+        }
+      }
+      if (!hidden) {
+        placed.push(box);
+      }
+      const shift = hidden
+        ? ''
+        : `${(box.left - origin.left).toFixed(1)}px ${(box.top - origin.top).toFixed(1)}px`;
+      if (element.style.translate !== shift) {
+        element.style.translate = shift;
+      }
+      const clash = String(hidden);
+      if (element.dataset.clash !== clash) {
+        element.dataset.clash = clash;
+      }
+    }
+  }
+}
+
 function setLines(element: HTMLElement, lines: readonly string[]): void {
   while (element.children.length < lines.length) {
     element.appendChild(document.createElement('span'));
@@ -938,6 +1072,9 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
   let hoveredId: string | null = null;
   let highlightedId: string | null = null;
   let renderQueued = false;
+  const declutter = new LabelDeclutter();
+  let viewWidth = 0;
+  let viewHeight = 0;
 
   const applyHover = (): void => {
     const target = hoveredId ?? highlightedId;
@@ -973,6 +1110,20 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
     controls.update();
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
+    declutter.run(
+      [
+        tankLabel,
+        ...[...rigs.values()].map((rig) => rig.label),
+        ...(ringLabels.children as CSS2DObject[]).map((object) => ({
+          object,
+          element: object.element,
+        })),
+        ...Object.values(partLabels),
+      ],
+      camera,
+      viewWidth,
+      viewHeight,
+    );
   };
 
   const requestDraw = (): void => {
@@ -1155,6 +1306,7 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
         }
       }
       setLines(tankLabel.element, [frame.tankTitle, frame.tankDetail]);
+      declutter.invalidate();
       partLabels.intake.element.textContent = frame.parts.intake;
       partLabels.overflow.element.textContent = frame.parts.overflow;
       partLabels.drain.element.textContent = frame.parts.drain;
@@ -1180,6 +1332,9 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
     resize(width: number, height: number) {
       renderer.setSize(width, height, false);
       labelRenderer.setSize(width, height);
+      viewWidth = width;
+      viewHeight = height;
+      declutter.invalidate();
       camera.aspect = width / height;
       if (firstSize) {
         // A narrow screen starts farther away, so the whole scene fits.
@@ -1231,6 +1386,8 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
       }
       labelRenderer.domElement.remove();
       renderer.dispose();
+      // Browsers cap live WebGL contexts; give this one back now instead of at garbage collection.
+      renderer.forceContextLoss();
     },
   };
 }
