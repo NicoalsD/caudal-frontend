@@ -225,7 +225,8 @@
     position: sticky;
     inset-block: var(--canvas-gutter) auto;
     inset-inline-start: auto;
-    z-index: 6;
+    /* Above the sticky top bar (10): the open rail lies over the title, never under it. */
+    z-index: 25;
     width: var(--rail-width);
     height: calc(100dvh - 2 * var(--canvas-gutter));
     overflow: hidden auto;
