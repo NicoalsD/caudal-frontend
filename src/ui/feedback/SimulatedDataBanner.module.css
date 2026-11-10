@@ -1,5 +1,7 @@
 .banner {
   display: inline-block;
+  align-self: flex-start;
+  width: fit-content;
   padding: var(--space-1) var(--space-3);
   background: var(--color-ochre-100);
   color: var(--color-ochre-800);

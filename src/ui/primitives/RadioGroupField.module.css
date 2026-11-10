@@ -44,6 +44,7 @@
 }
 
 .radio {
+  flex: none;
   width: 1.5rem;
   height: 1.5rem;
   accent-color: var(--color-water-700);
