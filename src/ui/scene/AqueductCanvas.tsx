@@ -97,7 +97,8 @@ export function AqueductCanvas({
         });
         created = next;
         const fit = (): void => {
-          const { width, height } = element.getBoundingClientRect();
+          // Layout size, not the painted one: a dialog that scales in would give a smaller box.
+          const { clientWidth: width, clientHeight: height } = element;
           if (width > 0 && height > 0) {
             next.resize(width, height);
           }

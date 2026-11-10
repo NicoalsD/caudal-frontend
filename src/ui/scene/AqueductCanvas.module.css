@@ -5,6 +5,8 @@
   height: 100%;
   min-height: 22rem;
   overflow: hidden;
+  /* The labels carry their own z-index (depth order); none of it may leave the scene. */
+  isolation: isolate;
   container-type: inline-size;
   color: var(--color-on-brand);
   background: radial-gradient(
