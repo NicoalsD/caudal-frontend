@@ -125,7 +125,8 @@
   --scene-field-top: #0f4a49;
   --scene-field-bottom: #04100f;
   --scene-open: #4fd1a5;
-  --scene-closed: #ec7a62;
+  /* Closed is a normal state: a quiet teal, never the alarm red of a failure. */
+  --scene-closed: #6f9c99;
   --scene-unknown: #b8c4c3;
   --scene-pending: #f2b84b;
   --scene-delivered: #6cc4ff;
