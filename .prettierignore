@@ -8,3 +8,6 @@ docs
 .github
 playwright-report
 test-results
+
+# Design tooling artifacts (mocks, caches, review captures)
+.impeccable/
