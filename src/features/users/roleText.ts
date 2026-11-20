@@ -8,11 +8,15 @@ export function roleText(role: Role): string {
       return t('users.roles.boardAdmin');
     case 'BOARD_MEMBER':
       return t('users.roles.boardMember');
+    case 'INSTITUTION_ADMIN':
+      return t('users.roles.institutionAdmin');
     case 'OPERATOR':
       return t('users.roles.operator');
     case 'PROJECT_TEAM':
       return t('users.roles.projectTeam');
     case 'SUPPORT_ENTITY':
       return t('users.roles.supportEntity');
+    case 'VIEWER':
+      return t('users.roles.viewer');
   }
 }

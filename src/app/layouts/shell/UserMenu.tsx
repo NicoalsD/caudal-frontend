@@ -13,9 +13,11 @@ import styles from './TopBar.module.css';
 const ROLE_TEXT = {
   BOARD_ADMIN: 'shell.roles.boardAdmin',
   BOARD_MEMBER: 'shell.roles.boardMember',
+  INSTITUTION_ADMIN: 'shell.roles.institutionAdmin',
   OPERATOR: 'shell.roles.operator',
   PROJECT_TEAM: 'shell.roles.projectTeam',
   SUPPORT_ENTITY: 'shell.roles.supportEntity',
+  VIEWER: 'shell.roles.viewer',
 } as const satisfies Record<Role, string>;
 
 /** User pill: initials, name and role; its menu holds the sign out. */
