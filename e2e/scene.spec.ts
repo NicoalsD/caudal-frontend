@@ -24,7 +24,7 @@ test.describe('Escena 3D del fontanero', () => {
     const dialog = page.getByRole('dialog', { name: `Llave ${HIGH_VALVE_NAME}` });
     await expect(dialog).toBeVisible();
     await dialog.getByLabel(strings.valveControl.reasonLabel).fill(REASON);
-    await dialog.getByRole('button', { name: strings.valveControl.confirmOpen }).click();
+    await dialog.getByRole('button', { name: strings.valveLever.noSlideOpen }).click();
 
     await expect(dialog.getByText(strings.valveControl.doneAcked)).toBeVisible({
       timeout: COMMAND_TIMEOUT_MS,
@@ -35,7 +35,11 @@ test.describe('Escena 3D del fontanero', () => {
       manual_reason: REASON,
     });
     await dialog.getByRole('button', { name: strings.valveControl.back }).click();
-    await expect(page.getByText(`${HIGH_VALVE_NAME}`, { exact: true }).first()).toBeVisible();
+    await expect(
+      page.getByRole('button', {
+        name: strings.valves.closeNamed.replace('{valve}', HIGH_VALVE_NAME),
+      }),
+    ).toBeVisible();
     await page.waitForTimeout(TWO_SECONDS_MS);
     await expect(page.getByText(strings.valves.state.open).first()).toBeVisible();
   });
