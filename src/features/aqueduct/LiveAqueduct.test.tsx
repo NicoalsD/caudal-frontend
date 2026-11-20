@@ -64,7 +64,11 @@ describe('Live aqueduct on the plumber home', () => {
         name: t('valveControl.title', { valve: HIGH_VALVE }),
       });
       await user.type(await within(dialog).findByLabelText(t('valveControl.reasonLabel')), REASON);
-      await user.click(within(dialog).getByRole('button', { name: t('valveControl.confirmOpen') }));
+      // The lever is the confirmation: from the keyboard, End throws it.
+      within(dialog)
+        .getByRole('slider', { name: t('valveLever.labelOpen', { valve: HIGH_VALVE }) })
+        .focus();
+      await user.keyboard('{End}');
 
       await waitFor(() => expect(backend.state.commands).toHaveLength(1));
       expect(backend.state.commands[0]).toMatchObject({ command: 'OPEN', manual_reason: REASON });
@@ -88,7 +92,7 @@ describe('Live aqueduct on the plumber home', () => {
       );
       const dialog = await screen.findByRole('dialog');
       await user.type(await within(dialog).findByLabelText(t('valveControl.reasonLabel')), REASON);
-      await user.click(within(dialog).getByRole('button', { name: t('valveControl.confirmOpen') }));
+      await user.click(within(dialog).getByRole('button', { name: t('valveLever.noSlideOpen') }));
 
       expect(
         await within(dialog).findByText(
@@ -110,7 +114,7 @@ describe('Live aqueduct on the plumber home', () => {
     );
     const dialog = await screen.findByRole('dialog');
     await user.type(await within(dialog).findByLabelText(t('valveControl.reasonLabel')), 'corto');
-    await user.click(within(dialog).getByRole('button', { name: t('valveControl.confirmOpen') }));
+    await user.click(within(dialog).getByRole('button', { name: t('valveLever.noSlideOpen') }));
 
     expect(
       await within(dialog).findByText(t('valveControl.reasonShort', { min: '10' })),
