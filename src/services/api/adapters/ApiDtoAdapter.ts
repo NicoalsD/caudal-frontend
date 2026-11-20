@@ -29,6 +29,7 @@ import type {
   DecimalView,
   HealthView,
   LoginView,
+  PublicInstitutionView,
   CurrentUserView,
   CatalogOptionView,
   DamageReportReceiptView,
@@ -76,6 +77,7 @@ type ConstraintsDto = components['schemas']['ConstraintsResponse'];
 type FieldConstraintDto = components['schemas']['FieldConstraint'];
 type AuthUserDto = components['schemas']['AuthUser'];
 type LoginDto = components['schemas']['LoginResponse'];
+type InstitutionDirectoryDto = components['schemas']['PublicInstitutionDirectory'];
 type RefreshDto = components['schemas']['RefreshResponse'];
 type CurrentUserDto = components['schemas']['CurrentUserResponse'];
 type MembershipDto = components['schemas']['Membership'];
@@ -211,6 +213,15 @@ export class ApiDtoAdapter {
       aqueductId: dto.aqueduct_id,
       mustChangePassword: dto.must_change_password,
     };
+  }
+
+  toInstitutionDirectory(dto: InstitutionDirectoryDto): PublicInstitutionView[] {
+    return dto.items.map((item) => {
+      if (item.slug === '' || item.name === '') {
+        throw new InvalidDtoError('institution');
+      }
+      return { slug: item.slug, name: item.name };
+    });
   }
 
   toLogin(dto: LoginDto): LoginView {

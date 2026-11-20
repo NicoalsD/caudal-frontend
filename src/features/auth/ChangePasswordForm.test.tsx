@@ -14,6 +14,8 @@ import { errorResponse } from '../../test/msw/errorResponse';
 import { createSessionBackend } from '../../test/msw/sessionBackend';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
+import { signInThroughSteps } from '../../test/signInForm';
+import { REMEMBERED_INSTITUTION_KEY } from '../../services/preferences/rememberedInstitutionPreference';
 
 const USER = TEST_USERS.newcomer;
 const sessionUser = () =>
@@ -44,9 +46,7 @@ async function signedIn() {
   server.use(...backend.handlers);
   const app = renderApp(ROUTE_PATHS.login);
   const user = userEvent.setup();
-  await user.type(await screen.findByLabelText(t('auth.username')), USER.username);
-  await user.type(screen.getByLabelText(t('auth.password')), TEST_PASSWORD);
-  await user.click(screen.getByRole('button', { name: t('auth.signIn') }));
+  await signInThroughSteps(user, USER.username, TEST_PASSWORD);
   await screen.findByLabelText(t('auth.currentPassword'));
   return { backend, user, ...app };
 }
@@ -183,7 +183,8 @@ describe('ChangePasswordForm', () => {
     await user.click(save());
     await screen.findByText(t('auth.wrongCurrentPassword'));
 
-    expect(setItem).not.toHaveBeenCalled();
+    // Only the remembered institution slug may be written; never a token or a password.
+    expect(setItem.mock.calls.every(([key]) => key === REMEMBERED_INSTITUTION_KEY)).toBe(true);
   });
 
   it('shows a general alert with the support code for a server error', async () => {

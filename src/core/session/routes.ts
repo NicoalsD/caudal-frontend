@@ -7,6 +7,8 @@ const PUBLIC_PREFIX = '/a';
 export const ROUTE_PATHS = {
   root: '/',
   login: '/login',
+  /** Second step of the sign in: the institution is already chosen (`/i/maqueta-caudal/login`). */
+  institutionLogin: '/i/:institutionSlug/login',
   changePassword: '/cambiar-contrasena',
   privacyNotice: '/aviso-de-privacidad',
   tank: '/tanque',
@@ -57,29 +59,39 @@ export const ROUTE_PATHS = {
   },
 } as const;
 
+/** Path of the credentials step for one institution. The slug is encoded, never trusted as HTML. */
+export function institutionLoginPath(slug: string): string {
+  return `/i/${encodeURIComponent(slug)}/login`;
+}
+
 /** First screen of each role after signing in. */
 export const HOME_PATH_BY_ROLE: Readonly<Record<Role, string>> = {
   OPERATOR: ROUTE_PATHS.operator.home,
   BOARD_ADMIN: ROUTE_PATHS.board.tank,
   BOARD_MEMBER: ROUTE_PATHS.board.tank,
+  INSTITUTION_ADMIN: ROUTE_PATHS.board.tank,
   PROJECT_TEAM: ROUTE_PATHS.team.evaluation,
   SUPPORT_ENTITY: ROUTE_PATHS.entity.summaries,
+  VIEWER: ROUTE_PATHS.board.tank,
 };
 
 /** Roles that may open each route family. Guards use these lists for UX only. */
 export const ROLES_BY_AREA = {
   operator: ['OPERATOR'],
-  board: ['BOARD_ADMIN', 'BOARD_MEMBER'],
-  boardAdmin: ['BOARD_ADMIN'],
+  /** The Board's screens. The viewer has its own list for the tank panel (below). */
+  board: ['BOARD_ADMIN', 'BOARD_MEMBER', 'INSTITUTION_ADMIN'],
+  /** The tank panel, read-only for the viewer (no VALVE_COMMAND_MANUAL). */
+  boardTank: ['BOARD_ADMIN', 'BOARD_MEMBER', 'INSTITUTION_ADMIN', 'VIEWER'],
+  boardAdmin: ['BOARD_ADMIN', 'INSTITUTION_ADMIN'],
   team: ['PROJECT_TEAM'],
-  /** The AI evaluation: the project team, and the Board's administrator (seed V45: every permission). */
-  evaluation: ['BOARD_ADMIN', 'PROJECT_TEAM'],
-  /** The audit log is read by the Board's administrator and by the project team (seed V45). */
-  audit: ['BOARD_ADMIN', 'PROJECT_TEAM'],
-  /** Devices are managed by the Board's administrator and the project team (DEVICE_MANAGE, API.md 16.9). */
-  devices: ['BOARD_ADMIN', 'PROJECT_TEAM'],
+  /** The AI evaluation: the project team, and the institution's administrator (seed V45: every permission). */
+  evaluation: ['BOARD_ADMIN', 'INSTITUTION_ADMIN', 'PROJECT_TEAM'],
+  /** The audit log is read by the institution's administrator and by the project team (seed V45). */
+  audit: ['BOARD_ADMIN', 'INSTITUTION_ADMIN', 'PROJECT_TEAM'],
+  /** Devices are managed by the institution's administrator and the project team (DEVICE_MANAGE, API.md 16.9). */
+  devices: ['BOARD_ADMIN', 'INSTITUTION_ADMIN', 'PROJECT_TEAM'],
   entity: ['SUPPORT_ENTITY'],
-  tank: ['OPERATOR', 'BOARD_ADMIN', 'BOARD_MEMBER', 'PROJECT_TEAM'],
+  tank: ['OPERATOR', 'BOARD_ADMIN', 'BOARD_MEMBER', 'INSTITUTION_ADMIN', 'PROJECT_TEAM', 'VIEWER'],
 } as const satisfies Record<string, readonly Role[]>;
 
 /**
@@ -90,6 +102,7 @@ const ROLES_BY_PATH: readonly (readonly [string, readonly Role[]])[] = [
   [ROUTE_PATHS.board.users, ROLES_BY_AREA.boardAdmin],
   [ROUTE_PATHS.board.entities, ROLES_BY_AREA.boardAdmin],
   [ROUTE_PATHS.board.regions, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.tank, ROLES_BY_AREA.boardTank],
   [ROUTE_PATHS.board.base, ROLES_BY_AREA.board],
   [ROUTE_PATHS.team.evaluation, ROLES_BY_AREA.evaluation],
   [ROUTE_PATHS.team.audit, ROLES_BY_AREA.audit],

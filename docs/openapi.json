@@ -4705,6 +4705,35 @@
           }
         }
       }
+    },
+    "/api/v1/public/institutions": {
+      "get": {
+        "operationId": "listPublicInstitutions",
+        "summary": "Directorio público de instituciones",
+        "description": "Público, limitado por tasa. Solo instituciones activas, con slug y nombre. Sin paginación. API.md sección 2.1.",
+        "responses": {
+          "200": {
+            "description": "Instituciones activas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicInstitutionDirectory"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiadas solicitudes (RATE_LIMITED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4814,6 +4843,10 @@
           },
           "password": {
             "type": "string"
+          },
+          "institution_slug": {
+            "type": "string",
+            "description": "Slug de la institución (directorio público). Obligatorio salvo para el superadmin, que no lo envía. Cualquier error de institución responde 401 INVALID_CREDENTIALS. API.md sección 2.2."
           }
         }
       },
@@ -4843,9 +4876,11 @@
             "enum": [
               "BOARD_ADMIN",
               "BOARD_MEMBER",
+              "INSTITUTION_ADMIN",
               "OPERATOR",
               "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
+              "SUPPORT_ENTITY",
+              "VIEWER"
             ]
           },
           "aqueduct_id": {
@@ -4923,9 +4958,11 @@
             "enum": [
               "BOARD_ADMIN",
               "BOARD_MEMBER",
+              "INSTITUTION_ADMIN",
               "OPERATOR",
               "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
+              "SUPPORT_ENTITY",
+              "VIEWER"
             ]
           },
           "valid_from": {
@@ -7170,9 +7207,11 @@
             "enum": [
               "BOARD_ADMIN",
               "BOARD_MEMBER",
+              "INSTITUTION_ADMIN",
               "OPERATOR",
               "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
+              "SUPPORT_ENTITY",
+              "VIEWER"
             ]
           }
         }
@@ -7198,9 +7237,11 @@
             "enum": [
               "BOARD_ADMIN",
               "BOARD_MEMBER",
+              "INSTITUTION_ADMIN",
               "OPERATOR",
               "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
+              "SUPPORT_ENTITY",
+              "VIEWER"
             ]
           }
         }
@@ -7338,9 +7379,11 @@
             "enum": [
               "BOARD_ADMIN",
               "BOARD_MEMBER",
+              "INSTITUTION_ADMIN",
               "OPERATOR",
               "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
+              "SUPPORT_ENTITY",
+              "VIEWER"
             ]
           },
           "valid_from": {
@@ -7399,9 +7442,11 @@
             "enum": [
               "BOARD_ADMIN",
               "BOARD_MEMBER",
+              "INSTITUTION_ADMIN",
               "OPERATOR",
               "PROJECT_TEAM",
-              "SUPPORT_ENTITY"
+              "SUPPORT_ENTITY",
+              "VIEWER"
             ]
           },
           "valid_from": {
@@ -9366,6 +9411,37 @@
           },
           "markdown": {
             "type": "string"
+          }
+        }
+      },
+      "PublicInstitution": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Identificador de la institución en las rutas (/i/{slug}/login)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre para mostrar."
+          }
+        }
+      },
+      "PublicInstitutionDirectory": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicInstitution"
+            }
           }
         }
       }

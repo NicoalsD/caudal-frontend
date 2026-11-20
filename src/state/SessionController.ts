@@ -76,6 +76,7 @@ export class SessionController {
 
   /** Signs in. Rejects with the API error (the form shows a generic text). */
   async signIn(credentials: {
+    readonly institutionSlug?: string;
     readonly username: string;
     readonly password: string;
   }): Promise<SessionUser> {

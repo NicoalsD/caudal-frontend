@@ -62,6 +62,10 @@ const signInRoutes: RouteObject = {
   element: <AuthLayout />,
   children: [
     { path: ROUTE_PATHS.login, element: screen(() => import('../features/auth'), 'LoginPage') },
+    {
+      path: ROUTE_PATHS.institutionLogin,
+      element: screen(() => import('../features/auth'), 'LoginPage'),
+    },
   ],
 };
 
@@ -119,8 +123,9 @@ const operatorRoutes: RouteObject = {
   ],
 };
 
-const boardRoutes: RouteObject = {
-  element: <RequireRole roles={ROLES_BY_AREA.board} />,
+/** The tank panel is also the viewer's home: it opens to every board role, the viewer read-only. */
+const boardTankRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.boardTank} />,
   children: [
     {
       element: <BoardLayout />,
@@ -132,6 +137,17 @@ const boardRoutes: RouteObject = {
             'BoardDashboardPage',
           ),
         },
+      ],
+    },
+  ],
+};
+
+const boardRoutes: RouteObject = {
+  element: <RequireRole roles={ROLES_BY_AREA.board} />,
+  children: [
+    {
+      element: <BoardLayout />,
+      children: [
         {
           path: ROUTE_PATHS.board.proposals,
           element: screen(() => import('../features/proposals'), 'ProposalListPage'),
@@ -317,6 +333,7 @@ export function buildRoutes(): RouteObject[] {
                   element: <RequirePrivacyAccepted />,
                   children: [
                     operatorRoutes,
+                    boardTankRoutes,
                     boardRoutes,
                     teamRoutes,
                     evaluationRoutes,

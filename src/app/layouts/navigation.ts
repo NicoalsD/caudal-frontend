@@ -92,7 +92,12 @@ export const BOARD_NAV: readonly NavItem[] = [
   },
 ];
 
-/** Extra items only for BOARD_ADMIN: accounts, entities, devices, the audit log and the AI evaluation. */
+/** The viewer (VIEWER) only reads the tank panel: it is the one item of its menu. */
+export const VIEWER_NAV: readonly NavItem[] = [
+  { to: ROUTE_PATHS.board.tank, label: t('nav.boardHome'), icon: LayoutDashboard },
+];
+
+/** Extra items only for the institution's administrator (BOARD_ADMIN and INSTITUTION_ADMIN): accounts, entities, devices, the audit log and the AI evaluation. */
 export const BOARD_ADMIN_NAV: readonly NavItem[] = [
   {
     to: ROUTE_PATHS.board.regions,

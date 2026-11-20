@@ -3,23 +3,24 @@ import userEvent from '@testing-library/user-event';
 import { http } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ROUTE_PATHS } from '../../core/session/routes';
+import { ROUTE_PATHS, institutionLoginPath } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { STATUS } from '../../test/constants';
 import { ACCESS_TOKEN_SECONDS, TEST_PASSWORD, TEST_USERS } from '../../test/factories/auth';
+import { TEST_INSTITUTION } from '../../test/factories/institutions';
 import { apiUrl } from '../../test/msw/apiUrl';
 import { errorResponse } from '../../test/msw/errorResponse';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
+import { signInThroughSteps } from '../../test/signInForm';
+import { REMEMBERED_INSTITUTION_KEY } from '../../services/preferences/rememberedInstitutionPreference';
 
 async function signIn(
   user: ReturnType<typeof userEvent.setup>,
   username: string,
   password: string,
 ) {
-  await user.type(await screen.findByLabelText(t('auth.username')), username);
-  await user.type(screen.getByLabelText(t('auth.password')), password);
-  await user.click(screen.getByRole('button', { name: t('auth.signIn') }));
+  await signInThroughSteps(user, username, password);
 }
 
 describe('login flow', () => {
@@ -85,13 +86,13 @@ describe('login flow', () => {
         errorResponse(STATUS.badRequest, 'VALIDATION_ERROR'),
       ),
     );
-    renderApp(ROUTE_PATHS.login);
+    renderApp(institutionLoginPath(TEST_INSTITUTION.slug));
 
     expect(await screen.findByText(t('connection.constraintsMissing'))).toBeInTheDocument();
     expect(screen.queryByLabelText(t('auth.username'))).not.toBeInTheDocument();
   });
 
-  it('never writes the token or the password to web storage', async () => {
+  it('never writes the token or the password to web storage; only the institution slug is kept', async () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem');
     const { router } = renderApp(ROUTE_PATHS.login);
 
@@ -100,7 +101,7 @@ describe('login flow', () => {
       expect(router.state.location.pathname).toBe(ROUTE_PATHS.operator.home);
     });
 
-    expect(setItem).not.toHaveBeenCalled();
+    expect(setItem.mock.calls).toEqual([[REMEMBERED_INSTITUTION_KEY, TEST_INSTITUTION.slug]]);
     expect(JSON.stringify({ ...localStorage })).not.toContain(TEST_PASSWORD);
     expect(ACCESS_TOKEN_SECONDS).toBeGreaterThan(0);
   });
@@ -122,7 +123,11 @@ describe('login flow', () => {
     await screen.findByRole('alert');
 
     expect(seen).toEqual({
-      body: { username: 'junta.uno', password: TEST_PASSWORD },
+      body: {
+        institution_slug: TEST_INSTITUTION.slug,
+        username: 'junta.uno',
+        password: TEST_PASSWORD,
+      },
       requestedWith: 'caudal-web',
     });
   });

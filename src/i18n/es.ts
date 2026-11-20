@@ -46,7 +46,9 @@ export const strings = {
     roles: {
       boardAdmin: 'Administración de la Junta',
       boardMember: 'Miembro de la Junta',
+      institutionAdmin: 'Admin de la institución',
       operator: 'Fontanero',
+      viewer: 'Lector',
       projectTeam: 'Equipo del proyecto',
       supportEntity: 'Entidad de apoyo',
     },
@@ -141,6 +143,22 @@ export const strings = {
   },
   auth: {
     tagline: 'El cuaderno del acueducto, pero digital',
+    institution: {
+      title: 'Elige tu institución',
+      intro: 'Busca el nombre de tu institución y elígela para entrar.',
+      searchLabel: 'Buscar institución',
+      listLabel: 'Instituciones',
+      continue: 'Continuar',
+      loading: 'Cargando instituciones',
+      loadError:
+        'No pudimos cargar la lista de instituciones. Revisa tu conexión e intenta de nuevo.',
+      retry: 'Reintentar',
+      empty: 'Todavía no hay instituciones disponibles.',
+      noMatch: 'Ninguna institución coincide con la búsqueda.',
+      unknownSlug: 'No encontramos la institución del enlace. Elígela de la lista.',
+      signingInto: 'Entrando a',
+      change: 'Cambiar institución',
+    },
     username: 'Usuario',
     password: 'Contraseña',
     signIn: 'Entrar',
@@ -1728,7 +1746,9 @@ export const strings = {
     roles: {
       boardAdmin: 'Administración de la Junta',
       boardMember: 'Miembro de la Junta',
+      institutionAdmin: 'Admin de la institución',
       operator: 'Fontanero',
+      viewer: 'Lector',
       projectTeam: 'Equipo del proyecto',
       supportEntity: 'Entidad de apoyo',
     },

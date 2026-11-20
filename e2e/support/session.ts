@@ -3,7 +3,15 @@ import type { Page } from '@playwright/test';
 import { strings } from '../../src/i18n/es';
 import { expect } from './fixtures';
 
-/** Signs in through the real login form and waits for the first screen of the role. */
+/**
+ * First step of the sign in: confirms the institution that is already chosen (the directory of the
+ * test API has one institution, preselected). Call it after opening /login.
+ */
+export async function chooseInstitution(page: Page): Promise<void> {
+  await page.getByRole('button', { name: strings.auth.institution.continue }).click();
+}
+
+/** Signs in through the real two-step login form and waits for the first screen of the role. */
 export async function signIn(
   page: Page,
   username: string,
@@ -11,6 +19,7 @@ export async function signIn(
   firstScreen: RegExp,
 ): Promise<void> {
   await page.goto('/login');
+  await chooseInstitution(page);
   await page.getByLabel(strings.auth.username, { exact: true }).fill(username);
   await page.getByLabel(strings.auth.password, { exact: true }).fill(password);
   await page.getByRole('button', { name: strings.auth.signIn }).click();

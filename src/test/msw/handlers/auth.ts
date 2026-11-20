@@ -9,10 +9,13 @@ import {
   findTestUser,
   TEST_PASSWORD,
 } from '../../factories/auth';
+import { institutionMatches } from '../../factories/institutions';
 import { apiUrl } from '../apiUrl';
 import { errorResponse } from '../errorResponse';
 
 type LoginRequestDto = components['schemas']['LoginRequest'];
+/** Same generic answer as a wrong password: the screen never says which field failed. */
+const INVALID_CREDENTIALS_MESSAGE = 'Usuario o contraseña incorrectos.';
 type ChangePasswordDto = components['schemas']['ChangePasswordRequest'];
 
 /** A password the fake server treats as "too common" (API.md 2.5). */
@@ -55,9 +58,13 @@ export const authHandlers = [
   http.post(apiUrl('/auth/login'), async ({ request }) => {
     const body = (await request.json()) as LoginRequestDto;
     const user = findTestUser((candidate) => candidate.username === body.username);
-    if (user === undefined || body.password !== TEST_PASSWORD) {
+    if (
+      user === undefined ||
+      body.password !== TEST_PASSWORD ||
+      !institutionMatches(body.institution_slug)
+    ) {
       return errorResponse(STATUS.unauthorized, 'INVALID_CREDENTIALS', {
-        message: 'Usuario o contraseña incorrectos.',
+        message: INVALID_CREDENTIALS_MESSAGE,
       });
     }
     return HttpResponse.json(buildLoginResponse(user));

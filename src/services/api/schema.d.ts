@@ -1531,6 +1531,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/public/institutions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Directorio público de instituciones
+     * @description Público, limitado por tasa. Solo instituciones activas, con slug y nombre. Sin paginación. API.md sección 2.1.
+     */
+    get: operations['listPublicInstitutions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1579,6 +1599,8 @@ export interface components {
     LoginRequest: {
       username: string;
       password: string;
+      /** @description Slug de la institución (directorio público). Obligatorio salvo para el superadmin, que no lo envía. Cualquier error de institución responde 401 INVALID_CREDENTIALS. API.md sección 2.2. */
+      institution_slug?: string;
     };
     AuthUser: {
       /** Format: uuid */
@@ -1586,7 +1608,14 @@ export interface components {
       username: string;
       full_name: string;
       /** @enum {string} */
-      role: 'BOARD_ADMIN' | 'BOARD_MEMBER' | 'OPERATOR' | 'PROJECT_TEAM' | 'SUPPORT_ENTITY';
+      role:
+        | 'BOARD_ADMIN'
+        | 'BOARD_MEMBER'
+        | 'INSTITUTION_ADMIN'
+        | 'OPERATOR'
+        | 'PROJECT_TEAM'
+        | 'SUPPORT_ENTITY'
+        | 'VIEWER';
       /** Format: uuid */
       aqueduct_id: string;
       must_change_password: boolean;
@@ -1613,7 +1642,14 @@ export interface components {
       /** Format: uuid */
       aqueduct_id: string;
       /** @enum {string} */
-      role: 'BOARD_ADMIN' | 'BOARD_MEMBER' | 'OPERATOR' | 'PROJECT_TEAM' | 'SUPPORT_ENTITY';
+      role:
+        | 'BOARD_ADMIN'
+        | 'BOARD_MEMBER'
+        | 'INSTITUTION_ADMIN'
+        | 'OPERATOR'
+        | 'PROJECT_TEAM'
+        | 'SUPPORT_ENTITY'
+        | 'VIEWER';
       /** Format: date-time */
       valid_from?: string;
       /** Format: date-time */
@@ -2308,7 +2344,14 @@ export interface components {
       /** Format: uuid */
       aqueduct_id: string;
       /** @enum {string} */
-      role: 'BOARD_ADMIN' | 'BOARD_MEMBER' | 'OPERATOR' | 'PROJECT_TEAM' | 'SUPPORT_ENTITY';
+      role:
+        | 'BOARD_ADMIN'
+        | 'BOARD_MEMBER'
+        | 'INSTITUTION_ADMIN'
+        | 'OPERATOR'
+        | 'PROJECT_TEAM'
+        | 'SUPPORT_ENTITY'
+        | 'VIEWER';
     };
     CreatedUserMembership: {
       /** Format: uuid */
@@ -2316,7 +2359,14 @@ export interface components {
       /** Format: uuid */
       aqueduct_id: string;
       /** @enum {string} */
-      role: 'BOARD_ADMIN' | 'BOARD_MEMBER' | 'OPERATOR' | 'PROJECT_TEAM' | 'SUPPORT_ENTITY';
+      role:
+        | 'BOARD_ADMIN'
+        | 'BOARD_MEMBER'
+        | 'INSTITUTION_ADMIN'
+        | 'OPERATOR'
+        | 'PROJECT_TEAM'
+        | 'SUPPORT_ENTITY'
+        | 'VIEWER';
     };
     /** @description Cuenta creada y su código de activación, que se muestra una sola vez (API.md 3.2). */
     CreatedUser: {
@@ -2359,7 +2409,14 @@ export interface components {
       /** Format: uuid */
       aqueduct_id: string;
       /** @enum {string} */
-      role_code: 'BOARD_ADMIN' | 'BOARD_MEMBER' | 'OPERATOR' | 'PROJECT_TEAM' | 'SUPPORT_ENTITY';
+      role_code:
+        | 'BOARD_ADMIN'
+        | 'BOARD_MEMBER'
+        | 'INSTITUTION_ADMIN'
+        | 'OPERATOR'
+        | 'PROJECT_TEAM'
+        | 'SUPPORT_ENTITY'
+        | 'VIEWER';
       /** Format: date-time */
       valid_from: string;
       /** Format: date-time */
@@ -2378,7 +2435,14 @@ export interface components {
       /** Format: uuid */
       aqueduct_id: string;
       /** @enum {string} */
-      role_code: 'BOARD_ADMIN' | 'BOARD_MEMBER' | 'OPERATOR' | 'PROJECT_TEAM' | 'SUPPORT_ENTITY';
+      role_code:
+        | 'BOARD_ADMIN'
+        | 'BOARD_MEMBER'
+        | 'INSTITUTION_ADMIN'
+        | 'OPERATOR'
+        | 'PROJECT_TEAM'
+        | 'SUPPORT_ENTITY'
+        | 'VIEWER';
       /** Format: date-time */
       valid_from?: string;
       /** Format: date-time */
@@ -2981,6 +3045,15 @@ export interface components {
       findings: string[];
       recommendations: string[];
       markdown: string;
+    };
+    PublicInstitution: {
+      /** @description Identificador de la institución en las rutas (/i/{slug}/login). */
+      slug: string;
+      /** @description Nombre para mostrar. */
+      name: string;
+    };
+    PublicInstitutionDirectory: {
+      items: components['schemas']['PublicInstitution'][];
     };
   };
   responses: never;
@@ -6559,6 +6632,35 @@ export interface operations {
       };
       /** @description FORBIDDEN: falta el permiso. */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  listPublicInstitutions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Instituciones activas. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PublicInstitutionDirectory'];
+        };
+      };
+      /** @description Demasiadas solicitudes (RATE_LIMITED). */
+      429: {
         headers: {
           [name: string]: unknown;
         };

@@ -22,3 +22,27 @@
 .formArea {
   margin-top: var(--space-6);
 }
+
+.institutionBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+}
+
+.institutionBar p {
+  margin: 0;
+}
+
+.institutionLabel {
+  color: var(--color-text-secondary);
+}
+
+.retryButton {
+  margin-top: var(--space-3);
+}
