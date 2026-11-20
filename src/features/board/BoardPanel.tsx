@@ -15,7 +15,7 @@ import { HistoryPanel } from './HistoryPanel';
 import { RecommendationStack } from './RecommendationStack';
 import { SceneCard } from './SceneCard';
 import { SectorsTable } from './SectorsTable';
-import { useLiveCommands } from './useLiveCommands';
+import { useLiveCommands } from '../../state/hooks/useLiveCommands';
 import { useTodayShifts } from './todayShifts';
 import styles from './BoardPanel.module.css';
 

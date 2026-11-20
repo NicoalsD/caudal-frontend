@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { ValveLiveCommandView } from '../../services/api/views';
-import { useCaudalApi } from '../../state/hooks/apiContext';
-import { useAqueductId } from '../../state/hooks/useAqueductId';
-import { LIVE_REFETCH_INTERVAL_MS, LIVE_SCOPE } from '../../state/hooks/useLiveAqueduct';
-import { aqueductKey } from '../../state/queryKeys';
+import { useCaudalApi } from './apiContext';
+import { useAqueductId } from './useAqueductId';
+import { LIVE_REFETCH_INTERVAL_MS, LIVE_SCOPE } from './useLiveAqueduct';
+import { aqueductKey } from '../queryKeys';
 
 /**
  * The last command of each valve with its origin (manual, schedule or pilot) and its time. It

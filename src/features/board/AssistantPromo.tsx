@@ -19,7 +19,7 @@ import { Button } from '../../ui/primitives/Button';
 import { LinkButton } from '../../ui/primitives/LinkButton';
 import { cn } from '../../ui/styles/cn';
 import { PERMISSION_ASSISTANT } from '../aqueduct/permissions';
-import { recommendationTitle } from './recommendationText';
+import { recommendationTitle } from '../aqueduct/recommendationText';
 import styles from './BoardPanel.module.css';
 
 const REPORT_PERMISSION = 'REPORT_VIEW';

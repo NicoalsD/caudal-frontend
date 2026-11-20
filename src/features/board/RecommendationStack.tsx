@@ -16,7 +16,7 @@ import { LoadingState } from '../../ui/feedback/LoadingState';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from '../aqueduct/permissions';
-import { recommendationTitle } from './recommendationText';
+import { recommendationTitle } from '../aqueduct/recommendationText';
 import styles from './BoardPanel.module.css';
 
 const PERCENT = 100;
