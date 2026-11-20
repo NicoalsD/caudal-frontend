@@ -547,3 +547,31 @@
 .modeInlineButton:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
 }
+
+/* ---- The question box in a narrow column: one field with its button at the side ---- */
+
+.askCompact {
+  gap: var(--space-2);
+}
+
+.askCompact .askText {
+  font-size: var(--font-size-small);
+}
+
+.askFormInline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.askFormInline .askField {
+  resize: none;
+}
+
+.askFormInline > :not(.askField, button) {
+  grid-column: 1 / -1;
+}
+
+.askCompact .askTitle {
+  font-size: var(--font-size-h2);
+}

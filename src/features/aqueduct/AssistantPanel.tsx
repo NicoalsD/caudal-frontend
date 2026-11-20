@@ -25,6 +25,8 @@ import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from './permissions';
 import { recommendationTitle } from './recommendationText';
 
 const PERCENT = 100;
+const ROWS_COMPACT = 1;
+const ROWS_FULL = 2;
 const WHOLE = 0;
 
 interface AssistantPanelProps {
@@ -180,7 +182,7 @@ export function AskCard({
   const errorId = `${id}-error`;
   const tooLong = question.length > QUESTION_MAX_LENGTH;
   return (
-    <Card variant="dark" className={cn(styles.askCard)}>
+    <Card variant="dark" className={cn(styles.askCard, compact && styles.askCompact)}>
       <h3 id={titleId} className={cn(styles.askTitle)}>
         {t('assistant.askTitle')}
       </h3>
@@ -189,7 +191,7 @@ export function AskCard({
       </p>
       <form
         noValidate
-        className={cn(styles.askForm)}
+        className={cn(styles.askForm, compact && styles.askFormInline)}
         onSubmit={(event) => {
           event.preventDefault();
           const trimmed = question.trim();
@@ -203,23 +205,25 @@ export function AskCard({
           aria-describedby={tooLong ? `${hintId} ${errorId}` : hintId}
           aria-invalid={tooLong ? true : undefined}
           className={cn(styles.askField)}
-          rows={2}
+          rows={compact ? ROWS_COMPACT : ROWS_FULL}
           value={question}
           onChange={(event) => {
             setQuestion(event.currentTarget.value);
           }}
         />
-        <p
-          className={cn(
-            styles.askCounter,
-            isNearLimit(question.length, QUESTION_MAX_LENGTH) && styles.askNear,
-          )}
-        >
-          {t('assistant.counter', {
-            length: String(question.length),
-            max: String(QUESTION_MAX_LENGTH),
-          })}
-        </p>
+        {compact && !isNearLimit(question.length, QUESTION_MAX_LENGTH) ? null : (
+          <p
+            className={cn(
+              styles.askCounter,
+              isNearLimit(question.length, QUESTION_MAX_LENGTH) && styles.askNear,
+            )}
+          >
+            {t('assistant.counter', {
+              length: String(question.length),
+              max: String(QUESTION_MAX_LENGTH),
+            })}
+          </p>
+        )}
         {tooLong ? (
           <p id={errorId} role="alert" className={cn(styles.askNear)}>
             {t('assistant.tooLong')}

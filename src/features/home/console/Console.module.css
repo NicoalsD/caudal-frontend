@@ -465,6 +465,12 @@
   list-style: none;
 }
 
+.queueList:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-control);
+}
+
 .queueRow {
   display: flex;
   flex-direction: column;
@@ -573,8 +579,19 @@
   .queue {
     flex: 1 1 auto;
     min-height: 0;
+  }
+
+  /* The list scrolls inside the card; a fade at its foot says there is more below. */
+  .queueList {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+  }
+
+  .sideArea > :last-child {
+    flex: none;
   }
 
   .readout {
