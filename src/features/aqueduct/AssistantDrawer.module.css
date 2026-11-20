@@ -8,15 +8,15 @@
   padding: 0 var(--space-5);
   font: inherit;
   font-weight: var(--font-weight-bold);
-  color: var(--color-on-brand);
-  background: var(--color-brand-900);
-  border: 0;
+  color: var(--color-water-700);
+  background: var(--color-surface);
+  border: 2px solid var(--color-water-700);
   border-radius: var(--radius-pill);
   cursor: pointer;
 }
 
 .trigger:hover {
-  background: var(--color-water-800);
+  background: var(--color-surface-sunken);
 }
 
 .trigger:focus-visible {
