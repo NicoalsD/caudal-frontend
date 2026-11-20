@@ -1,10 +1,11 @@
 # CAUDAL Frontend
 
-Aplicación web instalable (PWA) de **CAUDAL**, el cuaderno digital del acueducto veredal:
+Aplicación web instalable (PWA) de **CAUDAL**, producto B2B para instituciones que almacenan agua en un tanque y la reparten por válvulas:
 
-- **Fontanero:** registra la lectura del tanque desde el celular, también sin señal, y anota el cierre del día.
-- **Junta:** ve el estado y el pronóstico del tanque, aprueba o modifica los turnos con motivo y publica el horario.
-- **Familias:** consultan el horario sin datos personales y reportan daños.
+- **Superadmin de CAUDAL:** da de alta instituciones y su primer admin.
+- **Admin de la institución:** configura el tanque, las líneas y las válvulas, calibra el sensor y administra usuarios, parámetros y piloto.
+- **Operador:** ve el tanque en vivo, abre y cierra válvulas con confirmación, registra observaciones y cierra el día.
+- **Lector:** consulta el tanque, el pronóstico, los eventos y las actas.
 
 React 19 · Vite · TypeScript · PWA sin conexión.
 
@@ -12,7 +13,7 @@ React 19 · Vite · TypeScript · PWA sin conexión.
 
 ## Estado
 
-**v1.0.0.** La aplicación cubre a los cinco actores: horario público y reporte de daños, sesión, fontanero (con cola sin conexión), Junta (tanque, propuestas, reglas, actas, incidentes, entidades y usuarios), equipo del proyecto y entidades de apoyo. Detalle por actor, rutas y verificación en [docs/Version-1.0.0.md](docs/Version-1.0.0.md).
+**v1.0.0** (versión anterior al alcance B2B): horario público, fontanero con cola sin conexión, Junta, equipo y entidades. El alcance **B2B** (2026-11-20) la reemplaza y su implementación está por hacer (Fase 4 del plan). Detalle de la v1.0.0 por actor, rutas y verificación en [docs/Version-1.0.0.md](docs/Version-1.0.0.md).
 
 ## Documentación
 

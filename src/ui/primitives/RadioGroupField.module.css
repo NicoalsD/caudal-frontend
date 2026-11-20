@@ -18,14 +18,19 @@
 
 .options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
   gap: var(--space-3);
+}
+
+.stacked {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .option {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
   min-height: var(--field-height);
   padding: var(--space-2) var(--space-3);
   background: var(--color-raised);
@@ -40,6 +45,7 @@
 }
 
 .radio {
+  flex: none;
   width: 1.5rem;
   height: 1.5rem;
   accent-color: var(--color-water-700);

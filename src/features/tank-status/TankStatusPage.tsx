@@ -1,8 +1,8 @@
 import { useId, useState } from 'react';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 
 import { t } from '../../i18n/t';
-import type { TankView } from '../../services/api/views';
+import type { TankStatusView, TankView } from '../../services/api/views';
 import { useTankStatus } from '../../state/hooks/useTankStatus';
 import { useTanks } from '../../state/hooks/useTanks';
 import { LoadingState } from '../../ui/feedback/LoadingState';
@@ -10,12 +10,32 @@ import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
 import { AnomalyList } from './AnomalyList';
-import { ForecastSection } from './ForecastSection';
-import { TankStatusCard } from './TankStatusCard';
+import { TankOverview } from './TankOverview';
 import styles from './TankStatus.module.css';
 
+/** What the Board's panel receives once the tank and its status are known. */
+export interface ConsoleContext {
+  readonly tank: TankView;
+  readonly status: TankStatusView;
+}
+
+interface TankStatusPageProps {
+  /** Draws the body once the tank and its status are known (the Board's panel); default: the tank screen. */
+  readonly panel?: (context: ConsoleContext) => ReactNode;
+  /** The h1. The Board passes today's date; everyone else keeps the screen name. */
+  readonly title?: string;
+  /** Shown right under the h1 (the Board's day guide). */
+  readonly guide?: ReactNode;
+}
+
 /** The status of one tank, with its own loading and error states. */
-function TankStatusSection({ tank }: { readonly tank: TankView }): JSX.Element {
+function TankStatusSection({
+  tank,
+  panel,
+}: {
+  readonly tank: TankView;
+  readonly panel: TankStatusPageProps['panel'];
+}): JSX.Element {
   const status = useTankStatus(tank.id);
   if (status.isPending) {
     return <LoadingState message={t('tankStatus.loading')} />;
@@ -29,17 +49,19 @@ function TankStatusSection({ tank }: { readonly tank: TankView }): JSX.Element {
       />
     );
   }
+  if (panel !== undefined) {
+    return <>{panel({ tank, status: status.data })}</>;
+  }
   return (
     <>
-      <TankStatusCard tank={tank} status={status.data} />
-      <ForecastSection tank={tank} observed={status.data.level} />
+      <TankOverview tank={tank} status={status.data} />
       <AnomalyList />
     </>
   );
 }
 
 /** Screen S12 (status block): the active tank, or a picker when the aqueduct has several. */
-export function TankStatusPage(): JSX.Element {
+export function TankStatusPage({ panel, title, guide }: TankStatusPageProps = {}): JSX.Element {
   const tanks = useTanks();
   const pickerId = useId();
   const [pickedId, setPickedId] = useState<string | null>(null);
@@ -79,7 +101,7 @@ export function TankStatusPage(): JSX.Element {
               </select>
             </div>
           ) : null}
-          <TankStatusSection key={selected.id} tank={selected} />
+          <TankStatusSection key={selected.id} tank={selected} panel={panel} />
         </>
       );
     }
@@ -87,7 +109,10 @@ export function TankStatusPage(): JSX.Element {
 
   return (
     <div className={cn(styles.stack)}>
-      <ScreenTitle>{t('screens.tankStatus')}</ScreenTitle>
+      <div className={cn(styles.head)}>
+        <ScreenTitle>{title ?? t('screens.tankStatus')}</ScreenTitle>
+        {guide}
+      </div>
       {body}
     </div>
   );

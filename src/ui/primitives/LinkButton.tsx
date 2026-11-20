@@ -1,12 +1,12 @@
 import type { ComponentProps, JSX } from 'react';
 import { Link } from 'react-router';
 
-import { cn } from '../styles/cn';
-import styles from './Button.module.css';
+import { buttonClass } from './Button';
+import type { ButtonVariant } from './Button';
 
 interface LinkButtonProps extends ComponentProps<typeof Link> {
   /** Same look as Button: `primary` is the one main action of the screen. */
-  readonly variant?: 'primary' | 'secondary';
+  readonly variant?: ButtonVariant;
 }
 
 /** A navigation link drawn as a button (large target, same tokens as Button). */
@@ -15,14 +15,5 @@ export function LinkButton({
   className,
   ...link
 }: LinkButtonProps): JSX.Element {
-  return (
-    <Link
-      {...link}
-      className={cn(
-        styles.button,
-        variant === 'primary' ? styles.primary : styles.secondary,
-        className,
-      )}
-    />
-  );
+  return <Link {...link} className={buttonClass(variant, className)} />;
 }

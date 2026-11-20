@@ -9,5 +9,14 @@
       "role": "OPERATOR"
     }
   ],
-  "permissions": ["NETWORK_VIEW", "RULESET_VIEW", "READING_CREATE", "DAY_CLOSE", "STATUS_VIEW"]
+  "permissions": [
+    "NETWORK_VIEW",
+    "RULESET_VIEW",
+    "READING_CREATE",
+    "DAY_CLOSE",
+    "STATUS_VIEW",
+    "VALVE_COMMAND_MANUAL",
+    "ASSISTANT_USE",
+    "AUTOPILOT_CONFIGURE"
+  ]
 }

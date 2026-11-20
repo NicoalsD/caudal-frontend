@@ -1,5 +1,5 @@
 import { http } from 'msw';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
@@ -17,14 +17,16 @@ const INTERNAL_ERROR = 500;
 const STALE_HOURS = 12;
 
 function renderStatus() {
-  return renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+  return renderApp(ROUTE_PATHS.tank, { user: BOARD });
 }
 
 describe('TankStatusPage (S12 status block)', () => {
   it('shows the last level with a decimal comma, its age and the trend in words', async () => {
     renderStatus();
 
-    expect(await screen.findByText(t('tankStatus.levelValue', { value: '2,3' }))).toBeVisible();
+    expect(
+      await screen.findAllByText(t('tankStatus.levelValue', { value: '2,3' })),
+    ).not.toHaveLength(0);
     expect(screen.getByText(t('tankStatus.takenAgo', { hours: '6' }))).toBeVisible();
     expect(screen.getByText(t('tankStatus.trendDown'))).toBeVisible();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
@@ -57,14 +59,14 @@ describe('TankStatusPage (S12 status block)', () => {
     renderStatus();
 
     expect(
-      await screen.findByText(t('tankStatus.staleText', { hours: String(STALE_HOURS) })),
+      await screen.findByText(t('tankStatus.staleTextBoard', { hours: String(STALE_HOURS) })),
     ).toBeVisible();
   });
 
   it('does not warn when the last reading is recent', async () => {
     renderStatus();
 
-    await screen.findByText(t('tankStatus.levelValue', { value: '2,3' }));
+    await screen.findAllByText(t('tankStatus.levelValue', { value: '2,3' }));
     expect(screen.queryByText(t('tankStatus.staleTitle'))).not.toBeInTheDocument();
   });
 
@@ -91,7 +93,7 @@ describe('TankStatusPage (S12 status block)', () => {
     );
     renderStatus();
 
-    await screen.findByText(t('tankStatus.levelValue', { value: '2,3' }));
+    await screen.findAllByText(t('tankStatus.levelValue', { value: '2,3' }));
     expect(screen.getByText(t('tankStatus.noTrend'))).toBeVisible();
     expect(screen.queryByRole('button', { name: t('common.retry') })).not.toBeInTheDocument();
   });
@@ -103,5 +105,25 @@ describe('TankStatusPage (S12 status block)', () => {
     renderStatus();
 
     expect(await screen.findByRole('button', { name: t('common.retry') })).toBeVisible();
+  });
+});
+
+describe('TankStatusPage level slider', () => {
+  it('moves the tank to another day, and a forecast day says it is an estimate', async () => {
+    renderStatus();
+
+    const slider = await screen.findByRole('slider', { name: t('tankStatus.timelineLabel') });
+    expect(slider).toHaveAttribute('aria-valuetext', expect.stringContaining('2,3'));
+
+    fireEvent.change(slider, { target: { value: '0' } });
+    expect(slider).toHaveAttribute(
+      'aria-valuetext',
+      t('tankStatus.timelinePast', { day: formatDayKey('2026-10-12'), level: '2,7' }),
+    );
+    expect(screen.getByRole('button', { name: t('tankStatus.timelineBack') })).toBeVisible();
+    expect(screen.queryByText(t('tankStatus.timelineEstimate'))).not.toBeInTheDocument();
+
+    fireEvent.change(slider, { target: { value: slider.getAttribute('max') } });
+    expect(screen.getByText(t('tankStatus.timelineEstimate'))).toBeVisible();
   });
 });

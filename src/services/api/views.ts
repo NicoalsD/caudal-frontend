@@ -16,6 +16,19 @@ import type { ReportStatus } from '../../core/incidents/reportStatus';
 import type { ProposalStatus } from '../../core/proposal/proposalDay';
 import type { Role } from '../../core/session/roles';
 import type { DeviceKind, DeviceStatus } from '../../core/devices/deviceModel';
+import type {
+  AnswerSource,
+  AutopilotMode,
+  DecisionAction,
+  DecisionStatus,
+} from '../../core/autopilot/autopilotModel';
+import type { ReportAggregates } from '../../core/reports/reportModel';
+import type {
+  CommandOrigin,
+  CommandStatus,
+  ValveAction,
+  ValveState,
+} from '../../core/valves/valveModel';
 
 /** View models returned by CaudalApi. Components never see the server DTOs. */
 
@@ -154,6 +167,8 @@ export interface SectorView {
   readonly parentSectorId: string | null;
   readonly householdsCount: number;
   readonly isActive: boolean;
+  /** A root sector: a region of the aqueduct. */
+  readonly isRegion: boolean;
 }
 
 export interface TankView {
@@ -229,6 +244,26 @@ export interface ReadingCorrectionView {
 }
 
 /** The server's answer to a reading: what it stored and what it noticed. */
+/** One accepted reading of the tank history: the level now shown (after any correction). */
+export interface ReadingHistoryPointView {
+  readonly id: string;
+  readonly level: number;
+  readonly observedAt: TimestampView;
+}
+
+export interface ReadingHistoryQuery {
+  readonly tankId: string;
+  readonly from: Date;
+  readonly to: Date;
+  readonly limit: number;
+  readonly cursor?: string;
+}
+
+export interface ReadingHistoryPageView {
+  readonly items: readonly ReadingHistoryPointView[];
+  readonly nextCursor: string | null;
+}
+
 export interface ReadingResultView {
   readonly id: string;
   readonly gaugeValue: DecimalView;
@@ -734,4 +769,83 @@ export interface DevicePageView {
 export interface RotatedDeviceKeyView {
   readonly keyId: string;
   readonly activatedAt: TimestampView;
+}
+
+/** The last command sent to a valve (GET /valves/live). */
+export interface ValveLiveCommandView {
+  readonly id: string;
+  readonly action: ValveAction;
+  readonly status: CommandStatus;
+  readonly origin: CommandOrigin;
+  readonly createdAt: TimestampView;
+  readonly updatedAt: TimestampView;
+}
+
+/** A valve as it is now in the field: its state and its last command. */
+export interface ValveLiveView {
+  readonly valveId: string;
+  readonly sectorId: string;
+  readonly state: ValveState;
+  readonly lastCommand: ValveLiveCommandView | null;
+}
+
+/** A manual command just created (POST /valve-commands/manual). */
+export interface ValveCommandView {
+  readonly id: string;
+  readonly valveId: string;
+  readonly action: ValveAction;
+  readonly status: CommandStatus;
+  readonly notBefore: TimestampView;
+  readonly expiresAt: TimestampView;
+}
+
+export interface AutopilotSettingsView {
+  readonly mode: AutopilotMode;
+  readonly operatorAbsenceMinutes: number;
+  readonly reserveFloorPct: number;
+  readonly updatedAt: TimestampView | null;
+}
+
+/** One decision of the autopilot, or one recommendation of the assistant. */
+export interface AutopilotDecisionView {
+  readonly id: string;
+  readonly createdAt: TimestampView;
+  readonly source: AnswerSource;
+  readonly model: string;
+  readonly action: DecisionAction;
+  readonly valveId: string | null;
+  readonly reason: string;
+  /** From 0 to 1. */
+  readonly confidence: number;
+  readonly status: DecisionStatus;
+  readonly decidedBy: string | null;
+  readonly decidedAt: TimestampView | null;
+  readonly valveCommandId: string | null;
+  /** Why it was skipped or rejected, or a code such as RESERVE_FLOOR; null otherwise. */
+  readonly statusDetail: string | null;
+}
+
+export interface AssistantAnswerView {
+  readonly source: AnswerSource;
+  readonly model: string;
+  readonly answer: string;
+  readonly generatedAt: TimestampView;
+}
+
+/** The numbers of a period (GET /reports). `from` and `to` are the instants the server used. */
+export interface ReportView extends ReportAggregates {
+  readonly from: TimestampView;
+  readonly to: TimestampView;
+}
+
+/** The narrative report of a period (POST /reports/narrative). The markdown is plain text. */
+export interface NarrativeReportView {
+  readonly source: AnswerSource;
+  readonly model: string;
+  readonly generatedAt: TimestampView;
+  readonly title: string;
+  readonly summary: string;
+  readonly findings: readonly string[];
+  readonly recommendations: readonly string[];
+  readonly markdown: string;
 }

@@ -1,62 +1,48 @@
+import { useMemo } from 'react';
 import type { JSX } from 'react';
-import { useLocation } from 'react-router';
-import { CircleCheck, Clock, Circle, TriangleAlert } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import { Link, useLocation } from 'react-router';
 
-import type { TankStatusView } from '../../services/api/views';
-import type { OutboxSummary } from '../../core/commands/summarizeOutbox';
-import { ROUTE_PATHS } from '../../core/session/routes';
-import { formatDecimal } from '../../core/format/decimal';
+import { groupByRegion } from '../../core/console/regions';
 import { toBogotaDateKey } from '../../core/format/time';
+import { DISPLAY_LOCALE, DISPLAY_TIME_ZONE } from '../../core/policy/clientPolicy';
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
-import { useActiveTank, useTankStatus } from '../../state/hooks/useTankStatus';
 import { useOfflineServices } from '../../state/hooks/offlineContext';
+import { useDecisions } from '../../state/hooks/useAutopilot';
+import { usePermission } from '../../state/hooks/usePermission';
+import { useActiveTank } from '../../state/hooks/useTankStatus';
 import { useSession } from '../../state/hooks/useSession';
 import { useSyncQueue } from '../../state/hooks/useSyncQueue';
-import { Button } from '../../ui/primitives/Button';
-import { LinkButton } from '../../ui/primitives/LinkButton';
-import { LoadingState } from '../../ui/feedback/LoadingState';
+import { AssistantDrawer } from '../aqueduct/AssistantDrawer';
+import { LiveAqueduct, SceneMessage } from '../aqueduct/LiveAqueduct';
+import type { LiveAqueductParts, LiveStatus } from '../aqueduct/LiveAqueduct';
+import { NowCard } from '../aqueduct/NowCard';
+import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from '../aqueduct/permissions';
+import { RegionList } from '../aqueduct/RegionList';
+import { TankSummary } from '../aqueduct/TankSummary';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
-import styles from './OperatorHome.module.css';
+import styles from './Home.module.css';
+import { ShiftList } from './ShiftCards';
+import { PendingNotice, TodayBlock, todayFacts } from './TodayCards';
+import type { TodayFacts } from './TodayCards';
 
-/** Hours shown without decimals: the age of a level is a rough figure for the plumber. */
-const HOURS_DECIMALS = 0;
-const ICON_SIZE = 20;
-const NO_PENDING = 0;
-const ONE_PENDING = 1;
+/** Bogotá has no daylight saving time, so its offset is fixed; noon keeps the day stable. */
+const BOGOTA_NOON = 'T12:00:00-05:00';
 
-type Tone = 'done' | 'missing' | 'attention' | 'neutral';
-
-const TONE_CLASS: Record<Tone, string | undefined> = {
-  done: styles.toneDone,
-  missing: styles.toneMissing,
-  attention: styles.toneAttention,
-  neutral: styles.toneNeutral,
-};
-
-/** One line of the day's checklist: its state (icon, text and color together), and its action. */
-interface ChecklistLine {
-  readonly tone: Tone;
-  readonly icon: LucideIcon;
-  readonly text: string;
-}
-
-/** What the phone knows today. It needs no tank, so it is there even when the tank is not. */
-interface TodayFacts {
-  readonly today: string;
-  /** A reading of today is on the phone (waiting, being sent, or sent in this session). */
-  readonly queuedToday: boolean;
-  readonly pendingLine: ChecklistLine;
-  readonly pendingCount: number;
-}
+const DAY_WORDS_FORMAT = {
+  timeZone: DISPLAY_TIME_ZONE,
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+} as const;
+const dayWordsFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, DAY_WORDS_FORMAT);
 
 /**
- * Screen S07, the plumber's home. One main action at the top (the next thing the day needs), the
- * day as a short checklist, and the level of the tank at a glance. Every state has an icon and a
- * text, never the color alone. The phone's queue and the actions show even when the tank does not
- * load: the plumber must see what is pending.
+ * Screen S07, the plumber's home, read top to bottom in the order of the work: the day's action
+ * (a reading or the closure), what there is to decide now, the aqueduct (the 3D scene beside the
+ * tank with its forecast and the regions with their valves), and today's shifts. One column of
+ * sections with room between them; the assistant waits in a side panel behind one button.
  */
 export function OperatorHomePage(): JSX.Element {
   const location = useLocation();
@@ -64,29 +50,112 @@ export function OperatorHomePage(): JSX.Element {
   const active = useActiveTank();
   const offline = useOfflineServices();
   const summary = useSyncQueue();
+  const canAsk = usePermission(PERMISSION_ASSISTANT);
+  const canControl = usePermission(PERMISSION_VALVE_COMMAND);
   const name = session.status === 'authenticated' ? session.user.displayName : '';
   const facts = todayFacts(summary, toBogotaDateKey(new Date(offline.clock.nowMs()).toISOString()));
-
-  let tank: JSX.Element;
-  if (active.status === 'loading') {
-    tank = <LoadingState message={t('tankStatus.loading')} />;
-  } else if (active.status === 'error') {
-    tank = <p role="alert">{t('home.statusError')}</p>;
-  } else if (active.status === 'empty') {
-    tank = <p>{t('tankStatus.noTank')}</p>;
-  } else {
-    tank = <TankToday tankId={active.tank.id} facts={facts} />;
-  }
+  const tank = active.status === 'ready' ? active.tank : null;
 
   return (
-    <div className={cn(styles.stack)}>
-      <ScreenTitle>{t('screens.operatorHome')}</ScreenTitle>
-      <p>{t('home.greeting', { name })}</p>
-      {readDamageSent(location.state) ? <p role="status">{t('home.damageSent')}</p> : null}
-      {active.status === 'ready' ? null : <TodayChecklist facts={facts} readingLine={null} />}
-      {tank}
+    <div className={cn(styles.page)}>
+      <ScreenTitle>{t('home.todayHeading', { date: dayInWords(facts.today) })}</ScreenTitle>
+      <div className={cn(styles.intro)}>
+        <p className={cn(styles.greeting)}>{t('home.greeting', { name })}</p>
+        {readDamageSent(location.state) ? <p role="status">{t('home.damageSent')}</p> : null}
+        <div className={cn(styles.actions)}>
+          <TodayBlock tank={tank} facts={facts} part="quick" />
+          <AssistantDrawer />
+        </div>
+        <PendingNotice facts={facts} />
+      </div>
+      <LiveAqueduct tankLabel={false}>
+        {(parts, live) => (
+          <Body parts={parts} live={live} facts={facts} canAsk={canAsk} canControl={canControl} />
+        )}
+      </LiveAqueduct>
     </div>
   );
+}
+
+const noop = (): void => undefined;
+
+interface BodyProps {
+  readonly parts: LiveAqueductParts | null;
+  readonly live: LiveStatus;
+  readonly facts: TodayFacts;
+  readonly canAsk: boolean;
+  readonly canControl: boolean;
+}
+
+function Body({ parts, live, facts, canAsk, canControl }: BodyProps): JSX.Element {
+  const pending = useDecisions('PENDING', canAsk);
+  const aqueduct = parts?.aqueduct ?? null;
+  const regions = useMemo(
+    () => (aqueduct === null ? [] : groupByRegion(aqueduct.network, aqueduct.valves)),
+    [aqueduct],
+  );
+  const highlight = parts?.highlight ?? noop;
+
+  return (
+    <>
+      <NowCard valves={aqueduct?.valves ?? []} regions={regions} onFocusValve={highlight} />
+
+      <section className={cn(styles.section)} aria-labelledby="home-aqueduct-title">
+        <h2 id="home-aqueduct-title" className={cn(styles.sectionTitle)}>
+          {t('home.aqueductTitle')}
+        </h2>
+        <div className={cn(styles.aqueductGrid)}>
+          <section className={cn(styles.stage)} aria-label={t('console.sceneLabel')}>
+            {parts === null ? (
+              <div className={cn(styles.stageMessage)}>
+                <SceneMessage live={live} />
+              </div>
+            ) : (
+              parts.scene
+            )}
+          </section>
+          <div className={cn(styles.side)}>
+            {aqueduct === null ? null : <TankSummary aqueduct={aqueduct} />}
+            {parts === null ? null : (
+              <div className={cn(styles.regions)}>
+                <h3 className={cn(styles.subTitle)}>{t('console.regionsLabel')}</h3>
+                <RegionList
+                  regions={regions}
+                  suggestion={pending.data?.[0] ?? null}
+                  canControl={canControl}
+                  onOpenValve={parts.openValve}
+                  onFocusValve={highlight}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className={cn(styles.section)} aria-labelledby="home-shifts-title">
+        <div className={cn(styles.sectionHead)}>
+          <h2 id="home-shifts-title" className={cn(styles.sectionTitle)}>
+            {t('home.shiftsTitle')}
+          </h2>
+          <Link
+            to={ROUTE_PATHS.operator.dayClosure.replace(':date', facts.today)}
+            className={cn(styles.headLink)}
+          >
+            {t('home.dayClosure')}
+          </Link>
+        </div>
+        <ShiftList day={facts.today} />
+      </section>
+    </>
+  );
+}
+
+/** "viernes 6 de noviembre" for a day of America/Bogota given as YYYY-MM-DD. */
+function dayInWords(dayKey: string): string {
+  const parts = dayWordsFormatter.formatToParts(new Date(`${dayKey}${BOGOTA_NOON}`));
+  const part = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((item) => item.type === type)?.value ?? '';
+  return `${part('weekday')} ${part('day')} de ${part('month')}`;
 }
 
 /** The damage report page sends the person back here saying the report was sent (S11). */
@@ -96,184 +165,5 @@ function readDamageSent(state: unknown): boolean {
     state !== null &&
     'damageSent' in state &&
     state.damageSent === true
-  );
-}
-
-/** True when the item or the sent reading was observed on the given Bogotá day. */
-function isObservedOn(observedAt: string | null, dayKey: string): boolean {
-  return observedAt !== null && toBogotaDateKey(observedAt) === dayKey;
-}
-
-function todayFacts(summary: OutboxSummary, today: string): TodayFacts {
-  // Refused readings wait for a correction: they are not a reading of today that is on its way.
-  const queuedToday =
-    summary.items.some(
-      (item) => item.status !== 'CORRECTION_PENDING' && isObservedOn(item.observedAt, today),
-    ) ||
-    summary.closed.some((item) => item.outcome === 'SENT' && isObservedOn(item.observedAt, today));
-  const pendingCount = summary.pendingCount + summary.needsReviewCount;
-  let pendingLine: ChecklistLine;
-  if (summary.needsReviewCount > NO_PENDING) {
-    pendingLine = { tone: 'attention', icon: TriangleAlert, text: t('home.todayReviewNeeded') };
-  } else if (pendingCount === NO_PENDING) {
-    pendingLine = { tone: 'done', icon: CircleCheck, text: t('home.todayPendingNone') };
-  } else {
-    pendingLine = {
-      tone: 'missing',
-      icon: Clock,
-      text:
-        pendingCount === ONE_PENDING
-          ? t('home.todayPendingOne')
-          : t('home.todayPending', { count: String(pendingCount) }),
-    };
-  }
-  return { today, queuedToday, pendingLine, pendingCount };
-}
-
-/**
- * The home with the tank: its level decides whether today has a reading. While the level loads
- * the checklist still shows, with the reading line as "loading", so no action is hidden.
- */
-function TankToday({
-  tankId,
-  facts,
-}: {
-  readonly tankId: string;
-  readonly facts: TodayFacts;
-}): JSX.Element {
-  const status = useTankStatus(tankId);
-  const levelToday = status.data?.level?.observedAt.dayKey === facts.today;
-  const readingDone = facts.queuedToday || levelToday;
-
-  let readingLine: ChecklistLine;
-  if (readingDone) {
-    readingLine = { tone: 'done', icon: CircleCheck, text: t('home.todayReadingDone') };
-  } else if (status.isPending) {
-    readingLine = { tone: 'missing', icon: Clock, text: t('tankStatus.loading') };
-  } else if (status.isError) {
-    readingLine = { tone: 'attention', icon: TriangleAlert, text: t('home.todayReadingUnknown') };
-  } else {
-    readingLine = { tone: 'missing', icon: Circle, text: t('home.todayReadingMissing') };
-  }
-
-  return (
-    <>
-      <TodayChecklist facts={facts} readingLine={readingLine} readingDone={readingDone} />
-      <TankGlance status={status} />
-      <div className={cn(styles.secondary)}>
-        <LinkButton to={ROUTE_PATHS.operator.damage}>{t('home.damage')}</LinkButton>
-      </div>
-    </>
-  );
-}
-
-/**
- * The main action and today's checklist. The main action is the next step of the day: the
- * reading first, then the closure. Without the tank's level, the reading line is left out and
- * the main action is the reading.
- */
-function TodayChecklist({
-  facts,
-  readingLine,
-  readingDone = false,
-}: {
-  readonly facts: TodayFacts;
-  readonly readingLine: ChecklistLine | null;
-  readonly readingDone?: boolean;
-}): JSX.Element {
-  const closeToday = ROUTE_PATHS.operator.dayClosure.replace(':date', facts.today);
-  const main = readingDone ? (
-    <LinkButton variant="primary" to={closeToday}>
-      {t('home.closeDay')}
-    </LinkButton>
-  ) : (
-    <LinkButton variant="primary" to={ROUTE_PATHS.operator.newReading}>
-      {t('home.newReading')}
-    </LinkButton>
-  );
-  return (
-    <>
-      <div className={cn(styles.primaryAction)}>{main}</div>
-      <section className={cn(styles.card)} aria-labelledby="home-today-title">
-        <h2 id="home-today-title">{t('home.todayTitle')}</h2>
-        <ul className={cn(styles.checklist)}>
-          {readingLine === null ? null : (
-            <ChecklistRow line={readingLine}>
-              {readingDone ? (
-                <LinkButton to={ROUTE_PATHS.operator.newReading}>{t('home.newReading')}</LinkButton>
-              ) : null}
-            </ChecklistRow>
-          )}
-          <ChecklistRow line={facts.pendingLine}>
-            {facts.pendingCount === NO_PENDING ? null : (
-              <LinkButton to={ROUTE_PATHS.operator.pending}>{t('home.seePending')}</LinkButton>
-            )}
-          </ChecklistRow>
-          <ChecklistRow line={{ tone: 'neutral', icon: Circle, text: t('home.todayClosureHint') }}>
-            <LinkButton to={closeToday}>{t('home.dayClosure')}</LinkButton>
-          </ChecklistRow>
-        </ul>
-      </section>
-    </>
-  );
-}
-
-interface ChecklistRowProps {
-  readonly line: ChecklistLine;
-  readonly children?: JSX.Element | null;
-}
-
-/** One line of today's checklist: icon, text and, when there is one, the action of that line. */
-function ChecklistRow({ line, children }: ChecklistRowProps): JSX.Element {
-  const Icon = line.icon;
-  return (
-    <li className={cn(styles.row, TONE_CLASS[line.tone])}>
-      <span className={cn(styles.rowText)}>
-        <Icon aria-hidden="true" size={ICON_SIZE} />
-        <span>{line.text}</span>
-      </span>
-      {children ?? null}
-    </li>
-  );
-}
-
-/**
- * The last level of the tank, big, with its age and a link to the full status. It gets the query
- * from the panel: a second observer would refetch an errored query on mount and loop.
- */
-function TankGlance({ status }: { readonly status: UseQueryResult<TankStatusView> }): JSX.Element {
-  return (
-    <section className={cn(styles.card)} aria-labelledby="home-tank-title">
-      <h2 id="home-tank-title">{t('home.tankTitle')}</h2>
-      {status.isPending ? <LoadingState message={t('tankStatus.loading')} /> : null}
-      {status.isError ? (
-        <div>
-          <p role="alert">{t('home.statusError')}</p>
-          <Button onClick={() => void status.refetch()}>{t('common.retry')}</Button>
-        </div>
-      ) : null}
-      {status.data === undefined ? null : status.data.level === null ? (
-        <p>{t('tankStatus.noLevel')}</p>
-      ) : (
-        <>
-          <p className={cn(styles.level)}>
-            {t('home.levelValue', { value: formatDecimal(status.data.level.value.value) })}
-          </p>
-          <p>
-            {t('home.levelAge', {
-              hours: formatDecimal(status.data.level.hoursAgo, HOURS_DECIMALS),
-            })}
-          </p>
-        </>
-      )}
-      {status.data?.stale.isStale ? (
-        <p className={cn(styles.stale)}>
-          {t('home.stale', {
-            hours: formatDecimal(status.data.stale.staleAfterHours, HOURS_DECIMALS),
-          })}
-        </p>
-      ) : null}
-      <LinkButton to={ROUTE_PATHS.tank}>{t('home.tankDetail')}</LinkButton>
-    </section>
   );
 }

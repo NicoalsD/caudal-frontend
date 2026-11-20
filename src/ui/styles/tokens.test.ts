@@ -72,6 +72,31 @@ const PAIRS: readonly (readonly [string, string, number])[] = [
   ['--color-on-brand', '--color-brand-900', MIN_TEXT_RATIO],
   ['--color-water-700', '--color-raised', MIN_TEXT_RATIO],
   ['--color-text-primary', '--color-water-100', MIN_TEXT_RATIO],
+  ...['mint', 'aqua', 'sand', 'cream', 'coral', 'lavender', 'hero'].flatMap(
+    (tint): readonly (readonly [string, string, number])[] => [
+      ['--color-text-primary', `--color-tint-${tint}`, MIN_TEXT_RATIO],
+      ['--color-text-secondary', `--color-tint-${tint}`, MIN_TEXT_RATIO],
+      ['--color-paramo-800', `--color-tint-${tint}`, MIN_TEXT_RATIO],
+      ['--color-ochre-800', `--color-tint-${tint}`, MIN_TEXT_RATIO],
+      ['--color-clay-700', `--color-tint-${tint}`, MIN_TEXT_RATIO],
+      ['--color-water-700', `--color-tint-${tint}`, MIN_TEXT_RATIO],
+    ],
+  ),
+  ['--color-text-primary', '--color-surface', MIN_TEXT_RATIO],
+  ['--color-text-secondary', '--color-surface', MIN_TEXT_RATIO],
+  ['--color-text-secondary', '--color-surface-raised', MIN_TEXT_RATIO],
+  ['--color-water-700', '--color-surface', MIN_TEXT_RATIO],
+  ['--color-water-700', '--color-surface-raised', MIN_TEXT_RATIO],
+  ['--color-text-primary', '--color-surface-sunken', MIN_TEXT_RATIO],
+  ['--color-inverse-fg', '--color-inverse-bg', MIN_TEXT_RATIO],
+  ['--color-on-brand', '--color-promo-bg', MIN_TEXT_RATIO],
+  ['--color-on-brand', '--color-frame', MIN_TEXT_RATIO],
+  ['--color-rail-fg', '--color-frame', MIN_TEXT_RATIO],
+  ['--color-on-brand', '--color-rail-active', MIN_TEXT_RATIO],
+  ['--color-paramo-800', '--color-surface', MIN_TEXT_RATIO],
+  ['--color-clay-700', '--color-surface', MIN_TEXT_RATIO],
+  ['--color-ochre-800', '--color-surface', MIN_TEXT_RATIO],
+  ['--color-focus', '--color-surface', MIN_CONTROL_RATIO],
 ];
 
 describe.each([

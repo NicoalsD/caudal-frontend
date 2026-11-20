@@ -16,6 +16,7 @@ import { useFormSchema } from '../../state/hooks/useFormSchema';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import { CircleCheck } from 'lucide-react';
@@ -58,17 +59,19 @@ export function DamageReportPage(): JSX.Element {
   };
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       <ScreenTitle>{t('publicReport.title')}</ScreenTitle>
-      <DamageReportForm
-        schema={schema.schema}
-        categories={categories.data}
-        descriptionMin={constraints.data?.[INCIDENT_DESCRIPTION_CONSTRAINT]?.min}
-        descriptionMax={descriptionMax}
-        locationMax={constraints.data?.[INCIDENT_LOCATION_CONSTRAINT]?.max}
-        onSubmit={send}
-      />
-    </>
+      <Card>
+        <DamageReportForm
+          schema={schema.schema}
+          categories={categories.data}
+          descriptionMin={constraints.data?.[INCIDENT_DESCRIPTION_CONSTRAINT]?.min}
+          descriptionMax={descriptionMax}
+          locationMax={constraints.data?.[INCIDENT_LOCATION_CONSTRAINT]?.max}
+          onSubmit={send}
+        />
+      </Card>
+    </div>
   );
 }
 
@@ -84,26 +87,28 @@ function DamageReceipt({ receipt }: { readonly receipt: DamageReportReceiptView 
   };
 
   return (
-    <section>
+    <section className={cn(styles.page)}>
       <ScreenTitle>{t('publicReport.receiptTitle')}</ScreenTitle>
-      <p className={cn(styles.codeLabel)}>{t('publicReport.codeLabel')}</p>
-      <p className={cn(styles.code)}>{receipt.trackingCode}</p>
-      <p>{t('publicReport.saveCode')}</p>
-      <div className={cn(styles.stepActions)}>
-        <Button variant="primary" onClick={() => void copyCode()}>
-          {t('publicReport.copyCode')}
-        </Button>
-        <p role="status" className={cn(styles.status)}>
-          {copyState === 'copied' ? (
-            <>
-              <CircleCheck aria-hidden="true" className={cn(styles.statusIcon)} />
-              <span>{t('publicReport.codeCopied')}</span>
-            </>
-          ) : copyState === 'failed' ? (
-            <span>{t('publicReport.codeCopyFailed')}</span>
-          ) : null}
-        </p>
-      </div>
+      <Card variant="tinted" tint="mint" className={cn(styles.receipt)}>
+        <p className={cn(styles.codeLabel)}>{t('publicReport.codeLabel')}</p>
+        <p className={cn(styles.code)}>{receipt.trackingCode}</p>
+        <p>{t('publicReport.saveCode')}</p>
+        <div className={cn(styles.stepActions)}>
+          <Button variant="primary" onClick={() => void copyCode()}>
+            {t('publicReport.copyCode')}
+          </Button>
+          <p role="status" className={cn(styles.status)}>
+            {copyState === 'copied' ? (
+              <>
+                <CircleCheck aria-hidden="true" className={cn(styles.statusIcon)} />
+                <span>{t('publicReport.codeCopied')}</span>
+              </>
+            ) : copyState === 'failed' ? (
+              <span>{t('publicReport.codeCopyFailed')}</span>
+            ) : null}
+          </p>
+        </div>
+      </Card>
       <h2>{t('publicReport.nextTitle')}</h2>
       <ul className={cn(styles.nextList)}>
         <li>{t('publicReport.nextCheck')}</li>

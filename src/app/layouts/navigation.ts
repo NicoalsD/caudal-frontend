@@ -1,4 +1,27 @@
-import { AlertTriangle, ClipboardList, Droplets, House, PencilLine } from 'lucide-react';
+import {
+  AlertTriangle,
+  BarChart3,
+  BookOpenText,
+  Building2,
+  CalendarCheck,
+  ClipboardList,
+  CloudUpload,
+  Cpu,
+  Droplets,
+  FileText,
+  Bot,
+  GitFork,
+  Network,
+  HeartPulse,
+  House,
+  LayoutDashboard,
+  Megaphone,
+  PencilLine,
+  ScrollText,
+  ShieldCheck,
+  SlidersHorizontal,
+  Users,
+} from 'lucide-react';
 
 import { t } from '../../i18n/t';
 import type { NavItem } from './RoleLayout';
@@ -13,34 +36,101 @@ export const OPERATOR_NAV: readonly NavItem[] = [
   { to: ROUTE_PATHS.tank, label: t('nav.tank'), icon: Droplets },
 ];
 
+const BOARD_DAY_GROUP = t('nav.groups.day');
+const BOARD_SETUP_GROUP = t('nav.groups.setup');
+const BOARD_ADMIN_GROUP = t('nav.groups.admin');
+
 export const BOARD_NAV: readonly NavItem[] = [
-  { to: ROUTE_PATHS.board.tank, label: t('nav.tank') },
-  { to: ROUTE_PATHS.board.proposals, label: t('nav.proposals') },
-  { to: ROUTE_PATHS.board.publication, label: t('nav.publication') },
-  { to: ROUTE_PATHS.board.rules, label: t('nav.rules') },
-  { to: ROUTE_PATHS.board.network, label: t('nav.network') },
-  { to: ROUTE_PATHS.board.minutes, label: t('nav.minutes') },
-  { to: ROUTE_PATHS.board.incidents, label: t('nav.incidents') },
+  { to: ROUTE_PATHS.board.tank, label: t('nav.boardHome'), icon: LayoutDashboard },
+  {
+    to: ROUTE_PATHS.board.proposals,
+    label: t('nav.proposals'),
+    icon: CalendarCheck,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.publication,
+    label: t('nav.publication'),
+    icon: Megaphone,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.incidents,
+    label: t('nav.incidents'),
+    icon: AlertTriangle,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.minutes,
+    label: t('nav.minutes'),
+    icon: BookOpenText,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.autopilot,
+    label: t('nav.autopilot'),
+    icon: Bot,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.reports,
+    label: t('nav.reports'),
+    icon: FileText,
+    group: BOARD_DAY_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.rules,
+    label: t('nav.rules'),
+    icon: SlidersHorizontal,
+    group: BOARD_SETUP_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.board.network,
+    label: t('nav.network'),
+    icon: GitFork,
+    group: BOARD_SETUP_GROUP,
+  },
 ];
 
 /** Extra items only for BOARD_ADMIN: accounts, entities, devices, the audit log and the AI evaluation. */
 export const BOARD_ADMIN_NAV: readonly NavItem[] = [
-  { to: ROUTE_PATHS.board.users, label: t('nav.users') },
-  { to: ROUTE_PATHS.board.entities, label: t('nav.entities') },
-  { to: ROUTE_PATHS.team.devices, label: t('nav.devices') },
-  { to: ROUTE_PATHS.team.audit, label: t('nav.audit') },
-  { to: ROUTE_PATHS.team.evaluation, label: t('nav.evaluation') },
+  {
+    to: ROUTE_PATHS.board.regions,
+    label: t('nav.regions'),
+    icon: Network,
+    group: BOARD_ADMIN_GROUP,
+  },
+  { to: ROUTE_PATHS.board.users, label: t('nav.users'), icon: Users, group: BOARD_ADMIN_GROUP },
+  {
+    to: ROUTE_PATHS.board.entities,
+    label: t('nav.entities'),
+    icon: Building2,
+    group: BOARD_ADMIN_GROUP,
+  },
+  { to: ROUTE_PATHS.team.devices, label: t('nav.devices'), icon: Cpu, group: BOARD_ADMIN_GROUP },
+  {
+    to: ROUTE_PATHS.team.audit,
+    label: t('nav.audit'),
+    icon: ShieldCheck,
+    group: BOARD_ADMIN_GROUP,
+  },
+  {
+    to: ROUTE_PATHS.team.evaluation,
+    label: t('nav.evaluation'),
+    icon: BarChart3,
+    group: BOARD_ADMIN_GROUP,
+  },
 ];
 
 export const TEAM_NAV: readonly NavItem[] = [
-  { to: ROUTE_PATHS.team.evaluation, label: t('nav.evaluation') },
-  { to: ROUTE_PATHS.team.health, label: t('nav.health') },
-  { to: ROUTE_PATHS.team.devices, label: t('nav.devices') },
-  { to: ROUTE_PATHS.team.audit, label: t('nav.audit') },
-  { to: ROUTE_PATHS.team.imports, label: t('nav.imports') },
-  { to: ROUTE_PATHS.tank, label: t('nav.tank') },
+  { to: ROUTE_PATHS.team.evaluation, label: t('nav.evaluation'), icon: BarChart3 },
+  { to: ROUTE_PATHS.team.health, label: t('nav.health'), icon: HeartPulse },
+  { to: ROUTE_PATHS.team.devices, label: t('nav.devices'), icon: Cpu },
+  { to: ROUTE_PATHS.team.audit, label: t('nav.audit'), icon: ScrollText },
+  { to: ROUTE_PATHS.team.imports, label: t('nav.imports'), icon: CloudUpload },
+  { to: ROUTE_PATHS.tank, label: t('nav.tank'), icon: Droplets },
 ];
 
 export const ENTITY_NAV: readonly NavItem[] = [
-  { to: ROUTE_PATHS.entity.summaries, label: t('nav.summaries') },
+  { to: ROUTE_PATHS.entity.summaries, label: t('nav.summaries'), icon: FileText },
 ];

@@ -1,3 +1,4 @@
+import { Cpu, ShieldAlert, ShieldCheck, TriangleAlert, User, Workflow } from 'lucide-react';
 import { useState } from 'react';
 import type { JSX } from 'react';
 
@@ -6,7 +7,15 @@ import type { AuditLogEntryView, SecurityEventView } from '../../services/api/vi
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { StatTile } from '../../ui/cards/StatTile';
+import { DataTable } from '../../ui/data/DataTable';
+import type { DataColumn } from '../../ui/data/DataTable';
+import { PageHeader } from '../../ui/layout/PageHeader';
+import { Badge } from '../../ui/primitives/Badge';
+import type { BadgeTone } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
+import { Chip } from '../../ui/primitives/Chip';
+import { TextTabs, tabPanelProps } from '../../ui/primitives/TextTabs';
 import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import styles from './AuditPage.module.css';
@@ -14,6 +23,7 @@ import { useAuditLog, useSecurityEvents } from './auditQueries';
 import {
   KNOWN_ACTION_CODES,
   actionLabel,
+  entityTypeLabel,
   actorTypeLabel,
   securityTypeLabel,
   severityLabel,
@@ -63,35 +73,34 @@ export function AuditPage(): JSX.Element {
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       <ScreenTitle>{t('screens.audit')}</ScreenTitle>
-      <div className={cn(styles.tabs)} role="group" aria-label={t('screens.audit')}>
-        <Button
-          aria-pressed={tab === 'audit'}
-          variant={tab === 'audit' ? 'primary' : 'secondary'}
-          onClick={() => {
-            setTab('audit');
-          }}
-        >
-          {t('audit.tabAudit')}
-        </Button>
-        <Button
-          aria-pressed={tab === 'security'}
-          variant={tab === 'security' ? 'primary' : 'secondary'}
-          onClick={() => {
-            setTab('security');
-          }}
-        >
-          {t('audit.tabSecurity')}
-        </Button>
-      </div>
+      <PageHeader
+        lead={t('audit.lead')}
+        filters={
+          <TextTabs
+            label={t('screens.audit')}
+            idPrefix="audit"
+            value={tab}
+            onChange={(id) => {
+              setTab(id === 'security' ? 'security' : 'audit');
+            }}
+            tabs={[
+              { id: 'audit', label: t('audit.tabAudit') },
+              { id: 'security', label: t('audit.tabSecurity') },
+            ]}
+          />
+        }
+      />
       <FiltersForm tab={tab} filters={filters} onChange={setFilters} />
-      {tab === 'audit' ? (
-        <AuditLogList filters={filters} />
-      ) : (
-        <SecurityEventsList filters={filters} />
-      )}
-    </>
+      <div {...tabPanelProps('audit', tab)} className={cn(styles.panel)}>
+        {tab === 'audit' ? (
+          <AuditLogList filters={filters} />
+        ) : (
+          <SecurityEventsList filters={filters} />
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -186,17 +195,74 @@ function AuditLogList({ filters }: { readonly filters: Filters }): JSX.Element {
     );
   }
   const items = audit.data.pages.flatMap((page) => page.items);
+  const byActor = (type: string): number =>
+    items.filter((entry) => entry.actorType === type).length;
+  const columns: readonly DataColumn<AuditLogEntryView>[] = [
+    {
+      id: 'action',
+      header: t('audit.columns.action'),
+      cell: (entry) => <strong>{actionLabel(entry.action)}</strong>,
+    },
+    {
+      id: 'when',
+      header: t('audit.columns.when'),
+      cell: (entry) => entry.occurredAt.text,
+    },
+    {
+      id: 'actor',
+      header: t('audit.columns.actor'),
+      cell: (entry) => <Chip tone="aqua">{actorTypeLabel(entry.actorType)}</Chip>,
+    },
+    {
+      id: 'object',
+      header: t('audit.columns.object'),
+      hideOnNarrow: true,
+      cell: (entry) => <span className={cn(styles.meta)}>{entityTypeLabel(entry.entityType)}</span>,
+    },
+  ];
   return (
     <>
-      {items.length === 0 ? (
-        <p>{t('audit.empty')}</p>
-      ) : (
-        <ul className={cn(styles.list)}>
-          {items.map((entry) => (
-            <AuditItem key={entry.id} entry={entry} />
-          ))}
-        </ul>
-      )}
+      <ul className={cn(styles.tiles)} aria-label={t('audit.tilesLabel')}>
+        <li>
+          <StatTile
+            icon={ShieldCheck}
+            tint="aqua"
+            label={t('audit.tiles.loaded')}
+            value={items.length}
+          />
+        </li>
+        <li>
+          <StatTile
+            icon={User}
+            tint="mint"
+            label={t('audit.tiles.users')}
+            value={byActor('USER')}
+          />
+        </li>
+        <li>
+          <StatTile
+            icon={Cpu}
+            tint="sand"
+            label={t('audit.tiles.devices')}
+            value={byActor('DEVICE')}
+          />
+        </li>
+        <li>
+          <StatTile
+            icon={Workflow}
+            tint="lavender"
+            label={t('audit.tiles.system')}
+            value={byActor('SYSTEM')}
+          />
+        </li>
+      </ul>
+      <DataTable
+        caption={t('audit.tabAudit')}
+        columns={columns}
+        rows={items}
+        getRowKey={(entry) => String(entry.id)}
+        empty={{ title: t('audit.empty') }}
+      />
       {audit.hasNextPage ? (
         <Button
           disabled={audit.isFetchingNextPage}
@@ -208,19 +274,6 @@ function AuditLogList({ filters }: { readonly filters: Filters }): JSX.Element {
         </Button>
       ) : null}
     </>
-  );
-}
-
-function AuditItem({ entry }: { readonly entry: AuditLogEntryView }): JSX.Element {
-  return (
-    <li className={cn(styles.item)}>
-      <h3 className={cn(styles.title)}>{actionLabel(entry.action)}</h3>
-      <p className={cn(styles.meta)}>{entry.occurredAt.text}</p>
-      <p className={cn(styles.meta)}>
-        {t('audit.actor', { actor: actorTypeLabel(entry.actorType) })}
-      </p>
-      <p className={cn(styles.meta)}>{t('audit.object', { object: entry.entityType })}</p>
-    </li>
   );
 }
 
@@ -247,17 +300,58 @@ function SecurityEventsList({ filters }: { readonly filters: Filters }): JSX.Ele
     );
   }
   const items = events.data.pages.flatMap((page) => page.items);
+  const bySeverity = (...levels: string[]): number =>
+    items.filter((event) => levels.includes(event.severity.toLowerCase())).length;
+  const columns: readonly DataColumn<SecurityEventView>[] = [
+    {
+      id: 'type',
+      header: t('audit.columns.event'),
+      cell: (event) => <strong>{securityTypeLabel(event.type)}</strong>,
+    },
+    { id: 'when', header: t('audit.columns.when'), cell: (event) => event.createdAt.text },
+    {
+      id: 'severity',
+      header: t('audit.columns.severity'),
+      cell: (event) => (
+        <Badge tone={severityTone(event.severity)}>{severityLabel(event.severity)}</Badge>
+      ),
+    },
+  ];
   return (
     <>
-      {items.length === 0 ? (
-        <p>{t('audit.empty')}</p>
-      ) : (
-        <ul className={cn(styles.list)}>
-          {items.map((event) => (
-            <SecurityItem key={event.id} event={event} />
-          ))}
-        </ul>
-      )}
+      <ul className={cn(styles.tiles)} aria-label={t('audit.tilesLabel')}>
+        <li>
+          <StatTile
+            icon={ShieldAlert}
+            tint="aqua"
+            label={t('audit.tiles.loadedEvents')}
+            value={items.length}
+          />
+        </li>
+        <li>
+          <StatTile
+            icon={TriangleAlert}
+            tint="coral"
+            label={t('audit.tiles.severe')}
+            value={bySeverity('high', 'critical')}
+          />
+        </li>
+        <li>
+          <StatTile
+            icon={ShieldCheck}
+            tint="mint"
+            label={t('audit.tiles.minor')}
+            value={bySeverity('low', 'medium')}
+          />
+        </li>
+      </ul>
+      <DataTable
+        caption={t('audit.tabSecurity')}
+        columns={columns}
+        rows={items}
+        getRowKey={(event) => String(event.id)}
+        empty={{ title: t('audit.empty') }}
+      />
       {events.hasNextPage ? (
         <Button
           disabled={events.isFetchingNextPage}
@@ -272,14 +366,14 @@ function SecurityEventsList({ filters }: { readonly filters: Filters }): JSX.Ele
   );
 }
 
-function SecurityItem({ event }: { readonly event: SecurityEventView }): JSX.Element {
-  return (
-    <li className={cn(styles.item)}>
-      <h3 className={cn(styles.title)}>{securityTypeLabel(event.type)}</h3>
-      <p className={cn(styles.meta)}>{event.createdAt.text}</p>
-      <p className={cn(styles.meta)}>
-        {t('audit.severity', { severity: severityLabel(event.severity) })}
-      </p>
-    </li>
-  );
+function severityTone(severity: string): BadgeTone {
+  switch (severity.toLowerCase()) {
+    case 'critical':
+    case 'high':
+      return 'error';
+    case 'medium':
+      return 'warning';
+    default:
+      return 'info';
+  }
 }

@@ -22,7 +22,7 @@ async function typeCredentials(user: User, username: string, password: string) {
 /** Generous wait for a redirect while the whole suite runs in parallel. */
 const SLOW_REDIRECT_TIMEOUT_MS = 10_000;
 
-const heading = (name: string) => screen.findByRole('heading', { level: 1, name });
+const heading = (name: string | RegExp) => screen.findByRole('heading', { level: 1, name });
 
 describe('login journey', () => {
   it('a visitor asks for a private screen, signs in and lands on it', async () => {
@@ -34,6 +34,27 @@ describe('login journey', () => {
 
     expect(await heading(t('screens.pendingReadings'))).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(ROUTE_PATHS.operator.pending);
+  });
+
+  it('the next person of a shared device lands on their own home, not on the 403 page', async () => {
+    server.use(...createSessionBackend(TEST_USERS.operator).handlers);
+    const { services, router } = renderApp(ROUTE_PATHS.operator.home);
+    await services.session.restore();
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole('button', { name: /^Menú de / }));
+    await user.click(await screen.findByRole('button', { name: t('auth.signOut') }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(ROUTE_PATHS.login);
+    });
+    await typeCredentials(user, TEST_USERS.member.username, TEST_PASSWORD);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(ROUTE_PATHS.board.tank);
+    });
+    expect(
+      screen.queryByRole('heading', { name: t('errors.forbiddenTitle') }),
+    ).not.toBeInTheDocument();
   });
 
   it('each role lands on its own home after the sign in', async () => {
@@ -88,7 +109,7 @@ describe('expiry while using the app', () => {
     server.use(...backend.handlers);
     const { services, router } = renderApp(ROUTE_PATHS.operator.home);
     await services.session.restore();
-    await heading(t('screens.operatorHome'));
+    await heading(new RegExp(`^${t('home.todayHeading', { date: '' })}`));
     backend.expireAccessTokens();
 
     const currentUser = await services.api.auth.currentUser();
@@ -127,7 +148,7 @@ describe('expiry while using the app', () => {
     server.use(...backend.handlers);
     const { services, router } = renderApp(ROUTE_PATHS.operator.home);
     await services.session.restore();
-    await heading(t('screens.operatorHome'));
+    await heading(new RegExp(`^${t('home.todayHeading', { date: '' })}`));
     backend.expireAccessTokens();
     server.use(
       http.post(apiUrl('/auth/refresh'), () =>
@@ -200,7 +221,7 @@ describe('mandatory password change journey', () => {
     server.use(...backend.handlers);
     const { services, router } = renderApp(ROUTE_PATHS.operator.home);
     await services.session.restore();
-    await heading(t('screens.operatorHome'));
+    await heading(new RegExp(`^${t('home.todayHeading', { date: '' })}`));
     server.use(
       http.get(apiUrl('/meta/constraints'), () =>
         Response.json(
@@ -229,7 +250,7 @@ describe('secrets never reach the browser storage', () => {
     const user = userEvent.setup();
 
     await typeCredentials(user, TEST_USERS.operator.username, TEST_PASSWORD);
-    await heading(t('screens.operatorHome'));
+    await heading(new RegExp(`^${t('home.todayHeading', { date: '' })}`));
     backend.expireAccessTokens();
     await services.api.auth.currentUser();
 

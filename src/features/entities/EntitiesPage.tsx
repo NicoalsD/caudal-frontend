@@ -1,3 +1,4 @@
+import { Building2 } from 'lucide-react';
 import { useState } from 'react';
 import type { JSX } from 'react';
 
@@ -7,6 +8,10 @@ import type { SummaryView } from '../../services/api/views';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import { EmptyPanel } from '../../ui/layout/EmptyPanel';
+import { PageHeader } from '../../ui/layout/PageHeader';
+import { Badge } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import styles from './Entities.module.css';
@@ -46,21 +51,24 @@ export function EntitiesPage(): JSX.Element {
   const items = summaries.data.pages.flatMap((page) => page.items);
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       <ScreenTitle>{t('screens.entities')}</ScreenTitle>
-      <div className={cn(styles.toolbar)}>
-        <CreateShareDialog
-          open={creating}
-          onOpenChange={setCreating}
-          trigger={<Button variant="primary">{t('entities.create')}</Button>}
-          onCreated={() => {
-            setNotice(t('entities.created'));
-          }}
-        />
-      </div>
+      <PageHeader
+        lead={t('entities.lead')}
+        actions={
+          <CreateShareDialog
+            open={creating}
+            onOpenChange={setCreating}
+            trigger={<Button variant="primary">{t('entities.create')}</Button>}
+            onCreated={() => {
+              setNotice(t('entities.created'));
+            }}
+          />
+        }
+      />
       {notice === null ? null : <p role="status">{notice}</p>}
       {items.length === 0 ? (
-        <p>{t('entities.empty')}</p>
+        <EmptyPanel icon={Building2} title={t('entities.empty')} />
       ) : (
         <ul className={styles.list}>
           {items.map((summary) => (
@@ -84,7 +92,7 @@ export function EntitiesPage(): JSX.Element {
           {t('entities.loadMore')}
         </Button>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -96,24 +104,29 @@ interface ShareItemProps {
 function ShareItem({ summary, onRevoked }: ShareItemProps): JSX.Element {
   const [revoking, setRevoking] = useState(false);
   return (
-    <li className={styles.item}>
-      <h3 className={styles.name}>{summaryScopeText(summary.scope)}</h3>
+    <Card as="li" className={cn(styles.item)}>
+      <div className={cn(styles.head)}>
+        <span className={cn(styles.icon)}>
+          <Building2 aria-hidden="true" />
+        </span>
+        <h3 className={styles.name}>{summaryScopeText(summary.scope)}</h3>
+      </div>
       <p className={styles.meta}>
         {t('entities.period', {
           from: formatDayKey(summary.periodFrom),
           to: formatDayKey(summary.periodTo),
         })}
       </p>
-      <p className={styles.meta}>{t('entities.current')}</p>
+      <Badge tone="ok">{t('entities.current')}</Badge>
       <div className={cn(styles.actions)}>
         <RevokeShareDialog
           shareId={summary.summaryShareId}
           open={revoking}
           onOpenChange={setRevoking}
-          trigger={<Button>{t('entities.revoke')}</Button>}
+          trigger={<Button variant="ghost">{t('entities.revoke')}</Button>}
           onRevoked={onRevoked}
         />
       </div>
-    </li>
+    </Card>
   );
 }

@@ -39,6 +39,9 @@ export const ROUTE_PATHS = {
     incidents: '/junta/incidentes',
     entities: '/junta/entidades',
     users: '/junta/usuarios',
+    autopilot: '/junta/piloto',
+    regions: '/junta/regiones',
+    reports: '/junta/reportes',
   },
   team: {
     base: '/equipo',
@@ -78,3 +81,30 @@ export const ROLES_BY_AREA = {
   entity: ['SUPPORT_ENTITY'],
   tank: ['OPERATOR', 'BOARD_ADMIN', 'BOARD_MEMBER', 'PROJECT_TEAM'],
 } as const satisfies Record<string, readonly Role[]>;
+
+/**
+ * Who may open each private path, the most specific first. Same lists as the guards of the router:
+ * a role change there must change here too.
+ */
+const ROLES_BY_PATH: readonly (readonly [string, readonly Role[]])[] = [
+  [ROUTE_PATHS.board.users, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.entities, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.regions, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.base, ROLES_BY_AREA.board],
+  [ROUTE_PATHS.team.evaluation, ROLES_BY_AREA.evaluation],
+  [ROUTE_PATHS.team.audit, ROLES_BY_AREA.audit],
+  [ROUTE_PATHS.team.devices, ROLES_BY_AREA.devices],
+  [ROUTE_PATHS.team.base, ROLES_BY_AREA.team],
+  [ROUTE_PATHS.operator.base, ROLES_BY_AREA.operator],
+  [ROUTE_PATHS.entity.base, ROLES_BY_AREA.entity],
+  [ROUTE_PATHS.tank, ROLES_BY_AREA.tank],
+];
+
+/** False when the path belongs to an area closed to the role; any other path is not ours to judge. */
+export function canRoleOpenPath(role: Role, path: string): boolean {
+  const pathname = path.split(/[?#]/, 1)[0] ?? path;
+  const area = ROLES_BY_PATH.find(
+    ([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  return area === undefined || area[1].includes(role);
+}

@@ -4,6 +4,7 @@ import { toForecastRows } from './forecastRows';
 
 const LOW_LEVEL = 1.8;
 const HIGH_LEVEL = 2.5;
+const TWO_DAYS = 2;
 
 describe('toForecastRows', () => {
   it('puts the observed level before the forecast days, in day order', () => {
@@ -37,5 +38,31 @@ describe('toForecastRows', () => {
 
   it('has no observed row when there is no level yet', () => {
     expect(toForecastRows(null, [])).toEqual([]);
+  });
+
+  it('keeps the last reading of each history day and merges a forecast on the same day', () => {
+    const rows = toForecastRows(
+      null,
+      [{ dayKey: '2026-10-14', p10: 1.8, p50: 2.1, p90: 2.4 }],
+      [
+        { dayKey: '2026-10-13', observedAt: new Date('2026-10-13T10:00:00Z'), value: 2.6 },
+        { dayKey: '2026-10-13', observedAt: new Date('2026-10-13T22:00:00Z'), value: 2.5 },
+        { dayKey: '2026-10-14', observedAt: new Date('2026-10-14T10:00:00Z'), value: 2.3 },
+      ],
+    );
+
+    expect(rows).toHaveLength(TWO_DAYS);
+    expect(rows[0]).toEqual({ dayKey: '2026-10-13', observed: 2.5 });
+    expect(rows[1]).toMatchObject({ dayKey: '2026-10-14', observed: 2.3, p50: 2.1 });
+  });
+
+  it('lets the status level win over the history of its own day', () => {
+    const rows = toForecastRows(
+      { dayKey: '2026-10-13', value: 2.2 },
+      [],
+      [{ dayKey: '2026-10-13', observedAt: new Date('2026-10-13T22:00:00Z'), value: 2.5 }],
+    );
+
+    expect(rows).toEqual([{ dayKey: '2026-10-13', observed: 2.2 }]);
   });
 });

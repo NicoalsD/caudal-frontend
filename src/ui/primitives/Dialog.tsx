@@ -19,6 +19,8 @@ interface DialogProps {
   readonly onOpenAutoFocus?: (event: Event) => void;
   /** Takes the focus when the dialog opens (Cancel in destructive actions, ux-guidelines 6). */
   readonly initialFocusRef?: RefObject<HTMLElement | null>;
+  /** `wide` uses most of a desktop screen; the default is a narrow sheet for forms. */
+  readonly size?: 'default' | 'wide';
 }
 
 /**
@@ -34,6 +36,7 @@ export function Dialog({
   trigger,
   onOpenAutoFocus,
   initialFocusRef,
+  size = 'default',
 }: DialogProps): JSX.Element {
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -41,7 +44,7 @@ export function Dialog({
       <RadixDialog.Portal>
         <RadixDialog.Overlay className={cn(styles.overlay)} />
         <RadixDialog.Content
-          className={cn(styles.content)}
+          className={cn(styles.content, size === 'wide' && styles.wide)}
           onOpenAutoFocus={(event) => {
             if (onOpenAutoFocus !== undefined) {
               onOpenAutoFocus(event);

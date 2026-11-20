@@ -13,7 +13,7 @@ import { renderApp } from '../../test/renderApp';
 const BOARD = buildSessionUser({ role: 'BOARD_MEMBER' });
 
 function renderStatus() {
-  return renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+  return renderApp(ROUTE_PATHS.tank, { user: BOARD });
 }
 
 describe('ForecastSourceNotice (S12 source of the numbers)', () => {

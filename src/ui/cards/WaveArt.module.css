@@ -1,0 +1,32 @@
+.art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.art path {
+  stroke: var(--color-promo-art);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.l1 {
+  opacity: 0.55;
+}
+
+.l2 {
+  opacity: 0.35;
+  animation: drift 9s ease-in-out infinite alternate;
+}
+
+.l3 {
+  opacity: 0.18;
+}
+
+@keyframes drift {
+  to {
+    transform: translateX(-4%);
+  }
+}

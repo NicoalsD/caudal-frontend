@@ -26,6 +26,13 @@ const dayMonthFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, {
   month: 'short',
 });
 
+const longDayFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, {
+  timeZone: DISPLAY_TIME_ZONE,
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+});
+
 /** Hour at which a calendar day is anchored to format it without a time-zone shift. */
 const DAY_ANCHOR = 'T12:00:00-05:00';
 
@@ -68,4 +75,9 @@ export function toBogotaDateKey(iso: string): string {
 /** "9 oct" for a calendar day given as YYYY-MM-DD (a forecast target date). */
 export function formatDayKey(dayKey: string): string {
   return dayMonthFormatter.format(parseInstant(`${dayKey}${DAY_ANCHOR}`));
+}
+
+/** "viernes 6 de noviembre" for a calendar day given as YYYY-MM-DD, in words. */
+export function formatDayKeyLong(dayKey: string): string {
+  return longDayFormatter.format(parseInstant(`${dayKey}${DAY_ANCHOR}`)).replace(',', '');
 }

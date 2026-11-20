@@ -8,6 +8,7 @@ import type { closureNotesSchema } from '../../core/forms/formSchemas';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
 import { FormAlert } from '../../ui/feedback/FormAlert';
+import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
 import { Dialog } from '../../ui/primitives/Dialog';
 import { FormFields } from '../../ui/primitives/FormFields';
@@ -77,7 +78,13 @@ export function CloseDayPanel({
       : null;
 
   return (
-    <section className={cn(styles.card)} aria-labelledby="close-day-title">
+    <Card
+      variant="tinted"
+      tint="aqua"
+      as="section"
+      className={cn(styles.card)}
+      aria-labelledby="close-day-title"
+    >
       <h2 id="close-day-title" className={cn(styles.cardTitle)}>
         {t('closure.closeSection')}
       </h2>
@@ -105,7 +112,12 @@ export function CloseDayPanel({
               title={t('closure.closeAction')}
               description={t('closure.closeDialogDescription')}
               trigger={
-                <Button type="button" variant="primary" disabled={!online || close.isPending}>
+                <Button
+                  type="button"
+                  variant="primary"
+                  className={cn(styles.submit)}
+                  disabled={!online || close.isPending}
+                >
                   {close.isPending ? t('closure.closing') : t('closure.closeAction')}
                 </Button>
               }
@@ -133,6 +145,6 @@ export function CloseDayPanel({
           {online ? null : <p role="status">{t('closure.offline')}</p>}
         </FormFields>
       </form>
-    </section>
+    </Card>
   );
 }

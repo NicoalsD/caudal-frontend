@@ -22,6 +22,7 @@ const HASH_LENGTH = 64;
 const HASH_HEX = 'a'.repeat(HASH_LENGTH);
 const CHAIN_HEX = 'b'.repeat(HASH_LENGTH);
 const FIRST_PAGE_SIZE = 2;
+const TABLE_HEADER_ROWS = 1;
 const SECOND_PAGE_SIZE = 4;
 const LAST_QUERY = -1;
 const SUPPORT_ENTITY_ID = 'user-entity';
@@ -79,7 +80,7 @@ describe('user administration (F089)', () => {
     const user = userEvent.setup();
     renderApp(ROUTE_PATHS.board.users, { user: admin() });
 
-    const row = (await screen.findByText('Entidad Prueba')).closest('li');
+    const row = (await screen.findByText('Entidad Prueba')).closest('tr');
     if (row === null) {
       throw new Error('The account row is missing');
     }
@@ -242,20 +243,20 @@ describe('audit log (F093)', () => {
     const user = userEvent.setup();
     renderApp(ROUTE_PATHS.team.audit, { user: team() });
 
-    await screen.findByRole('heading', { level: 3, name: 'Se creó un usuario' });
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(FIRST_PAGE_SIZE);
+    await screen.findByRole('cell', { name: 'Se creó un usuario' });
+    expect(screen.getAllByRole('row')).toHaveLength(FIRST_PAGE_SIZE + TABLE_HEADER_ROWS);
 
     await user.click(screen.getByRole('button', { name: t('audit.loadMore') }));
     await waitFor(() => {
-      expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(SECOND_PAGE_SIZE);
+      expect(screen.getAllByRole('row')).toHaveLength(SECOND_PAGE_SIZE + TABLE_HEADER_ROWS);
     });
 
     await user.click(screen.getByRole('button', { name: t('audit.loadMore') }));
     await waitFor(() => {
-      expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(entries.length);
+      expect(screen.getAllByRole('row')).toHaveLength(entries.length + TABLE_HEADER_ROWS);
     });
     expect(screen.queryByRole('button', { name: t('audit.loadMore') })).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 3, name: 'Cerró el día' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Cerró el día' })).toBeInTheDocument();
   });
 
   it('filters by action and sends the filter to the server', async () => {
@@ -264,15 +265,15 @@ describe('audit log (F093)', () => {
     const user = userEvent.setup();
     renderApp(ROUTE_PATHS.team.audit, { user: team() });
 
-    await screen.findByRole('heading', { level: 3, name: 'Se creó un usuario' });
+    await screen.findByRole('cell', { name: 'Se creó un usuario' });
     await user.selectOptions(screen.getByLabelText(t('audit.action')), 'RULESET_ACTIVATED');
 
     await waitFor(() => {
       expect(backend.queries.at(LAST_QUERY)?.params.action).toBe('RULESET_ACTIVATED');
     });
     expect(
-      await screen.findByRole('heading', { level: 3, name: 'Se activó una versión de reglas' }),
+      await screen.findByRole('cell', { name: 'Se activó una versión de reglas' }),
     ).toBeInTheDocument();
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(1);
+    expect(screen.getAllByRole('row')).toHaveLength(1 + TABLE_HEADER_ROWS);
   });
 });

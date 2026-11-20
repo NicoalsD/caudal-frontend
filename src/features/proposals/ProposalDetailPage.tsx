@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router';
 
 import { formatServiceDate } from '../../core/format/serviceDate';
 import { isDecidable, isPublishable } from '../../core/proposal/proposalDay';
@@ -16,7 +17,10 @@ import { useSectors } from '../../state/hooks/useSectors';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import { PageHeader } from '../../ui/layout/PageHeader';
 import { Button } from '../../ui/primitives/Button';
+import { LinkButton } from '../../ui/primitives/LinkButton';
 import { cn } from '../../ui/styles/cn';
 import { ApproveDialog, RejectDialog } from './ProposalDecisionDialogs';
 import { hoursText } from './hoursText';
@@ -74,57 +78,74 @@ export function ProposalDetailPage(): JSX.Element {
   return (
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.proposalDetail')}</ScreenTitle>
-      <Link className={cn(styles.link)} to={ROUTE_PATHS.board.proposals}>
-        {t('proposals.backToList')}
-      </Link>
-      <ProposalHeader proposal={proposal.data} />
-      <ProposalActions
-        proposal={proposal.data}
-        reasonMin={constraints.data.reason?.min ?? 0}
-        reasonMax={constraints.data.reason?.max ?? 0}
+      <PageHeader
+        actions={
+          <LinkButton variant="ghost" to={ROUTE_PATHS.board.proposals}>
+            <ArrowLeft aria-hidden="true" />
+            {t('proposals.backToList')}
+          </LinkButton>
+        }
       />
-      <section className={cn(styles.section)} aria-labelledby="proposal-shifts-title">
-        <h2 id="proposal-shifts-title" className={cn(styles.heading)}>
-          {t('proposals.shiftsTitle')}
-        </h2>
-        {proposal.data.items.length === 0 ? (
-          <p>{t('proposals.noShifts')}</p>
-        ) : (
-          <ol className={cn(styles.schedule)}>
-            {proposal.data.items.map((item) => (
-              <li key={item.id} className={cn(styles.shift)}>
-                <ShiftExplanation
-                  item={item}
-                  name={nameBySector.get(item.sectorId) ?? t('proposals.unknownSector')}
-                  priority={prioritySectors.has(item.sectorId)}
-                />
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
-      <section className={cn(styles.section)} aria-labelledby="proposal-unserved-title">
-        <h2 id="proposal-unserved-title" className={cn(styles.heading)}>
-          {t('proposals.unserved.title')}
-        </h2>
-        {proposal.data.unservedSectors.length === 0 ? (
-          <p>{t('proposals.unserved.empty')}</p>
-        ) : (
-          <ul className={cn(styles.list)}>
-            {proposal.data.unservedSectors.map((sector) => (
-              <li key={sector.sectorId} className={cn(styles.item)}>
-                <p className={cn(styles.sectorName)}>
-                  {nameBySector.get(sector.sectorId) ?? t('proposals.unknownSector')}
-                </p>
-                <p>{unservedReasonText(sector.reason)}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <p className={cn(styles.meta)}>
-        {t('proposals.generatedOn', { date: proposal.data.generatedAt.text })}
-      </p>
+      <div className={cn(styles.detailGrid)}>
+        <div className={cn(styles.side)}>
+          <ProposalHeader proposal={proposal.data} />
+          <ProposalActions
+            proposal={proposal.data}
+            reasonMin={constraints.data.reason?.min ?? 0}
+            reasonMax={constraints.data.reason?.max ?? 0}
+          />
+          <p className={cn(styles.meta)}>
+            {t('proposals.generatedOn', { date: proposal.data.generatedAt.text })}
+          </p>
+        </div>
+        <div className={cn(styles.main)}>
+          <Card as="section" className={cn(styles.section)} aria-labelledby="proposal-shifts-title">
+            <h2 id="proposal-shifts-title" className={cn(styles.heading)}>
+              {t('proposals.shiftsTitle')}
+            </h2>
+            {proposal.data.items.length === 0 ? (
+              <p>{t('proposals.noShifts')}</p>
+            ) : (
+              <ol className={cn(styles.schedule)}>
+                {proposal.data.items.map((item) => (
+                  <li key={item.id} className={cn(styles.shift)}>
+                    <ShiftExplanation
+                      item={item}
+                      name={nameBySector.get(item.sectorId) ?? t('proposals.unknownSector')}
+                      priority={prioritySectors.has(item.sectorId)}
+                    />
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
+          <Card
+            as="section"
+            variant="tinted"
+            tint="cream"
+            className={cn(styles.section)}
+            aria-labelledby="proposal-unserved-title"
+          >
+            <h2 id="proposal-unserved-title" className={cn(styles.heading)}>
+              {t('proposals.unserved.title')}
+            </h2>
+            {proposal.data.unservedSectors.length === 0 ? (
+              <p>{t('proposals.unserved.empty')}</p>
+            ) : (
+              <ul className={cn(styles.list)}>
+                {proposal.data.unservedSectors.map((sector) => (
+                  <li key={sector.sectorId} className={cn(styles.item)}>
+                    <p className={cn(styles.sectorName)}>
+                      {nameBySector.get(sector.sectorId) ?? t('proposals.unknownSector')}
+                    </p>
+                    <p>{unservedReasonText(sector.reason)}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
@@ -158,7 +179,7 @@ function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProp
     return <></>;
   }
   return (
-    <section className={cn(styles.decisions)} aria-label={t('proposals.decideTitle')}>
+    <Card as="section" className={cn(styles.decisions)} aria-label={t('proposals.decideTitle')}>
       {decidable && canDecide ? (
         <>
           <div className={cn(styles.primaryAction)}>
@@ -241,7 +262,7 @@ function ProposalActions({ proposal, reasonMin, reasonMax }: ProposalActionsProp
         </div>
       ) : null}
       {online ? null : <p>{t('proposals.offline')}</p>}
-    </section>
+    </Card>
   );
 }
 
@@ -253,7 +274,13 @@ function ProposalHeader({ proposal }: { readonly proposal: ScheduleProposalView 
   const bandText =
     band !== null && isBandCode(band) ? t(`proposals.bandName.${BAND_KEY[band]}`) : (band ?? '');
   return (
-    <section className={cn(styles.summary)} aria-labelledby="proposal-day-title">
+    <Card
+      as="section"
+      variant="tinted"
+      tint="hero"
+      className={cn(styles.summary)}
+      aria-labelledby="proposal-day-title"
+    >
       <div className={cn(styles.summaryTop)}>
         <h2 id="proposal-day-title" className={cn(styles.heading)}>
           {formatServiceDate(proposal.serviceDate)}
@@ -275,7 +302,7 @@ function ProposalHeader({ proposal }: { readonly proposal: ScheduleProposalView 
           {t('proposals.tankLevel', { level: proposal.tankLevel.text })}
         </p>
       )}
-    </section>
+    </Card>
   );
 }
 

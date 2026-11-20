@@ -4,6 +4,8 @@ import { formatDecimal } from '../../core/format/decimal';
 import { formatSignedPercent } from '../../core/evaluation/forecastEvaluation';
 import { t } from '../../i18n/t';
 import type { ForecastEvaluationView } from '../../services/api/views';
+import { Card } from '../../ui/cards/Card';
+import { TableScroll } from '../../ui/primitives/TableScroll';
 import { cn } from '../../ui/styles/cn';
 import styles from './EvaluationPage.module.css';
 import { horizonLabel } from './horizonLabel';
@@ -26,41 +28,45 @@ interface HorizonSkillTableProps {
  */
 export function HorizonSkillTable({ evaluations }: HorizonSkillTableProps): JSX.Element {
   return (
-    <table className={cn(styles.table)}>
-      <caption>{t('evaluation.skillCaption')}</caption>
-      <thead>
-        <tr>
-          <th scope="col">{t('evaluation.horizonColumn')}</th>
-          <th scope="col">{t('evaluation.skillColumn')}</th>
-          <th scope="col">{t('evaluation.maeIaColumn')}</th>
-          <th scope="col">{t('evaluation.maeSimpleColumn')}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {evaluations.map((evaluation) => (
-          <tr key={evaluation.horizonDays}>
-            <th scope="row">{horizonLabel(evaluation.horizonDays)}</th>
-            {evaluation.helps === null ? (
-              <td colSpan={COLUMNS_WITH_EVIDENCE}>
-                {t('evaluation.evaluatedCount', { count: evaluation.n })}
-              </td>
-            ) : (
-              <>
-                <td>
-                  {evaluation.skill === null ? (
-                    t('evaluation.noValue')
-                  ) : (
-                    <SkillBar skill={evaluation.skill} />
-                  )}
-                </td>
-                <td>{meters(evaluation.maeIa)}</td>
-                <td>{meters(evaluation.maeSimple)}</td>
-              </>
-            )}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <Card as="div" className={cn(styles.tableCard)}>
+      <TableScroll label={t('evaluation.skillCaption')}>
+        <table className={cn(styles.table)}>
+          <caption>{t('evaluation.skillCaption')}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t('evaluation.horizonColumn')}</th>
+              <th scope="col">{t('evaluation.skillColumn')}</th>
+              <th scope="col">{t('evaluation.maeIaColumn')}</th>
+              <th scope="col">{t('evaluation.maeSimpleColumn')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {evaluations.map((evaluation) => (
+              <tr key={evaluation.horizonDays}>
+                <th scope="row">{horizonLabel(evaluation.horizonDays)}</th>
+                {evaluation.helps === null ? (
+                  <td colSpan={COLUMNS_WITH_EVIDENCE}>
+                    {t('evaluation.evaluatedCount', { count: evaluation.n })}
+                  </td>
+                ) : (
+                  <>
+                    <td>
+                      {evaluation.skill === null ? (
+                        t('evaluation.noValue')
+                      ) : (
+                        <SkillBar skill={evaluation.skill} />
+                      )}
+                    </td>
+                    <td>{meters(evaluation.maeIa)}</td>
+                    <td>{meters(evaluation.maeSimple)}</td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableScroll>
+    </Card>
   );
 }
 

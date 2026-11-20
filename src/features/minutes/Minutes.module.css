@@ -1,14 +1,47 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
 .stack {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  margin: var(--space-4) 0 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
+}
+
+.docIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--target-min);
+  height: var(--target-min);
+  border-radius: var(--radius-control);
+  background: var(--color-tint-aqua);
+}
+
+.docIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.rowText {
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -19,9 +52,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border-subtle);
+  gap: var(--space-3);
 }
 
 .section {
@@ -29,9 +60,8 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-4);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-surface);
-  background: var(--color-raised);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-sunken);
 }
 
 .entries {

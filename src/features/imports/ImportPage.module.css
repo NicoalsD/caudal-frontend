@@ -2,7 +2,33 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: var(--content-max);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
 }
 
 .field {
@@ -21,7 +47,24 @@
 
 .file {
   min-height: var(--target-min);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-sunken);
   font-size: var(--font-size-body);
+}
+
+.file::file-selector-button {
+  min-height: var(--target-min);
+  margin-inline-end: var(--space-3);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-water-700);
+  color: var(--color-on-brand);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
 }
 
 .preview {
@@ -47,8 +90,8 @@
 
 .tableWrap th,
 .tableWrap td {
-  padding: var(--space-2);
-  border-bottom: 1px solid var(--color-border-strong);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
   text-align: start;
 }
 

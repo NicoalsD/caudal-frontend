@@ -10,6 +10,7 @@ import { useSectors } from '../../state/hooks/useSectors';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { QueryError } from '../../ui/feedback/QueryError';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
 import { cn } from '../../ui/styles/cn';
 import styles from './Rules.module.css';
 import { statusLabel } from './ruleLabels';
@@ -90,16 +91,20 @@ export function RuleHistoryPage(): JSX.Element {
         <p>{t('ruleHistory.empty')}</p>
       ) : (
         <>
-          <section className={cn(styles.section)} aria-labelledby="history-versions-title">
+          <Card
+            as="section"
+            className={cn(styles.section)}
+            aria-labelledby="history-versions-title"
+          >
             <h2 id="history-versions-title">{t('ruleHistory.versionsTitle')}</h2>
             <ol className={cn(styles.versionList)} aria-labelledby="history-versions-title">
               {history.map((item) => (
                 <VersionItem key={item.id} summary={item} rules={byId.get(item.id)} />
               ))}
             </ol>
-          </section>
+          </Card>
 
-          <section className={cn(styles.section)} aria-labelledby="history-compare-title">
+          <Card as="section" className={cn(styles.section)} aria-labelledby="history-compare-title">
             <h2 id="history-compare-title">{t('ruleHistory.compareTitle')}</h2>
             <div className={cn(styles.pair)}>
               <VersionSelect
@@ -122,7 +127,7 @@ export function RuleHistoryPage(): JSX.Element {
               failed={details.some((query) => query.isError)}
               names={names}
             />
-          </section>
+          </Card>
         </>
       )}
       <Link to={ROUTE_PATHS.board.rules}>{t('rules.backToRules')}</Link>

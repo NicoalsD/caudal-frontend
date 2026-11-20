@@ -21,7 +21,8 @@ import { TextField } from '../../ui/primitives/TextField';
 import { cn } from '../../ui/styles/cn';
 import { normalizeTrackingCodeInput } from '../../core/public/trackingCode';
 import type { ReportStatus } from '../../core/incidents/reportStatus';
-import { ReportStatusBadge } from '../../ui/feedback/ReportStatusBadge';
+import { Card } from '../../ui/cards/Card';
+import { TrackingTimeline } from './TrackingTimeline';
 import styles from './PublicSchedule.module.css';
 import { usePublicDamageReport } from './publicQueries';
 
@@ -67,7 +68,7 @@ export function PublicTrackingPage(): JSX.Element {
   const codeLength = constraints.data?.[TRACKING_CODE_CONSTRAINT]?.max ?? 0;
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       <ScreenTitle>{t('publicTracking.title')}</ScreenTitle>
       <TrackingLookupForm
         schema={schema.schema}
@@ -81,7 +82,7 @@ export function PublicTrackingPage(): JSX.Element {
           <TrackingResult code={trackingCode} />
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -165,18 +166,22 @@ function TrackingResult({ code }: { readonly code: string }): JSX.Element {
     return <FormAlert message={trackingErrorMessage(report.error)} />;
   }
   return (
-    <section aria-labelledby="tracking-status-heading">
+    <Card
+      variant="tinted"
+      tint="hero"
+      as="section"
+      aria-labelledby="tracking-status-heading"
+      className={cn(styles.trackingStatus)}
+    >
       <h2 id="tracking-status-heading">{t('publicTracking.statusLabel')}</h2>
-      <div className={cn(styles.trackingStatus)}>
-        <ReportStatusBadge status={report.data.status} />
-        <p className={cn(styles.statusHelp)}>{t(STATUS_HELP_KEY[report.data.status])}</p>
-        <p className={cn(styles.hint)}>
-          {t('publicTracking.reportedAt', { date: report.data.reportedAt.text })}
-        </p>
-        <p className={cn(styles.hint)}>
-          {t('publicTracking.updatedAt', { date: report.data.updatedAt.text })}
-        </p>
-      </div>
-    </section>
+      <TrackingTimeline status={report.data.status} />
+      <p className={cn(styles.statusHelp)}>{t(STATUS_HELP_KEY[report.data.status])}</p>
+      <p className={cn(styles.hint)}>
+        {t('publicTracking.reportedAt', { date: report.data.reportedAt.text })}
+      </p>
+      <p className={cn(styles.hint)}>
+        {t('publicTracking.updatedAt', { date: report.data.updatedAt.text })}
+      </p>
+    </Card>
   );
 }

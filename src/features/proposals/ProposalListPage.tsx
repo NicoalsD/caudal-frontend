@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { CalendarDays, CalendarPlus, Clock3 } from 'lucide-react';
 import { Link } from 'react-router';
 
 import {
@@ -18,6 +19,9 @@ import { ErrorState } from '../../ui/feedback/ErrorState';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { Card } from '../../ui/cards/Card';
+import { EmptyPanel } from '../../ui/layout/EmptyPanel';
+import { PageHeader } from '../../ui/layout/PageHeader';
 import { Button } from '../../ui/primitives/Button';
 import { LinkButton } from '../../ui/primitives/LinkButton';
 import { cn } from '../../ui/styles/cn';
@@ -72,14 +76,36 @@ export function ProposalListPage(): JSX.Element {
   const todayView = todayProposal === null ? null : (byId.get(todayProposal.id) ?? null);
   const canAct = canGenerate && online;
 
+  const generateAction =
+    todayProposal === null && canGenerate ? (
+      <Button
+        variant="primary"
+        disabled={!canAct || generate.isPending}
+        onClick={() => {
+          generate.mutate(today);
+        }}
+      >
+        <CalendarPlus aria-hidden="true" />
+        {generate.isPending ? t('proposals.generating') : t('proposals.generate')}
+      </Button>
+    ) : undefined;
+
   return (
     <div className={cn(styles.stack)}>
       <ScreenTitle>{t('screens.proposals')}</ScreenTitle>
-      <section
-        className={cn(styles.section, todayView !== null && styles.highlight)}
+      <PageHeader lead={t('proposals.lead')} actions={generateAction} />
+      {!online ? <p role="status">{t('proposals.offline')}</p> : null}
+      {generate.isError ? <FormAlert message={errorText(generate.error).message} /> : null}
+      {generate.isSuccess ? <p role="status">{t('proposals.generated')}</p> : null}
+      <Card
+        as="section"
+        variant="tinted"
+        tint={todayView === null ? 'sand' : 'hero'}
+        className={cn(styles.todayCard)}
         aria-labelledby="proposal-today-title"
       >
         <h2 id="proposal-today-title" className={cn(styles.heading)}>
+          <CalendarDays aria-hidden="true" />
           {t('proposals.today')}
         </h2>
         {todayView === null ? (
@@ -87,35 +113,19 @@ export function ProposalListPage(): JSX.Element {
         ) : (
           <ProposalSummary proposal={todayView} emphasis />
         )}
-        {todayProposal === null && canGenerate ? (
-          <div className={cn(styles.actions)}>
-            <Button
-              variant="primary"
-              disabled={!canAct || generate.isPending}
-              onClick={() => {
-                generate.mutate(today);
-              }}
-            >
-              {generate.isPending ? t('proposals.generating') : t('proposals.generate')}
-            </Button>
-          </div>
-        ) : null}
-        {!online ? <p>{t('proposals.offline')}</p> : null}
-        {generate.isError ? <FormAlert message={errorText(generate.error).message} /> : null}
-        {generate.isSuccess ? <p role="status">{t('proposals.generated')}</p> : null}
-      </section>
+      </Card>
       <section className={cn(styles.section)} aria-labelledby="proposal-others-title">
         <h2 id="proposal-others-title" className={cn(styles.heading)}>
           {t('proposals.others')}
         </h2>
         {others.length === 0 ? (
-          <p>{t('proposals.emptyList')}</p>
+          <EmptyPanel icon={Clock3} title={t('proposals.emptyList')} />
         ) : (
-          <ul className={cn(styles.list)}>
+          <ul className={cn(styles.grid)}>
             {others.map((item) => (
-              <li key={item.id} className={cn(styles.item)}>
+              <Card as="li" key={item.id} interactive className={cn(styles.item)}>
                 <ProposalSummary proposal={item} showDay />
-              </li>
+              </Card>
             ))}
           </ul>
         )}
@@ -150,7 +160,7 @@ function ProposalSummary({
   return (
     <>
       {showDay ? (
-        <p className={cn(styles.heading)}>{formatServiceDate(proposal.serviceDate)}</p>
+        <p className={cn(styles.dayHeading)}>{formatServiceDate(proposal.serviceDate)}</p>
       ) : null}
       <ProposalStatusChip status={proposal.status} />
       <p className={cn(styles.meta)}>

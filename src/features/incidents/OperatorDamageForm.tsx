@@ -6,6 +6,7 @@ import type { operatorDamageFormSchema } from '../../core/forms/formSchemas';
 import { DAMAGE_REPORT_FIELD, OPERATOR_DAMAGE_SECTOR_FIELD } from '../../core/forms/formSchemas';
 import { t } from '../../i18n/t';
 import type { CatalogOptionView, IncidentInput, SectorView } from '../../services/api/views';
+import { Card } from '../../ui/cards/Card';
 import { DamageReportFields } from '../../ui/forms/DamageReportFields';
 import { FormAlert } from '../../ui/feedback/FormAlert';
 import { Button } from '../../ui/primitives/Button';
@@ -75,43 +76,45 @@ export function OperatorDamageForm({
   });
 
   return (
-    <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
-      <FormFields disabled={isSubmitting}>
-        {failure === null ? null : <FormAlert message={failure} />}
-        <DamageReportFields
-          categories={categoryOptions}
-          descriptionMax={descriptionMax}
-          locationMax={locationMax}
-          description={description}
-          errors={{
-            category: errors.category_code?.message,
-            description: errors.description?.message,
-            location: errors.location_hint?.message,
-          }}
-          categoryField={register(DAMAGE_REPORT_FIELD.categoryCode)}
-          descriptionField={register(DAMAGE_REPORT_FIELD.description)}
-          locationField={register(DAMAGE_REPORT_FIELD.locationHint)}
-        />
-        <label className={cn(styles.label)}>
-          {t('operatorDamage.sectorLabel')}
-          <select className={cn(styles.select)} {...register(OPERATOR_DAMAGE_SECTOR_FIELD)}>
-            <option value={NO_SECTOR}>{t('operatorDamage.noSector')}</option>
-            {sectors.map((sector) => (
-              <option key={sector.id} value={sector.id}>
-                {sector.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={!isValid || isSubmitting}
-          className={cn(styles.submit)}
-        >
-          {isSubmitting ? t('operatorDamage.saving') : t('operatorDamage.submit')}
-        </Button>
-      </FormFields>
-    </form>
+    <Card className={cn(styles.card)}>
+      <form onSubmit={(event) => void submit(event)} noValidate aria-busy={isSubmitting}>
+        <FormFields disabled={isSubmitting}>
+          {failure === null ? null : <FormAlert message={failure} />}
+          <DamageReportFields
+            categories={categoryOptions}
+            descriptionMax={descriptionMax}
+            locationMax={locationMax}
+            description={description}
+            errors={{
+              category: errors.category_code?.message,
+              description: errors.description?.message,
+              location: errors.location_hint?.message,
+            }}
+            categoryField={register(DAMAGE_REPORT_FIELD.categoryCode)}
+            descriptionField={register(DAMAGE_REPORT_FIELD.description)}
+            locationField={register(DAMAGE_REPORT_FIELD.locationHint)}
+          />
+          <label className={cn(styles.label)}>
+            {t('operatorDamage.sectorLabel')}
+            <select className={cn(styles.select)} {...register(OPERATOR_DAMAGE_SECTOR_FIELD)}>
+              <option value={NO_SECTOR}>{t('operatorDamage.noSector')}</option>
+              {sectors.map((sector) => (
+                <option key={sector.id} value={sector.id}>
+                  {sector.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!isValid || isSubmitting}
+            className={cn(styles.submit)}
+          >
+            {isSubmitting ? t('operatorDamage.saving') : t('operatorDamage.submit')}
+          </Button>
+        </FormFields>
+      </form>
+    </Card>
   );
 }

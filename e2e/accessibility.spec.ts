@@ -40,11 +40,30 @@ test.describe('Accesibilidad (axe, WCAG 2.1 AA)', () => {
 
   test('pantallas de la Junta', async ({ page }) => {
     await signIn(page, BOARD_ADMIN_USERNAME, SEED_PASSWORD, /\/junta\/tanque$/);
-    await expect(page.getByRole('heading', { name: strings.screens.tankStatus })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Hoy, / })).toBeVisible();
     await expectNoSeriousViolations(page);
 
     await page.goto('/junta/propuestas');
     await expect(page.getByRole('heading', { name: strings.screens.proposals })).toBeVisible();
     await expectNoSeriousViolations(page);
+  });
+
+  test('tablero, piloto, reportes y regiones de la Junta', async ({ page }) => {
+    await signIn(page, BOARD_ADMIN_USERNAME, SEED_PASSWORD, /\/junta\/tanque$/);
+    await expect(
+      page.getByRole('heading', { name: strings.board.panorama.chartTitle }),
+    ).toBeVisible();
+    await expect(page.getByRole('list', { name: strings.console.regionsLabel })).toBeVisible();
+    await expectNoSeriousViolations(page);
+
+    for (const [path, heading] of [
+      ['/junta/piloto', strings.screens.autopilot],
+      ['/junta/reportes', strings.screens.reports],
+      ['/junta/regiones', strings.screens.regions],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+      await expectNoSeriousViolations(page);
+    }
   });
 });

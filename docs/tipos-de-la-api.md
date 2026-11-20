@@ -31,6 +31,10 @@ Hoy el backend no publica una instantánea, así que `docs/openapi.json` es un d
 - `GET /actuator/health`;
 - `GET /api/v1/meta/constraints` (`API.md`, sección 4.1), como mapa plano de campo a `min`, `max`, `pattern` y `max_lines`.
 
+## Operaciones de la v2 escritas a mano
+
+Mientras el backend de la v2 no publica su OpenAPI, `docs/openapi.json` incluye a mano las operaciones del contrato v2 (sección B): `GET /valves/live`, `POST /valve-commands/manual`, `GET` y `PUT /autopilot/settings`, `GET /autopilot/decisions`, `POST /autopilot/decisions/{id}/accept` y `/reject`, y `POST /assistant/ask`. Después se sumaron `POST /autopilot/run`, `GET /autopilot/recommendations`, `GET /reports`, `POST /reports/narrative`, `POST /sectors`, `PATCH /sectors/{id}`, `POST /sectors/{id}/valves`, `Sector.is_region` y `AutopilotDecision.status_detail` (API.md secciones 5 y 20; las filas de `aggregates` salen de `ReportPersistenceAdapter`). Se regenera `schema.d.ts` con `pnpm gen:api`. Cuando exista la instantánea real del backend, reemplaza a estas.
+
 Cuando el backend publique `caudal-backend/docs/openapi.json` o esté corriendo en `/v3/api-docs`, se regenera desde esa fuente y se confirma en un commit aparte (`chore: actualiza tipos de la API`). La instantánea mínima se puede borrar entonces.
 
 ## Regla de uso

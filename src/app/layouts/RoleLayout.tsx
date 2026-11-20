@@ -1,21 +1,44 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { JSX } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Menu, X } from 'lucide-react';
+import { Droplets } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
 
-import { SignOutButton } from '../../features/auth/SignOutButton';
 import { SyncStatus } from '../../features/sync';
 import { t } from '../../i18n/t';
 import { BrandLogo } from '../../ui/brand/BrandLogo';
 import { cn } from '../../ui/styles/cn';
-import styles from './Layout.module.css';
+import { PageTitleSlotContext } from '../../ui/feedback/pageTitleSlot';
+import { TopBar } from './shell/TopBar';
+import styles from './Shell.module.css';
 
 export interface NavItem {
   readonly to: string;
   readonly label: string;
-  /** Needed only by layouts that show the bottom tab bar. */
+  /** Always shown in the desktop sidebar and in the bottom tab bar; hidden in the "Menú" fold. */
   readonly icon?: LucideIcon;
+  /** Heading of the sidebar group. Consecutive items with the same one stay together. */
+  readonly group?: string;
+}
+
+interface NavGroup {
+  readonly label: string | null;
+  readonly items: readonly NavItem[];
+}
+
+/** Keeps the order of the items: a group starts each time the heading changes. */
+function groupNavItems(items: readonly NavItem[]): readonly NavGroup[] {
+  const groups: { label: string | null; items: NavItem[] }[] = [];
+  for (const item of items) {
+    const label = item.group ?? null;
+    const last = groups[groups.length - 1];
+    if (last?.label === label) {
+      last.items.push(item);
+    } else {
+      groups.push({ label, items: [item] });
+    }
+  }
+  return groups;
 }
 
 interface RoleLayoutProps {
@@ -30,64 +53,115 @@ interface RoleLayoutProps {
 export const MAIN_CONTENT_ID = 'main-content';
 
 /**
- * Shared shell for authenticated areas: skip link, brand header, navigation and main landmark. On
- * a narrow screen the links fold behind a "Menú" button (or move to a bottom tab bar), so the
- * screen starts with its content and not with a wall of links.
+ * Shared shell of the authenticated areas (redesign v2). On a desktop the app lives in a rounded
+ * frame over a tinted canvas: a dark icon rail at the left (it opens over the content on hover or
+ * keyboard focus to show labels and groups) and a white surface with the top bar (page title,
+ * search, bell, user) and the main landmark. On a phone the frame disappears: the operator gets a
+ * bottom tab bar, the others a drawer behind the "Menú" button. The skip link, the banner, the
+ * navigation and main landmarks, and the sync status stay in every layout.
  */
 export function RoleLayout({ navItems, tabBar = false }: RoleLayoutProps): JSX.Element {
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [titleSlot, setTitleSlot] = useState<HTMLElement | null>(null);
+  const closeMenu = (): void => {
+    setMenuOpen(false);
+  };
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
   return (
-    <div className={cn(styles.shell)} data-tab-bar={tabBar}>
+    <div className={cn(styles.canvas)} data-tab-bar={tabBar}>
       {/* Screens behind a session are not for search engines (robots.txt says the same). */}
       <meta name="robots" content="noindex" />
       <a className={cn(styles.skipLink)} href={`#${MAIN_CONTENT_ID}`}>
         {t('app.skipToContent')}
       </a>
-      <header className={cn(styles.header)}>
-        <p className={cn(styles.brand)}>
-          <BrandLogo tone="onBrand" />
-        </p>
-        {!tabBar && (
-          <button
-            type="button"
-            className={cn(styles.menuToggle)}
-            aria-expanded={menuOpen}
-            aria-controls={menuId}
-            onClick={() => setMenuOpen((open) => !open)}
+      <div className={cn(styles.frame)}>
+        <div className={cn(styles.railSlot)}>
+          <nav
+            id={menuId}
+            aria-label={t('app.mainNavigation')}
+            className={cn(styles.nav)}
+            data-open={menuOpen}
+            data-print-hide=""
           >
-            {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-            {t('app.menu')}
-          </button>
-        )}
-        <div id={menuId} className={cn(styles.menu)} data-open={menuOpen}>
-          <nav aria-label={t('app.mainNavigation')} className={cn(styles.nav)}>
-            <ul className={cn(styles.navList)}>
-              {navItems.map(({ to, label, icon: Icon }) => (
-                <li key={to}>
-                  <NavLink
-                    className={cn(styles.navLink)}
-                    to={to}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {tabBar && Icon !== undefined && (
-                      <Icon className={cn(styles.navIcon)} aria-hidden="true" />
-                    )}
-                    <span>{label}</span>
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+            <p className={cn(styles.brand)}>
+              <span className={cn(styles.brandTile)}>
+                <Droplets aria-hidden="true" />
+              </span>
+              <BrandLogo tone="onBrand" className={cn(styles.brandLogo)} />
+            </p>
+            {groupNavItems(navItems).map((group) => (
+              <div key={group.label ?? 'main'} className={cn(styles.group)}>
+                {group.label === null ? null : (
+                  <p className={cn(styles.groupLabel)}>{group.label}</p>
+                )}
+                <ul className={cn(styles.list)}>
+                  {group.items.map(({ to, label, icon: Icon }) => (
+                    <li key={to}>
+                      <NavLink className={cn(styles.link)} to={to} onClick={closeMenu}>
+                        <span className={cn(styles.iconWrap)}>
+                          {Icon !== undefined && <Icon aria-hidden="true" />}
+                        </span>
+                        <span className={cn(styles.label)}>{label}</span>
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </nav>
-          <div className={cn(styles.signOut)}>
-            <SignOutButton />
-          </div>
+          {!tabBar && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-hidden="true"
+              className={cn(styles.scrim)}
+              data-open={menuOpen}
+              onClick={closeMenu}
+            />
+          )}
         </div>
-      </header>
-      <SyncStatus />
-      <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
-        <Outlet />
-      </main>
+        <div className={cn(styles.surface)}>
+          <PageTitleSlotContext value={titleSlot}>
+            <TopBar
+              navItems={navItems}
+              titleRef={setTitleSlot}
+              menu={
+                tabBar
+                  ? null
+                  : {
+                      id: menuId,
+                      open: menuOpen,
+                      onToggle: () => {
+                        setMenuOpen((open) => !open);
+                      },
+                    }
+              }
+            />
+            <div data-print-hide="">
+              <SyncStatus />
+            </div>
+            <main id={MAIN_CONTENT_ID} className={cn(styles.main)}>
+              <Outlet />
+            </main>
+          </PageTitleSlotContext>
+        </div>
+      </div>
     </div>
   );
 }

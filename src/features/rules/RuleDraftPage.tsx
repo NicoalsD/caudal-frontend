@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
 import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
@@ -7,6 +7,8 @@ import { useSectors } from '../../state/hooks/useSectors';
 import { usePermission } from '../../state/hooks/usePermission';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { PageHeader } from '../../ui/layout/PageHeader';
+import { LinkButton } from '../../ui/primitives/LinkButton';
 import { cn } from '../../ui/styles/cn';
 import { DraftEditor } from './DraftEditor';
 import { QueryError } from '../../ui/feedback/QueryError';
@@ -58,9 +60,22 @@ export function RuleDraftPage(): JSX.Element {
           ? t('rules.draftPageTitle', { version: String(rules.version) })
           : t('rules.versionPageTitle', { version: String(rules.version) })}
       </ScreenTitle>
-      <p>
-        <span className={cn(styles.status)}>{statusLabel(rules.status)}</span>
-      </p>
+      <PageHeader
+        lead={<span className={cn(styles.status)}>{statusLabel(rules.status)}</span>}
+        actions={
+          <>
+            <LinkButton
+              variant="secondary"
+              to={ROUTE_PATHS.board.ruleHistory.replace(':id', encodeURIComponent(rules.id))}
+            >
+              {t('rules.viewHistory')}
+            </LinkButton>
+            <LinkButton variant="ghost" to={ROUTE_PATHS.board.rules}>
+              {t('rules.backToRules')}
+            </LinkButton>
+          </>
+        }
+      />
       {isDraft ? null : <p>{t('rules.notEditable')}</p>}
       {isDraft && canEdit ? (
         <DraftEditor key={rules.id} rules={rules} sectors={sectors.data ?? []} />
@@ -70,10 +85,6 @@ export function RuleDraftPage(): JSX.Element {
           <RuleSetOverview rules={rules} />
         </>
       )}
-      <Link to={ROUTE_PATHS.board.ruleHistory.replace(':id', encodeURIComponent(rules.id))}>
-        {t('rules.viewHistory')}
-      </Link>
-      <Link to={ROUTE_PATHS.board.rules}>{t('rules.backToRules')}</Link>
     </div>
   );
 }

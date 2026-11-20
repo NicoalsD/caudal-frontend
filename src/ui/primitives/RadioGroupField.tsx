@@ -18,6 +18,10 @@ interface RadioGroupFieldProps extends InputProps {
   readonly legend: string;
   readonly options: readonly RadioOption[];
   readonly error?: string | undefined;
+  /** Makes the group controlled: the option with this value is checked. */
+  readonly selected?: string | undefined;
+  /** One option per row at the full width, for long option texts. */
+  readonly stacked?: boolean;
 }
 
 /**
@@ -28,6 +32,8 @@ export function RadioGroupField({
   legend,
   options,
   error,
+  selected,
+  stacked = false,
   ...input
 }: RadioGroupFieldProps): JSX.Element {
   const errorId = `${useId()}-error`;
@@ -38,10 +44,16 @@ export function RadioGroupField({
       aria-describedby={error === undefined ? undefined : errorId}
     >
       <legend className={cn(styles.legend)}>{legend}</legend>
-      <div className={cn(styles.options)}>
+      <div className={cn(styles.options, stacked && styles.stacked)}>
         {options.map((option) => (
           <label key={option.value} className={cn(styles.option)}>
-            <input {...input} type="radio" value={option.value} className={cn(styles.radio)} />
+            <input
+              {...input}
+              type="radio"
+              value={option.value}
+              {...(selected === undefined ? {} : { checked: selected === option.value })}
+              className={cn(styles.radio)}
+            />
             <span>{option.label}</span>
           </label>
         ))}

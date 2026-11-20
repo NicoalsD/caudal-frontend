@@ -87,6 +87,8 @@ const BOARD_PERMISSIONS = [
   'PROPOSAL_DECIDE',
   'SCHEDULE_PUBLISH',
   'ANOMALY_REVIEW',
+  'ASSISTANT_USE',
+  'REPORT_VIEW',
 ] as const;
 
 /** Permission codes by role, as in Actores-y-permisos.md section 3.3 (the ones the screens use). */
@@ -97,10 +99,19 @@ export const PERMISSIONS_BY_ROLE: Record<AuthUserDto['role'], readonly string[]>
     'NETWORK_MANAGE',
     'USER_MANAGE',
     'DEVICE_MANAGE',
+    'AUTOPILOT_CONFIGURE',
+    'VALVE_COMMAND_MANUAL',
   ],
   BOARD_MEMBER: BOARD_PERMISSIONS,
   OPERATOR: ['NETWORK_VIEW', 'RULESET_VIEW', 'READING_CREATE', 'DAY_CLOSE', 'STATUS_VIEW'],
-  PROJECT_TEAM: ['NETWORK_VIEW', 'RULESET_VIEW', 'EVALUATION_VIEW', 'DEVICE_MANAGE'],
+  PROJECT_TEAM: [
+    'NETWORK_VIEW',
+    'RULESET_VIEW',
+    'EVALUATION_VIEW',
+    'DEVICE_MANAGE',
+    'ASSISTANT_USE',
+    'REPORT_VIEW',
+  ],
   SUPPORT_ENTITY: ['SUMMARY_VIEW'],
 };
 

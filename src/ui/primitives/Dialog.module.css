@@ -1,33 +1,45 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--color-text-primary) 55%, transparent);
+  /* Above the whole shell: the top bar, the rail and the phone's menu and tab bar. */
+  z-index: 60;
+  background: color-mix(in srgb, var(--color-brand-900) 55%, transparent);
+  backdrop-filter: blur(4px);
 }
 
 .content {
   position: fixed;
   inset-block-start: 50%;
   inset-inline-start: 50%;
+  z-index: 61;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  width: min(100% - 2 * var(--space-4), var(--content-max));
+  width: min(100% - 2 * var(--space-4), var(--dialog-width));
   max-height: calc(100dvh - 2 * var(--space-4));
   overflow-y: auto;
   padding: var(--space-5);
-  background: var(--color-raised);
-  border: 2px solid var(--color-border-strong);
-  border-radius: var(--radius-surface);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
 }
 
 .title {
   margin: 0;
-  font-size: var(--font-size-h2);
-  line-height: var(--line-height-h2);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
 }
 
 .description {
   margin: 0;
   color: var(--color-text-secondary);
+}
+
+/* For content that needs the room: the 3D scene in large. */
+.wide {
+  --dialog-width: 72rem;
 }

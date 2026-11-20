@@ -43,9 +43,17 @@ export default defineConfig({
       workbox: {
         // App shell only: the HTML, JS, CSS, fonts and icons. Operator screens open offline.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // The landing's scroll motion (GSAP) loads on demand and only on "/": an operator
-        // installing the app over a weak signal never downloads it.
-        globIgnores: ['**/heroMotion-*.js', '**/gsap*.js', '**/ScrollTrigger-*.js'],
+        // The landing's scroll motion (GSAP) and the desktop 3D tank (three.js) load on demand: an
+        // operator installing the app over a weak signal never downloads them.
+        globIgnores: [
+          '**/heroMotion-*.js',
+          '**/gsap*.js',
+          '**/ScrollTrigger-*.js',
+          '**/tankScene-*.js',
+          '**/tankParts-*.js',
+          '**/AqueductScene-*.js',
+          '**/three*.js',
+        ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
@@ -60,6 +68,13 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
   build: {
+    rollupOptions: {
+      output: {
+        // three.js shared by the tank and the scene goes to a chunk named "three", which the
+        // service worker leaves out of the precache (globIgnores above).
+        manualChunks: (id: string) => (id.includes('/node_modules/three/') ? 'three' : undefined),
+      },
+    },
     // Never inline fonts as data: URIs; the CSP only allows font-src 'self'.
     assetsInlineLimit: 0,
   },

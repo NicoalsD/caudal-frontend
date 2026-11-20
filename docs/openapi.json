@@ -641,6 +641,73 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createSector",
+        "summary": "Crear un sector o una región",
+        "description": "Permiso NETWORK_MANAGE. Sin parent_sector_id crea una región. API.md sección 5.4.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sector creado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sector"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: código repetido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/tanks": {
@@ -701,6 +768,94 @@
           },
           "404": {
             "description": "El sector no existe (NOT_FOUND).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createValve",
+        "summary": "Crear una válvula en un sector",
+        "description": "Permiso NETWORK_MANAGE. API.md sección 5.7.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateValveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Válvula creada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Valve"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: código repetido en el sector.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1406,8 +1561,8 @@
               }
             }
           },
-          "422": {
-            "description": "REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW.",
+          "409": {
+            "description": "CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1416,8 +1571,8 @@
               }
             }
           },
-          "409": {
-            "description": "CONFLICT, SCHEDULE_OVERLAP o INVALID_STATE_TRANSITION.",
+          "422": {
+            "description": "REASON_REQUIRED, HOURS_EXCEEDED, SHIFT_LENGTH_INVALID u OUTSIDE_OPERATING_WINDOW.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1466,8 +1621,8 @@
               }
             }
           },
-          "422": {
-            "description": "REASON_REQUIRED.",
+          "409": {
+            "description": "CONFLICT o INVALID_STATE_TRANSITION.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1476,8 +1631,8 @@
               }
             }
           },
-          "409": {
-            "description": "CONFLICT o INVALID_STATE_TRANSITION.",
+          "422": {
+            "description": "REASON_REQUIRED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2250,16 +2405,6 @@
               }
             }
           },
-          "422": {
-            "description": "REASON_REQUIRED.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "404": {
             "description": "NOT_FOUND.",
             "content": {
@@ -2272,6 +2417,16 @@
           },
           "409": {
             "description": "INVALID_STATE_TRANSITION: cuenta desactivada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3442,8 +3597,8 @@
               }
             }
           },
-          "404": {
-            "description": "NOT_FOUND.",
+          "403": {
+            "description": "FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3452,8 +3607,8 @@
               }
             }
           },
-          "403": {
-            "description": "FORBIDDEN.",
+          "404": {
+            "description": "NOT_FOUND.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3502,6 +3657,16 @@
               }
             }
           },
+          "403": {
+            "description": "FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "NOT_FOUND.",
             "content": {
@@ -3524,16 +3689,6 @@
           },
           "422": {
             "description": "INVALID_KEY.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3574,6 +3729,16 @@
           "204": {
             "description": "Clave revocada."
           },
+          "403": {
+            "description": "FORBIDDEN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "NOT_FOUND.",
             "content": {
@@ -3586,16 +3751,6 @@
           },
           "409": {
             "description": "CONFLICT: la clave ya estaba revocada.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "FORBIDDEN.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3656,6 +3811,890 @@
           },
           "400": {
             "description": "VALIDATION_ERROR: horizonte o periodo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readings": {
+      "get": {
+        "operationId": "listReadings",
+        "summary": "Listar las lecturas de un tanque",
+        "description": "Permiso READING_VIEW. De la más reciente a la más antigua por observed_at; limit de 1 a 100 (20 por defecto) y cursor firmado.",
+        "parameters": [
+          {
+            "name": "tank_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "validation_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACCEPTED",
+                "FLAGGED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Página de lecturas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR o CURSOR_INVALID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: el tanque no existe.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/valves/live": {
+      "get": {
+        "operationId": "listValvesLive",
+        "summary": "Estado en vivo de las llaves",
+        "description": "Permiso NETWORK_VIEW. Contrato v2, sección B.",
+        "responses": {
+          "200": {
+            "description": "Llaves con su estado y su último comando.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValveLiveList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/valve-commands/manual": {
+      "post": {
+        "operationId": "createManualValveCommand",
+        "summary": "Enviar un comando manual a una llave",
+        "description": "Permiso VALVE_COMMAND_MANUAL. API.md 16.6. El motivo es obligatorio (10 a 500).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateManualValveCommandRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comando creado en PENDING.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValveCommand"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: llave sin actuador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: ya hay un comando activo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "REASON_REQUIRED: falta el motivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/settings": {
+      "get": {
+        "operationId": "getAutopilotSettings",
+        "summary": "Ajustes del piloto",
+        "description": "Permiso ASSISTANT_USE.",
+        "responses": {
+          "200": {
+            "description": "Ajustes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateAutopilotSettings",
+        "summary": "Cambiar los ajustes del piloto",
+        "description": "Permiso AUTOPILOT_CONFIGURE.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAutopilotSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ajustes guardados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotSettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: valores fuera de rango.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/decisions": {
+      "get": {
+        "operationId": "listAutopilotDecisions",
+        "summary": "Decisiones del piloto",
+        "description": "Permiso ASSISTANT_USE. De la más nueva a la más vieja.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "ACCEPTED",
+                "REJECTED",
+                "EXECUTED",
+                "EXPIRED",
+                "SKIPPED"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decisiones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecisionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/decisions/{id}/accept": {
+      "post": {
+        "operationId": "acceptAutopilotDecision",
+        "summary": "Aceptar una decisión",
+        "description": "Permiso VALVE_COMMAND_MANUAL. Crea el comando.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decisión aceptada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecision"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: la decisión ya no está pendiente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/decisions/{id}/reject": {
+      "post": {
+        "operationId": "rejectAutopilotDecision",
+        "summary": "Rechazar una decisión",
+        "description": "Permiso ASSISTANT_USE.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decisión rechazada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecision"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "CONFLICT: la decisión ya no está pendiente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assistant/ask": {
+      "post": {
+        "operationId": "askAssistant",
+        "summary": "Preguntarle al asistente",
+        "description": "Permiso ASSISTANT_USE.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantAskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAnswer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR: pregunta vacía o de más de 500 caracteres.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sectors/{id}": {
+      "patch": {
+        "operationId": "updateSector",
+        "summary": "Renombrar o mover un sector",
+        "description": "Permiso NETWORK_MANAGE. API.md sección 5.5.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSectorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sector actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sector"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/run": {
+      "post": {
+        "operationId": "runAutopilot",
+        "summary": "Forzar un ciclo del piloto",
+        "description": "Permiso AUTOPILOT_CONFIGURE. Para la demostración. API.md sección 20.7.",
+        "responses": {
+          "200": {
+            "description": "Decisiones del ciclo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecisionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/autopilot/recommendations": {
+      "get": {
+        "operationId": "listAutopilotRecommendations",
+        "summary": "Recomendaciones pendientes",
+        "description": "Permiso ASSISTANT_USE. Atajo de GET /autopilot/decisions?status=PENDING.",
+        "responses": {
+          "200": {
+            "description": "Decisiones pendientes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotDecisionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports": {
+      "get": {
+        "operationId": "getReport",
+        "summary": "Números del periodo",
+        "description": "Permiso REPORT_VIEW. from inclusive y to exclusivo. API.md sección 20.9.",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agregados del periodo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/narrative": {
+      "post": {
+        "operationId": "createNarrativeReport",
+        "summary": "Reporte narrativo del periodo",
+        "description": "Permiso REPORT_VIEW. Lo escribe el asistente o, si falla, una plantilla. API.md sección 20.10.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NarrativeReportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reporte narrativo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NarrativeReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_ERROR.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión no válida (UNAUTHORIZED).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: falta el permiso.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4440,7 +5479,8 @@
           "code",
           "name",
           "households_count",
-          "is_active"
+          "is_active",
+          "is_region"
         ],
         "description": "Sector de la red. Sin datos personales (API.md sección 5.3).",
         "properties": {
@@ -4466,6 +5506,10 @@
           },
           "is_active": {
             "type": "boolean"
+          },
+          "is_region": {
+            "type": "boolean",
+            "description": "Verdadero si es un sector raíz, es decir, una región."
           }
         }
       },
@@ -7460,6 +8504,868 @@
             "minimum": 1,
             "maximum": 3,
             "description": "Días a pronosticar. Sin él se usa forecast_horizon_days de la regla vigente."
+          }
+        }
+      },
+      "Reading": {
+        "type": "object",
+        "required": [
+          "id",
+          "tank_id",
+          "gauge_value",
+          "damage_noticed",
+          "observed_at",
+          "received_at",
+          "source",
+          "validation_status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tank_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gauge_value": {
+            "type": "number",
+            "format": "double"
+          },
+          "effective_gauge_value": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "correction_count": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "water_appearance_code": {
+            "type": "string"
+          },
+          "damage_noticed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string"
+          },
+          "validation_status": {
+            "type": "string"
+          },
+          "rule_set_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ReadingPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reading"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ValveLiveCommand": {
+        "type": "object",
+        "required": [
+          "id",
+          "action",
+          "status",
+          "origin",
+          "created_at",
+          "updated_at"
+        ],
+        "description": "Último comando de una válvula (contrato v2, sección B).",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "DELIVERED",
+              "ACKED",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "SCHEDULE",
+              "MANUAL",
+              "AUTOPILOT"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValveLive": {
+        "type": "object",
+        "required": [
+          "valve_id",
+          "sector_id",
+          "state"
+        ],
+        "description": "Estado en vivo de una válvula (GET /valves/live).",
+        "properties": {
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sector_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSED",
+              "UNKNOWN"
+            ]
+          },
+          "last_command": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ValveLiveCommand"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "ValveLiveList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Estado en vivo de las válvulas.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValveLive"
+            }
+          }
+        }
+      },
+      "CreateManualValveCommandRequest": {
+        "type": "object",
+        "required": [
+          "valve_id",
+          "command",
+          "manual_reason",
+          "not_before",
+          "expires_at"
+        ],
+        "description": "Comando manual de una válvula (API.md 16.6).",
+        "properties": {
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "command": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE"
+            ]
+          },
+          "manual_reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "not_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValveCommand": {
+        "type": "object",
+        "required": [
+          "id",
+          "valve_id",
+          "command",
+          "status",
+          "not_before",
+          "expires_at"
+        ],
+        "description": "Comando de una válvula con su estado.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valve_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "command": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "DELIVERED",
+              "ACKED",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "not_before": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AutopilotSettings": {
+        "type": "object",
+        "required": [
+          "mode",
+          "operator_absence_minutes",
+          "reserve_floor_pct"
+        ],
+        "description": "Ajustes del piloto automático.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "ASSISTED",
+              "AUTOMATIC"
+            ]
+          },
+          "operator_absence_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "reserve_floor_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateAutopilotSettingsRequest": {
+        "type": "object",
+        "required": [
+          "mode",
+          "operator_absence_minutes",
+          "reserve_floor_pct"
+        ],
+        "description": "Cambio de los ajustes del piloto.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "ASSISTED",
+              "AUTOMATIC"
+            ]
+          },
+          "operator_absence_minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "reserve_floor_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "AutopilotDecision": {
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "source",
+          "model",
+          "action",
+          "reason",
+          "confidence",
+          "status"
+        ],
+        "description": "Decisión del piloto o recomendación del asistente.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "CLOSE",
+              "WAIT",
+              "INSPECT"
+            ]
+          },
+          "valve_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACCEPTED",
+              "REJECTED",
+              "EXECUTED",
+              "EXPIRED",
+              "SKIPPED"
+            ]
+          },
+          "decided_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "valve_command_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status_detail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nulo, RESERVE_FLOOR, COMMAND_REFUSED, OPERATOR_ACTIVE o el motivo del rechazo."
+          }
+        }
+      },
+      "AutopilotDecisionList": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "description": "Decisiones, de la más nueva a la más vieja.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutopilotDecision"
+            }
+          }
+        }
+      },
+      "RejectDecisionRequest": {
+        "type": "object",
+        "required": [],
+        "description": "Rechazo de una decisión, con motivo opcional.",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AssistantAskRequest": {
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "description": "Pregunta al asistente.",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "AssistantAnswer": {
+        "type": "object",
+        "required": [
+          "source",
+          "model",
+          "answer",
+          "generated_at"
+        ],
+        "description": "Respuesta del asistente.",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateSectorRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 20,
+            "pattern": "^[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "parent_sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "households_count": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          }
+        }
+      },
+      "UpdateSectorRequest": {
+        "type": "object",
+        "description": "Todos los campos son opcionales. parent_sector_id no se combina con is_region.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "households_count": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "parent_sector_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "is_region": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateValveRequest": {
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20,
+            "pattern": "^[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          },
+          "location_hint": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "is_motorized": {
+            "type": "boolean"
+          },
+          "fail_safe_position": {
+            "type": "string",
+            "enum": [
+              "KEEP",
+              "OPEN",
+              "CLOSED"
+            ]
+          }
+        }
+      },
+      "ReportLevels": {
+        "type": "object",
+        "required": [
+          "readings"
+        ],
+        "properties": {
+          "readings": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "min_level": {
+            "type": "number",
+            "nullable": true
+          },
+          "max_level": {
+            "type": "number",
+            "nullable": true
+          },
+          "avg_level": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ReportShiftsRow": {
+        "type": "object",
+        "required": [
+          "sector",
+          "planned"
+        ],
+        "properties": {
+          "sector": {
+            "type": "string",
+            "description": "Nombre del sector."
+          },
+          "planned": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "planned_hours": {
+            "type": "number",
+            "nullable": true
+          },
+          "completed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partial": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "not_executed": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportCommandRow": {
+        "type": "object",
+        "required": [
+          "origin",
+          "status",
+          "total"
+        ],
+        "properties": {
+          "origin": {
+            "type": "string",
+            "enum": [
+              "SCHEDULE",
+              "MANUAL",
+              "AUTOPILOT"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportDecisionRow": {
+        "type": "object",
+        "required": [
+          "source",
+          "action",
+          "status",
+          "total"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "action": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportIncidentRow": {
+        "type": "object",
+        "required": [
+          "category",
+          "status",
+          "total"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportAnomalyRow": {
+        "type": "object",
+        "required": [
+          "kind",
+          "total"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReportAggregates": {
+        "type": "object",
+        "required": [
+          "levels",
+          "shifts_by_sector",
+          "valve_commands",
+          "autopilot_decisions",
+          "incidents",
+          "anomalies"
+        ],
+        "properties": {
+          "levels": {
+            "$ref": "#/components/schemas/ReportLevels"
+          },
+          "shifts_by_sector": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportShiftsRow"
+            }
+          },
+          "valve_commands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportCommandRow"
+            }
+          },
+          "autopilot_decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportDecisionRow"
+            }
+          },
+          "incidents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportIncidentRow"
+            }
+          },
+          "anomalies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportAnomalyRow"
+            }
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "aggregates"
+        ],
+        "description": "Datos del periodo; el periodo dura como máximo 92 días.",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aggregates": {
+            "$ref": "#/components/schemas/ReportAggregates"
+          }
+        }
+      },
+      "NarrativeReportRequest": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NarrativeReport": {
+        "type": "object",
+        "required": [
+          "source",
+          "model",
+          "generated_at",
+          "title",
+          "summary",
+          "findings",
+          "recommendations",
+          "markdown"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "LLM",
+              "RULES"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "markdown": {
+            "type": "string"
           }
         }
       }

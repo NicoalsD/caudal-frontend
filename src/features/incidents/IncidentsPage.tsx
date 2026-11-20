@@ -1,3 +1,4 @@
+import { CircleCheck } from 'lucide-react';
 import type { JSX } from 'react';
 
 import { errorText } from '../../i18n/errorText';
@@ -6,6 +7,8 @@ import { useDamageCategories } from '../../state/hooks/useDamageCategories';
 import { ErrorState } from '../../ui/feedback/ErrorState';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
+import { EmptyPanel } from '../../ui/layout/EmptyPanel';
+import { PageHeader } from '../../ui/layout/PageHeader';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import { IncidentItem } from './IncidentItem';
@@ -44,10 +47,11 @@ export function IncidentsPage(): JSX.Element {
   const labelByCode = new Map((categories.data ?? []).map((option) => [option.code, option.label]));
 
   return (
-    <>
+    <div className={cn(styles.page)}>
       <ScreenTitle>{t('screens.incidents')}</ScreenTitle>
+      <PageHeader lead={t('incidents.lead')} />
       {items.length === 0 ? (
-        <p>{t('incidents.empty')}</p>
+        <EmptyPanel icon={CircleCheck} title={t('incidents.empty')} />
       ) : (
         <ul className={cn(styles.list)}>
           {items.map((incident) => (
@@ -69,6 +73,6 @@ export function IncidentsPage(): JSX.Element {
           {t('incidents.loadMore')}
         </Button>
       ) : null}
-    </>
+    </div>
   );
 }

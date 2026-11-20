@@ -50,7 +50,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         return HttpResponse.json(NEW_RUN, { status: CREATED });
       }),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());
@@ -80,7 +80,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         }),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());
@@ -98,14 +98,14 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         HttpResponse.json(NEW_RUN, { status: CREATED }),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
-    expect(await screen.findByText(t('forecast.none'))).toBeVisible();
+    expect(await screen.findByText(t('forecast.noForecastYet'))).toBeVisible();
     await user.click(await runButton());
 
     expect(await screen.findByText(t('forecast.runDoneAi'))).toBeVisible();
-    expect(screen.queryByText(t('forecast.none'))).not.toBeInTheDocument();
+    expect(screen.queryByText(t('forecast.noForecastYet'))).not.toBeInTheDocument();
   });
 
   it('says how long to wait when the hourly limit is reached', async () => {
@@ -116,7 +116,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         }),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());
@@ -132,7 +132,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         errorResponse(UNPROCESSABLE, 'NO_LEVEL_DATA'),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());

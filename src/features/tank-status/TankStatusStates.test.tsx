@@ -21,7 +21,7 @@ const NOT_FOUND = 404;
 const INTERNAL_ERROR = 500;
 
 function renderStatus() {
-  return renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+  return renderApp(ROUTE_PATHS.tank, { user: BOARD });
 }
 
 describe('TankStatusPage states (S12): empty, error and fallback', () => {
@@ -55,9 +55,20 @@ describe('TankStatusPage states (S12): empty, error and fallback', () => {
     expect(picker).toHaveValue(second.id);
   });
 
-  it('shows a plain "no forecast yet" line when the tank was never forecast', async () => {
+  it('keeps the history chart and says there is no forecast yet', async () => {
     server.use(
       http.get(apiUrl('/tanks/:id/forecasts/latest'), () => errorResponse(NOT_FOUND, 'NOT_FOUND')),
+    );
+    renderStatus();
+
+    expect(await screen.findByText(t('forecast.noForecastYet'))).toBeVisible();
+    expect(screen.getByRole('img', { name: t('forecast.chartLabel') })).toBeInTheDocument();
+  });
+
+  it('shows a plain "no forecast yet" line when there is no forecast and no history', async () => {
+    server.use(
+      http.get(apiUrl('/tanks/:id/forecasts/latest'), () => errorResponse(NOT_FOUND, 'NOT_FOUND')),
+      http.get(apiUrl('/readings'), () => Response.json({ items: [], next_cursor: null })),
     );
     renderStatus();
 
@@ -73,7 +84,9 @@ describe('TankStatusPage states (S12): empty, error and fallback', () => {
     );
     renderStatus();
 
-    expect(await screen.findByText(t('tankStatus.levelValue', { value: '2,3' }))).toBeVisible();
+    expect(
+      await screen.findAllByText(t('tankStatus.levelValue', { value: '2,3' })),
+    ).not.toHaveLength(0);
     const forecast = screen.getByRole('region', { name: t('forecast.title') });
     expect(await within(forecast).findByRole('button', { name: t('common.retry') })).toBeVisible();
   });

@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
-import { CircleCheck } from 'lucide-react';
 
 import type { ClosedItemSummary } from '../../core/commands/summarizeOutbox';
 import { formatDateTime } from '../../core/format/time';
 import { formatDecimal } from '../../core/format/decimal';
 import { t } from '../../i18n/t';
 import { useConnection } from '../../state/hooks/useConnection';
+import { Card } from '../../ui/cards/Card';
+import { Badge } from '../../ui/primitives/Badge';
 import { Button } from '../../ui/primitives/Button';
 import { cn } from '../../ui/styles/cn';
 import styles from './Readings.module.css';
 import { ReadingCorrectionDialog } from './ReadingCorrectionDialog';
 import { useGaugeForTank } from './ReadingIssues';
-
-const ICON_SIZE = 20;
 
 interface SentReadingRowProps {
   readonly item: ClosedItemSummary;
@@ -31,18 +30,21 @@ export function SentReadingRow({ item, onCorrected }: SentReadingRowProps): JSX.
   const online = connection === 'ONLINE';
   const value = item.gaugeValue;
   return (
-    <article className={cn(styles.issue)}>
-      <p className={cn(styles.issueTitle)}>
-        {item.observedAt === null
-          ? t('readings.review.unknownDate')
-          : t('readings.sent.observedAt', { date: formatDateTime(item.observedAt) })}
-      </p>
-      <p className={cn(styles.issueStatus)}>
-        <CircleCheck aria-hidden="true" size={ICON_SIZE} />
-        <span>{t('readings.sent.status')}</span>
-      </p>
-      {value === null ? null : <p>{t('readings.sent.value', { value: formatDecimal(value) })}</p>}
-      {online ? null : <p>{t('readings.sent.offline')}</p>}
+    <Card variant="plain" as="article" className={cn(styles.item)}>
+      <div className={cn(styles.itemHead)}>
+        <p className={cn(styles.issueTitle)}>
+          {item.observedAt === null
+            ? t('readings.review.unknownDate')
+            : t('readings.sent.observedAt', { date: formatDateTime(item.observedAt) })}
+        </p>
+        <Badge tone="ok">{t('readings.sent.status')}</Badge>
+      </div>
+      {value === null ? null : (
+        <p className={cn(styles.itemValue)}>
+          {t('readings.sent.value', { value: formatDecimal(value) })}
+        </p>
+      )}
+      {online ? null : <p className={cn(styles.itemText)}>{t('readings.sent.offline')}</p>}
       <div className={cn(styles.actions)}>
         <ReadingCorrectionDialog
           readingId={item.clientId}
@@ -56,6 +58,6 @@ export function SentReadingRow({ item, onCorrected }: SentReadingRowProps): JSX.
           }
         />
       </div>
-    </article>
+    </Card>
   );
 }

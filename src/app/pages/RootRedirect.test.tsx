@@ -11,17 +11,17 @@ import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
 
 const landingHeading = () =>
-  screen.getByRole('heading', { level: 1, name: strings.landing.hero.title });
+  screen.findByRole('heading', { level: 1, name: strings.landing.hero.title });
 
 describe('RootRedirect', () => {
   it('shows the landing page to an anonymous visitor at "/"', async () => {
     const { router } = renderApp(ROUTE_PATHS.root);
 
-    expect(landingHeading()).toBeInTheDocument();
+    expect(await landingHeading()).toBeInTheDocument();
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(ROUTE_PATHS.root);
     });
-    expect(landingHeading()).toBeInTheDocument();
+    expect(await landingHeading()).toBeInTheDocument();
   });
 
   it('shows the landing page while the session is still being restored', async () => {
@@ -37,12 +37,12 @@ describe('RootRedirect', () => {
     );
     const { router } = renderApp(ROUTE_PATHS.root);
 
-    expect(landingHeading()).toBeInTheDocument();
+    expect(await landingHeading()).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(ROUTE_PATHS.root);
 
     releaseRefresh();
-    await waitFor(() => {
-      expect(landingHeading()).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(await landingHeading()).toBeInTheDocument();
     });
   });
 });

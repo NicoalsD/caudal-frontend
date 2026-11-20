@@ -1,8 +1,8 @@
 import type { JSX } from 'react';
-import { Link } from 'react-router';
 
 import { t } from '../../i18n/t';
 import { ErrorState } from '../../ui/feedback/ErrorState';
+import { LinkButton } from '../../ui/primitives/LinkButton';
 import { ROUTE_PATHS } from '../../core/session/routes';
 
 export function NotFoundPage(): JSX.Element {
@@ -10,7 +10,11 @@ export function NotFoundPage(): JSX.Element {
     <ErrorState
       title={t('errors.notFoundTitle')}
       message={t('errors.notFoundBody')}
-      action={<Link to={ROUTE_PATHS.root}>{t('errors.goHome')}</Link>}
+      action={
+        <LinkButton variant="primary" to={ROUTE_PATHS.root}>
+          {t('errors.goHome')}
+        </LinkButton>
+      }
     />
   );
 }

@@ -1,32 +1,10 @@
-import type { DeviceKind, DeviceStatus } from '../../core/devices/deviceModel';
 import { errorText } from '../../i18n/errorText';
 import { t } from '../../i18n/t';
+export { kindText, statusText } from '../../i18n/deviceText';
 import { DomainError } from '../../core/errors/DomainError';
 
 const INVALID_KEY = 'INVALID_KEY';
 const CONFLICT = 'CONFLICT';
-
-export function kindText(kind: DeviceKind): string {
-  switch (kind) {
-    case 'LEVEL_SENSOR':
-      return t('devices.kinds.levelSensor');
-    case 'VALVE_ACTUATOR':
-      return t('devices.kinds.valveActuator');
-    case 'GATEWAY':
-      return t('devices.kinds.gateway');
-  }
-}
-
-export function statusText(status: DeviceStatus): string {
-  switch (status) {
-    case 'ACTIVE':
-      return t('devices.statuses.active');
-    case 'SUSPENDED':
-      return t('devices.statuses.suspended');
-    case 'RETIRED':
-      return t('devices.statuses.retired');
-  }
-}
 
 /**
  * The text for a failed key change. The key itself is never part of the text: the server codes

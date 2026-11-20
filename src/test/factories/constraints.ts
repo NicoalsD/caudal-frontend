@@ -11,6 +11,7 @@ export function buildConstraints(overrides: ConstraintsDto = {}): ConstraintsDto
     person_name: { min: 2, max: 80 },
     place_name: { min: 2, max: 60 },
     reason: { min: 10, max: 500 },
+    'valve.code': { min: 1, max: 20, pattern: '^[A-Z0-9-]+$' },
     'sector.code': { min: 2, max: 20, pattern: '^[A-Z0-9-]+$' },
     'incident.description': { min: 10, max: 500 },
     'incident.location_hint': { min: 0, max: 120 },

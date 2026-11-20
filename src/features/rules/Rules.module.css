@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: var(--content-max);
 }
 
 .section {
@@ -11,14 +10,40 @@
   gap: var(--space-3);
 }
 
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.section h2 {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
+}
+
 .tableWrap {
   overflow-x: auto;
+  border-radius: var(--radius-control);
 }
 
 .table {
   width: 100%;
-  border-collapse: collapse;
-  background: var(--color-raised);
+  border-collapse: separate;
+  border-spacing: 0 var(--space-1);
 }
 
 .table caption {
@@ -29,14 +54,31 @@
 
 .table th,
 .table td {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
   text-align: start;
-  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-sunken);
 }
 
-.table th {
+.table th:first-child,
+.table td:first-child {
+  border-start-start-radius: var(--radius-control);
+  border-end-start-radius: var(--radius-control);
+}
+
+.table th:last-child,
+.table td:last-child {
+  border-start-end-radius: var(--radius-control);
+  border-end-end-radius: var(--radius-control);
+}
+
+.table thead th {
+  background: transparent;
   font-size: var(--font-size-small);
   color: var(--color-text-secondary);
+}
+
+.table tbody th {
+  font-weight: var(--font-weight-bold);
 }
 
 .definitions {
@@ -60,6 +102,42 @@
   font-weight: var(--font-weight-bold);
 }
 
+/* Parameters and windows: a figure per tile, the label above it. */
+.tileList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.tileRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-tile);
+  background: var(--color-tint-aqua);
+}
+
+.tileRow dt {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.tileRow dd {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.sectorRow {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -74,14 +152,10 @@
 .status {
   display: inline-block;
   padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-chip);
+  border-radius: var(--radius-pill);
+  background: var(--color-tint-mint);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-bold);
-}
-
-.definitionRow {
-  display: contents;
 }
 
 .cellInput {
@@ -108,17 +182,19 @@
 .sectorList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .sectorItem {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-raised);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-control);
+  padding: var(--space-4);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-tile);
 }
 
 .sectorName {
@@ -137,9 +213,10 @@
   flex-direction: column;
   gap: var(--space-3);
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-control);
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-tile);
+  background: var(--color-surface-sunken);
 }
 
 .dayGroup legend {
@@ -178,8 +255,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding: var(--space-4);
+  border-radius: var(--radius-tile);
+  background: var(--color-surface-sunken);
 }
 
 .versionTitle {
@@ -205,7 +283,7 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
-  background: var(--color-raised);
+  background: var(--color-surface-raised);
   border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-control);
 }

@@ -106,6 +106,8 @@ describe('EvaluationPage states (S23)', () => {
     renderApp(ROUTE_PATHS.team.evaluation, { user: TEAM });
 
     expect(await screen.findByText(t('evaluation.empty'))).toBeVisible();
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('table', { name: t('evaluation.skillCaption') }),
+    ).not.toBeInTheDocument();
   });
 });

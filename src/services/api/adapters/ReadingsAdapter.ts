@@ -1,5 +1,6 @@
 import type {
   CatalogItemView,
+  ReadingHistoryPageView,
   ReadingBatchResultView,
   ReadingCorrectionView,
   ReadingResultView,
@@ -102,5 +103,32 @@ export function toReadingCorrection(
     reason: dto.reason,
     createdAt: adapter.toTimestamp('created_at', dto.created_at),
     effectiveGaugeValue: adapter.toDecimal('effective_gauge_value', dto.effective_gauge_value),
+  };
+}
+
+/** GET /readings (section 7.4): the page of readings of a tank, newest first. */
+export interface ReadingListItemDto {
+  readonly id: string;
+  readonly gauge_value: number;
+  readonly effective_gauge_value?: number | null;
+  readonly observed_at: string;
+}
+
+export interface ReadingPageDto {
+  readonly items: readonly ReadingListItemDto[];
+  readonly next_cursor?: string | null;
+}
+
+export function toReadingHistoryPage(
+  adapter: ApiDtoAdapter,
+  dto: ReadingPageDto,
+): ReadingHistoryPageView {
+  return {
+    items: dto.items.map((item) => ({
+      id: item.id,
+      level: item.effective_gauge_value ?? item.gauge_value,
+      observedAt: adapter.toTimestamp('reading.observed_at', item.observed_at),
+    })),
+    nextCursor: dto.next_cursor ?? null,
   };
 }

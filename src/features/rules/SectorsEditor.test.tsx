@@ -177,7 +177,11 @@ describe('SectorsEditor', () => {
     );
     renderApp(DRAFT_PATH, { user: member() });
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(t('rules.sectorsLoadError'));
+    // The title is the screen's h1: the shell draws it in the top bar, outside the alert.
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      t('rules.sectorsLoadError'),
+    );
     await userEvent.setup().click(screen.getByRole('button', { name: t('rules.retry') }));
 
     await waitFor(() => {

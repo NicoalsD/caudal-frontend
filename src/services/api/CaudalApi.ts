@@ -22,6 +22,9 @@ import { SummariesApi } from './endpoints/SummariesApi';
 import { AuditApi } from './endpoints/AuditApi';
 import { DevicesApi } from './endpoints/DevicesApi';
 import { EvaluationApi } from './endpoints/EvaluationApi';
+import { AutopilotApi } from './endpoints/AutopilotApi';
+import { ValvesLiveApi } from './endpoints/ValvesLiveApi';
+import { ReportsApi } from './endpoints/ReportsApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -64,6 +67,12 @@ export class CaudalApi {
   readonly devices: DevicesApi;
   /** Whether the AI helps against the simple estimate (API.md section 14). */
   readonly evaluation: EvaluationApi;
+  /** The autopilot, its decisions and the assistant (contract v2 B). */
+  readonly autopilot: AutopilotApi;
+  /** The valves as they are now and the manual commands to them. */
+  readonly valvesLive: ValvesLiveApi;
+  /** The numbers of a period and its narrative (API.md 20.9 and 20.10). */
+  readonly reports: ReportsApi;
 
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
@@ -89,5 +98,8 @@ export class CaudalApi {
     this.audit = new AuditApi(http, adapter);
     this.devices = new DevicesApi(http, adapter);
     this.evaluation = new EvaluationApi(http);
+    this.autopilot = new AutopilotApi(http, adapter);
+    this.valvesLive = new ValvesLiveApi(http, adapter);
+    this.reports = new ReportsApi(http, adapter);
   }
 }

@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
-import type { ForecastView, TankStatusView, TankView } from '../../services/api/views';
+import type {
+  ForecastView,
+  ReadingHistoryPointView,
+  TankStatusView,
+  TankView,
+} from '../../services/api/views';
 import { aqueductKey } from '../queryKeys';
 import { useCaudalApi } from './apiContext';
 import { useAqueductId } from './useAqueductId';
@@ -20,6 +25,47 @@ export function useTankStatus(tankId: string): UseQueryResult<TankStatusView> {
   return useQuery({
     queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'status', tankId),
     queryFn: () => api.tankStatus.get(tankId),
+    refetchInterval: STATUS_REFETCH_INTERVAL_MS,
+  });
+}
+
+/** Days of level history drawn next to the forecast. */
+export const HISTORY_DAYS = 14;
+const MS_PER_DAY = 86_400_000;
+/** Largest page the API gives (FieldLimits.PAGE_LIMIT_MAX) and a stop so a loop can never run on. */
+const HISTORY_PAGE_LIMIT = 100;
+const HISTORY_MAX_PAGES = 5;
+
+/**
+ * GET /readings for the last HISTORY_DAYS days: only accepted readings, newest first, following
+ * the cursor until the window is complete.
+ */
+export function useTankHistory(tankId: string): UseQueryResult<readonly ReadingHistoryPointView[]> {
+  const api = useCaudalApi();
+  const aqueductId = useAqueductId();
+  return useQuery({
+    queryKey: aqueductKey(aqueductId, TANK_STATUS_SCOPE, 'history', tankId),
+    queryFn: async () => {
+      const to = new Date();
+      const from = new Date(to.getTime() - HISTORY_DAYS * MS_PER_DAY);
+      const points: ReadingHistoryPointView[] = [];
+      let cursor: string | undefined;
+      for (let page = 0; page < HISTORY_MAX_PAGES; page += 1) {
+        const result = await api.readings.history({
+          tankId,
+          from,
+          to,
+          limit: HISTORY_PAGE_LIMIT,
+          ...(cursor === undefined ? {} : { cursor }),
+        });
+        points.push(...result.items);
+        if (result.nextCursor === null) {
+          break;
+        }
+        cursor = result.nextCursor;
+      }
+      return points;
+    },
     refetchInterval: STATUS_REFETCH_INTERVAL_MS,
   });
 }

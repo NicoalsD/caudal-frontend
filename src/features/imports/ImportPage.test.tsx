@@ -39,10 +39,10 @@ async function fillScenario(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe('ImportPage (S27)', () => {
-  it('always shows the simulated-data banner and the file choice', () => {
+  it('always shows the simulated-data banner and the file choice', async () => {
     renderApp(ROUTE_PATHS.team.imports, { user: projectTeam() });
 
-    expect(screen.getByText(t('common.simulatedData'))).toBeVisible();
+    expect(await screen.findByText(t('common.simulatedData'))).toBeVisible();
     expect(screen.getByLabelText(t('imports.fileLabel'))).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('ImportPage (S27)', () => {
     renderApp(ROUTE_PATHS.team.imports, { user: projectTeam() });
     const user = userEvent.setup();
 
-    await user.upload(screen.getByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
+    await user.upload(await screen.findByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
 
     expect(
       await screen.findByRole('heading', {
@@ -67,7 +67,7 @@ describe('ImportPage (S27)', () => {
     const user = userEvent.setup();
     const broken = new File(['id,gauge_value\nr-1,2.4\n'], 'malo.csv', { type: 'text/csv' });
 
-    await user.upload(screen.getByLabelText(t('imports.fileLabel')), broken);
+    await user.upload(await screen.findByLabelText(t('imports.fileLabel')), broken);
 
     expect(
       await screen.findByText(
@@ -98,7 +98,7 @@ describe('ImportPage (S27)', () => {
     );
     renderApp(ROUTE_PATHS.team.imports, { user: projectTeam() });
     const user = userEvent.setup();
-    await user.upload(screen.getByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
+    await user.upload(await screen.findByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
     await screen.findByRole('table');
     await fillScenario(user);
 
@@ -123,7 +123,7 @@ describe('ImportPage (S27)', () => {
     server.use(http.post(apiUrl(IMPORT_PATH), () => errorResponse(FORBIDDEN_STATUS, 'DEMO_ONLY')));
     renderApp(ROUTE_PATHS.team.imports, { user: projectTeam() });
     const user = userEvent.setup();
-    await user.upload(screen.getByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
+    await user.upload(await screen.findByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
     await screen.findByRole('table');
     await fillScenario(user);
 
@@ -136,7 +136,7 @@ describe('ImportPage (S27)', () => {
     server.use(http.post(apiUrl(IMPORT_PATH), () => errorResponse(CONFLICT_STATUS, 'CONFLICT')));
     renderApp(ROUTE_PATHS.team.imports, { user: projectTeam() });
     const user = userEvent.setup();
-    await user.upload(screen.getByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
+    await user.upload(await screen.findByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
     await screen.findByRole('table');
     await fillScenario(user);
 
@@ -150,7 +150,7 @@ describe('ImportPage (S27)', () => {
   it('asks for the scenario fields before it sends', async () => {
     renderApp(ROUTE_PATHS.team.imports, { user: projectTeam() });
     const user = userEvent.setup();
-    await user.upload(screen.getByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
+    await user.upload(await screen.findByLabelText(t('imports.fileLabel')), csvFile(GOOD_LINES));
     await screen.findByRole('table');
 
     await user.click(screen.getByRole('button', { name: t('imports.submit') }));

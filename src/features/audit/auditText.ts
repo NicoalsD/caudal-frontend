@@ -44,6 +44,11 @@ export function severityLabel(code: string): string {
   return lookup(strings.audit.severities, code);
 }
 
+/** What an audit entry touched; the raw code when the catalog does not know it. */
+export function entityTypeLabel(code: string): string {
+  return lookup(strings.audit.entityTypes, code.toUpperCase());
+}
+
 export function actorTypeLabel(code: string): string {
   return lookup(strings.audit.actorTypes, code);
 }
