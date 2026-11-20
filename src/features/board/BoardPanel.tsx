@@ -13,7 +13,7 @@ import { AssistantDrawer } from '../aqueduct/AssistantDrawer';
 import { LiveAqueduct } from '../aqueduct/LiveAqueduct';
 import type { LiveAqueductParts } from '../aqueduct/LiveAqueduct';
 import { NowCard } from '../aqueduct/NowCard';
-import { PERMISSION_ASSISTANT } from '../aqueduct/permissions';
+import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from '../aqueduct/permissions';
 import { RegionList } from '../aqueduct/RegionList';
 import { AnomalyList, LevelChartCard, useTankDay } from '../tank-status';
 import type { ConsoleContext, PanoramaRange } from '../tank-status';
@@ -33,6 +33,7 @@ export function BoardPanel({ tank, status }: ConsoleContext): JSX.Element {
   const [range, setRange] = useState<PanoramaRange>(DEFAULT_RANGE);
   const day = useTankDay(tank, status, range);
   const canSeeNetwork = usePermission(NETWORK_PERMISSION);
+  const canCommandValves = usePermission(PERMISSION_VALVE_COMMAND);
 
   return (
     <div className={cn(styles.panel)}>
@@ -40,9 +41,9 @@ export function BoardPanel({ tank, status }: ConsoleContext): JSX.Element {
         <BoardDayGuide />
         <AssistantDrawer />
       </div>
-      <LiveAqueduct readOnly>
+      <LiveAqueduct readOnly={!canCommandValves}>
         {(parts) => (
-          <Decisions parts={parts} canSeeNetwork={canSeeNetwork}>
+          <Decisions parts={parts} canSeeNetwork={canSeeNetwork} canControl={canCommandValves}>
             <section className={cn(styles.section)} aria-labelledby="board-level-title">
               <div className={cn(styles.sectionHead)}>
                 <h2 id="board-level-title" className={cn(styles.sectionTitle)}>
@@ -82,15 +83,18 @@ const noop = (): void => undefined;
 
 /**
  * The "now" card first, then the chart (passed as children) with the regions at its side. The
- * regions need the live aqueduct, so both live inside it.
+ * regions need the live aqueduct, so both live inside it. With VALVE_COMMAND_MANUAL each region
+ * row gets the button that opens the valve's dialog, as on the plumber's home.
  */
 function Decisions({
   parts,
   canSeeNetwork,
+  canControl,
   children,
 }: {
   readonly parts: LiveAqueductParts | null;
   readonly canSeeNetwork: boolean;
+  readonly canControl: boolean;
   readonly children: JSX.Element;
 }): JSX.Element {
   const canAsk = usePermission(PERMISSION_ASSISTANT);
@@ -113,7 +117,10 @@ function Decisions({
             <RegionList
               regions={regions}
               suggestion={pending.data?.[0] ?? null}
-              canControl={false}
+              canControl={canControl}
+              {...(canControl && parts !== null
+                ? { onOpenValve: parts.openValve, onFocusValve: parts.highlight }
+                : {})}
             />
           </section>
         ) : null}
