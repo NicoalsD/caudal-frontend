@@ -17,6 +17,8 @@ export interface ChangePasswordInput {
 }
 
 export interface LoginInput {
+  /** Slug of the institution chosen in the first step. Absent only for the platform administrator. */
+  readonly institutionSlug?: string;
   readonly username: string;
   readonly password: string;
 }
@@ -30,10 +32,14 @@ export class AuthApi {
 
   /**
    * POST /api/v1/auth/login (public). The body is built field by field: the API rejects unknown
-   * fields. The refresh cookie arrives as Set-Cookie and the JavaScript never sees it.
+   * fields. Any wrong credential or institution answers 401 INVALID_CREDENTIALS. The refresh cookie arrives as Set-Cookie and the JavaScript never sees it.
    */
   async login(input: LoginInput): Promise<LoginView> {
-    const body: LoginRequestDto = { username: input.username, password: input.password };
+    const body: LoginRequestDto = {
+      ...(input.institutionSlug === undefined ? {} : { institution_slug: input.institutionSlug }),
+      username: input.username,
+      password: input.password,
+    };
     const response = await this.http.request<LoginDto>({
       method: 'POST',
       path: '/auth/login',

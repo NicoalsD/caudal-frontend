@@ -25,6 +25,7 @@ import { EvaluationApi } from './endpoints/EvaluationApi';
 import { AutopilotApi } from './endpoints/AutopilotApi';
 import { ValvesLiveApi } from './endpoints/ValvesLiveApi';
 import { ReportsApi } from './endpoints/ReportsApi';
+import { InstitutionsApi } from './endpoints/InstitutionsApi';
 
 /**
  * Facade over the REST API (api-integration.md section 3). Features call business methods and
@@ -35,6 +36,8 @@ import { ReportsApi } from './endpoints/ReportsApi';
  */
 export class CaudalApi {
   readonly auth: AuthApi;
+  /** The public directory of institutions shown before the sign in (API.md 2.1). */
+  readonly institutions: InstitutionsApi;
   readonly catalogs: CatalogApi;
   readonly incidents: IncidentsApi;
   readonly meta: MetaApi;
@@ -77,6 +80,7 @@ export class CaudalApi {
   /** `apiBaseUrl` is the absolute API base (with /api/v1): links to files are built from it. */
   constructor(http: HttpClient, adapter: ApiDtoAdapter, apiBaseUrl: string) {
     this.auth = new AuthApi(http, adapter);
+    this.institutions = new InstitutionsApi(http, adapter);
     this.catalogs = new CatalogApi(http, adapter);
     this.incidents = new IncidentsApi(http, adapter);
     this.meta = new MetaApi(http, adapter);

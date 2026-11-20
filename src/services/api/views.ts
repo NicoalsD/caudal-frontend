@@ -97,6 +97,12 @@ export interface AuthUserView {
 }
 
 /** Answer of a sign in. The access token is for the in-memory TokenStore only. */
+/** One institution of the public directory (GET /public/institutions). */
+export interface PublicInstitutionView {
+  readonly slug: string;
+  readonly name: string;
+}
+
 export interface LoginView {
   readonly accessToken: string;
   readonly expiresInSeconds: number;

@@ -11,4 +11,6 @@ export const queryKeys = {
   constraints: ['meta', 'constraints'] as const,
   /** The notice is the same for every aqueduct, so it has no aqueduct in its key. */
   privacyNotice: ['privacy', 'notice'] as const,
+  /** The public directory of institutions: the same for everyone, so no aqueduct in the key. */
+  institutions: ['public', 'institutions'] as const,
 };
