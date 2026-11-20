@@ -21,6 +21,10 @@ const ADMIN = buildSessionUser({
     'VALVE_COMMAND_MANUAL',
   ],
 });
+const LOOKER = buildSessionUser({
+  role: 'BOARD_MEMBER',
+  permissions: ['NETWORK_VIEW', 'STATUS_VIEW', 'RULESET_VIEW', 'ASSISTANT_USE'],
+});
 const BARE = buildSessionUser({
   role: 'BOARD_MEMBER',
   permissions: ['STATUS_VIEW', 'RULESET_VIEW'],
@@ -45,9 +49,27 @@ describe('Board dashboard (overview)', () => {
     expect(within(regions).getAllByRole('listitem').length).toBeGreaterThan(0);
   });
 
-  it('only tells the state of the regions: the Board moves no valve from here', async () => {
+  it('lets the admin move each valve from its region, as on the plumber home', async () => {
     server.use(...createLiveBackend().handlers);
+    const user = userEvent.setup();
     renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
+
+    const regions = await screen.findByRole('list', { name: t('console.regionsLabel') });
+    await user.click(
+      await within(regions).findByRole('button', {
+        name: t('valves.openNamed', { valve: 'Válvula alta' }),
+      }),
+    );
+    expect(
+      await screen.findByRole('dialog', {
+        name: t('valveControl.title', { valve: 'Válvula alta' }),
+      }),
+    ).toBeVisible();
+  });
+
+  it('only tells the state of the regions to a person who cannot move valves', async () => {
+    server.use(...createLiveBackend().handlers);
+    renderApp(ROUTE_PATHS.board.tank, { user: LOOKER });
 
     const regions = await screen.findByRole('list', { name: t('console.regionsLabel') });
     expect(within(regions).queryByRole('button')).not.toBeInTheDocument();
