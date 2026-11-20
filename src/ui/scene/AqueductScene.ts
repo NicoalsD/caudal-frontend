@@ -1305,6 +1305,8 @@ export function createAqueductScene(options: AqueductSceneOptions): AqueductScen
           ringLabels.add(label.object);
         }
       }
+      // A screen that prints the level itself leaves the title empty: the label then hides.
+      tankLabel.object.visible = frame.tankTitle !== '';
       setLines(tankLabel.element, [frame.tankTitle, frame.tankDetail]);
       declutter.invalidate();
       partLabels.intake.element.textContent = frame.parts.intake;

@@ -27,6 +27,7 @@ export interface SceneRing {
 export interface SceneFrame {
   /** Height of the water, 0 to 1. */
   readonly levelFraction: number;
+  /** Empty hides the tank's label (the screen shows the level elsewhere). */
   readonly tankTitle: string;
   readonly tankDetail: string;
   readonly rings: readonly SceneRing[];

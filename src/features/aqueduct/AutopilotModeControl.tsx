@@ -22,7 +22,12 @@ const MODE_ICON = { MANUAL: Hand, ASSISTED: Bot, AUTOMATIC: Sparkles } as const;
  * (PUT /autopilot/settings) needs AUTOPILOT_CONFIGURE; without it the mode is shown and the
  * screen says who can change it.
  */
-export function AutopilotModeControl(): JSX.Element | null {
+export function AutopilotModeControl({
+  compact = false,
+}: {
+  /** One line on a dark band: the mode and the button, without the help text or the card. */
+  readonly compact?: boolean;
+} = {}): JSX.Element | null {
   const canRead = usePermission(PERMISSION_ASSISTANT);
   const canConfigure = usePermission(PERMISSION_AUTOPILOT);
   const settings = useAutopilotSettings(canRead);
@@ -40,6 +45,48 @@ export function AutopilotModeControl(): JSX.Element | null {
     const current = settings.data;
     const next = nextControlMode(current.mode);
     const ModeIcon = MODE_ICON[current.mode];
+    const toggle = (): void => {
+      update.mutate({
+        mode: next,
+        operatorAbsenceMinutes: current.operatorAbsenceMinutes,
+        reserveFloorPct: current.reserveFloorPct,
+      });
+    };
+    const toggleText = update.isPending
+      ? t('autopilot.saving')
+      : isPlumberInControl(current.mode)
+        ? t('autopilot.giveBack')
+        : t('autopilot.takeControl');
+    if (compact) {
+      return (
+        <section className={cn(styles.modeInline)} aria-labelledby="autopilot-inline-title">
+          <h2 id="autopilot-inline-title" className={cn(styles.visuallyHidden)}>
+            {t('autopilot.title')}
+          </h2>
+          <p className={cn(styles.modeInlineName)}>
+            <ModeIcon aria-hidden="true" />
+            {t('autopilot.currentMode', { mode: t(`autopilot.mode.${lower(current.mode)}`) })}
+          </p>
+          {canConfigure ? (
+            <Button
+              variant="ghost"
+              className={cn(styles.modeInlineButton)}
+              disabled={update.isPending}
+              onClick={toggle}
+            >
+              {toggleText}
+            </Button>
+          ) : (
+            <p className={cn(styles.modeInlineMeta)}>{t('autopilot.readOnly')}</p>
+          )}
+          {update.isError ? (
+            <p role="alert" className={cn(styles.modeInlineMeta)}>
+              {errorText(update.error).message}
+            </p>
+          ) : null}
+        </section>
+      );
+    }
     body = (
       <>
         <div className={cn(styles.modeHead)}>
@@ -65,19 +112,9 @@ export function AutopilotModeControl(): JSX.Element | null {
           <Button
             variant={isPlumberInControl(current.mode) ? 'secondary' : 'primary'}
             disabled={update.isPending}
-            onClick={() => {
-              update.mutate({
-                mode: next,
-                operatorAbsenceMinutes: current.operatorAbsenceMinutes,
-                reserveFloorPct: current.reserveFloorPct,
-              });
-            }}
+            onClick={toggle}
           >
-            {update.isPending
-              ? t('autopilot.saving')
-              : isPlumberInControl(current.mode)
-                ? t('autopilot.giveBack')
-                : t('autopilot.takeControl')}
+            {toggleText}
           </Button>
         ) : (
           <p className={cn(styles.meta)}>{t('autopilot.readOnly')}</p>
@@ -89,6 +126,13 @@ export function AutopilotModeControl(): JSX.Element | null {
           </p>
         ) : null}
       </>
+    );
+  }
+  if (compact) {
+    return (
+      <p className={cn(styles.modeInlineMeta)}>
+        {settings.isError ? t('autopilot.error') : t('autopilot.loading')}
+      </p>
     );
   }
   return (
