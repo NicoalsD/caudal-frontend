@@ -137,11 +137,12 @@ function ConsoleBody({
         )}
       </section>
       <div className={cn(styles.sideArea)}>
-        <TodayBlock tank={tank} facts={facts} part="quick" />
         <ActionQueue valves={valves} />
+        {canAsk ? <AskCard compact /> : null}
       </div>
       <div className={cn(styles.belowArea)}>
         <div className={cn(styles.belowColumn)}>
+          <TodayBlock tank={tank} facts={facts} part="quick" />
           <ShiftNowCard />
           <UpcomingShifts />
         </div>
@@ -156,7 +157,6 @@ function ConsoleBody({
         )}
         <div className={cn(styles.belowColumn)}>
           <TodayBlock tank={tank} facts={facts} part="check" />
-          {canAsk ? <AskCard /> : null}
           <TodayBlock tank={tank} facts={facts} part="tank" />
         </div>
         <div className={cn(styles.wide)}>

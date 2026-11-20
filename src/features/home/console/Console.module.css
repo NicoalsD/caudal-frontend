@@ -237,7 +237,7 @@
 .readoutValue {
   margin: 0;
   font-family: var(--font-family-display);
-  font-size: clamp(2.75rem, 1.9rem + 3vw, 4.5rem);
+  font-size: clamp(2.5rem, 1.9rem + 2vw, 3.5rem);
   font-weight: var(--font-weight-display);
   line-height: 1;
   letter-spacing: -0.03em;
@@ -314,8 +314,12 @@
   border-color: var(--color-ochre-700);
 }
 
-/* The signature move: looking at the recommendation lifts the region it is about. */
+/* The signature move: looking at the recommendation lifts and lights the region it is about.
+   The ring and the tint stay without motion; only the lift goes away. */
 .console:has(.band:hover, .band:focus-within) .region[data-suggested='true'] {
+  background: color-mix(in srgb, var(--color-tint-sand) 55%, var(--color-surface));
+  outline: 3px solid var(--color-ochre-700);
+  outline-offset: 2px;
   transform: translateY(calc(var(--space-2) * -1));
   box-shadow: var(--shadow-lift);
 }
@@ -423,7 +427,7 @@
 }
 
 .region[data-suggested='true'] .regionButton {
-  color: var(--color-on-brand);
+  color: var(--color-raised);
   background: var(--color-water-700);
 }
 
@@ -552,13 +556,25 @@
     border-inline-start: 1px solid color-mix(in srgb, var(--color-on-brand) 16%, transparent);
   }
 
-  .stageArea {
-    position: sticky;
-    inset-block-start: var(--space-2);
+  /* The scene sets the height of its row; the side column matches it and its queue scrolls. */
+  .console {
+    --stage-height: max(28rem, calc(100dvh - 27.5rem));
   }
 
   .stage {
-    height: max(28rem, calc(100dvh - 27.5rem));
+    height: var(--stage-height);
+  }
+
+  .sideArea {
+    height: var(--stage-height);
+    gap: var(--space-4);
+  }
+
+  .queue {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .readout {

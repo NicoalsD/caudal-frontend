@@ -175,10 +175,11 @@ describe('Autopilot mode and assistant panel', () => {
       'Sector Alto',
       'Sector Bajo',
     ]);
+    const [school, high, low] = panels;
     const suggested = t('console.suggested', { action: 'abrir' });
-    expect(await within(panels[1]!).findByText(suggested)).toBeVisible();
-    expect(within(panels[0]!).queryByText(suggested)).not.toBeInTheDocument();
-    expect(within(panels[2]!).getByText(t('console.regionState.empty'))).toBeVisible();
+    expect(await within(high!).findByText(suggested)).toBeVisible();
+    expect(within(school!).queryByText(suggested)).not.toBeInTheDocument();
+    expect(within(low!).getByText(t('console.regionState.empty'))).toBeVisible();
   });
 
   it('leads the console with the recommendation, its region and its source', async () => {

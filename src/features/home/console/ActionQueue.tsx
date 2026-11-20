@@ -102,7 +102,9 @@ export function ActionQueue({ valves }: { readonly valves: readonly LiveValve[] 
       {shown.length === 0 ? (
         <p className={cn(styles.queueEmpty)}>{t('console.queueEmpty')}</p>
       ) : (
-        <ol className={cn(styles.queueList)}>
+        // It scrolls on a desktop when the column is shorter than the queue: reachable by keyboard.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        <ol className={cn(styles.queueList)} tabIndex={0} aria-labelledby="console-queue-title">
           {shown.map((row) => (
             <li key={row.id} className={cn(styles.queueRow)}>
               <Badge tone={row.tone}>{row.status}</Badge>

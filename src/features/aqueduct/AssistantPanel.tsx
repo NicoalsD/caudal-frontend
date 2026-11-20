@@ -166,7 +166,12 @@ function RecommendationCard({
 }
 
 /** The dark promotional card where the person asks Caudal a question in plain words. */
-export function AskCard(): JSX.Element {
+export function AskCard({
+  compact = false,
+}: {
+  /** Short: only the example as a hint, for a narrow column. */
+  readonly compact?: boolean;
+} = {}): JSX.Element {
   const ask = useAskAssistant();
   const [question, setQuestion] = useState('');
   const id = useId();
@@ -180,7 +185,7 @@ export function AskCard(): JSX.Element {
         {t('assistant.askTitle')}
       </h3>
       <p id={hintId} className={cn(styles.askText)}>
-        {t('assistant.askPromo')} {t('assistant.askHint')}
+        {compact ? t('assistant.askHint') : `${t('assistant.askPromo')} ${t('assistant.askHint')}`}
       </p>
       <form
         noValidate
