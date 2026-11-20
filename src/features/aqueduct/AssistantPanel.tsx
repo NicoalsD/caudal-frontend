@@ -22,6 +22,7 @@ import { isNearLimit } from '../../core/format/counter';
 import { cn } from '../../ui/styles/cn';
 import styles from './Aqueduct.module.css';
 import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from './permissions';
+import { recommendationTitle } from './recommendationText';
 
 const PERCENT = 100;
 const WHOLE = 0;
@@ -112,17 +113,6 @@ function Recommendations({ valves }: AssistantPanelProps): JSX.Element {
 
 const TINTS = ['sand', 'cream', 'mint'] as const;
 
-function recommendationTitle(
-  decision: AutopilotDecisionView,
-  valves: readonly LiveValve[],
-): string {
-  const valve = valves.find((item) => item.id === decision.valveId);
-  const action = t(`assistant.action.${lower(decision.action)}`);
-  return valve === undefined
-    ? t('assistant.recommendationNoValve', { action })
-    : t('assistant.recommendation', { action, valve: valve.name });
-}
-
 function RecommendationCard({
   decision,
   title,
@@ -176,7 +166,7 @@ function RecommendationCard({
 }
 
 /** The dark promotional card where the person asks Caudal a question in plain words. */
-function AskCard(): JSX.Element {
+export function AskCard(): JSX.Element {
   const ask = useAskAssistant();
   const [question, setQuestion] = useState('');
   const id = useId();

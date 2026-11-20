@@ -36,13 +36,6 @@ function renderHome(user = OPERATOR, settings?: Parameters<typeof createLiveBack
   return backend;
 }
 
-async function openPanelIfFolded(user: ReturnType<typeof userEvent.setup>): Promise<void> {
-  const handle = screen.queryByRole('button', { name: t('operatorHome.panelOpen') });
-  if (handle !== null) {
-    await user.click(handle);
-  }
-}
-
 describe('Live aqueduct on the plumber home', () => {
   it('lists every active valve with its state, so the keyboard reaches what the scene draws', async () => {
     renderHome();
@@ -53,7 +46,7 @@ describe('Live aqueduct on the plumber home', () => {
     expect(within(rows[0]!).getByText(SCHOOL_VALVE)).toBeVisible();
     expect(within(rows[0]!).getByText(t('valves.state.open'))).toBeVisible();
     expect(within(rows[1]!).getByText(t('valves.state.closed'))).toBeVisible();
-    expect(screen.getByRole('region', { name: t('operatorHome.sceneRegion') })).toBeVisible();
+    expect(screen.getByRole('region', { name: t('console.sceneLabel') })).toBeVisible();
   });
 
   it(
@@ -151,7 +144,6 @@ describe('Autopilot mode and assistant panel', () => {
   it('takes control: puts the mode in MANUAL keeping the other settings', async () => {
     const backend = renderHome();
     const user = userEvent.setup();
-    await openPanelIfFolded(user);
 
     await user.click(await screen.findByRole('button', { name: t('autopilot.takeControl') }));
 
@@ -173,6 +165,36 @@ describe('Autopilot mode and assistant panel', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('docks one panel per region and marks the one the recommendation is about', async () => {
+    renderHome();
+
+    const dock = await screen.findByRole('list', { name: t('console.regionsLabel') });
+    const panels = within(dock).getAllByRole('listitem');
+    expect(panels.map((panel) => within(panel).getByRole('heading').textContent)).toEqual([
+      'Sector Escuela',
+      'Sector Alto',
+      'Sector Bajo',
+    ]);
+    const suggested = t('console.suggested', { action: 'abrir' });
+    expect(await within(panels[1]!).findByText(suggested)).toBeVisible();
+    expect(within(panels[0]!).queryByText(suggested)).not.toBeInTheDocument();
+    expect(within(panels[2]!).getByText(t('console.regionState.empty'))).toBeVisible();
+  });
+
+  it('leads the console with the recommendation, its region and its source', async () => {
+    renderHome();
+
+    expect(
+      await screen.findByRole('heading', {
+        name: t('assistant.recommendation', {
+          action: t('assistant.action.open'),
+          valve: HIGH_VALVE,
+        }),
+      }),
+    ).toBeVisible();
+    expect(screen.getByText(t('console.regionOf', { region: 'Sector Alto' }))).toBeVisible();
+  });
+
   it('accepts a pending recommendation', async () => {
     const backend = renderHome();
     const user = userEvent.setup();
@@ -180,7 +202,7 @@ describe('Autopilot mode and assistant panel', () => {
     await user.click(await screen.findByRole('button', { name: t('assistant.accept') }));
 
     await waitFor(() => expect(backend.state.accepted).toHaveLength(1));
-    expect(await screen.findByText(t('assistant.empty'))).toBeVisible();
+    expect(await screen.findByText(t('console.noRecommendation'))).toBeVisible();
   });
 
   it('rejects a pending recommendation', async () => {

@@ -31,16 +31,3 @@ export async function goToNavLink(page: Page, name: string): Promise<void> {
     .getByRole('link', { name })
     .click();
 }
-
-/** On a phone the operator panel is a folded sheet: open it so its links and buttons can be used. */
-/** Same breakpoint as the desktop layout (64rem). */
-const DESKTOP_MIN_WIDTH_PX = 1024;
-
-export async function openOperatorPanel(page: Page): Promise<void> {
-  const handle = page.getByRole('button', { name: strings.operatorHome.panelOpen });
-  // The handle only exists on narrow screens; there, wait for it instead of checking once.
-  const width = page.viewportSize()?.width ?? Number.POSITIVE_INFINITY;
-  if (width < DESKTOP_MIN_WIDTH_PX) {
-    await handle.click();
-  }
-}

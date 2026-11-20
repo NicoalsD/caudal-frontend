@@ -1,0 +1,607 @@
+/* The operation console (S07). Phone first: band, scene with the regions under it, side column,
+   then the rest, in one column. Desktop (>= 64rem): the band across the top, the scene with the
+   regions docked at its foot, the side column at the right, and the rest below in a grid. The band
+   is dark in both themes: it sits on --color-frame with --color-on-brand text. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.greeting,
+.muted {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.muted {
+  font-size: var(--font-size-small);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.console {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sideArea,
+.belowArea,
+.belowColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ---- Decision band ---- */
+
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  color: var(--color-on-brand);
+  background: var(--color-frame);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.bandMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.bandText {
+  display: flex;
+  flex: 1 1 26rem;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.bandTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: clamp(1.625rem, 1.2rem + 1.2vw, 2.125rem);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.bandTitleQuiet {
+  font-size: var(--font-size-section);
+}
+
+.bandReason {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--color-rail-fg);
+  text-wrap: pretty;
+}
+
+.bandFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-rail-fg);
+  list-style: none;
+}
+
+.bandFacts li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bandFacts svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: none;
+}
+
+.bandActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.outlineOnDark {
+  color: var(--color-on-brand);
+  border-color: color-mix(in srgb, var(--color-on-brand) 55%, transparent);
+}
+
+.outlineOnDark:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
+}
+
+.bandMeta {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-rail-fg);
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-rail-fg);
+}
+
+.pagerButton {
+  display: grid;
+  width: var(--target-min);
+  height: var(--target-min);
+  place-items: center;
+  color: var(--color-on-brand);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-on-brand) 30%, transparent);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.pagerButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagerButton:focus-visible {
+  outline: 2px solid var(--color-on-brand);
+  outline-offset: 2px;
+}
+
+.bandSide {
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid color-mix(in srgb, var(--color-on-brand) 16%, transparent);
+}
+
+/* ---- Stage: the scene with the level and the regions ---- */
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--scene-field-bottom);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.stageScene {
+  position: relative;
+  height: 26rem;
+}
+
+.stageMessage {
+  display: grid;
+  min-height: 20rem;
+  place-items: center;
+  padding: var(--space-5);
+  color: var(--color-on-brand);
+  text-align: center;
+}
+
+.readout {
+  position: relative;
+  order: -1;
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-surface);
+  color: var(--color-on-brand);
+  pointer-events: none;
+}
+
+.readoutName {
+  margin: 0;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-rail-fg);
+}
+
+.readoutValue {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: clamp(2.75rem, 1.9rem + 3vw, 4.5rem);
+  font-weight: var(--font-weight-display);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.readoutLine {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.readoutFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-rail-fg);
+  list-style: none;
+}
+
+.readoutFacts li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.readoutFacts svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.readoutStale {
+  color: var(--scene-pending);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---- Regions: one panel per ration region ---- */
+
+.dock {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+  list-style: none;
+}
+
+.region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 2px solid transparent;
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform var(--duration-base) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard);
+}
+
+.region:hover {
+  box-shadow: var(--shadow-lift);
+}
+
+.region[data-suggested='true'] {
+  border-color: var(--color-ochre-700);
+}
+
+/* The signature move: looking at the recommendation lifts the region it is about. */
+.console:has(.band:hover, .band:focus-within) .region[data-suggested='true'] {
+  transform: translateY(calc(var(--space-2) * -1));
+  box-shadow: var(--shadow-lift);
+}
+
+.regionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.regionName {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h2);
+}
+
+.regionState {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.regionState svg,
+.regionNote svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: none;
+}
+
+.region[data-state='open'] .regionState {
+  color: var(--color-paramo-800);
+}
+
+.region[data-state='closed'] .regionState {
+  color: var(--color-text-secondary);
+}
+
+.region[data-state='unknown'] .regionState,
+.region[data-state='mixed'] .regionState {
+  color: var(--color-ochre-800);
+}
+
+.regionFlow {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.regionNote {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.noteFailed {
+  color: var(--color-clay-700);
+}
+
+.noteInFlight {
+  color: var(--color-water-700);
+}
+
+.noteSuggested {
+  color: var(--color-ochre-800);
+}
+
+.regionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-1);
+}
+
+.regionButton {
+  flex: 1 1 auto;
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  background: transparent;
+  border: 1.5px solid var(--color-water-700);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.regionButton:hover {
+  background: var(--color-surface-sunken);
+}
+
+.regionButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.region[data-suggested='true'] .regionButton {
+  color: var(--color-on-brand);
+  background: var(--color-water-700);
+}
+
+/* ---- Side column: the queue ---- */
+
+.queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.queueTitle,
+.blockTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h2);
+}
+
+.queueEmpty {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.queueList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.queueRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding-block: var(--space-3);
+}
+
+.queueRow + .queueRow {
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+.queueRowTitle {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.queueRowMeta {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+/* ---- Below ---- */
+
+.valvesBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region,
+  .regionButton {
+    transition: none;
+  }
+
+  .console:has(.band:hover, .band:focus-within) .region[data-suggested='true'] {
+    transform: none;
+  }
+}
+
+@media (min-width: 64rem) {
+  .console {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 25rem;
+    grid-template-areas:
+      'band band'
+      'stage side'
+      'below below';
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .bandArea {
+    grid-area: band;
+  }
+
+  .stageArea {
+    grid-area: stage;
+  }
+
+  .sideArea {
+    grid-area: side;
+  }
+
+  .belowArea {
+    grid-area: below;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+
+  .band {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .bandSide {
+    flex: none;
+    padding-block-start: 0;
+    padding-inline-start: var(--space-5);
+    border-block-start: 0;
+    border-inline-start: 1px solid color-mix(in srgb, var(--color-on-brand) 16%, transparent);
+  }
+
+  .stageArea {
+    position: sticky;
+    inset-block-start: var(--space-2);
+  }
+
+  .stage {
+    height: max(28rem, calc(100dvh - 27.5rem));
+  }
+
+  .readout {
+    position: absolute;
+    max-width: min(21rem, 60%);
+    background: linear-gradient(
+      to bottom right,
+      color-mix(in srgb, var(--scene-field-bottom) 70%, transparent),
+      transparent 80%
+    );
+  }
+
+  .band {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .bandMain {
+    flex-wrap: nowrap;
+  }
+
+  .bandActions {
+    flex-wrap: nowrap;
+  }
+
+  .bandText {
+    flex-basis: auto;
+  }
+
+  .stageScene {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+
+  /* The regions sit at the foot of the scene, one at each side, under their pipes. */
+  .dock {
+    position: absolute;
+    inset-inline: var(--space-4);
+    inset-block-end: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 20rem));
+    justify-content: space-between;
+    align-items: end;
+    padding: 0;
+  }
+}

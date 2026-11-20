@@ -1,7 +1,7 @@
 import { strings } from '../src/i18n/es';
 import { OPERATOR_USERNAME, SEED_PASSWORD } from './support/constants';
 import { expect, expectNoSeriousViolations, test } from './support/fixtures';
-import { openOperatorPanel, signIn } from './support/session';
+import { signIn } from './support/session';
 
 const HOME = /\/operador\/inicio$/;
 const HIGH_VALVE_NAME = 'Válvula alta';
@@ -19,7 +19,6 @@ test.describe('Escena 3D del fontanero', () => {
     await expect(page.getByTestId('aqueduct-scene')).toHaveAttribute('data-ready', 'true', {
       timeout: SCENE_TIMEOUT_MS,
     });
-    await openOperatorPanel(page);
 
     await page.getByRole('button', { name: `Abrir la llave ${HIGH_VALVE_NAME}` }).click();
     const dialog = page.getByRole('dialog', { name: `Llave ${HIGH_VALVE_NAME}` });
@@ -43,11 +42,10 @@ test.describe('Escena 3D del fontanero', () => {
 
   test('acepta una recomendación del asistente', async ({ page, api }) => {
     await signIn(page, OPERATOR_USERNAME, SEED_PASSWORD, HOME);
-    await openOperatorPanel(page);
 
     await page.getByRole('button', { name: strings.assistant.accept }).click();
 
-    await expect(page.getByText(strings.assistant.empty)).toBeVisible();
+    await expect(page.getByText(strings.console.noRecommendation)).toBeVisible();
     expect(api.state.decisionStatus).toBe('ACCEPTED');
   });
 
@@ -56,7 +54,6 @@ test.describe('Escena 3D del fontanero', () => {
   }) => {
     await signIn(page, OPERATOR_USERNAME, SEED_PASSWORD, HOME);
     await expect(page.getByTestId('aqueduct-scene')).toBeVisible();
-    await openOperatorPanel(page);
     await expectNoSeriousViolations(page);
 
     const overflow = await page.evaluate(

@@ -6,7 +6,7 @@ import {
   SEED_PASSWORD,
 } from './support/constants';
 import { expect, expectNoSeriousViolations, test } from './support/fixtures';
-import { openOperatorPanel, signIn } from './support/session';
+import { signIn } from './support/session';
 
 test.describe('Accesibilidad (axe, WCAG 2.1 AA)', () => {
   test('portada', async ({ page }) => {
@@ -30,7 +30,6 @@ test.describe('Accesibilidad (axe, WCAG 2.1 AA)', () => {
 
   test('pantallas del fontanero', async ({ page }) => {
     await signIn(page, OPERATOR_USERNAME, SEED_PASSWORD, /\/operador\/inicio$/);
-    await openOperatorPanel(page);
     await expect(page.getByRole('link', { name: strings.home.newReading })).toBeVisible();
     await expectNoSeriousViolations(page);
 
