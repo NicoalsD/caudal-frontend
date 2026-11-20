@@ -12,6 +12,7 @@ import { errorResponse } from '../../test/msw/errorResponse';
 import { createSessionBackend } from '../../test/msw/sessionBackend';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
+import { signInThroughSteps } from '../../test/signInForm';
 import { TEST_PASSWORD, TEST_USERS } from '../../test/factories/auth';
 
 const forced = () => buildSessionUser({ mustChangePassword: true });
@@ -64,10 +65,7 @@ describe('mandatory password change', () => {
     server.use(...createSessionBackend(null).handlers);
     const { router } = renderApp(ROUTE_PATHS.login);
 
-    const user = userEvent.setup();
-    await user.type(await screen.findByLabelText(t('auth.username')), TEST_USERS.newcomer.username);
-    await user.type(screen.getByLabelText(t('auth.password')), TEST_PASSWORD);
-    await user.click(screen.getByRole('button', { name: t('auth.signIn') }));
+    await signInThroughSteps(userEvent.setup(), TEST_USERS.newcomer.username, TEST_PASSWORD);
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(ROUTE_PATHS.changePassword);

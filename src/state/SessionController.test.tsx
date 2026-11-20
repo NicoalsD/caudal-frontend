@@ -17,6 +17,7 @@ import { createSessionBackend } from '../test/msw/sessionBackend';
 import { server } from '../test/msw/server';
 import { STATUS } from '../test/constants';
 import { renderApp } from '../test/renderApp';
+import { signInThroughSteps } from '../test/signInForm';
 
 const ENV = { VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL };
 const MS_PER_SECOND = 1000;
@@ -375,10 +376,7 @@ describe('sign in through the form', () => {
     const scheduler = new ManualScheduler();
     const { services } = renderApp(ROUTE_PATHS.login, { scheduler });
 
-    const user = userEvent.setup();
-    await user.type(await screen.findByLabelText(t('auth.username')), TEST_USERS.admin.username);
-    await user.type(screen.getByLabelText(t('auth.password')), TEST_PASSWORD);
-    await user.click(screen.getByRole('button', { name: t('auth.signIn') }));
+    await signInThroughSteps(userEvent.setup(), TEST_USERS.admin.username, TEST_PASSWORD);
 
     await waitFor(() => {
       expect(services.sessionStore.getSnapshot().status).toBe('authenticated');

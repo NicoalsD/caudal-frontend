@@ -11,12 +11,14 @@ import {
   ACCESS_TOKEN_SECONDS,
 } from '../factories/auth';
 import type { AuthUserDto, MembershipDto } from '../factories/auth';
+import { institutionMatches } from '../factories/institutions';
 import { apiUrl } from './apiUrl';
 import { errorResponse } from './errorResponse';
 import { bearerOf, changePasswordOutcome } from './handlers/auth';
 import type { components } from '../../services/api/schema';
 
 type ChangePasswordDto = components['schemas']['ChangePasswordRequest'];
+type LoginRequestDto = components['schemas']['LoginRequest'];
 type SwitchAqueductDto = components['schemas']['SwitchAqueductRequest'];
 
 /** The header the real API demands on /auth/refresh (API.md section 1.2). */
@@ -78,7 +80,7 @@ export function createSessionBackend(
   const handlers = [
     http.post(apiUrl('/auth/login'), async ({ request }) => {
       calls.login += 1;
-      const body = (await request.json()) as { username: string; password: string };
+      const body = (await request.json()) as LoginRequestDto;
       const known = findTestUser((candidate) => candidate.username === body.username);
       const user =
         known === undefined
@@ -87,7 +89,11 @@ export function createSessionBackend(
               ...known,
               must_change_password: !changed.has(known.id) && known.must_change_password,
             };
-      if (user === undefined || body.password !== (passwords.get(user.username) ?? TEST_PASSWORD)) {
+      if (
+        user === undefined ||
+        body.password !== (passwords.get(user.username) ?? TEST_PASSWORD) ||
+        !institutionMatches(body.institution_slug)
+      ) {
         return errorResponse(STATUS.unauthorized, 'INVALID_CREDENTIALS');
       }
       cookieUser = user; // Set-Cookie: caudal_rt

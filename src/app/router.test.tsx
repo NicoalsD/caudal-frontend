@@ -33,13 +33,15 @@ describe('role router', () => {
     expect(router.state.location.search).toBe(
       `?next=${encodeURIComponent(ROUTE_PATHS.operator.pending)}`,
     );
-    expect(await heading(t('screens.login'))).toBeInTheDocument();
+    expect(await heading(t('auth.institution.title'))).toBeInTheDocument();
   });
 
   it.each<[Role, string, string]>([
     ['OPERATOR', ROUTE_PATHS.root, ROUTE_PATHS.operator.home],
     ['BOARD_ADMIN', ROUTE_PATHS.root, ROUTE_PATHS.board.tank],
     ['BOARD_MEMBER', ROUTE_PATHS.root, ROUTE_PATHS.board.tank],
+    ['INSTITUTION_ADMIN', ROUTE_PATHS.root, ROUTE_PATHS.board.tank],
+    ['VIEWER', ROUTE_PATHS.root, ROUTE_PATHS.board.tank],
     ['PROJECT_TEAM', ROUTE_PATHS.root, ROUTE_PATHS.team.evaluation],
     ['SUPPORT_ENTITY', ROUTE_PATHS.root, ROUTE_PATHS.entity.summaries],
   ])('redirects %s from the root to its home', (role, from, expected) => {

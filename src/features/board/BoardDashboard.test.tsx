@@ -9,6 +9,8 @@ import { createLiveBackend } from '../../test/msw/liveBackend';
 import { server } from '../../test/msw/server';
 import { renderApp } from '../../test/renderApp';
 
+const COLD_CHUNK_WAIT_MS = 8000;
+
 const ADMIN = buildSessionUser({
   role: 'BOARD_ADMIN',
   permissions: [
@@ -35,7 +37,12 @@ describe('Board dashboard (overview)', () => {
     server.use(...createLiveBackend().handlers);
     renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
 
-    const now = await screen.findByRole('region', { name: t('console.bandLabel') });
+    // The first screen of the file loads its lazy chunk cold, which takes longer than the default wait.
+    const now = await screen.findByRole(
+      'region',
+      { name: t('console.bandLabel') },
+      { timeout: COLD_CHUNK_WAIT_MS },
+    );
     expect(
       await within(now).findByRole('heading', {
         name: t('assistant.recommendation', {

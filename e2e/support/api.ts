@@ -142,8 +142,15 @@ export class ApiMock {
       /^\/schedule-proposals\/(?<id>[^/]+)(\/(?<action>approve|publish))?$/.exec(path);
     const proposalAction = proposalMatch?.groups?.action;
 
+    if (method === 'GET' && path === '/public/institutions') {
+      return { status: OK, body: fixture('institutions') };
+    }
     if (method === 'POST' && path === '/auth/login') {
-      const body = request.postDataJSON() as { username: string; password: string };
+      const body = request.postDataJSON() as {
+        institution_slug?: string;
+        username: string;
+        password: string;
+      };
       if (body.password !== SEED_PASSWORD) {
         return { status: UNAUTHORIZED, body: errorBody('INVALID_CREDENTIALS', 'Credenciales') };
       }

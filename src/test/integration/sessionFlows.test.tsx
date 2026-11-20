@@ -10,13 +10,15 @@ import { apiUrl } from '../msw/apiUrl';
 import { createSessionBackend } from '../msw/sessionBackend';
 import { server } from '../msw/server';
 import { renderApp } from '../renderApp';
+import { signInThroughSteps } from '../signInForm';
+import { institutionLoginPath } from '../../core/session/routes';
+import { TEST_INSTITUTION } from '../factories/institutions';
+import { REMEMBERED_INSTITUTION_KEY } from '../../services/preferences/rememberedInstitutionPreference';
 
 type User = ReturnType<typeof userEvent.setup>;
 
 async function typeCredentials(user: User, username: string, password: string) {
-  await user.type(await screen.findByLabelText(t('auth.username')), username);
-  await user.type(screen.getByLabelText(t('auth.password')), password);
-  await user.click(screen.getByRole('button', { name: t('auth.signIn') }));
+  await signInThroughSteps(user, username, password);
 }
 
 /** Generous wait for a redirect while the whole suite runs in parallel. */
@@ -75,7 +77,7 @@ describe('login journey', () => {
     await typeCredentials(userEvent.setup(), TEST_USERS.admin.username, 'una-clave-equivocada');
 
     expect(await screen.findByRole('alert')).toHaveTextContent(t('errors.api.invalidCredentials'));
-    expect(router.state.location.pathname).toBe(ROUTE_PATHS.login);
+    expect(router.state.location.pathname).toBe(institutionLoginPath(TEST_INSTITUTION.slug));
   });
 });
 
@@ -98,7 +100,7 @@ describe('opening the app with an existing cookie', () => {
 
     await services.session.restore();
 
-    expect(await heading(t('screens.login'))).toBeInTheDocument();
+    expect(await heading(t('auth.institution.title'))).toBeInTheDocument();
     expect(screen.queryByText(t('auth.sessionExpired'))).not.toBeInTheDocument();
   });
 });
@@ -254,8 +256,8 @@ describe('secrets never reach the browser storage', () => {
     backend.expireAccessTokens();
     await services.api.auth.currentUser();
 
-    expect(setItem).not.toHaveBeenCalled();
-    expect(localStorage.length).toBe(0);
+    // The only write allowed is the remembered institution slug, which is public.
+    expect(setItem.mock.calls.every(([key]) => key === REMEMBERED_INSTITUTION_KEY)).toBe(true);
     expect(sessionStorage.length).toBe(0);
     expect(document.cookie).toBe('');
   });

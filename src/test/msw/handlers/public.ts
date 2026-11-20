@@ -4,6 +4,7 @@ import type { components } from '../../../services/api/schema';
 import { errorResponse } from '../errorResponse';
 
 import { buildPublicSchedule, PUBLIC_WHATSAPP_TEXT } from '../../factories/public';
+import { buildInstitutionDirectory } from '../../factories/institutions';
 import { apiUrl } from '../apiUrl';
 
 /** Public pages (API.md section 15): no session, the default answer is a published schedule. */
@@ -13,6 +14,8 @@ const NOT_FOUND_STATUS = 404;
 export const DEFAULT_TRACKING_CODE = '7K2M9QAZ';
 
 export const publicHandlers = [
+  /** GET /public/institutions (API.md 2.1): the directory of the first sign-in step. */
+  http.get(apiUrl('/public/institutions'), () => HttpResponse.json(buildInstitutionDirectory())),
   http.get(apiUrl('/public/:aqueductSlug/schedule'), () =>
     HttpResponse.json(buildPublicSchedule()),
   ),

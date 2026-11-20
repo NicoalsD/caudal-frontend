@@ -45,6 +45,24 @@ export const TEST_USERS = {
     aqueduct_id: TEST_AQUEDUCT_ID,
     must_change_password: false,
   },
+  /** The institution's administrator: the same screens as the Board's administrator. */
+  institutionAdmin: {
+    id: '0190f3a2-0000-7000-8000-000000000006',
+    username: 'institucion.admin',
+    full_name: 'Persona Administradora',
+    role: 'INSTITUTION_ADMIN',
+    aqueduct_id: TEST_AQUEDUCT_ID,
+    must_change_password: false,
+  },
+  /** Read-only: the tank panel without valve controls. */
+  viewer: {
+    id: '0190f3a2-0000-7000-8000-000000000007',
+    username: 'lector.ejemplo',
+    full_name: 'Persona Lectora',
+    role: 'VIEWER',
+    aqueduct_id: TEST_AQUEDUCT_ID,
+    must_change_password: false,
+  },
   newcomer: {
     id: '0190f3a2-0000-7000-8000-000000000004',
     username: 'fontanero.nuevo',
@@ -103,7 +121,19 @@ export const PERMISSIONS_BY_ROLE: Record<AuthUserDto['role'], readonly string[]>
     'VALVE_COMMAND_MANUAL',
   ],
   BOARD_MEMBER: BOARD_PERMISSIONS,
+  /** The institution's administrator has the permissions the Board's administrator had (B2B round 1). */
+  INSTITUTION_ADMIN: [
+    ...BOARD_PERMISSIONS,
+    'RULESET_ACTIVATE',
+    'NETWORK_MANAGE',
+    'USER_MANAGE',
+    'DEVICE_MANAGE',
+    'AUTOPILOT_CONFIGURE',
+    'VALVE_COMMAND_MANUAL',
+  ],
   OPERATOR: ['NETWORK_VIEW', 'RULESET_VIEW', 'READING_CREATE', 'DAY_CLOSE', 'STATUS_VIEW'],
+  /** Read-only: no VALVE_COMMAND_MANUAL and no management permission. */
+  VIEWER: ['NETWORK_VIEW', 'RULESET_VIEW', 'STATUS_VIEW', 'PROPOSAL_VIEW', 'REPORT_VIEW'],
   PROJECT_TEAM: [
     'NETWORK_VIEW',
     'RULESET_VIEW',

@@ -1,5 +1,6 @@
 import { strings } from '../src/i18n/es';
 import { BOARD_ADMIN_USERNAME, OPERATOR_USERNAME, SEED_PASSWORD } from './support/constants';
+import { chooseInstitution } from './support/session';
 import { expect, expectNoSeriousViolations, test } from './support/fixtures';
 
 test.describe('Entrada a la aplicación', () => {
@@ -11,6 +12,7 @@ test.describe('Entrada a la aplicación', () => {
 
     await page.getByRole('link', { name: strings.landing.nav.signIn }).first().click();
     await expect(page).toHaveURL(/\/login$/);
+    await chooseInstitution(page);
     await expect(page.getByRole('heading', { name: strings.screens.login })).toBeVisible();
 
     await page.getByLabel(strings.auth.username, { exact: true }).fill(OPERATOR_USERNAME);
@@ -21,11 +23,12 @@ test.describe('Entrada a la aplicación', () => {
 
     // The same generic sentence for any 401: the screen never reveals whether the user exists.
     await expect(page.getByText(strings.errors.api.invalidCredentials)).toBeVisible();
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL(/\/i\/[^/]+\/login$/);
   });
 
   test('el login entra como fontanero con la contraseña correcta', async ({ page }) => {
     await page.goto('/login');
+    await chooseInstitution(page);
     await page.getByLabel(strings.auth.username, { exact: true }).fill(OPERATOR_USERNAME);
     await page.getByLabel(strings.auth.password, { exact: true }).fill(SEED_PASSWORD);
     await page.getByRole('button', { name: strings.auth.signIn }).click();
@@ -71,6 +74,7 @@ test.describe('Entrada a la aplicación', () => {
 
   test('la Junta entra a su tablero de tanque', async ({ page }) => {
     await page.goto('/login');
+    await chooseInstitution(page);
     await page.getByLabel(strings.auth.username, { exact: true }).fill(BOARD_ADMIN_USERNAME);
     await page.getByLabel(strings.auth.password, { exact: true }).fill(SEED_PASSWORD);
     await page.getByRole('button', { name: strings.auth.signIn }).click();
