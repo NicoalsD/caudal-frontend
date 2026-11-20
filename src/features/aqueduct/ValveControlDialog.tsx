@@ -30,8 +30,9 @@ interface ValveControlDialogProps {
 }
 
 /**
- * Opens or closes a valve: the reason (mandatory), then the lever, which is the confirmation:
- * dragged to the end it sends the command. A button does the same without dragging. When the
+ * Opens or closes a valve: an optional reason (empty sends the default text), then the lever,
+ * which is the confirmation: dragged to the end it sends the command. A button does the same
+ * without dragging. When the
  * valve's state is unknown the person picks the action first. After sending it follows the
  * command live: sent, delivered, confirmed or failed.
  * Only people with VALVE_COMMAND_MANUAL get the form; the server checks it again.
@@ -123,8 +124,9 @@ function ControlBody({
     );
   }
   const trimmed = reason.trim();
+  const fallbackReason = t('valveControl.defaultReason');
   let problem: string | undefined;
-  if (trimmed.length < min) {
+  if (trimmed.length > 0 && trimmed.length < min) {
     problem = t('valveControl.reasonShort', { min: String(min) });
   } else if (reason.length > max) {
     problem = t('valveControl.reasonLong', { max: String(max) });
@@ -135,7 +137,7 @@ function ControlBody({
       return;
     }
     send.mutate(
-      { valveId: valve.id, action, reason: trimmed },
+      { valveId: valve.id, action, reason: trimmed.length > 0 ? trimmed : fallbackReason },
       {
         onSuccess: (command) => {
           setSentId(command.id);
@@ -187,7 +189,7 @@ function ControlBody({
       ) : null}
       <TextAreaField
         label={t('valveControl.reasonLabel')}
-        hint={t('valveControl.reasonHint')}
+        hint={t('valveControl.reasonHint', { fallback: fallbackReason })}
         error={attempted ? problem : undefined}
         length={reason.length}
         maxLength={max}

@@ -105,7 +105,7 @@ describe('Live aqueduct on the plumber home', () => {
     TEST_TIMEOUT_MS,
   );
 
-  it('asks for a reason long enough before it sends anything', async () => {
+  it('asks for a reason long enough when one is written, before it sends anything', async () => {
     const backend = renderHome();
     const user = userEvent.setup();
 
@@ -121,6 +121,28 @@ describe('Live aqueduct on the plumber home', () => {
     ).toBeVisible();
     expect(backend.state.commands).toHaveLength(0);
   });
+
+  it(
+    'sends the default reason when the reason is left empty',
+    async () => {
+      const backend = renderHome();
+      const user = userEvent.setup();
+
+      await user.click(
+        await screen.findByRole('button', { name: t('valves.openNamed', { valve: HIGH_VALVE }) }),
+      );
+      const dialog = await screen.findByRole('dialog');
+      await within(dialog).findByLabelText(t('valveControl.reasonLabel'));
+      await user.click(within(dialog).getByRole('button', { name: t('valveLever.noSlideOpen') }));
+
+      await waitFor(() => expect(backend.state.commands).toHaveLength(1));
+      expect(backend.state.commands[0]).toMatchObject({
+        command: 'OPEN',
+        manual_reason: t('valveControl.defaultReason'),
+      });
+    },
+    TEST_TIMEOUT_MS,
+  );
 
   it('only shows the valve to a person without permission to move it', async () => {
     renderHome(VIEWER);
