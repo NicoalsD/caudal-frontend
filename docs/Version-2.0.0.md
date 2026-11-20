@@ -1,5 +1,7 @@
 # Versión 2.0.0 del frontend
 
+> **Cambio de alcance B2B (2026-11-20).** Este documento describe la versión con Junta, familias y cola sin conexión. Las pantallas por rol de abajo, la Junta y el editor de regiones salen del producto. El alcance nuevo está en `PRODUCT.md` y en `AGENTS.md`, sección 1. Se conserva como registro.
+
 Pantallas nuevas por rol sobre el contrato v2 del backend (`API.md`, sección 20).
 
 ## Pantallas por rol
