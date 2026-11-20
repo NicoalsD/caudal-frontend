@@ -1,7 +1,10 @@
 import { strings } from '../src/i18n/es';
 import { BOARD_ADMIN_USERNAME, OPERATOR_USERNAME, SEED_PASSWORD } from './support/constants';
 import { chooseInstitution } from './support/session';
+import institutions from './fixtures/institutions.json' with { type: 'json' };
 import { expect, expectNoSeriousViolations, test } from './support/fixtures';
+
+const INSTITUTION_SLUG = institutions.items[0]?.slug ?? '';
 
 test.describe('Entrada a la aplicación', () => {
   test('la portada lleva al login y el login rechaza una contraseña incorrecta', async ({
@@ -54,7 +57,8 @@ test.describe('Entrada a la aplicación', () => {
       }).observe(document, { subtree: true, childList: true });
     });
     const refreshed = page.waitForResponse((response) => response.url().endsWith('/auth/refresh'));
-    await page.goto('/login');
+    // The credentials step of the two-step login, reached directly by its link.
+    await page.goto(`/i/${INSTITUTION_SLUG}/login`);
     await page.getByLabel(strings.auth.username, { exact: true }).fill(OPERATOR_USERNAME);
     await page.getByLabel(strings.auth.password, { exact: true }).fill(SEED_PASSWORD);
     await refreshed;
@@ -88,7 +92,11 @@ test.describe('Entrada a la aplicación', () => {
     await expectNoSeriousViolations(page);
 
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: strings.screens.login })).toBeVisible();
+    await expect(page.getByRole('heading', { name: strings.auth.institution.title })).toBeVisible();
+    await expectNoSeriousViolations(page);
+
+    await page.goto(`/i/${INSTITUTION_SLUG}/login`);
+    await expect(page.getByLabel(strings.auth.password, { exact: true })).toBeVisible();
     await expectNoSeriousViolations(page);
   });
 });
