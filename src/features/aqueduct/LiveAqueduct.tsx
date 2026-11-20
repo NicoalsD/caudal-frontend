@@ -4,23 +4,18 @@ import type { JSX, ReactNode } from 'react';
 import { t } from '../../i18n/t';
 import { useLiveAqueduct } from '../../state/hooks/useLiveAqueduct';
 import type { LiveAqueduct as LiveAqueductData } from '../../state/hooks/useLiveAqueduct';
-import { usePermission } from '../../state/hooks/usePermission';
 import { Button } from '../../ui/primitives/Button';
 import { LoadingState } from '../../ui/feedback/LoadingState';
 import { AqueductCanvas } from '../../ui/scene/AqueductCanvas';
 import { cn } from '../../ui/styles/cn';
 import styles from './Aqueduct.module.css';
-import { PERMISSION_VALVE_COMMAND } from './permissions';
 import { toSceneFrame } from './sceneFrame';
 import { ValveControlDialog } from './ValveControlDialog';
-import { ValveList } from './ValveList';
 
 export interface LiveAqueductParts {
   readonly aqueduct: LiveAqueductData;
   /** The 3D scene with its note when the live valves are lost. */
   readonly scene: JSX.Element;
-  /** The accessible list of valves; it opens the same dialog as a click on the scene. */
-  readonly valveList: JSX.Element;
   /** Lights a valve in the scene, as the pointer does (null turns it off). */
   readonly highlight: (valveId: string | null) => void;
   /** Opens the dialog that moves a valve; it does nothing on a look-only scene. */
@@ -45,8 +40,8 @@ interface LiveAqueductProps {
 }
 
 /**
- * The live aqueduct: the 3D scene of the tank and its valves, the list that says the same in
- * words, and the dialog that moves a valve. Data comes every 2 seconds from useLiveAqueduct.
+ * The live aqueduct: the 3D scene of the tank and its valves and the dialog that moves a valve.
+ * The regions list (RegionList) says the same in words and opens the same dialog. Data comes every 2 seconds from useLiveAqueduct.
  */
 export function LiveAqueduct({
   children,
@@ -56,7 +51,6 @@ export function LiveAqueduct({
   const live = useLiveAqueduct();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lit, setLit] = useState<string | null>(null);
-  const canControl = usePermission(PERMISSION_VALVE_COMMAND) && !readOnly;
 
   const aqueduct = live.status === 'ready' ? live.aqueduct : null;
   const frame = useMemo(() => {
@@ -90,21 +84,12 @@ export function LiveAqueduct({
       )}
     </div>
   );
-  const valveList = (
-    <ValveList
-      valves={aqueduct.valves}
-      canControl={canControl}
-      onOpen={setSelectedId}
-      onFocusValve={setLit}
-    />
-  );
   return (
     <>
       {children(
         {
           aqueduct,
           scene,
-          valveList,
           highlight: setLit,
           openValve: (valveId) => {
             if (!readOnly) {

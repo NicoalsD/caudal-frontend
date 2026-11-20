@@ -1,0 +1,127 @@
+/* What there is to decide now: a calm card, first on the screen. One heading, one reason, the
+   two actions and a quiet line of facts. No dark field, no competing figures. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  transition: border-color var(--duration-base) var(--ease-standard);
+}
+
+.card[data-has-decision='true'] {
+  border-color: var(--color-ochre-700);
+  box-shadow: var(--shadow-soft);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 62ch;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.quietTitle {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-h3);
+}
+
+.reason {
+  margin: 0;
+  color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  list-style: none;
+}
+
+.facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.facts svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.meta {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.pagerButton {
+  display: grid;
+  width: var(--target-min);
+  height: var(--target-min);
+  place-items: center;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.pagerButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagerButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.footer {
+  margin-block-start: var(--space-1);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

@@ -2,39 +2,41 @@ import { useState } from 'react';
 import type { JSX } from 'react';
 import { Bot, Check, ChevronLeft, ChevronRight, Cpu, MapPin, X } from 'lucide-react';
 
-import type { RegionView } from '../../../core/console/regions';
-import { regionOfValve } from '../../../core/console/regions';
-import { formatDecimal } from '../../../core/format/decimal';
-import type { LiveValve } from '../../../core/scene/sceneModel';
-import { lower } from '../../../i18n/lower';
-import { t } from '../../../i18n/t';
-import type { AutopilotDecisionView } from '../../../services/api/views';
-import { useDecisionActions, useDecisions } from '../../../state/hooks/useAutopilot';
-import { usePermission } from '../../../state/hooks/usePermission';
-import { Button } from '../../../ui/primitives/Button';
-import { cn } from '../../../ui/styles/cn';
-import { AutopilotModeControl } from '../../aqueduct/AutopilotModeControl';
-import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from '../../aqueduct/permissions';
-import { recommendationTitle } from '../../aqueduct/recommendationText';
-import styles from './Console.module.css';
+import type { RegionView } from '../../core/console/regions';
+import { regionOfValve } from '../../core/console/regions';
+import { formatDecimal } from '../../core/format/decimal';
+import type { LiveValve } from '../../core/scene/sceneModel';
+import { lower } from '../../i18n/lower';
+import { t } from '../../i18n/t';
+import type { AutopilotDecisionView } from '../../services/api/views';
+import { useDecisionActions, useDecisions } from '../../state/hooks/useAutopilot';
+import { usePermission } from '../../state/hooks/usePermission';
+import { Button } from '../../ui/primitives/Button';
+import { cn } from '../../ui/styles/cn';
+import { AutopilotModeControl } from './AutopilotModeControl';
+import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from './permissions';
+import { recommendationTitle } from './recommendationText';
+import styles from './NowCard.module.css';
 
+const noop = (): void => undefined;
 const PERCENT = 100;
 const WHOLE = 0;
-const TITLE_ID = 'console-decision-title';
+const TITLE_ID = 'now-card-title';
 
-interface DecisionBandProps {
+interface NowCardProps {
   readonly valves: readonly LiveValve[];
   readonly regions: readonly RegionView[];
   /** Lights the valve the recommendation is about while the person looks at it. */
-  readonly onFocusValve: (valveId: string | null) => void;
+  readonly onFocusValve?: (valveId: string | null) => void;
 }
 
 /**
- * The band at the top of the console: what the pilot proposes now, in one big sentence, with its
- * reason, its source and its confidence, Accept and Reject, and the pilot's mode at the side.
- * Hovering or focusing the band lights the valve in the 3D scene.
+ * What there is to decide now, first on the screen: the pilot's recommendation as a plain
+ * sentence with its reason, Accept and Reject, and one quiet line with its region, source and
+ * confidence. Without a recommendation it says so in one line. The pilot's mode closes the card.
+ * Pointing at the card lights the valve in the 3D scene.
  */
-export function DecisionBand({ valves, regions, onFocusValve }: DecisionBandProps): JSX.Element {
+export function NowCard({ valves, regions, onFocusValve = noop }: NowCardProps): JSX.Element {
   const allowed = usePermission(PERMISSION_ASSISTANT);
   const pending = useDecisions('PENDING', allowed);
   const [index, setIndex] = useState(0);
@@ -75,7 +77,8 @@ export function DecisionBand({ valves, regions, onFocusValve }: DecisionBandProp
 
   return (
     <section
-      className={cn(styles.band)}
+      className={cn(styles.card)}
+      data-has-decision={decision !== null}
       aria-label={t('console.bandLabel')}
       onPointerEnter={light}
       onPointerLeave={dim}
@@ -86,8 +89,8 @@ export function DecisionBand({ valves, regions, onFocusValve }: DecisionBandProp
         }
       }}
     >
-      <div className={cn(styles.bandMain)}>{body}</div>
-      <div className={cn(styles.bandSide)}>
+      {body}
+      <div className={cn(styles.footer)}>
         <AutopilotModeControl compact />
       </div>
     </section>
@@ -104,11 +107,11 @@ function Quiet({
   readonly alert?: boolean;
 }): JSX.Element {
   return (
-    <div className={cn(styles.bandText)}>
-      <h2 id={TITLE_ID} className={cn(styles.bandTitle, styles.bandTitleQuiet)}>
+    <div className={cn(styles.text)}>
+      <h2 id={TITLE_ID} className={cn(styles.quietTitle)}>
         {title}
       </h2>
-      <p className={cn(styles.bandReason)} role={alert ? 'alert' : undefined}>
+      <p className={cn(styles.reason)} role={alert ? 'alert' : undefined}>
         {text}
       </p>
     </div>
@@ -144,12 +147,12 @@ function Recommendation({
 
   return (
     <>
-      <div className={cn(styles.bandText)}>
-        <h2 id={TITLE_ID} className={cn(styles.bandTitle)}>
+      <div className={cn(styles.text)}>
+        <h2 id={TITLE_ID} className={cn(styles.title)}>
           {recommendationTitle(decision, valves)}
         </h2>
-        <p className={cn(styles.bandReason)}>{decision.reason}</p>
-        <ul className={cn(styles.bandFacts)}>
+        <p className={cn(styles.reason)}>{decision.reason}</p>
+        <ul className={cn(styles.facts)}>
           {region === null ? null : (
             <li>
               <MapPin aria-hidden="true" />
@@ -167,10 +170,10 @@ function Recommendation({
           </li>
         </ul>
       </div>
-      <div className={cn(styles.bandActions)}>
+      <div className={cn(styles.actions)}>
         {movesValve && canAccept ? (
           <Button
-            variant="onDark"
+            variant="primary"
             disabled={busy}
             onClick={() => {
               accept.mutate(decision.id);
@@ -181,8 +184,7 @@ function Recommendation({
           </Button>
         ) : null}
         <Button
-          variant="ghost"
-          className={cn(styles.outlineOnDark)}
+          variant="secondary"
           disabled={busy}
           onClick={() => {
             reject.mutate(decision.id);
@@ -221,20 +223,20 @@ function Recommendation({
           </div>
         ) : null}
         {movesValve && !canAccept ? (
-          <p className={cn(styles.bandMeta)}>{t('assistant.cannotAccept')}</p>
+          <p className={cn(styles.meta)}>{t('assistant.cannotAccept')}</p>
         ) : null}
         {failure === null ? null : (
-          <p role="alert" className={cn(styles.bandMeta)}>
+          <p role="alert" className={cn(styles.meta)}>
             {failure}
           </p>
         )}
         {accept.isSuccess ? (
-          <p role="status" className={cn(styles.bandMeta)}>
+          <p role="status" className={cn(styles.meta)}>
             {t('assistant.accepted')}
           </p>
         ) : null}
         {reject.isSuccess ? (
-          <p role="status" className={cn(styles.bandMeta)}>
+          <p role="status" className={cn(styles.meta)}>
             {t('assistant.rejected')}
           </p>
         ) : null}

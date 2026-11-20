@@ -68,12 +68,7 @@ export function AutopilotModeControl({
             {t('autopilot.currentMode', { mode: t(`autopilot.mode.${lower(current.mode)}`) })}
           </p>
           {canConfigure ? (
-            <Button
-              variant="ghost"
-              className={cn(styles.modeInlineButton)}
-              disabled={update.isPending}
-              onClick={toggle}
-            >
+            <Button variant="ghost" disabled={update.isPending} onClick={toggle}>
               {toggleText}
             </Button>
           ) : (

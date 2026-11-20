@@ -37,15 +37,17 @@ function renderHome(user = OPERATOR, settings?: Parameters<typeof createLiveBack
 }
 
 describe('Live aqueduct on the plumber home', () => {
-  it('lists every active valve with its state, so the keyboard reaches what the scene draws', async () => {
+  it('gives every active valve a named button in its region, so the keyboard reaches the scene', async () => {
     renderHome();
 
-    const list = await screen.findByRole('list', { name: t('valves.listTitle') });
-    const rows = within(list).getAllByRole('listitem');
-    expect(rows).toHaveLength(ACTIVE_VALVES);
-    expect(within(rows[0]!).getByText(SCHOOL_VALVE)).toBeVisible();
-    expect(within(rows[0]!).getByText(t('valves.state.open'))).toBeVisible();
-    expect(within(rows[1]!).getByText(t('valves.state.closed'))).toBeVisible();
+    expect(
+      await screen.findByRole('button', { name: t('valves.closeNamed', { valve: SCHOOL_VALVE }) }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: t('valves.openNamed', { valve: HIGH_VALVE }) }),
+    ).toBeVisible();
+    const dock = screen.getByRole('list', { name: t('console.regionsLabel') });
+    expect(within(dock).getAllByRole('button')).toHaveLength(ACTIVE_VALVES);
     expect(screen.getByRole('region', { name: t('console.sceneLabel') })).toBeVisible();
   });
 
@@ -227,13 +229,14 @@ describe('Autopilot mode and assistant panel', () => {
     const backend = renderHome();
     const user = userEvent.setup();
 
-    await user.type(await screen.findByLabelText(t('assistant.askTitle')), '¿Alcanza el agua?');
-    await user.click(screen.getByRole('button', { name: t('assistant.askSubmit') }));
+    await user.click(await screen.findByRole('button', { name: t('chat.open') }));
+    const panel = await screen.findByRole('dialog', { name: t('chat.title') });
+    await user.type(within(panel).getByLabelText(t('assistant.askLabel')), '¿Alcanza el agua?');
+    await user.click(within(panel).getByRole('button', { name: t('assistant.askSubmit') }));
 
-    expect(await screen.findByText('El tanque alcanza para dos turnos más.')).toBeVisible();
-    expect(
-      screen.getByText(t('assistant.answerSource', { source: t('assistant.source.rules') })),
-    ).toBeVisible();
+    expect(await within(panel).findByText('El tanque alcanza para dos turnos más.')).toBeVisible();
+    expect(within(panel).getByText(t('assistant.source.rules'))).toBeVisible();
+    expect(within(panel).getByText('¿Alcanza el agua?')).toBeVisible();
     expect(backend.state.questions).toEqual(['¿Alcanza el agua?']);
   });
 });

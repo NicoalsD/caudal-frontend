@@ -439,20 +439,13 @@
 .sceneWrap .sceneHint {
   position: absolute;
   z-index: 4;
-  inset-inline-end: var(--space-5);
-  inset-block-start: 2.75rem;
+  inset-inline-start: var(--space-4);
+  inset-block-end: var(--space-3);
   margin: 0;
-  max-width: 16rem;
-  text-align: end;
-  padding: 0.125rem var(--space-3);
-  font-size: var(--font-size-small);
+  font-size: 0.875rem;
   color: var(--color-on-brand);
-  background: color-mix(in srgb, var(--scene-field-bottom) 70%, transparent);
-  border-radius: var(--radius-control);
-  opacity: 0.85;
+  opacity: 0.7;
   pointer-events: none;
-  /* The tip is read once; then it leaves the labels of the scene alone. */
-  animation: scene-hint-out var(--duration-slow) var(--ease-standard) 7s forwards;
 }
 
 @keyframes scene-hint-out {
@@ -495,13 +488,13 @@
   }
 }
 
-/* ---- The pilot on one line (the decision band of the console) ---- */
+/* ---- The pilot on one line (the foot of the "now" card) ---- */
 
 .modeInline {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
 }
 
 .modeInlineName {
@@ -509,22 +502,20 @@
   align-items: center;
   gap: var(--space-2);
   margin: 0;
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-display);
-  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
 }
 
 .modeInlineName svg {
-  width: 1.375rem;
-  height: 1.375rem;
+  width: 1.125rem;
+  height: 1.125rem;
   flex: none;
+  color: var(--color-water-700);
 }
 
 .modeInlineMeta {
   margin: 0;
-  font-size: var(--font-size-small);
-  color: var(--color-rail-fg);
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
 }
 
 .visuallyHidden {
@@ -537,15 +528,6 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
-}
-
-.modeInlineButton {
-  color: var(--color-on-brand);
-  border-color: color-mix(in srgb, var(--color-on-brand) 55%, transparent);
-}
-
-.modeInlineButton:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
 }
 
 /* ---- The question box in a narrow column: one field with its button at the side ---- */
