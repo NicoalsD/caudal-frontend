@@ -229,9 +229,16 @@ export function AskCard({
             {t('assistant.tooLong')}
           </p>
         ) : null}
-        <Button type="submit" variant="onDark" disabled={ask.isPending || question.trim() === ''}>
+        <Button
+          type="submit"
+          variant="onDark"
+          className={cn(compact && styles.askIconButton)}
+          disabled={ask.isPending || question.trim() === ''}
+        >
           <Send aria-hidden="true" />
-          {ask.isPending ? t('assistant.asking') : t('assistant.askSubmit')}
+          <span className={cn(compact && styles.visuallyHidden)}>
+            {ask.isPending ? t('assistant.asking') : t('assistant.askSubmit')}
+          </span>
         </Button>
       </form>
       {ask.isError ? (

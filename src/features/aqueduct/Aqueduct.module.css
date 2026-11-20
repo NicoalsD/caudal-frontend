@@ -575,3 +575,9 @@
 .askCompact .askTitle {
   font-size: var(--font-size-h2);
 }
+
+.askIconButton {
+  width: var(--target-min);
+  min-width: var(--target-min);
+  padding: 0;
+}
