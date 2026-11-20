@@ -1,0 +1,123 @@
+import type { Role } from './roles';
+
+/** Public path prefix (architecture.md section 4). Change here only. */
+const PUBLIC_PREFIX = '/a';
+
+/** Route paths by actor. Every route not listed here answers 404 (deny by default). */
+export const ROUTE_PATHS = {
+  root: '/',
+  login: '/login',
+  /** Second step of the sign in: the institution is already chosen (`/i/maqueta-caudal/login`). */
+  institutionLogin: '/i/:institutionSlug/login',
+  changePassword: '/cambiar-contrasena',
+  privacyNotice: '/aviso-de-privacidad',
+  tank: '/tanque',
+  public: {
+    schedule: `${PUBLIC_PREFIX}/:aqueductSlug`,
+    damageReport: `${PUBLIC_PREFIX}/:aqueductSlug/reportar-dano`,
+    /** Without the code it is the entry form; the static word wins over :aqueductSlug. */
+    tracking: `${PUBLIC_PREFIX}/seguimiento/:trackingCode?`,
+  },
+  operator: {
+    base: '/operador',
+    home: '/operador/inicio',
+    newReading: '/operador/lectura/nueva',
+    pending: '/operador/pendientes',
+    dayClosure: '/operador/cierre/:date',
+    damage: '/operador/dano',
+  },
+  board: {
+    base: '/junta',
+    tank: '/junta/tanque',
+    proposals: '/junta/propuestas',
+    proposalDetail: '/junta/propuestas/:id',
+    proposalEdit: '/junta/propuestas/:id/editar',
+    publication: '/junta/publicacion',
+    rules: '/junta/reglas',
+    ruleDetail: '/junta/reglas/:id',
+    ruleHistory: '/junta/reglas/:id/historial',
+    network: '/junta/red',
+    minutes: '/junta/actas',
+    incidents: '/junta/incidentes',
+    entities: '/junta/entidades',
+    users: '/junta/usuarios',
+    autopilot: '/junta/piloto',
+    regions: '/junta/regiones',
+    reports: '/junta/reportes',
+  },
+  team: {
+    base: '/equipo',
+    evaluation: '/equipo/evaluacion',
+    health: '/equipo/salud',
+    devices: '/equipo/dispositivos',
+    audit: '/equipo/auditoria',
+    imports: '/equipo/importacion',
+  },
+  entity: {
+    base: '/entidad',
+    summaries: '/entidad/resumenes',
+  },
+} as const;
+
+/** Path of the credentials step for one institution. The slug is encoded, never trusted as HTML. */
+export function institutionLoginPath(slug: string): string {
+  return `/i/${encodeURIComponent(slug)}/login`;
+}
+
+/** First screen of each role after signing in. */
+export const HOME_PATH_BY_ROLE: Readonly<Record<Role, string>> = {
+  OPERATOR: ROUTE_PATHS.operator.home,
+  BOARD_ADMIN: ROUTE_PATHS.board.tank,
+  BOARD_MEMBER: ROUTE_PATHS.board.tank,
+  INSTITUTION_ADMIN: ROUTE_PATHS.board.tank,
+  PROJECT_TEAM: ROUTE_PATHS.team.evaluation,
+  SUPPORT_ENTITY: ROUTE_PATHS.entity.summaries,
+  VIEWER: ROUTE_PATHS.board.tank,
+};
+
+/** Roles that may open each route family. Guards use these lists for UX only. */
+export const ROLES_BY_AREA = {
+  operator: ['OPERATOR'],
+  /** The Board's screens. The viewer has its own list for the tank panel (below). */
+  board: ['BOARD_ADMIN', 'BOARD_MEMBER', 'INSTITUTION_ADMIN'],
+  /** The tank panel, read-only for the viewer (no VALVE_COMMAND_MANUAL). */
+  boardTank: ['BOARD_ADMIN', 'BOARD_MEMBER', 'INSTITUTION_ADMIN', 'VIEWER'],
+  boardAdmin: ['BOARD_ADMIN', 'INSTITUTION_ADMIN'],
+  team: ['PROJECT_TEAM'],
+  /** The AI evaluation: the project team, and the institution's administrator (seed V45: every permission). */
+  evaluation: ['BOARD_ADMIN', 'INSTITUTION_ADMIN', 'PROJECT_TEAM'],
+  /** The audit log is read by the institution's administrator and by the project team (seed V45). */
+  audit: ['BOARD_ADMIN', 'INSTITUTION_ADMIN', 'PROJECT_TEAM'],
+  /** Devices are managed by the institution's administrator and the project team (DEVICE_MANAGE, API.md 16.9). */
+  devices: ['BOARD_ADMIN', 'INSTITUTION_ADMIN', 'PROJECT_TEAM'],
+  entity: ['SUPPORT_ENTITY'],
+  tank: ['OPERATOR', 'BOARD_ADMIN', 'BOARD_MEMBER', 'INSTITUTION_ADMIN', 'PROJECT_TEAM', 'VIEWER'],
+} as const satisfies Record<string, readonly Role[]>;
+
+/**
+ * Who may open each private path, the most specific first. Same lists as the guards of the router:
+ * a role change there must change here too.
+ */
+const ROLES_BY_PATH: readonly (readonly [string, readonly Role[]])[] = [
+  [ROUTE_PATHS.board.users, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.entities, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.regions, ROLES_BY_AREA.boardAdmin],
+  [ROUTE_PATHS.board.tank, ROLES_BY_AREA.boardTank],
+  [ROUTE_PATHS.board.base, ROLES_BY_AREA.board],
+  [ROUTE_PATHS.team.evaluation, ROLES_BY_AREA.evaluation],
+  [ROUTE_PATHS.team.audit, ROLES_BY_AREA.audit],
+  [ROUTE_PATHS.team.devices, ROLES_BY_AREA.devices],
+  [ROUTE_PATHS.team.base, ROLES_BY_AREA.team],
+  [ROUTE_PATHS.operator.base, ROLES_BY_AREA.operator],
+  [ROUTE_PATHS.entity.base, ROLES_BY_AREA.entity],
+  [ROUTE_PATHS.tank, ROLES_BY_AREA.tank],
+];
+
+/** False when the path belongs to an area closed to the role; any other path is not ours to judge. */
+export function canRoleOpenPath(role: Role, path: string): boolean {
+  const pathname = path.split(/[?#]/, 1)[0] ?? path;
+  const area = ROLES_BY_PATH.find(
+    ([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  return area === undefined || area[1].includes(role);
+}

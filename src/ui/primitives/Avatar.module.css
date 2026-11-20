@@ -1,0 +1,54 @@
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+  line-height: 1;
+  user-select: none;
+}
+
+.sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.8125rem;
+}
+
+.md {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1rem;
+}
+
+.lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.25rem;
+}
+
+.aqua {
+  background: var(--color-tint-aqua);
+}
+
+.mint {
+  background: var(--color-tint-mint);
+}
+
+.sand {
+  background: var(--color-tint-sand);
+}
+
+.coral {
+  background: var(--color-tint-coral);
+}
+
+.lavender {
+  background: var(--color-tint-lavender);
+}
+
+.dark {
+  background: var(--color-frame);
+  color: var(--color-on-brand);
+}

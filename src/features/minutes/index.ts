@@ -1,0 +1,1 @@
+export { MinutesPage } from './MinutesPage';

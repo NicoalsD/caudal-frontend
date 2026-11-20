@@ -1,0 +1,93 @@
+/* Public pages: the tinted canvas, a brand bar with rounded corners and one white sheet. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 100dvh;
+  padding: var(--space-3);
+  background: var(--color-canvas);
+}
+
+.skipLink {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: calc(-1 * var(--target-min) - var(--space-4));
+  min-height: var(--target-min);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-water-700);
+  color: var(--color-raised);
+  border-radius: var(--radius-control);
+  z-index: 3;
+}
+
+.skipLink:focus {
+  inset-block-start: var(--space-2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-frame);
+  color: var(--color-on-brand);
+  border-radius: var(--radius-card);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  margin: 0;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 64rem;
+  min-width: 0;
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--shadow-soft);
+}
+
+.main h1 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-page-title);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--tracking-display);
+}
+
+@media (min-width: 48rem) {
+  .page {
+    padding: var(--space-5);
+  }
+
+  .main {
+    padding: var(--space-6);
+  }
+}
+
+@media print {
+  .page {
+    display: block;
+    padding: 0;
+    background: #fff;
+  }
+
+  .skipLink,
+  .header {
+    display: none;
+  }
+
+  .main {
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+  }
+}

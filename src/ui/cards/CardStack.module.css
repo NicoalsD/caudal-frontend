@@ -1,0 +1,60 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stack {
+  display: grid;
+  margin: 0;
+  padding: var(--space-4) var(--space-6) var(--space-4) var(--space-2);
+  list-style: none;
+  border-radius: var(--radius-card);
+}
+
+/* Every slot sits in the same cell; the offset spreads them like a hand of cards. */
+.slot {
+  grid-area: 1 / 1;
+  position: relative;
+  min-width: 0;
+  z-index: calc(10 - var(--distance));
+  transform-origin: 0 100%;
+  transform: translateX(calc(var(--offset) * 9%)) translateY(calc(var(--distance) * 0.5rem))
+    rotate(calc(var(--offset) * 2.5deg)) scale(calc(1 - var(--distance) * 0.05));
+  opacity: calc(1 - var(--distance) * 0.18);
+  transition:
+    transform var(--duration-slow) var(--ease-standard),
+    opacity var(--duration-base) var(--ease-standard);
+}
+
+.slot[data-front='false'] {
+  filter: saturate(0.85);
+}
+
+.card {
+  height: 100%;
+}
+
+.pick {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-card);
+  cursor: pointer;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.position {
+  min-width: 4.5rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}

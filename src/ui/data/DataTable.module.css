@@ -1,0 +1,139 @@
+/*
+ * When the table is wider than its box, the edge that hides more columns fades out, so a cut column
+ * reads as "scroll me" instead of as a broken layout. Browsers without scroll timelines skip it.
+ */
+@property --table-fade-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --table-fade-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.scroll {
+  overflow-x: auto;
+  border-radius: var(--radius-card);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-brand-400) transparent;
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--table-fade-start),
+      black calc(100% - var(--table-fade-end)),
+      transparent
+    );
+    animation: table-edges linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+
+@keyframes table-edges {
+  from {
+    --table-fade-start: 0;
+    --table-fade-end: 3rem;
+  }
+
+  to {
+    --table-fade-start: 3rem;
+    --table-fade-end: 0;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--space-1);
+  font-size: var(--font-size-small);
+}
+
+.caption {
+  padding-block-end: var(--space-3);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  text-align: start;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.th {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-bold);
+  text-align: start;
+  vertical-align: bottom;
+}
+
+.td {
+  padding: var(--space-4) var(--space-3);
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+  border-block: 1px solid transparent;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.td:first-child {
+  border-start-start-radius: var(--radius-control);
+  border-end-start-radius: var(--radius-control);
+}
+
+.td:last-child {
+  border-start-end-radius: var(--radius-control);
+  border-end-end-radius: var(--radius-control);
+}
+
+.row:hover .td {
+  background: var(--color-surface-sunken);
+}
+
+.end {
+  text-align: end;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-5);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-brand-400);
+}
+
+.emptyTitle {
+  font-weight: var(--font-weight-bold);
+}
+
+.emptyText {
+  max-inline-size: var(--measure-prose);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+@media (max-width: 47.99rem) {
+  .narrow {
+    display: none;
+  }
+}

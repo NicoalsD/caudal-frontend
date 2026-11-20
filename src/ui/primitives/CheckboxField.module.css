@@ -1,0 +1,13 @@
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  cursor: pointer;
+}
+
+.box {
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--color-water-700);
+}

@@ -1,0 +1,48 @@
+.welcome {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.notice {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-tint-aqua);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-control);
+  font-weight: var(--font-weight-bold);
+}
+
+.help {
+  margin-top: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.formArea {
+  margin-top: var(--space-6);
+}
+
+.institutionBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+}
+
+.institutionBar p {
+  margin: 0;
+}
+
+.institutionLabel {
+  color: var(--color-text-secondary);
+}
+
+.retryButton {
+  margin-top: var(--space-3);
+}

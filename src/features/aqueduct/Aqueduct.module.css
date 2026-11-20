@@ -1,0 +1,565 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h2);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Valve dialog ---- */
+
+.beforeAfter {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.graphic {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-tile);
+  font-size: var(--font-size-small);
+}
+
+.graphicAccent {
+  background: var(--color-tint-hero);
+  border-color: var(--color-brand-500);
+}
+
+.graphicArt {
+  width: 100%;
+  height: auto;
+}
+
+.graphicCaption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  font-weight: var(--font-weight-bold);
+}
+
+.pipe {
+  fill: var(--color-border-strong);
+}
+
+.water {
+  fill: var(--color-brand-500);
+  transition: width var(--duration-slow) var(--ease-standard);
+}
+
+.valveBody {
+  fill: var(--color-brand-900);
+}
+
+.gate {
+  fill: var(--color-water-300);
+  transition:
+    y var(--duration-base) var(--ease-standard),
+    height var(--duration-base) var(--ease-standard);
+}
+
+.wheel {
+  fill: var(--color-text-primary);
+}
+
+.actionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.actionGroup legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.actionTiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.actionOption {
+  position: relative;
+  display: block;
+}
+
+.actionInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.actionFace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: calc(var(--target-min) * 1.25);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-tile);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.actionFace svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+}
+
+.actionInput:checked + .actionFace {
+  background: var(--color-water-700);
+  border-color: var(--color-water-700);
+  color: var(--color-surface);
+  box-shadow: var(--shadow-press);
+}
+
+.actionInput:focus-visible + .actionFace {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.summaryCard {
+  padding: var(--space-3) var(--space-4);
+}
+
+.summary {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.progress h3 {
+  margin: 0 0 var(--space-3);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-tile);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.steps li[data-done='true'] {
+  background: var(--color-tint-mint);
+  border-color: transparent;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.steps li[data-done='true'] svg {
+  color: var(--color-paramo-800);
+}
+
+.steps li[data-bad='true'] {
+  background: var(--color-tint-coral);
+  border-color: transparent;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.steps li[data-bad='true'] svg {
+  color: var(--color-clay-700);
+}
+
+.waiting {
+  font-size: var(--font-size-small);
+}
+
+/* ---- Valve cards ---- */
+
+.valveList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.valveCard {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.valveInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.valveName {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h2);
+}
+
+.valveChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-1);
+}
+
+.valveAction {
+  width: 100%;
+  min-height: calc(var(--target-min) * 1.25);
+}
+
+/* ---- Autopilot mode ---- */
+
+.modeBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.modeHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.modeIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-soft);
+}
+
+.modeIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.modeName {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.modeHelp {
+  margin: 0;
+}
+
+/* ---- Assistant ---- */
+
+.assistantBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.emptyCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.emptyCard p {
+  margin: 0;
+}
+
+.recommendation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-soft);
+}
+
+.recommendationHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.recommendationTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h2);
+}
+
+.reason {
+  margin: 0;
+}
+
+.askCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.askTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  line-height: var(--line-height-h2);
+}
+
+.askText {
+  margin: 0;
+  max-width: 28rem;
+}
+
+.askForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.askField {
+  width: 100%;
+  min-height: var(--field-height);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 2px solid transparent;
+  border-radius: var(--radius-tile);
+  color: var(--color-text-primary);
+  font: inherit;
+  resize: vertical;
+}
+
+.askField[aria-invalid='true'] {
+  border-color: var(--color-clay-700);
+}
+
+.askCounter {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-on-brand);
+  opacity: 0.85;
+}
+
+.askNear {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-on-brand);
+  text-decoration: underline;
+}
+
+.answerBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-tile);
+  color: var(--color-text-primary);
+}
+
+.answer {
+  margin: 0;
+}
+
+/* ---- Scene ---- */
+
+.sceneWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.sceneWrap > :first-child {
+  flex: 1 1 auto;
+}
+
+.sceneWrap .sceneHint {
+  position: absolute;
+  z-index: 4;
+  inset-inline-start: var(--space-4);
+  inset-block-end: var(--space-3);
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-on-brand);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@keyframes scene-hint-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.sceneNote {
+  position: absolute;
+  inset-inline: var(--space-4);
+  inset-block-start: 5.5rem;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-on-brand);
+  background: color-mix(in srgb, var(--scene-failed) 35%, var(--scene-field-bottom));
+  border-radius: var(--radius-control);
+}
+
+@media (max-width: 40rem) {
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sceneWrap .sceneHint {
+    display: none;
+  }
+
+  .sceneNote {
+    inset-block-start: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .water,
+  .gate,
+  .actionFace {
+    transition: none;
+  }
+}
+
+/* ---- The pilot on one line (the foot of the "now" card) ---- */
+
+.modeInline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.modeInlineName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.modeInlineName svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: none;
+  color: var(--color-water-700);
+}
+
+.modeInlineMeta {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- The question box in a narrow column: one field with its button at the side ---- */
+
+.askCompact {
+  gap: var(--space-2);
+}
+
+.askCompact .askText {
+  font-size: var(--font-size-small);
+}
+
+.askFormInline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.askFormInline .askField {
+  resize: none;
+}
+
+.askFormInline > :not(.askField, button) {
+  grid-column: 1 / -1;
+}
+
+.askCompact .askTitle {
+  font-size: var(--font-size-h2);
+}
+
+.askIconButton {
+  width: var(--target-min);
+  min-width: var(--target-min);
+  padding: 0;
+}

@@ -1,0 +1,221 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .columns {
+    grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: -0.02em;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.wrap {
+  display: block;
+  min-width: 12rem;
+  max-width: 32rem;
+  white-space: normal;
+}
+
+.modes {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-block-end: var(--space-3);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+}
+
+.modeGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.mode {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: var(--space-4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition:
+    box-shadow var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
+}
+
+.mode:hover {
+  box-shadow: var(--shadow-lift);
+  transform: translateY(var(--lift));
+}
+
+.tintSand {
+  background: var(--color-tint-sand);
+}
+
+.tintAqua {
+  background: var(--color-tint-aqua);
+}
+
+.tintMint {
+  background: var(--color-tint-mint);
+}
+
+.chosen {
+  border-color: var(--color-water-700);
+  box-shadow: var(--shadow-soft);
+}
+
+.modeInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.mode:has(:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.modeIcon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-soft);
+}
+
+.modeIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.modeText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.modeText strong {
+  font-size: var(--font-size-body);
+}
+
+.modeCheck {
+  width: 1.5rem;
+  height: 1.5rem;
+  opacity: 0;
+}
+
+.chosen .modeCheck {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode:hover {
+    transform: none;
+  }
+}
+
+.stack,
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.actions > * {
+  min-height: 48px;
+}
+
+.quiet {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.decision {
+  display: block;
+  white-space: nowrap;
+}
+
+.when {
+  display: block;
+  min-width: 7.5rem;
+}
+
+.meta {
+  display: block;
+  color: var(--color-text-secondary);
+}
+
+.scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 47.99rem) {
+  /* On a phone the decision wraps, so its state stays closer to the first screen of the table. */
+  .decision {
+    white-space: normal;
+  }
+
+  .when {
+    min-width: 5.5rem;
+  }
+}

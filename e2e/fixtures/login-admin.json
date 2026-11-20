@@ -1,0 +1,13 @@
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMTkwZjNhMi0wMDAwLTcwMDAtODAwMC0wMDAwMDAwMDAwMDIiLCJyb2xlIjoiQk9BUkRfQURNSU4iLCJhcXVlZHVjdF9pZCI6IjAxOTBmM2EyLTAwMDAtNzAwMC04MDAwLTAwMDAwMDAwMDBhYSIsInNlcmlhbCI6MX0.firma-de-prueba",
+  "token_type": "Bearer",
+  "expires_in": 900,
+  "user": {
+    "id": "0190f3a2-0000-7000-8000-000000000002",
+    "username": "junta.presidencia",
+    "full_name": "Persona Presidente",
+    "role": "BOARD_ADMIN",
+    "aqueduct_id": "0190f3a2-0000-7000-8000-0000000000aa",
+    "must_change_password": false
+  }
+}

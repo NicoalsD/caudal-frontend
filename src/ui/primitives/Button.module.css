@@ -1,0 +1,89 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-water-700);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(var(--lift));
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.primary {
+  background: var(--color-water-700);
+  color: var(--color-raised);
+  box-shadow: var(--shadow-press);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-water-800);
+  border-color: var(--color-water-800);
+  box-shadow: var(--shadow-lift);
+}
+
+.secondary {
+  background: var(--color-surface-raised);
+  color: var(--color-water-700);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-water-100);
+  box-shadow: var(--shadow-soft);
+}
+
+.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-water-700);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-water-100);
+}
+
+.onDark {
+  background: var(--color-on-brand);
+  border-color: var(--color-on-brand);
+  color: var(--color-brand-900);
+}
+
+.onDark:hover:not(:disabled) {
+  background: var(--color-brand-200);
+  border-color: var(--color-brand-200);
+  box-shadow: var(--shadow-lift);
+}
+
+.onDark:focus-visible {
+  outline-color: var(--color-on-brand);
+}
+
+.button:disabled {
+  background: var(--color-sand-200);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-secondary);
+  box-shadow: none;
+  cursor: not-allowed;
+}

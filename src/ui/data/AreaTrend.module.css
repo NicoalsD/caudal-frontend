@@ -1,0 +1,60 @@
+.figure {
+  width: 100%;
+  margin: 0;
+}
+
+.plot {
+  width: 100%;
+  height: 100%;
+}
+
+.stopTop {
+  stop-color: var(--color-brand-500);
+  stop-opacity: 0.45;
+}
+
+.stopBottom {
+  stop-color: var(--color-brand-500);
+  stop-opacity: 0.03;
+}
+
+.grid line {
+  stroke: var(--chart-grid);
+}
+
+.area {
+  stroke: var(--chart-line);
+}
+
+.dot {
+  fill: var(--color-water-700);
+  stroke: var(--color-surface);
+}
+
+.cursor {
+  stroke: var(--color-border-strong);
+  stroke-dasharray: 3 4;
+}
+
+.plot text {
+  fill: var(--color-text-secondary);
+}
+
+.pill {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-inverse-bg);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-inverse-fg);
+  font-size: var(--font-size-small);
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pill span {
+  font-size: 0.8125rem;
+  opacity: 0.8;
+}

@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000e1",
+      "name": "Tanque principal",
+      "gauge_min": 0,
+      "gauge_max": 5,
+      "gauge_step": 0.01,
+      "capacity_liters": 20000,
+      "is_active": true
+    }
+  ]
+}

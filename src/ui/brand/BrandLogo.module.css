@@ -1,0 +1,12 @@
+.image {
+  display: block;
+  width: auto;
+}
+
+.image.compact {
+  height: 2rem;
+}
+
+.image.large {
+  height: clamp(3rem, 8vw, 4.5rem);
+}

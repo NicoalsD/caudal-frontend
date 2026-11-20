@@ -1,0 +1,33 @@
+{
+  "0190f3a2-0000-7000-8000-0000000000d1": [
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000f1",
+      "code": "V1",
+      "name": "Válvula escuela",
+      "location_hint": "Junto a la cancha",
+      "is_motorized": false,
+      "fail_safe_position": "KEEP",
+      "is_active": true
+    }
+  ],
+  "0190f3a2-0000-7000-8000-0000000000d2": [
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000f2",
+      "code": "V2",
+      "name": "Válvula alta",
+      "location_hint": null,
+      "is_motorized": true,
+      "fail_safe_position": "CLOSED",
+      "is_active": true
+    },
+    {
+      "id": "0190f3a2-0000-7000-8000-0000000000f3",
+      "code": "V3",
+      "name": "Válvula alta 2",
+      "location_hint": null,
+      "is_motorized": false,
+      "fail_safe_position": "OPEN",
+      "is_active": false
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  color: var(--color-text-secondary);
+}
+
+.requirementMet {
+  color: var(--color-paramo-800);
+  font-weight: var(--font-weight-bold);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: var(--font-size-body);
+  height: var(--font-size-body);
+}

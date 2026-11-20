@@ -1,0 +1,109 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  padding: 0 var(--space-4);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.chip svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.aqua {
+  background: var(--color-tint-aqua);
+  border-color: transparent;
+}
+
+.mint {
+  background: var(--color-tint-mint);
+  border-color: transparent;
+}
+
+.sand {
+  background: var(--color-tint-sand);
+  border-color: transparent;
+}
+
+.coral {
+  background: var(--color-tint-coral);
+  border-color: transparent;
+}
+
+.lavender {
+  background: var(--color-tint-lavender);
+  border-color: transparent;
+}
+
+.filter {
+  min-height: var(--target-min);
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  cursor: pointer;
+  transition:
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.filter:hover {
+  background: var(--color-water-100);
+  box-shadow: var(--shadow-soft);
+}
+
+.filterLabel {
+  color: var(--color-text-secondary);
+}
+
+.chevron {
+  color: var(--color-text-secondary);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  font-weight: var(--font-weight-regular);
+  text-align: start;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--color-surface-sunken);
+}
+
+.option[aria-pressed='true'] {
+  background: var(--color-water-100);
+  font-weight: var(--font-weight-bold);
+}
+
+.check {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--color-water-700);
+}

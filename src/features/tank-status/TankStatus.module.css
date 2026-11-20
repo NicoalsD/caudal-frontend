@@ -1,0 +1,441 @@
+/* Shared by the tank screen (/tanque) and the Board's panorama: tokens only. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.head h1 {
+  margin: 0;
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.picker select {
+  min-height: var(--target-min);
+  font: inherit;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.muted {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The tank screen: hero tank at the left, tiles and chart at the right. */
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.tankCard {
+  min-width: 0;
+}
+
+.tankColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--space-4);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .overview {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+  }
+
+  .tankColumn {
+    position: sticky;
+    inset-block-start: var(--space-4);
+  }
+}
+
+/* What the level means, how it moves and when it was read. */
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.facts p {
+  margin: 0;
+}
+
+.meaning {
+  font-weight: var(--font-weight-bold);
+}
+
+.trendLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stale {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-tint-sand);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-control);
+}
+
+.stale strong {
+  color: var(--color-ochre-800);
+}
+
+.stale p {
+  margin: 0;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-soft);
+}
+
+.notice p {
+  margin: 0;
+}
+
+.noticeEstimate {
+  background: var(--color-tint-sand);
+}
+
+.noticeEstimate strong {
+  color: var(--color-ochre-800);
+}
+
+.summary {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--font-size-small);
+}
+
+.runAction {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.actions > * {
+  min-height: var(--target-min);
+}
+
+/* The chart. */
+.chartBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chartWrap {
+  width: 100%;
+  height: 20rem;
+}
+
+.chartWrap text {
+  fill: var(--color-text-secondary);
+}
+
+.chartGrid line {
+  stroke: var(--chart-grid);
+}
+
+.axis text {
+  fill: var(--color-text-secondary);
+}
+
+.stopTop {
+  stop-color: var(--color-brand-500);
+  stop-opacity: 0.45;
+}
+
+.stopBottom {
+  stop-color: var(--color-brand-500);
+  stop-opacity: 0.03;
+}
+
+.cursor {
+  stroke: var(--color-border-strong);
+  stroke-dasharray: 3 4;
+}
+
+.activeDot {
+  fill: var(--color-water-700);
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+}
+
+.pill {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-inverse-bg);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-inverse-fg);
+  font-size: var(--font-size-small);
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pill span {
+  font-size: 0.8125rem;
+  opacity: 0.8;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-small);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 1.5rem;
+  height: 0;
+  border-top: 3px solid var(--chart-line);
+}
+
+.swatchRead {
+  border-top-color: var(--chart-line);
+}
+
+.swatchMedian {
+  border-top-color: var(--color-water-700);
+  border-top-style: dashed;
+}
+
+.swatchRange {
+  height: 0.75rem;
+  border-top: 0;
+  background: var(--color-water-300);
+}
+
+.swatchReserve {
+  border-top-color: var(--color-clay-700);
+  border-top-style: dashed;
+}
+
+.swatchLimit {
+  border-top-width: 1px;
+  border-top-color: var(--color-border-strong);
+  border-top-style: dashed;
+}
+
+.swatchMedian.swatchEstimate {
+  border-top-color: var(--color-ochre-700);
+}
+
+.swatchRange.swatchEstimate {
+  background: var(--color-ochre-100);
+  outline: 1px dashed var(--color-ochre-700);
+}
+
+.numbers summary {
+  min-height: var(--target-min);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-water-700);
+  font-weight: var(--font-weight-bold);
+}
+
+.pointsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pointsTable th,
+.pointsTable td {
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.pointsTable th {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Anomalies to review. */
+.review {
+  gap: var(--space-3);
+}
+
+.reviewColumns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+.reviewColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reviewColumn h3 {
+  margin: 0;
+}
+
+.reviewEmpty p {
+  margin: 0;
+}
+
+.anomalyList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anomaly {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-control);
+}
+
+.anomaly p {
+  margin: 0;
+}
+
+@media (min-width: 64rem) {
+  .chartWrap {
+    height: 22rem;
+  }
+
+  .reviewColumns {
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  }
+
+  .anomaly {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .anomaly > p:first-child {
+    flex: 1 1 14rem;
+  }
+}
+
+/* ---- The chart without its card (the Board's panel) ---- */
+
+.plainChart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sourceLine {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.sourceLine svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.summaryLead {
+  padding: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  list-style: none;
+}

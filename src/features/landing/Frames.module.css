@@ -1,0 +1,34 @@
+/* Frames of the presentation page: the simulated-data mark and the phone around a real screen. */
+
+.simulated {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25em 0.75em;
+  background: var(--color-ochre-100);
+  color: var(--color-ochre-800);
+  border: 1px solid var(--color-ochre-700);
+  border-radius: var(--radius-chip);
+  font-size: 0.75em;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Frames */
+
+.phone {
+  /* The size of the captured screens: a 390 x 844 phone. */
+  aspect-ratio: 390 / 844;
+  padding: var(--device-bezel);
+  background: var(--color-bezel);
+  border-radius: var(--radius-device);
+  /* A thin rim keeps the dark phone visible against the dark page. */
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+}
+
+.phoneScreen {
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-page);
+  border-radius: calc(var(--radius-device) - var(--device-bezel));
+}

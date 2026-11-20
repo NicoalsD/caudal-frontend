@@ -1,0 +1,125 @@
+/* The scene lives on the deep brand field in light and dark mode alike. */
+.host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 22rem;
+  overflow: hidden;
+  /* The labels carry their own z-index (depth order); none of it may leave the scene. */
+  isolation: isolate;
+  container-type: inline-size;
+  color: var(--color-on-brand);
+  background: radial-gradient(
+    ellipse at 50% 20%,
+    var(--scene-field-top) 0%,
+    var(--scene-field-bottom) 75%
+  );
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  text-align: center;
+}
+
+/* Labels are DOM nodes placed by CSS2DRenderer. Colors say nothing alone: the text says it too. */
+.host [data-scene-label] {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-size-small);
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--color-on-brand);
+  background: color-mix(in srgb, var(--scene-field-bottom) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-on-brand) 28%, transparent);
+  border-radius: var(--radius-control);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-base) var(--ease-standard);
+}
+
+/* A ring or part label that would cover a valve or the tank steps aside (AqueductScene). */
+.host [data-scene-label][data-clash='true'] {
+  opacity: 0;
+}
+
+.host[data-readonly='true'] [data-scene-label] {
+  padding: 0.15rem 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.host [data-scene-label] > span:first-child {
+  font-weight: var(--font-weight-bold);
+}
+
+.host [data-scene-label='part'],
+.host [data-scene-label='ring'] {
+  padding: 0.1rem 0.4rem;
+  opacity: 0.8;
+}
+
+.host [data-scene-label='tank'] {
+  border-color: var(--scene-open);
+}
+
+.host [data-scene-label='valve'][data-state='open'] {
+  border-color: var(--scene-open);
+}
+
+.host [data-scene-label='valve'][data-state='closed'] {
+  border-color: var(--scene-closed);
+}
+
+.host [data-scene-label='valve'][data-state='unknown'] {
+  border-color: var(--scene-unknown);
+}
+
+.host [data-scene-label='valve'][data-command='pending'] {
+  border-color: var(--scene-pending);
+}
+
+.host [data-scene-label='valve'][data-command='delivered'] {
+  border-color: var(--scene-delivered);
+}
+
+.host [data-scene-label='valve'][data-command='failed'] {
+  border-color: var(--scene-failed);
+}
+
+.host [data-scene-label='valve'][data-hover='true'] {
+  box-shadow: 0 0 0 2px var(--color-on-brand);
+  background: var(--scene-field-bottom);
+  border-width: 2px;
+}
+
+/* A narrow scene (a phone) keeps each valve to its name and state, in smaller type. */
+@container (max-width: 30rem) {
+  .host [data-scene-label] {
+    padding: 0.15rem 0.375rem;
+    font-size: 0.8125rem;
+  }
+
+  .host [data-scene-label='valve'] > span:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .host [data-scene-label] {
+    transition: none;
+  }
+}

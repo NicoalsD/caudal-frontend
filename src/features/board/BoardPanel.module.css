@@ -1,0 +1,72 @@
+/* The Board's panel: one column of sections with room between them. The chart is the one large
+   element; the regions sit at its side on a desktop. */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding-block-end: var(--space-8);
+}
+
+.top {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .top {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-h2);
+}
+
+.mainGrid {
+  display: grid;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  padding-block-start: var(--space-5);
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+.more a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 64rem) {
+  .mainGrid {
+    grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+  }
+}

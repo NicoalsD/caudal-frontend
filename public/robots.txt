@@ -1,0 +1,13 @@
+# Solo la portada y las páginas públicas se indexan; las pantallas con sesión no.
+User-agent: *
+Allow: /
+Disallow: /operador
+Disallow: /junta
+Disallow: /equipo
+Disallow: /entidad
+Disallow: /tanque
+Disallow: /cambiar-contrasena
+Disallow: /aviso-de-privacidad
+Disallow: /a/seguimiento/
+
+Sitemap: https://caudal-frontend.vercel.app/sitemap.xml

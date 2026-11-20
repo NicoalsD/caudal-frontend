@@ -1,0 +1,357 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.actions > * {
+  flex: 1 1 12rem;
+}
+
+/* ---- Steps of the form: one card each, numbered, with a big touch target inside ---- */
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.stepHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.stepNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-brand-900);
+  color: var(--color-on-brand);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-display);
+}
+
+.tankLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+/* ---- Confirmation after saving ---- */
+
+.confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.confirmationHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.confirmationIcon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-paramo-800);
+}
+
+.confirmationIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.confirmation h2 {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.warning {
+  margin-top: var(--space-2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ochre-800);
+}
+
+.select {
+  min-height: var(--field-height);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-sunken);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-body);
+}
+
+/* ---- Queue and history: a list of cards, each with its state as a badge ---- */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.itemHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+
+.issueTitle {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+}
+
+.itemValue {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-stat);
+  font-weight: var(--font-weight-display);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-display);
+}
+
+.itemText {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.summaryHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.summaryText {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-section);
+  font-weight: var(--font-weight-display);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--line-height-display);
+}
+
+.notice {
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-paramo-800);
+}
+
+.notice:empty {
+  display: none;
+}
+
+/* The level is the one big field of the screen: a big figure, easy to reach with a thumb. */
+.gaugeInput {
+  min-height: calc(var(--target-min) * 1.5);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.submit {
+  width: 100%;
+  min-height: calc(var(--target-min) * 1.5);
+}
+
+.optional {
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-sunken);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  cursor: pointer;
+}
+
+.optionalBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.savedValue {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-stat);
+  font-weight: var(--font-weight-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.nextTitle {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-bold);
+}
+
+.help {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
+}
+
+/* The level field, with its slider and the gauge preview beside it on desktop only. On a phone
+   the field is the only control, full width, as before. */
+/* Step 1: the drawn ruler at the left, and beside it the number, its buttons and what it means. */
+.levelRow {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: var(--space-3) var(--space-4);
+  align-items: stretch;
+}
+
+.levelField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The field comes first for the keyboard and the screen reader; the eye meets the ruler first. */
+.levelRuler {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 19rem;
+}
+
+.levelField {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.nudges {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.nudge {
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding-inline: var(--space-2);
+}
+
+.nudge svg {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* On a phone the two buttons are the signs alone; their names stay for the screen reader. */
+.nudgeText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.meaning {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-control);
+  font-weight: var(--font-weight-bold);
+  text-wrap: pretty;
+}
+
+.meaning[data-warn='true'] {
+  background: var(--color-tint-coral);
+  color: var(--color-clay-700);
+}
+
+@media (min-width: 40rem) {
+  .levelRow {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .levelRuler {
+    grid-row: 1 / span 2;
+    min-height: 24rem;
+  }
+
+  .meaning {
+    grid-column: 2;
+    align-self: start;
+  }
+
+  .nudgeText {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+/* A form reads best in a column; on a wide screen it does not stretch across the whole sheet. */
+.readingForm {
+  max-width: 56rem;
+}
