@@ -17,7 +17,7 @@ const INTERNAL_ERROR = 500;
 const STALE_HOURS = 12;
 
 function renderStatus() {
-  return renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+  return renderApp(ROUTE_PATHS.tank, { user: BOARD });
 }
 
 describe('TankStatusPage (S12 status block)', () => {

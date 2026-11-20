@@ -1,57 +1,31 @@
-/* The Board's panel: one grid that fills the width on a desktop and is one column on a phone. */
+/* The Board's panel: one column of sections with room between them. The chart is the one large
+   element; the regions sit at its side on a desktop. */
+
 .panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  max-width: 76rem;
+  padding-block-end: var(--space-8);
+}
+
+.top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-auto-flow: dense;
-  gap: var(--space-5);
-  min-width: 0;
+  gap: var(--space-4);
+  align-items: start;
 }
 
-.panel > * {
-  min-width: 0;
+@media (min-width: 64rem) {
+  .top {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 }
 
-.head {
+.section {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.panorama {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.panoramaTitle {
-  margin: 0;
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-section);
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.02em;
-}
-
-/* Pastel tiles: one row across a desktop, two columns on a tablet, one on a phone. */
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-  grid-auto-rows: 1fr;
-  gap: var(--space-4);
-}
-
-.tiles > * {
-  align-content: center;
-}
-
-.coverage {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  min-width: 0;
 }
 
 .sectionHead {
@@ -60,369 +34,40 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  margin-block-end: var(--space-3);
 }
 
 .sectionTitle {
   margin: 0;
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-section);
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.02em;
-}
-
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.sectors,
-.history {
-  display: flex;
-  flex-direction: column;
-}
-
-.valveCell {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.valveCell > span:last-child {
-  display: flex;
-  flex-direction: column;
-}
-
-.valveCell strong {
-  white-space: nowrap;
-}
-
-.valveIcon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 2.5rem;
-  height: 2.5rem;
-  background: var(--color-tint-aqua);
-  border-radius: var(--radius-control);
-}
-
-.valveIcon svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.sub {
-  display: block;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-regular);
-}
-
-.quiet {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-
-/* The assistant and what it recommends, stacked beside the chart. */
-.side {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-/* The dark promotional card: the assistant, the last recommendation and the report. */
-.promo {
-  display: flex;
-}
-
-.promoBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  width: 100%;
-}
-
-.promoTitle {
-  margin: 0;
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-section);
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.02em;
-}
-
-.promoText,
-.promoHint {
-  margin: 0;
-  color: color-mix(in srgb, var(--color-on-brand) 88%, transparent);
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
-}
-
-.promoSub {
-  margin: 0;
-  font-size: var(--font-size-small);
+  font-size: 1.375rem;
   font-weight: var(--font-weight-bold);
-}
-
-.ask {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.askLabel {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.askRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.askInput {
-  flex: 1 1 100%;
-  min-width: 0;
-  min-height: var(--target-min);
-  padding: 0 var(--space-4);
-  background: color-mix(in srgb, var(--color-on-brand) 14%, transparent);
-  border: 2px solid color-mix(in srgb, var(--color-on-brand) 45%, transparent);
-  border-radius: var(--radius-pill);
-  color: var(--color-on-brand);
-  font: inherit;
-  font-size: var(--font-size-small);
-}
-
-.askInput::placeholder {
-  color: color-mix(in srgb, var(--color-on-brand) 75%, transparent);
-}
-
-.askInput:focus-visible {
-  outline: 3px solid var(--color-on-brand);
-  outline-offset: 2px;
-}
-
-.askInput[aria-invalid='true'] {
-  border-color: var(--color-on-brand);
-}
-
-.askButton {
-  gap: var(--space-2);
-}
-
-.askButton svg {
-  width: 1.125rem;
-  height: 1.125rem;
-}
-
-.answer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  background: color-mix(in srgb, var(--color-on-brand) 12%, transparent);
-  border-radius: var(--radius-control);
-}
-
-.answer p {
-  margin: 0;
-}
-
-.last {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-block-start: var(--space-4);
-  border-block-start: 1px solid color-mix(in srgb, var(--color-on-brand) 25%, transparent);
-}
-
-.lastTitle {
-  margin: 0;
-  font-weight: var(--font-weight-bold);
-}
-
-.promoActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.promoActions .promoLink {
-  background: transparent;
-  border: 2px solid color-mix(in srgb, var(--color-on-brand) 60%, transparent);
-  color: var(--color-on-brand);
-  box-shadow: none;
-}
-
-/* The 3D scene on the hero card; the wave at its top edge belongs to the card. */
-.scene {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.heroTitle {
-  margin: 0;
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-section);
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.02em;
-}
-
-.sceneBox {
-  flex: 1 1 auto;
-  height: 20rem;
-  overflow: hidden;
-  border-radius: var(--radius-surface);
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.sceneOpen {
-  margin-inline-start: auto;
-  gap: var(--space-2);
-}
-
-.sceneOpen svg {
-  width: 1.125rem;
-  height: 1.125rem;
-}
-
-.bigScene {
-  height: min(70vh, 40rem);
-}
-
-/* Recommendations fanned like a hand of cards. */
-.stackSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.stackEmpty {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  min-height: 12rem;
-}
-
-.stackEmpty svg {
-  flex: none;
-  width: 2rem;
-  height: 2rem;
-}
-
-.stackEmpty p {
-  margin: 0;
-}
-
-.recommendation {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-height: 19rem;
-  height: 100%;
-}
-
-.recommendation p {
-  margin: 0;
-}
-
-.recommendationTitle {
-  font-family: var(--font-family-display);
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-display);
   line-height: var(--line-height-h2);
 }
 
-.recommendationActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-block-start: auto;
+.mainGrid {
+  display: grid;
+  gap: var(--space-7);
+  align-items: start;
 }
 
-.recommendationActions svg {
-  width: 1.125rem;
-  height: 1.125rem;
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  padding-block-start: var(--space-5);
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+.more a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-water-700);
+  text-underline-offset: 3px;
 }
 
 @media (min-width: 64rem) {
-  .panel {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-
-  .head,
-  .tiles,
-  .sectors {
-    grid-column: 1 / -1;
-  }
-
-  .head {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    align-items: center;
-    gap: var(--space-5);
-  }
-
-  .panorama {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .chart {
-    grid-column: span 8;
-  }
-
-  .side {
-    grid-column: span 4;
-  }
-
-  .scene,
-  .history {
-    grid-column: span 6;
-    align-self: start;
-  }
-
-  .sceneBox {
-    height: 26rem;
-  }
-}
-
-@media (min-width: 64rem) and (max-width: 80rem) {
-  /* Not enough width for the range beside the day guide: one under the other. */
-  .head {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-3);
-  }
-
-  .panorama {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .chart,
-  .side,
-  .scene,
-  .history {
-    grid-column: 1 / -1;
-  }
-
-  .side {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
+  .mainGrid {
+    grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
   }
 }

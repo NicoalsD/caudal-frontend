@@ -50,7 +50,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         return HttpResponse.json(NEW_RUN, { status: CREATED });
       }),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());
@@ -80,7 +80,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         }),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());
@@ -98,7 +98,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         HttpResponse.json(NEW_RUN, { status: CREATED }),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     expect(await screen.findByText(t('forecast.noForecastYet'))).toBeVisible();
@@ -116,7 +116,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         }),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());
@@ -132,7 +132,7 @@ describe('ForecastRunAction (S12 recalculate the forecast)', () => {
         errorResponse(UNPROCESSABLE, 'NO_LEVEL_DATA'),
       ),
     );
-    renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+    renderApp(ROUTE_PATHS.tank, { user: BOARD });
     const user = userEvent.setup();
 
     await user.click(await runButton());

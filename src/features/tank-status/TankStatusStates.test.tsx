@@ -21,7 +21,7 @@ const NOT_FOUND = 404;
 const INTERNAL_ERROR = 500;
 
 function renderStatus() {
-  return renderApp(ROUTE_PATHS.board.tank, { user: BOARD });
+  return renderApp(ROUTE_PATHS.tank, { user: BOARD });
 }
 
 describe('TankStatusPage states (S12): empty, error and fallback', () => {

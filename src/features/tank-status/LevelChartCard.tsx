@@ -1,4 +1,6 @@
 import type { JSX } from 'react';
+import type { ForecastView } from '../../services/api/views';
+import { Bot, Calculator } from 'lucide-react';
 
 import { DomainError } from '../../core/errors/DomainError';
 import { formatDecimal } from '../../core/format/decimal';
@@ -33,6 +35,11 @@ interface LevelChartCardProps {
   readonly askPlumber?: boolean;
   /** Shows the meaning, trend and reading age under the chart. */
   readonly withFacts?: boolean;
+  /**
+   * The Board's panel: no card around it, the source of the forecast in one quiet line and only
+   * the next day's sentence (the rest is in the chart's table).
+   */
+  readonly plain?: boolean;
 }
 
 /**
@@ -45,6 +52,7 @@ export function LevelChartCard({
   withTimeline = false,
   askPlumber = false,
   withFacts = true,
+  plain = false,
 }: LevelChartCardProps): JSX.Element {
   const canRun = usePermission(RUN_PERMISSION);
   const { forecast, rows, rules, tank, status } = day;
@@ -75,18 +83,16 @@ export function LevelChartCard({
   }
   const level = status.level?.value.value ?? null;
 
-  return (
-    <ChartCard
-      title={t('forecast.title')}
-      value={
-        level === null
-          ? t('board.kpis.noLevel')
-          : t('tankStatus.levelValue', { value: formatDecimal(level, LEVEL_DIGITS) })
-      }
-      caption={t('tankStatus.stageTitle')}
-    >
+  const content = (
+    <>
       {notice}
-      {hasPoints ? <ForecastSourceNotice forecast={data} /> : null}
+      {hasPoints ? (
+        plain ? (
+          <ForecastSourceLine forecast={data} />
+        ) : (
+          <ForecastSourceNotice forecast={data} />
+        )
+      ) : null}
       {day.historyFailed ? (
         <p className={cn(styles.muted)}>{t('tankStatus.historyError')}</p>
       ) : null}
@@ -110,8 +116,8 @@ export function LevelChartCard({
         />
       ) : null}
       {hasPoints ? (
-        <ul className={cn(styles.summary)}>
-          {data.points.slice(0, SUMMARY_DAYS).map((point) => (
+        <ul className={cn(styles.summary, plain && styles.summaryLead)}>
+          {data.points.slice(0, plain ? 1 : SUMMARY_DAYS).map((point) => (
             <li key={point.targetDate}>
               {t('forecast.summary', {
                 day: formatDayKey(point.targetDate),
@@ -125,6 +131,38 @@ export function LevelChartCard({
       ) : null}
       {withFacts ? <TankFacts status={status} rules={rules} askPlumber={askPlumber} /> : null}
       {canRun ? <ForecastRunAction tankId={tank.id} /> : null}
+    </>
+  );
+  if (plain) {
+    return <div className={cn(styles.plainChart)}>{content}</div>;
+  }
+  return (
+    <ChartCard
+      title={t('forecast.title')}
+      value={
+        level === null
+          ? t('board.kpis.noLevel')
+          : t('tankStatus.levelValue', { value: formatDecimal(level, LEVEL_DIGITS) })
+      }
+      caption={t('tankStatus.stageTitle')}
+    >
+      {content}
     </ChartCard>
+  );
+}
+
+/** The source of the forecast in one quiet line: the AI model, or the simple estimate and why. */
+function ForecastSourceLine({ forecast }: { readonly forecast: ForecastView }): JSX.Element {
+  const SourceIcon = forecast.isFallback ? Calculator : Bot;
+  return (
+    <p className={cn(styles.sourceLine)}>
+      <SourceIcon aria-hidden="true" />
+      {forecast.isFallback
+        ? t('console.forecastFallback')
+        : t('forecast.sourceLineAi', {
+            model: forecast.modelName ?? '',
+            time: forecast.createdAt?.text ?? '',
+          })}
+    </p>
   );
 }

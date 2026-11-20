@@ -27,56 +27,66 @@ const BARE = buildSessionUser({
 });
 
 describe('Board dashboard (overview)', () => {
-  it('shows the four figures: level with band, reserve days, coverage by region and incidents', async () => {
+  it('leads with the recommendation of the moment, then the chart and the regions', async () => {
     server.use(...createLiveBackend().handlers);
-    renderApp(ROUTE_PATHS.board.tank, {
-      user: buildSessionUser({ ...ADMIN, permissions: [...ADMIN.permissions, 'INCIDENT_READ'] }),
-    });
+    renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
 
-    const group = await screen.findByRole('group', { name: t('board.kpis.label') });
-    expect(await within(group).findByText(t('board.kpis.level'))).toBeVisible();
-    expect(within(group).getByText(t('board.kpis.reserve'))).toBeVisible();
-    expect(await within(group).findByText(/Sector Escuela: 75 %/)).toBeVisible();
-    expect(await within(group).findByText(t('board.kpis.incidents'))).toBeVisible();
-    expect(await within(group).findByText(t('board.kpis.coverage'))).toBeVisible();
+    const now = await screen.findByRole('region', { name: t('console.bandLabel') });
+    expect(
+      await within(now).findByRole('heading', {
+        name: t('assistant.recommendation', {
+          action: t('assistant.action.open'),
+          valve: 'Válvula alta',
+        }),
+      }),
+    ).toBeVisible();
+    expect(screen.getByRole('heading', { name: t('board.panorama.chartTitle') })).toBeVisible();
+    const regions = await screen.findByRole('list', { name: t('console.regionsLabel') });
+    expect(within(regions).getAllByRole('listitem').length).toBeGreaterThan(0);
   });
 
-  it('shows the pilot record, the assistant and the report card, and asks for the narrative on demand', async () => {
+  it('only tells the state of the regions: the Board moves no valve from here', async () => {
+    server.use(...createLiveBackend().handlers);
+    renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
+
+    const regions = await screen.findByRole('list', { name: t('console.regionsLabel') });
+    expect(within(regions).queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('opens the assistant in its side panel', async () => {
     server.use(...createLiveBackend().handlers);
     const user = userEvent.setup();
     renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
 
-    await user.click(await screen.findByRole('tab', { name: t('board.history.pilot') }));
-    const pilot = await screen.findByRole('region', { name: t('history.recentTitle') });
-    expect(await within(pilot).findByRole('table')).toBeVisible();
-    expect(await screen.findByRole('heading', { name: t('board.stack.title') })).toBeVisible();
-    expect(await screen.findByRole('heading', { name: t('assistant.askTitle') })).toBeVisible();
-
-    const card = screen.getByRole('region', { name: t('board.report.title') });
-    expect(within(card).queryByRole('status')).not.toBeInTheDocument();
-    await user.click(within(card).getByRole('button', { name: t('board.report.generate') }));
-    expect(await within(card).findByText('El tanque se mantuvo estable.')).toBeVisible();
+    await user.click(await screen.findByRole('button', { name: t('chat.open') }));
+    const panel = await screen.findByRole('dialog', { name: t('chat.title') });
+    expect(within(panel).getByRole('button', { name: t('chat.suggestion.enough') })).toBeVisible();
   });
 
-  it('draws the scene for looking only: no valve dialog can open', async () => {
+  it('keeps the history, the proposals and the network one link away', async () => {
     server.use(...createLiveBackend().handlers);
     renderApp(ROUTE_PATHS.board.tank, { user: ADMIN });
 
-    const scene = await screen.findByRole('region', { name: t('board.scene.title') });
-    expect(await within(scene).findByTestId('aqueduct-scene')).toHaveAttribute(
-      'data-readonly',
-      'true',
+    const more = await screen.findByRole('navigation', { name: t('board.calm.moreLabel') });
+    expect(within(more).getByRole('link', { name: t('board.calm.pilotHistory') })).toHaveAttribute(
+      'href',
+      ROUTE_PATHS.board.autopilot,
     );
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(within(more).getByRole('link', { name: t('board.calm.network') })).toHaveAttribute(
+      'href',
+      ROUTE_PATHS.board.network,
+    );
   });
 
   it('leaves out what the person cannot read', async () => {
     renderApp(ROUTE_PATHS.board.tank, { user: BARE });
 
-    expect(await screen.findByText(t('board.kpis.level'))).toBeVisible();
-    expect(screen.queryByText(t('board.kpis.coverage'))).not.toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: t('board.history.pilot') })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: t('board.stack.title') })).not.toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: t('board.report.title') })).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: t('board.panorama.chartTitle') }),
+    ).toBeVisible();
+    expect(screen.queryByRole('button', { name: t('chat.open') })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: t('console.regionsLabel') })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: t('board.calm.network') })).not.toBeInTheDocument();
   });
 });
