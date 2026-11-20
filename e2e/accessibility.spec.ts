@@ -53,7 +53,7 @@ test.describe('Accesibilidad (axe, WCAG 2.1 AA)', () => {
     await expect(
       page.getByRole('heading', { name: strings.board.panorama.chartTitle }),
     ).toBeVisible();
-    await expect(page.getByRole('heading', { name: strings.board.report.title })).toBeVisible();
+    await expect(page.getByRole('list', { name: strings.console.regionsLabel })).toBeVisible();
     await expectNoSeriousViolations(page);
 
     for (const [path, heading] of [
