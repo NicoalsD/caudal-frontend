@@ -50,7 +50,9 @@ test.describe('Accesibilidad (axe, WCAG 2.1 AA)', () => {
 
   test('tablero, piloto, reportes y regiones de la Junta', async ({ page }) => {
     await signIn(page, BOARD_ADMIN_USERNAME, SEED_PASSWORD, /\/junta\/tanque$/);
-    await expect(page.getByRole('group', { name: strings.board.kpis.label })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: strings.board.panorama.chartTitle }),
+    ).toBeVisible();
     await expect(page.getByRole('heading', { name: strings.board.report.title })).toBeVisible();
     await expectNoSeriousViolations(page);
 

@@ -214,14 +214,80 @@
   gap: var(--space-3);
 }
 
-@media (min-width: 40rem) and (max-width: 63.99rem) {
+@media (min-width: 40rem) {
   .quick {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .quickButton {
+    min-height: var(--target-min);
   }
 }
 
-@media (min-width: 64rem) {
-  .quick {
-    grid-template-columns: minmax(0, 1fr);
+/* ---- Today's shifts as a list ---- */
+
+.shiftList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shiftRow {
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+}
+
+.shiftRow + .shiftRow {
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+
+.shiftTime {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.shiftSector {
+  font-weight: var(--font-weight-bold);
+}
+
+.shiftState {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+}
+
+.shiftRow[data-state='running'] .shiftState {
+  color: var(--color-paramo-800);
+}
+
+.shiftRow[data-state='done'] {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 30rem) {
+  .shiftRow {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
+
+  .shiftTime {
+    grid-column: 1 / -1;
+  }
+}
+
+.pendingNotice {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.pendingLink {
+  margin-inline-start: var(--space-2);
+  color: var(--color-water-700);
+  text-underline-offset: 3px;
 }

@@ -23,6 +23,7 @@ import { useTankStatus } from '../../state/hooks/useTankStatus';
 import { Card } from '../../ui/cards/Card';
 import { Button } from '../../ui/primitives/Button';
 import { LinkButton } from '../../ui/primitives/LinkButton';
+import { Link } from 'react-router';
 import { cn } from '../../ui/styles/cn';
 import styles from './OperatorHome.module.css';
 
@@ -311,5 +312,27 @@ function ChecklistRow({ line, children }: ChecklistRowProps): JSX.Element {
       </span>
       {children ?? null}
     </li>
+  );
+}
+
+/**
+ * The readings still on the phone, in one line with its link, only when there are some. When the
+ * queue is empty there is nothing to say, so nothing is shown.
+ */
+export function PendingNotice({ facts }: { readonly facts: TodayFacts }): JSX.Element | null {
+  if (facts.pendingCount === NO_PENDING) {
+    return null;
+  }
+  const Icon = facts.pendingLine.icon;
+  return (
+    <p
+      className={cn(styles.lineWithIcon, styles.pendingNotice, TONE_CLASS[facts.pendingLine.tone])}
+    >
+      <Icon aria-hidden="true" />
+      <span>{facts.pendingLine.text}</span>
+      <Link to={ROUTE_PATHS.operator.pending} className={cn(styles.pendingLink)}>
+        {t('home.seePending')}
+      </Link>
+    </p>
   );
 }

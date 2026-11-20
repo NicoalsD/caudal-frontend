@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import type { JSX } from 'react';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import { groupByRegion } from '../../core/console/regions';
 import { toBogotaDateKey } from '../../core/format/time';
 import { DISPLAY_LOCALE, DISPLAY_TIME_ZONE } from '../../core/policy/clientPolicy';
+import { ROUTE_PATHS } from '../../core/session/routes';
 import { t } from '../../i18n/t';
 import { useOfflineServices } from '../../state/hooks/offlineContext';
 import { useDecisions } from '../../state/hooks/useAutopilot';
@@ -12,20 +13,18 @@ import { usePermission } from '../../state/hooks/usePermission';
 import { useActiveTank } from '../../state/hooks/useTankStatus';
 import { useSession } from '../../state/hooks/useSession';
 import { useSyncQueue } from '../../state/hooks/useSyncQueue';
-import { AskCard } from '../aqueduct/AssistantPanel';
+import { AssistantDrawer } from '../aqueduct/AssistantDrawer';
 import { LiveAqueduct, SceneMessage } from '../aqueduct/LiveAqueduct';
 import type { LiveAqueductParts, LiveStatus } from '../aqueduct/LiveAqueduct';
-import type { TankView } from '../../services/api/views';
+import { NowCard } from '../aqueduct/NowCard';
 import { PERMISSION_ASSISTANT, PERMISSION_VALVE_COMMAND } from '../aqueduct/permissions';
+import { RegionList } from '../aqueduct/RegionList';
+import { TankSummary } from '../aqueduct/TankSummary';
 import { ScreenTitle } from '../../ui/feedback/ScreenTitle';
 import { cn } from '../../ui/styles/cn';
-import { ActionQueue } from './console/ActionQueue';
-import styles from './console/Console.module.css';
-import { DecisionBand } from './console/DecisionBand';
-import { LevelReadout } from './console/LevelReadout';
-import { RegionDock } from './console/RegionDock';
-import { DayShifts, ShiftNowCard, UpcomingShifts } from './ShiftCards';
-import { TodayBlock, todayFacts } from './TodayCards';
+import styles from './Home.module.css';
+import { ShiftList } from './ShiftCards';
+import { PendingNotice, TodayBlock, todayFacts } from './TodayCards';
 import type { TodayFacts } from './TodayCards';
 
 /** Bogotá has no daylight saving time, so its offset is fixed; noon keeps the day stable. */
@@ -40,12 +39,10 @@ const DAY_WORDS_FORMAT = {
 const dayWordsFormatter = new Intl.DateTimeFormat(DISPLAY_LOCALE, DAY_WORDS_FORMAT);
 
 /**
- * Screen S07, the operation console. The decision of the moment leads: a dark band across the
- * top with the pilot's recommendation, its reason, Accept and Reject, and the pilot's mode. Under
- * it the live 3D aqueduct (the tank and one pipe per ration region) with the level over it and
- * one panel per region at its foot; at the side, the day's actions, the queue of commands and
- * decisions, and the question box. Below, the shifts, the valve list (the keyboard twin of the
- * scene) and the day's checklist. Pointing at the recommendation or a region lights its valve.
+ * Screen S07, the plumber's home, read top to bottom in the order of the work: the day's action
+ * (a reading or the closure), what there is to decide now, the aqueduct (the 3D scene beside the
+ * tank with its forecast and the regions with their valves), and today's shifts. One column of
+ * sections with room between them; the assistant waits in a side panel behind one button.
  */
 export function OperatorHomePage(): JSX.Element {
   const location = useLocation();
@@ -61,21 +58,19 @@ export function OperatorHomePage(): JSX.Element {
 
   return (
     <div className={cn(styles.page)}>
-      <div className={cn(styles.head)}>
-        <ScreenTitle>{t('home.todayHeading', { date: dayInWords(facts.today) })}</ScreenTitle>
+      <ScreenTitle>{t('home.todayHeading', { date: dayInWords(facts.today) })}</ScreenTitle>
+      <div className={cn(styles.intro)}>
         <p className={cn(styles.greeting)}>{t('home.greeting', { name })}</p>
         {readDamageSent(location.state) ? <p role="status">{t('home.damageSent')}</p> : null}
+        <div className={cn(styles.actions)}>
+          <TodayBlock tank={tank} facts={facts} part="quick" />
+          <AssistantDrawer />
+        </div>
+        <PendingNotice facts={facts} />
       </div>
       <LiveAqueduct tankLabel={false}>
         {(parts, live) => (
-          <ConsoleBody
-            parts={parts}
-            live={live}
-            tank={tank}
-            facts={facts}
-            canAsk={canAsk}
-            canControl={canControl}
-          />
+          <Body parts={parts} live={live} facts={facts} canAsk={canAsk} canControl={canControl} />
         )}
       </LiveAqueduct>
     </div>
@@ -84,86 +79,74 @@ export function OperatorHomePage(): JSX.Element {
 
 const noop = (): void => undefined;
 
-interface ConsoleBodyProps {
+interface BodyProps {
   readonly parts: LiveAqueductParts | null;
   readonly live: LiveStatus;
-  readonly tank: TankView | null;
   readonly facts: TodayFacts;
   readonly canAsk: boolean;
   readonly canControl: boolean;
 }
 
-/** The four areas of the console in reading order: band, stage, side column and what is below. */
-function ConsoleBody({
-  parts,
-  live,
-  tank,
-  facts,
-  canAsk,
-  canControl,
-}: ConsoleBodyProps): JSX.Element {
+function Body({ parts, live, facts, canAsk, canControl }: BodyProps): JSX.Element {
   const pending = useDecisions('PENDING', canAsk);
   const aqueduct = parts?.aqueduct ?? null;
   const regions = useMemo(
     () => (aqueduct === null ? [] : groupByRegion(aqueduct.network, aqueduct.valves)),
     [aqueduct],
   );
-  const valves = aqueduct?.valves ?? [];
   const highlight = parts?.highlight ?? noop;
-  const suggestion = pending.data?.[0] ?? null;
 
   return (
-    <div className={cn(styles.console)}>
-      <div className={cn(styles.bandArea)}>
-        <DecisionBand valves={valves} regions={regions} onFocusValve={highlight} />
-      </div>
-      <section className={cn(styles.stageArea, styles.stage)} aria-label={t('console.sceneLabel')}>
-        {parts === null ? (
-          <div className={cn(styles.stageMessage)}>
-            <SceneMessage live={live} />
-          </div>
-        ) : (
-          <>
-            <div className={cn(styles.stageScene)}>{parts.scene}</div>
-            <LevelReadout aqueduct={parts.aqueduct} />
-            <RegionDock
-              regions={regions}
-              suggestion={suggestion}
-              canControl={canControl}
-              onOpenValve={parts.openValve}
-              onFocusValve={highlight}
-            />
-          </>
-        )}
-      </section>
-      <div className={cn(styles.sideArea)}>
-        <ActionQueue valves={valves} />
-        {canAsk ? <AskCard compact /> : null}
-      </div>
-      <div className={cn(styles.belowArea)}>
-        <div className={cn(styles.belowColumn)}>
-          <TodayBlock tank={tank} facts={facts} part="quick" />
-          <ShiftNowCard />
-          <UpcomingShifts />
-        </div>
-        {parts === null ? null : (
-          <section className={cn(styles.valvesBlock)} aria-labelledby="home-valves-title">
-            <h2 id="home-valves-title" className={cn(styles.blockTitle)}>
-              {t('valves.listTitle')}
-            </h2>
-            <p className={cn(styles.muted)}>{t('valves.listHint')}</p>
-            {parts.valveList}
+    <>
+      <NowCard valves={aqueduct?.valves ?? []} regions={regions} onFocusValve={highlight} />
+
+      <section className={cn(styles.section)} aria-labelledby="home-aqueduct-title">
+        <h2 id="home-aqueduct-title" className={cn(styles.sectionTitle)}>
+          {t('home.aqueductTitle')}
+        </h2>
+        <div className={cn(styles.aqueductGrid)}>
+          <section className={cn(styles.stage)} aria-label={t('console.sceneLabel')}>
+            {parts === null ? (
+              <div className={cn(styles.stageMessage)}>
+                <SceneMessage live={live} />
+              </div>
+            ) : (
+              parts.scene
+            )}
           </section>
-        )}
-        <div className={cn(styles.belowColumn)}>
-          <TodayBlock tank={tank} facts={facts} part="check" />
-          <TodayBlock tank={tank} facts={facts} part="tank" />
+          <div className={cn(styles.side)}>
+            {aqueduct === null ? null : <TankSummary aqueduct={aqueduct} />}
+            {parts === null ? null : (
+              <div className={cn(styles.regions)}>
+                <h3 className={cn(styles.subTitle)}>{t('console.regionsLabel')}</h3>
+                <RegionList
+                  regions={regions}
+                  suggestion={pending.data?.[0] ?? null}
+                  canControl={canControl}
+                  onOpenValve={parts.openValve}
+                  onFocusValve={highlight}
+                />
+              </div>
+            )}
+          </div>
         </div>
-        <div className={cn(styles.wide)}>
-          <DayShifts day={facts.today} />
+      </section>
+
+      <section className={cn(styles.section)} aria-labelledby="home-shifts-title">
+        <div className={cn(styles.sectionHead)}>
+          <h2 id="home-shifts-title" className={cn(styles.sectionTitle)}>
+            {t('home.shiftsTitle')}
+          </h2>
+          <Link
+            to={ROUTE_PATHS.operator.dayClosure.replace(':date', facts.today)}
+            className={cn(styles.headLink)}
+          >
+            {t('home.dayClosure')}
+          </Link>
         </div>
-      </div>
-    </div>
+        <ShiftList day={facts.today} />
+      </section>
+    </>
   );
 }
 

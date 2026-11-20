@@ -89,9 +89,7 @@ describe('DayClosurePage closure (S10, operator)', () => {
     server.use(...createScheduleBackend(buildScheduleProposal()).handlers);
     const { router } = renderApp(ROUTE_PATHS.operator.home, { user: operator() });
 
-    // The checklist is complete once the level has loaded; clicking before that would miss it.
-    await screen.findByText(t('operatorHome.tankFacts', { level: '2,3', hours: '6' }));
-    const link = screen.getByRole('link', { name: t('home.dayClosure') });
+    const link = await screen.findByRole('link', { name: t('home.dayClosure') });
     await userEvent.click(link);
 
     const today = toBogotaDateKey(new Date().toISOString());
